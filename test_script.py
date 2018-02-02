@@ -1,7 +1,7 @@
 import django
 import os
 import sys
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
@@ -10,24 +10,36 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dcp.settings.dev")
 
 django.setup()
 
-from django.contrib.auth import get_user_model
-
 # Create new user
 newuser = get_user_model().objects.create_user(
     password = 'adminadmin', 
     usertype = 'ST', 
     firstname = 'Test', 
-    lastname = 'Orama'
+    lastname = 'Orama',
+    username = 'buffgecko',
+    emailaddress = 'fart@poop.com'
 )
 
 # Get an existing user
-newuser2 = get_user_model().objects.get_user(newuser.userid)
-print ("New user: ", str(newuser.userid), newuser.get_email_field_name())
+try:
+    newuser2 = get_user_model().objects.get(newuser.userid)
+    print(newuser2)
+except get_user_model().DoesNotExist:
+    print("No user found")
 
-print(newuser2.password)
-newuser2.set_password('fart')
-newuser2.save()
-print(newuser2.password)
 
-fart = authenticate(username=newuser2.userid,password='fart')
-print (fart.is_authenticated)
+try:
+    newuser2 = get_user_model().objects.all()
+    print("# Users:", len(list(newuser2)))
+except get_user_model().DoesNotExist:
+    print("No user found")
+
+    
+print ("New user: ", str(newuser.userid))
+
+fart = authenticate(username='fart@poop.com',password='adminadmin')
+print("Authenticating...", end="")
+if(fart):
+    print (fart.is_authenticated)
+else:
+    print(False)

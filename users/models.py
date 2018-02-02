@@ -11,10 +11,11 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 class MyUserManager(BaseUserManager):
 
     # Create new user
-    def create_user(self, password, usertype = None, firstname = None, lastname = None, signaturescanfile = None, phonenumber = None, emailaddress = None):
+    def create_user(self, password, username = None, usertype = None, firstname = None, lastname = None, signaturescanfile = None, phonenumber = None, emailaddress = None):
  
         user = self.model(
             userid=None,
+            username=username,
             usertype=usertype,
             firstname=firstname,
             lastname=lastname,
@@ -32,17 +33,22 @@ class MyUserManager(BaseUserManager):
 
         return user
 
-    def get_all(self):
-        return get_data(self, 'SP_DCPGetUser(%s)', (None,)) # Use tuple instead of array for input parameters
+    def all(self):
+        return get_data(self, 'SP_DCPGetUser(%s,%s,%s)', (None, None, None))
 
     # Get info for one specific user
-    def get_user(self, userid):
-        return get_data_pk(self, 'SP_DCPGetUser(%s)', (userid,)) # Use tuple instead of array for input parameters
+    def get(self, userid):
+        return get_data_pk(self, 'SP_DCPGetUser(%s,%s,%s)', (userid, None, None)) # Use tuple instead of array for input parameters
 
-    def save_user(self, myUser):
+    # Lookup user for authentication (email / username)
+    def get_user_auth(self, username = None, emailaddress = None):
+        return get_data_pk(self, 'SP_DCPGetUser(%s,%s,%s)', (None, username, emailaddress))
+
+    def save(self, myUser):
         return save_data('SP_DCPUpsertUser', 
             (
                 myUser.userid,
+                myUser.username,
                 myUser.usertype,
                 myUser.firstname,
                 myUser.lastname,
@@ -54,7 +60,7 @@ class MyUserManager(BaseUserManager):
             )
          )
     
-    def delete_user(self, myUser):
+    def delete(self, myUser):
         return delete_data('SP_DCPDeleteUser', (myUser.userid, None))
 
 # Data models (i.e. tables)
@@ -64,24 +70,26 @@ class MyUser(AbstractBaseUser):
 
     # Define attributes (inherited class includes password + last_login fields)
     userid = models.IntegerField(primary_key=True) # Specify as PK to prevent Django from creating "id" column and for queryset returns (raw)
+    username = models.CharField(max_length=50, unique=True)
     usertype = models.CharField(max_length=1)
     firstname = models.CharField(max_length=100)
     lastname = models.CharField(max_length=100)
     signaturescanfile = models.BinaryField # TO-DO: Verify returns data properly in "get" functions
     phonenumber = models.CharField(max_length=25)
-    emailaddress = models.CharField(max_length=250)
+    emailaddress = models.CharField(max_length=250, unique=True)
 
     # Define data manager
     objects = MyUserManager()
     
     # Create new constructor (must be passed in correct order) -- i.e. inherited columns first)
-    def __init__(self, password = None, last_login = None, userid = None, usertype = None, firstname = None, lastname = None, signaturescanfile = None, phonenumber = None, emailaddress = None):
+    def __init__(self, password = None, last_login = None, userid = None, username = None, usertype = None, firstname = None, lastname = None, signaturescanfile = None, phonenumber = None, emailaddress = None):
         
         # Call parent's init function
         super(get_user_model(), self).__init__()
         
         # Set properties
         self.userid = userid
+        self.username = username
         self.usertype = usertype
         self.firstname = firstname
         self.lastname = lastname
@@ -99,17 +107,17 @@ class MyUser(AbstractBaseUser):
     # Required fields
     USERNAME_FIELD = 'userid' # specify how Django recognizes the user
     EMAIL_FIELD = 'emailaddress'
-    REQUIRED_FIELDS = ['usertype','firstname','lastname'] # Fields required when creating a user interactively (email and password are included by default)
+    REQUIRED_FIELDS = ['usertype','username','firstname','lastname'] # Fields required when creating a user interactively (email and password are included by default)
 
     # Methods
     def __str__(self):
         return self.lastname
     
     def save(self):
-        return MyUser.objects.save_user(self)
+        return MyUser.objects.save(self)
 
     def delete(self):
-        return MyUser.objects.delete_user(self)
+        return MyUser.objects.delete(self)
     
     def is_admin(self):
         if(self.usertype == 'A' or self.usertype == 'S'):

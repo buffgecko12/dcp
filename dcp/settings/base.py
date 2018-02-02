@@ -102,5 +102,6 @@ STATIC_URL = '/static/' # Url for static file serving
 # Other settings
 LOGIN_REDIRECT_URL = '/' # Where to redirect login requests if "next" is not specified
 AUTH_USER_MODEL = 'users.MyUser' # Custom user model
+AUTHENTICATION_BACKENDS=['users.backends.MyBackend']
 # MAX_UPLOAD_SIZE = 5242880 # Limit max file upload size for RestrictedFileField class
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True # Kill session on browser close
