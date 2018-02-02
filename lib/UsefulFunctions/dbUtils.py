@@ -11,20 +11,26 @@ from collections import namedtuple
 # Return data as a RawQuerySet object (list of objects)
 def get_data(myobjects, sp_signature, params):
     # IMPORTANT: Model field names must match column names in DB
-    return myobjects.raw('select * from ' + sp_signature, params)
+    resultset = myobjects.raw('select * from ' + sp_signature, params)
+
+    try:
+        # Check if resultset has any rows
+        test = resultset[0] 
+    except IndexError:
+        # Return DoesNotExist error if now rows
+        raise myobjects.model._meta.model.DoesNotExist
+
+    # Return result set
+    return resultset
 
 # Return data as a single model object
 def get_data_pk(myobjects, sp_signature, params):
     resultset = get_data(myobjects, sp_signature, params)
     
-    if(resultset):
-        return resultset[0] # Get first (and only) list object for PK lookup
-    else:
-        return resultset # Return "None"
+    return resultset[0] 
 
 # Return data as a QuerySet object (first column in resultset must be the PK for the model
 def get_data_qs(self, sp_signature, params, pk_fieldname = None):
-
     cursor = connection.cursor()
     try:
         # Use default PK if not provided
