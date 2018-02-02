@@ -27,16 +27,6 @@ try:
 except get_user_model().DoesNotExist:
     print("No user found")
 
-
-try:
-    newuser2 = get_user_model().objects.all()
-    print("# Users:", len(list(newuser2)))
-except get_user_model().DoesNotExist:
-    print("No user found")
-
-    
-print ("New user: ", str(newuser.userid))
-
 fart = authenticate(username='fart@poop.com',password='adminadmin')
 print("Authenticating...", end="")
 if(fart):
