@@ -1,6 +1,7 @@
 import django
 import os
 import sys
+
 from django.contrib.auth import authenticate, get_user_model
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

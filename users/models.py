@@ -111,7 +111,7 @@ class MyUser(AbstractBaseUser):
 
     # Methods
     def __str__(self):
-        return self.lastname
+        return self.firstname + " " + self.lastname
     
     def save(self):
         return MyUser.objects.save(self)
