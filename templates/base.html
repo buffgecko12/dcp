@@ -1,0 +1,46 @@
+<!-- Base template -->
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Meta info -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <!-- Page title -->
+        <title class="title">
+            {% block title %}Wake Me Up{% endblock %}
+        </title>    
+    
+        <!-- Import CSS files (files read and attributes overidden in order) -->
+        <!-- TO-DO: Update to support fallback CDN server -->
+        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+
+        <!-- Page-specific imports -->
+        {% block cssimport %}{% endblock %}
+        {% block javascriptimport %}{% endblock %}
+
+        <!-- Workaround to allow styling of unknown HTML elements in IE browsers older than IE9 (must be after CSS imports -->
+        <!--[if lt IE 9]>
+            <script src="{% static 'js/html5shiv.js' %}"></script>
+        <![endif]-->
+
+        <!-- Image to use for favorite/bookmark icon -->        
+        <link rel="icon" href="{% static 'img/favicon.png' %}" />
+    </head>
+
+    {% block body %}
+        <body>
+            {% include "header.html" %}
+            {% include "navbar.html" %}
+            <main>{% block content %}{% endblock %}</main>
+            {% include "footer.html" %}
+
+            <!-- Bootstrap core JavaScript -->
+            <script src="{% static 'jquery/jquery.min.js' %}"></script>
+            <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>                
+        </body>
+    {% endblock %}
+</html>
