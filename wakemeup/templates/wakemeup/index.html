@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+<!-- Set page title -->
+{% block title %}Wake Me Up - Homepage{% endblock %}
+
+{% block content %}
+    <h1 class="bg-primary">Wake Me Up Home page</h1>
+    <a href="{% url 'wakemeup:create_contract' %}">Create contract</a>
+{% endblock %}
