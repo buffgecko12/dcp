@@ -1,5 +1,6 @@
 *.pydevproject
 *.project
 *.prefs
+*.env
 *.pyc
 *.example
