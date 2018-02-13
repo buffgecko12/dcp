@@ -3,3 +3,5 @@
 *.prefs
 *.pyc
 *.example
+*.env
+*.gitignore
