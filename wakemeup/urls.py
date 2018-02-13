@@ -7,4 +7,5 @@ urlpatterns = [
     # Index (i.e. /wakemeup)
     url(r'^$', views.index, name="index"),
     url(r'^contract/new$', views.create_contract, name="create_contract"),
+    url(r'^contract/new_new$', views.create_contract_new, name="create_contract_new"),
 ]
