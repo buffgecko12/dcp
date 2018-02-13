@@ -1,1 +1,21 @@
-<nav></nav>
+<nav class="navbar navbar-expand-sm bg-light navbar-light sticky-top">
+    <a class="navbar-brand" href="{% url 'wakemeup:index' %}"><span class="fa fa-home"></span> Wake Me Up</a>
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="{% url 'wakemeup:index' %}">Home</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Contracts</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="{% url 'wakemeup:create_contract' %}">Create contract</a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>    
