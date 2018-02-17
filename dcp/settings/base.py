@@ -30,7 +30,7 @@ PREREQ_APPS = [
 # Define project apps
 PROJECT_APPS = [
     'users.apps.UsersConfig',
-    'newage.apps.NewageConfig',
+#     'newage.apps.NewageConfig',
     'wakemeup.apps.WakemeupConfig'
 ]
 

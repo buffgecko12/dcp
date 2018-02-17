@@ -19,6 +19,6 @@ from django.conf.urls import url, include
 
 urlpatterns = [
 #     path('admin/', admin.site.urls),
-    url('^newage/', include('newage.urls', namespace='newage'), name='index'),
+#     url('^newage/', include('newage.urls', namespace='newage'), name='index'),
     url('^wakemeup/', include('wakemeup.urls', namespace='wakemeup'), name='index'),
 ]
