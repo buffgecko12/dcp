@@ -1,4 +1,6 @@
+*.pydevproject
+*.project
+*.prefs
 *.pyc
 *.env
-*.project
-*.pydevproject
+*.gitignore
