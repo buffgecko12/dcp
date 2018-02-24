@@ -61,7 +61,7 @@ class MyUserManager(BaseUserManager):
          )
     
     def delete(self, myUser):
-        return delete_data('SP_DCPDeleteUser', (myUser.userid, None))
+        return delete_data('SP_DCPDeleteUser', (myUser.userid,))
 
 # Data models (i.e. tables)
 # Create custom base user
