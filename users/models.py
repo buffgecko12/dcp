@@ -11,7 +11,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 class MyUserManager(BaseUserManager):
 
     # Create new user
-    def create_user(self, password, username = None, usertype = None, firstname = None, lastname = None, defaultsignaturescanfile = None, phonenumber = None, emailaddress = None):
+    def create_user(self, password, username = None, usertype = None, firstname = None, lastname = None, defaultsignaturescanfile = None, phonenumber = None, emailaddress = None, reputationvalue = None):
  
         user = self.model(
             userid=None,
@@ -21,7 +21,8 @@ class MyUserManager(BaseUserManager):
             lastname=lastname,
             defaultsignaturescanfile=defaultsignaturescanfile,
             phonenumber=phonenumber,
-            emailaddress=emailaddress
+            emailaddress=emailaddress,
+            reputationvalue = reputationvalue,
         )
 
         # Save hashed password
@@ -56,6 +57,7 @@ class MyUserManager(BaseUserManager):
                 myUser.phonenumber,
                 self.normalize_email(myUser.emailaddress),
                 myUser.password,
+                myUser.reputationvalue,
                 myUser.last_login,
             )
          )
@@ -77,12 +79,13 @@ class MyUser(AbstractBaseUser):
     defaultsignaturescanfile = models.BinaryField # TO-DO: Verify returns data properly in "get" functions
     phonenumber = models.CharField(max_length=25)
     emailaddress = models.CharField(max_length=250, unique=True)
+    reputationvalue = models.IntegerField
 
     # Define data manager
     objects = MyUserManager()
     
     # Create new constructor (must be passed in correct order) -- i.e. inherited columns first)
-    def __init__(self, password = None, last_login = None, userid = None, username = None, usertype = None, firstname = None, lastname = None, defaultsignaturescanfile = None, phonenumber = None, emailaddress = None):
+    def __init__(self, password = None, last_login = None, userid = None, username = None, usertype = None, firstname = None, lastname = None, defaultsignaturescanfile = None, phonenumber = None, emailaddress = None, reputationvalue = None):
         
         # Call parent's init function
         super(get_user_model(), self).__init__()
@@ -96,6 +99,7 @@ class MyUser(AbstractBaseUser):
         self.defaultsignaturescanfile = defaultsignaturescanfile
         self.phonenumber = phonenumber
         self.emailaddress = emailaddress
+        self.reputationvalue = reputationvalue
         self.last_login = last_login
         self.password = password
 
