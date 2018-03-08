@@ -1,29 +1,22 @@
-import django
-import os
-import sys
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(BASE_DIR)
-os.environ['DJANGO_SETTINGS_MODULE'] = 'dcp.settings.dev'
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dcp.settings.dev")
-
-django.setup()
+import test_setup
 
 from wakemeup.models import School
 
 if __name__ == '__main__':
     
+    # Create new school
+    newschool = School(None, 'MySchool', '123 Fake Ln', 'San Diego', 'CA')
+    
+    # Save school
+    newschoolid = newschool.save()
+    
+    # Get school
+    newschool_new = School.objects.get(newschoolid)
+    
+    
+    # Update school
+    newschool_new.address = '123 New address'
+    newschool_new.save()
 
-#     newschool = School(None, 'School name', 'My address','San Diego','CA')    
-#     newschoolid = newschool.save()    
-#     newschool2 = School.objects.get(newschoolid)
-
-
-    School.objects.delete(1)
-
-    try:
-        fart = School.objects.get(2)
-
-    except School.DoesNotExist:
-        print("FART!")
-        
+    # Delete school
+    newschool_new.delete()
