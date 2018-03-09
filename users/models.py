@@ -79,7 +79,7 @@ class MyUser(AbstractBaseUser):
     defaultsignaturescanfile = models.BinaryField # TO-DO: Verify returns data properly in "get" functions
     phonenumber = models.CharField(max_length=25)
     emailaddress = models.CharField(max_length=250, unique=True)
-    reputationvalue = models.IntegerField
+    reputationvalue = models.IntegerField()
 
     # Define data manager
     objects = MyUserManager()
