@@ -53,7 +53,7 @@ class School(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'school'
+#         db_table = 'school'
         
     # School Manager instance
     objects = SchoolManager()
@@ -67,7 +67,7 @@ class School(models.Model):
 class Class(models.Model):
     
     classid = models.IntegerField(primary_key=True)
-    schoolid = models.IntegerField
+    schoolid = models.IntegerField()
     classdisplayname = models.CharField(max_length=100)
 
     # Class Manager instance    
@@ -75,19 +75,11 @@ class Class(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'class'
+#         db_table = 'class'
         
     def save(self):
         return Class.objects.save(self)
     
     def delete(self):
         return Class.objects.delete(self)
-
-
-    def __init__(self, classid = None, schoolid = None, classdisplayname = None):
-        super(Class, self).__init__()
-
-        self.classid = classid
-        self.schoolid = schoolid
-        self.classdisplayname = classdisplayname
 
