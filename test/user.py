@@ -1,15 +1,6 @@
-import django
-import os
-import sys
+import test_setup
 
 from django.contrib.auth import authenticate, get_user_model
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(BASE_DIR)
-os.environ['DJANGO_SETTINGS_MODULE'] = 'dcp.settings.dev'
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dcp.settings.dev")
-
-django.setup()
 
 # Create new user
 newuser = get_user_model().objects.create_user(
