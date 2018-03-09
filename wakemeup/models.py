@@ -83,3 +83,40 @@ class Class(models.Model):
     def delete(self):
         return Class.objects.delete(self)
 
+
+
+
+class StudentManager(models.Manager):
+    def all(self):
+        return get_data(self, 'SP_DCPGetStudent(%s)', (None,))
+    
+    def get(self, studentuserid):
+        return get_data_pk(self, 'SP_DCPGetStudent(%s)', (studentuserid,))
+    
+    def save(self, myStudent):
+        return save_data('SP_DCPUpsertStudent', (
+            myStudent.studentuserid,
+            myStudent.classid
+            )
+         )
+    
+    def delete(self, myStudent):
+        pass # No use-case
+
+class Student(models.Model):
+
+    studentuserid = models.IntegerField(primary_key=True)
+    classid = models.IntegerField()
+
+    # Object manager instance    
+    objects = StudentManager()
+    
+    class Meta:
+        managed = False
+#         db_table = 'user_student'
+
+    def save(self):
+        return Student.objects.save(self)
+    
+    def delete(self):
+        return Student.objects.delete(self)
