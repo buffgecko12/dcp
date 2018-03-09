@@ -107,6 +107,13 @@ class Student(models.Model):
 
     studentuserid = models.IntegerField(primary_key=True)
     classid = models.IntegerField()
+    firstname = models.CharField(max_length=100)
+    lastname = models.CharField(max_length=100)
+    defaultsignaturescanfile = models.BinaryField()
+    phonenumber = models.CharField(max_length=25)
+    emailaddress = models.CharField(max_length=250)
+    reputationvalue = models.IntegerField()
+    last_login = models.DateTimeField()
 
     # Object manager instance    
     objects = StudentManager()
