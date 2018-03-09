@@ -6,7 +6,7 @@ from UsefulFunctions.dbUtils import *
 # Data model managers (interface between DB and objects)
 class SchoolManager(models.Manager):
     def all(self):
-        return get_data(self, 'SP_DCPGetSchool(%s)', (None))
+        return get_data(self, 'SP_DCPGetSchool(%s)', (None,))
     
     def get(self, schoolid):
         return get_data_pk(self, 'SP_DCPGetSchool(%s)', (schoolid,))
@@ -24,6 +24,24 @@ class SchoolManager(models.Manager):
         
     def delete(self, mySchool):
         return delete_data('SP_DCPDeleteSchool', (mySchool.schoolid,))
+
+class ClassManager(models.Manager):
+    def all(self):
+        return get_data(self, 'SP_DCPGetClass(%s)', (None,))
+    
+    def get(self, classid):
+        return get_data_pk(self, 'SP_DCPGetClass(%s)', (classid,))
+    
+    def save(self, myClass):
+        return save_data('SP_DCPUpsertClass', (
+            myClass.classid,
+            myClass.schoolid,
+            myClass.classdisplayname
+            )
+        )
+    
+    def delete(self, myClass):
+        return delete_data('SP_DCPDeleteClass', (myClass.classid,))
     
 class School(models.Model):
     
@@ -37,7 +55,7 @@ class School(models.Model):
         managed = False
         db_table = 'school'
         
-    # Item Manager instance
+    # School Manager instance
     objects = SchoolManager()
     
     def save(self):
@@ -46,7 +64,30 @@ class School(models.Model):
     def delete(self):
         return School.objects.delete(self)
 
+class Class(models.Model):
+    
+    classid = models.IntegerField(primary_key=True)
+    schoolid = models.IntegerField
+    classdisplayname = models.CharField(max_length=100)
+
+    # Class Manager instance    
+    objects = ClassManager()
+
+    class Meta:
+        managed = False
+        db_table = 'class'
+        
+    def save(self):
+        return Class.objects.save(self)
+    
+    def delete(self):
+        return Class.objects.delete(self)
 
 
+    def __init__(self, classid = None, schoolid = None, classdisplayname = None):
+        super(Class, self).__init__()
 
+        self.classid = classid
+        self.schoolid = schoolid
+        self.classdisplayname = classdisplayname
 
