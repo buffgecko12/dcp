@@ -1,26 +1,36 @@
 import test_setup
+import unittest
 
 from wakemeup.models import School
 
-if __name__ == '__main__':
+class testSchool(unittest.TestCase):
     
     # Create new school
-    newschool = School(None, 'MySchool', '123 Fake Ln', 'San Diego', 'CA')
+    def testCreateNewSchool(self):
+        newschool = School(None, 'MySchool', '123 Fake Ln', 'San Diego', 'CA')
+        self.assertEqual(newschool.schooldisplayname, 'MySchool')
+        self.assertFalse(newschool.schoolid)
     
-    # Save school
-    newschoolid = newschool.save()
+        # Save school
+        newschoolid = newschool.save()
     
-    # Get school
-    newschool_new = School.objects.get(newschoolid)
-    
-    # Get all schools
-    allschools = School.objects.all()
-    for myschool in allschools:
-        print(myschool.schooldisplayname)
+        # Get school
+        newschool_get = School.objects.get(newschoolid)
 
-    # Update school
-    newschool_new.address = '123 New address'
-    newschool_new.save()
+        self.assertEqual(newschool.schooldisplayname, newschool_get.schooldisplayname)
+        self.assertTrue(newschool_get.schoolid)
+    
+        # Get all schools
+        allschools = School.objects.all()
+        for myschool in allschools:
+            print(myschool.schooldisplayname)
 
-    # Delete school
-    newschool_new.delete()
+        # Update school
+        newschool_get.address = '123 New address'
+        newschool_get.save()
+
+        # Delete school
+        newschool_get.delete()
+
+if __name__ == '__main__':
+    unittest.main() # Run all tests
