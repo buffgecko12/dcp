@@ -29,7 +29,7 @@ class MyUserManager(BaseUserManager):
         user.set_password(password)
 
         # Save user data and update user object with newly created id
-        result = user.save() # TO-DO: Look at using existing save() function instead
+        result = user.save()
         user.userid = result[0] # TO-DO: Fix SP call
 
         return user
