@@ -3,6 +3,8 @@
 from django.db import models
 from UsefulFunctions.dbUtils import *
 
+from django.contrib.postgres.fields import JSONField
+
 # Data model managers (interface between DB and objects)
 class SchoolManager(models.Manager):
     def all(self):
@@ -20,7 +22,7 @@ class SchoolManager(models.Manager):
                 mySchool.city,
                 mySchool.department
             )
-         )
+         )[0] # Return schoolid
         
     def delete(self, mySchool):
         return delete_data('SP_DCPDeleteSchool', (mySchool.schoolid,))
@@ -38,7 +40,7 @@ class ClassManager(models.Manager):
             myClass.schoolid,
             myClass.classdisplayname
             )
-        )
+        )[0] # Return classid
     
     def delete(self, myClass):
         return delete_data('SP_DCPDeleteClass', (myClass.classid,))
@@ -98,7 +100,7 @@ class StudentManager(models.Manager):
             myStudent.studentuserid,
             myStudent.classid
             )
-         )
+         )[0] # Return studentuserid
     
     def delete(self, myStudent):
         pass # No use-case
@@ -127,3 +129,43 @@ class Student(models.Model):
     
     def delete(self):
         return Student.objects.delete(self)
+    
+class TeacherManager(models.Manager):
+    def all(self):
+        return get_data(self, 'SP_DCPGetTeacher(%s)', (None,))
+    
+    def get(self, teacheruserid):
+        return get_data_pk(self, 'SP_DCPGetTeacher(%s)', (teacheruserid,))
+    
+    def save(self, myTeacher):
+        return save_data('SP_DCPUpsertTeacher', (
+            myTeacher.teacheruserid,
+            myTeacher.classinfo
+            )
+        )[0] # Return teacheruserid
+        
+    def delete(self, myTeacher):
+        pass # No use-case
+    
+class Teacher(models.Model):
+    teacheruserid = models.IntegerField(primary_key=True)
+    classinfo = JSONField()
+    firstname = models.CharField(max_length=100)
+    lastname = models.CharField(max_length=100)
+    defaultsignaturescanfile = models.BinaryField()
+    phonenumber = models.CharField(max_length=25)
+    emailaddress = models.CharField(max_length=250)
+    reputationvalue = models.IntegerField()
+    last_login = models.DateTimeField()
+    
+    objects = TeacherManager()
+    
+    class Meta:
+        managed = False
+#         db_table = 'user_teacher'
+
+    def save(self):
+        return Teacher.objects.save(self)
+    
+    def delete(self):
+        return Teacher.objects.delete(self)
