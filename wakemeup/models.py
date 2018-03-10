@@ -2,7 +2,6 @@
 
 from django.db import models
 from UsefulFunctions.dbUtils import *
-
 from django.contrib.postgres.fields import JSONField
 
 # Data model managers (interface between DB and objects)
@@ -45,6 +44,40 @@ class ClassManager(models.Manager):
     def delete(self, myClass):
         return delete_data('SP_DCPDeleteClass', (myClass.classid,))
     
+class TeacherManager(models.Manager):
+    def all(self):
+        return get_data(self, 'SP_DCPGetTeacher(%s)', (None,))
+    
+    def get(self, teacheruserid):
+        return get_data_pk(self, 'SP_DCPGetTeacher(%s)', (teacheruserid,))
+    
+    def save(self, myTeacher):
+        return save_data('SP_DCPUpsertTeacher', (
+            myTeacher.teacheruserid,
+            myTeacher.classinfo
+            )
+        )[0] # Return teacheruserid
+        
+    def delete(self, myTeacher):
+        pass # No use-case
+
+class StudentManager(models.Manager):
+    def all(self):
+        return get_data(self, 'SP_DCPGetStudent(%s)', (None,))
+    
+    def get(self, studentuserid):
+        return get_data_pk(self, 'SP_DCPGetStudent(%s)', (studentuserid,))
+    
+    def save(self, myStudent):
+        return save_data('SP_DCPUpsertStudent', (
+            myStudent.studentuserid,
+            myStudent.classid
+            )
+         )[0] # Return studentuserid
+    
+    def delete(self, myStudent):
+        pass # No use-case
+    
 class School(models.Model):
     
     schoolid = models.IntegerField(primary_key=True)
@@ -55,7 +88,6 @@ class School(models.Model):
 
     class Meta:
         managed = False
-#         db_table = 'school'
         
     # School Manager instance
     objects = SchoolManager()
@@ -77,7 +109,6 @@ class Class(models.Model):
 
     class Meta:
         managed = False
-#         db_table = 'class'
         
     def save(self):
         return Class.objects.save(self)
@@ -85,26 +116,29 @@ class Class(models.Model):
     def delete(self):
         return Class.objects.delete(self)
 
-
-
-
-class StudentManager(models.Manager):
-    def all(self):
-        return get_data(self, 'SP_DCPGetStudent(%s)', (None,))
+class Teacher(models.Model):
     
-    def get(self, studentuserid):
-        return get_data_pk(self, 'SP_DCPGetStudent(%s)', (studentuserid,))
+    teacheruserid = models.IntegerField(primary_key=True)
+    classinfo = JSONField()
+    firstname = models.CharField(max_length=100)
+    lastname = models.CharField(max_length=100)
+    defaultsignaturescanfile = models.BinaryField()
+    phonenumber = models.CharField(max_length=25)
+    emailaddress = models.CharField(max_length=250)
+    reputationvalue = models.IntegerField()
+    last_login = models.DateTimeField()
     
-    def save(self, myStudent):
-        return save_data('SP_DCPUpsertStudent', (
-            myStudent.studentuserid,
-            myStudent.classid
-            )
-         )[0] # Return studentuserid
+    objects = TeacherManager()
     
-    def delete(self, myStudent):
-        pass # No use-case
+    class Meta:
+        managed = False
 
+    def save(self):
+        return Teacher.objects.save(self)
+    
+    def delete(self):
+        return Teacher.objects.delete(self)
+    
 class Student(models.Model):
 
     studentuserid = models.IntegerField(primary_key=True)
@@ -122,50 +156,9 @@ class Student(models.Model):
     
     class Meta:
         managed = False
-#         db_table = 'user_student'
 
     def save(self):
         return Student.objects.save(self)
     
     def delete(self):
         return Student.objects.delete(self)
-    
-class TeacherManager(models.Manager):
-    def all(self):
-        return get_data(self, 'SP_DCPGetTeacher(%s)', (None,))
-    
-    def get(self, teacheruserid):
-        return get_data_pk(self, 'SP_DCPGetTeacher(%s)', (teacheruserid,))
-    
-    def save(self, myTeacher):
-        return save_data('SP_DCPUpsertTeacher', (
-            myTeacher.teacheruserid,
-            myTeacher.classinfo
-            )
-        )[0] # Return teacheruserid
-        
-    def delete(self, myTeacher):
-        pass # No use-case
-    
-class Teacher(models.Model):
-    teacheruserid = models.IntegerField(primary_key=True)
-    classinfo = JSONField()
-    firstname = models.CharField(max_length=100)
-    lastname = models.CharField(max_length=100)
-    defaultsignaturescanfile = models.BinaryField()
-    phonenumber = models.CharField(max_length=25)
-    emailaddress = models.CharField(max_length=250)
-    reputationvalue = models.IntegerField()
-    last_login = models.DateTimeField()
-    
-    objects = TeacherManager()
-    
-    class Meta:
-        managed = False
-#         db_table = 'user_teacher'
-
-    def save(self):
-        return Teacher.objects.save(self)
-    
-    def delete(self):
-        return Teacher.objects.delete(self)
