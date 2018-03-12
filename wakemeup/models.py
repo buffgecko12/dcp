@@ -51,6 +51,9 @@ class TeacherManager(models.Manager):
     def get(self, teacheruserid):
         return get_data_pk(self, 'SP_DCPGetTeacher(%s)', (teacheruserid,))
     
+    def get_class(self, myTeacher, classid):
+        return get_data(self, 'SP_DCPGetTeacherClass (%s, %s)', (myTeacher.teacheruserid, classid,))
+    
     def save(self, myTeacher):
         return save_data('SP_DCPUpsertTeacher', (
             myTeacher.teacheruserid,
@@ -119,7 +122,7 @@ class Class(models.Model):
 class Teacher(models.Model):
     
     teacheruserid = models.IntegerField(primary_key=True)
-    classinfo = JSONField()
+    classinfo = JSONField() # TO-DO: Possibly remove and use other SP
     firstname = models.CharField(max_length=100)
     lastname = models.CharField(max_length=100)
     defaultsignaturescanfile = models.BinaryField()
@@ -138,6 +141,9 @@ class Teacher(models.Model):
     
     def delete(self):
         return Teacher.objects.delete(self)
+    
+    def get_classes(self, classid = None):
+        return Teacher.objects.get_class(self, classid)
     
 class Student(models.Model):
 

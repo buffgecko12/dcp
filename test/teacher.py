@@ -65,6 +65,11 @@ class testTeacher(unittest.TestCase):
         for myteacher in allteachers:
             print (myteacher.teacheruserid, myteacher.classinfo)
  
+        allclasses = newteacherget.get_classes()
+        
+        for myclass in allclasses:
+            print (myclass.classid)
+ 
         newteacher.delete()
 
 if __name__ == '__main__':
