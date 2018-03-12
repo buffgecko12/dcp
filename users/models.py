@@ -11,7 +11,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 class MyUserManager(BaseUserManager):
 
     # Create new user
-    def create_user(self, password, username = None, usertype = None, firstname = None, lastname = None, defaultsignaturescanfile = None, phonenumber = None, emailaddress = None, reputationvalue = None):
+    def create_user(self, password, username = None, usertype = None, firstname = None, lastname = None, defaultsignaturescanfile = None, phonenumber = None, emailaddress = None):
  
         user = self.model(
             userid=None,
@@ -22,7 +22,6 @@ class MyUserManager(BaseUserManager):
             defaultsignaturescanfile=defaultsignaturescanfile,
             phonenumber=phonenumber,
             emailaddress=emailaddress,
-            reputationvalue = reputationvalue,
         )
 
         # Save hashed password
@@ -57,7 +56,6 @@ class MyUserManager(BaseUserManager):
                 myUser.phonenumber,
                 self.normalize_email(myUser.emailaddress),
                 myUser.password,
-                myUser.reputationvalue,
                 myUser.last_login,
             )
          )
