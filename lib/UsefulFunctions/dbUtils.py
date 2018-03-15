@@ -5,8 +5,6 @@ from collections import namedtuple
 # Check for valid connection (DB is up, valid credential)
 # Error-handling for queries, timeout
 # Handle non-ASCII characters (Python default encoding is ASCII)
-# Write new function for deleteDBData
-# Update write DB calls to return any query result info (error, id, variables)
 
 # Return data as a RawQuerySet object (list of objects)
 def get_data(myobjects, sp_signature, params):
