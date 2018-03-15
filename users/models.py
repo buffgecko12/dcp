@@ -29,7 +29,7 @@ class MyUserManager(BaseUserManager):
 
         # Save user data and update user object with newly created id
         result = user.save()
-        user.userid = result[0] # TO-DO: Fix SP call
+        user.userid = result[0] # TO-DO: Fix SP call (move [0] to save() below)
 
         return user
 
@@ -132,3 +132,48 @@ class MyUser(AbstractBaseUser):
             return True
         else:
             return False
+
+class UserReputationEventManager(models.Manager):
+    
+    def all(self):
+        return self.get_events(None, None, None,)
+    
+    def get(self, eventid):
+        return get_data_pk(self, 'SP_DCPGetUserReputationEvent(%s,%s,%s)', (None, None, eventid,))
+    
+    def get_events(self, userid, contractid, eventid):
+        return get_data(self, 'SP_DCPGetUserReputationEvent(%s,%s,%s)', (userid, contractid, eventid,))
+    
+    def save(self, myUserReputationEvent):
+        return save_data('SP_DCPUpsertUserReputationEvent', 
+             (
+                myUserReputationEvent.userid,
+                myUserReputationEvent.eventtype,
+                myUserReputationEvent.eventts,
+                myUserReputationEvent.pointvalue,
+                myUserReputationEvent.contractid
+            )
+        )[0] # Return new eventid
+        
+    def delete(self, myUserReputationEvent):
+        pass # No use-case
+    
+class UserReputationEvent(models.Model):
+    
+    eventid = models.BigIntegerField(primary_key=True)
+    userid = models.IntegerField()
+    eventtype = models.CharField(max_length=2)
+    eventts = models.DateTimeField()
+    pointvalue = models.IntegerField()
+    contractid = models.IntegerField()
+    
+    class Meta:
+        managed = False
+        
+    objects = UserReputationEventManager()
+    
+    def save(self):
+        return UserReputationEvent.objects.save(self)
+    
+    def delete(self):
+        return UserReputationEvent.objects.delete(self)
