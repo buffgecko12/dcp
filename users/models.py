@@ -29,7 +29,7 @@ class MyUserManager(BaseUserManager):
 
         # Save user data and update user object with newly created id
         result = user.save()
-        user.userid = result[0] # TO-DO: Fix SP call (move [0] to save() below)
+        user.userid = result
 
         return user
 
@@ -58,7 +58,7 @@ class MyUserManager(BaseUserManager):
                 myUser.password,
                 myUser.last_login,
             )
-         )
+         )[0] # Return userid
     
     def delete(self, myUser):
         return delete_data('SP_DCPDeleteUser', (myUser.userid,))
@@ -153,7 +153,7 @@ class UserReputationEventManager(models.Manager):
                 myUserReputationEvent.pointvalue,
                 myUserReputationEvent.contractid
             )
-        )[0] # Return new eventid
+        )[0] # Return eventid
         
     def delete(self, myUserReputationEvent):
         pass # No use-case
