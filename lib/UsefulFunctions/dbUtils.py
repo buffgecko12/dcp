@@ -13,12 +13,12 @@ def get_data(myobjects, sp_signature, params):
     # IMPORTANT: Model field names must match column names in DB
     resultset = myobjects.raw('select * from ' + sp_signature, params)
 
+    # Check if resultset has any rows
     try:
-        # Check if resultset has any rows
         test = resultset[0] 
     except IndexError:
-        # Return DoesNotExist error if now rows
-        raise myobjects.model._meta.model.DoesNotExist
+        return None
+#         raise myobjects.model._meta.model.DoesNotExist
 
     # Return result set
     return resultset
@@ -27,7 +27,9 @@ def get_data(myobjects, sp_signature, params):
 def get_data_pk(myobjects, sp_signature, params):
     resultset = get_data(myobjects, sp_signature, params)
     
-    return resultset[0] 
+    # If there is a result set, return the first instance
+    if(resultset):
+        return resultset[0] 
 
 # Return data as a QuerySet object (first column in resultset must be the PK for the model
 def get_data_qs(self, sp_signature, params, pk_fieldname = None):
