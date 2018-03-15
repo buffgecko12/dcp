@@ -2,7 +2,7 @@ import test_setup
 import unittest
 
 from django.contrib.auth import get_user_model
-from wakemeup.models import Teacher, Class, School
+from wakemeup.models.environment import Teacher, Class, School
 
 import json
 

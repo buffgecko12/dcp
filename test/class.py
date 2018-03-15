@@ -1,7 +1,7 @@
 import test_setup
 import unittest
 
-from wakemeup.models import Class, School
+from wakemeup.models.environment import Class, School
     
 class testClass(unittest.TestCase):
     
