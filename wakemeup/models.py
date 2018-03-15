@@ -107,12 +107,12 @@ class Class(models.Model):
     schoolid = models.IntegerField()
     classdisplayname = models.CharField(max_length=100)
 
-    # Class Manager instance    
-    objects = ClassManager()
-
     class Meta:
         managed = False
         
+    # Class Manager instance    
+    objects = ClassManager()
+
     def save(self):
         return Class.objects.save(self)
     
