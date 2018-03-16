@@ -51,7 +51,7 @@ class TeacherManager(models.Manager):
     def get(self, teacheruserid):
         return get_data_pk(self, 'SP_DCPGetTeacher(%s)', (teacheruserid,))
     
-    def get_class(self, myTeacher, classid):
+    def get_classes(self, myTeacher, classid):
         return get_data(self, 'SP_DCPGetTeacherClass (%s, %s)', (myTeacher.teacheruserid, classid,))
     
     def save(self, myTeacher):
@@ -143,7 +143,7 @@ class Teacher(models.Model):
         return Teacher.objects.delete(self)
     
     def get_classes(self, classid = None):
-        return Teacher.objects.get_class(self, classid)
+        return Teacher.objects.get_classes(self, classid)
     
 class Student(models.Model):
 
