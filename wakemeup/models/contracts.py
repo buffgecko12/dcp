@@ -1,10 +1,25 @@
 from django.db import models
 from UsefulFunctions.dbUtils import *
-from django.contrib.postgres import JSONField
 
 # Data model managers
 class ContractManager(models.Manager):
-    pass
+    def all(self):
+        pass
+    
+    def get(self):
+        pass
+    
+    def get_contract(self):
+        pass
+    
+    def save(self):
+        pass
+    
+    def complete(self):
+        pass
+    
+    def delete(self):
+        pass
 
 class Contract(models.Model):
     
@@ -28,3 +43,12 @@ class Contract(models.Model):
     
     # Objects manager
     objects = ContractManager()
+    
+    def save(self):
+        return Contract.objects.save(self)
+    
+    def delete(self):
+        return Contract.objects.delete(self)
+    
+    def complete(self):
+        return Contract.objects.complete(self)
