@@ -34,6 +34,26 @@ class ContractManager(models.Manager):
             )
         )[0]
 
+    def approve(self, myContract, partyuserid, approvaltype, signaturescanfile, approvalts, logonuserid):
+        return save_data('SP_DCPApproveContract', 
+            (
+                myContract.contractid, 
+                partyuserid, 
+                approvaltype, 
+                signaturescanfile, 
+                approvalts, 
+                logonuserid
+            )
+        )
+    
+    def revise(self, myContract):
+        return save_data('SP_DCPReviseContract', 
+            (
+                myContract.contractid, 
+                myContract.revisiondescription
+            )
+        )
+
     def complete(self):
         pass
     
@@ -98,6 +118,12 @@ class Contract(models.Model):
     
     def save(self):
         return Contract.objects.save(self)
+    
+    def approve(self, partyuserid, approvaltype, signaturescanfile, approvalts, logonuserid):
+        return Contract.objects.approve(self, partyuserid, approvaltype, signaturescanfile, approvalts, logonuserid)
+    
+    def revise(self):
+        return Contract.objects.revise(self)
     
     def delete(self):
         return Contract.objects.delete(self)
