@@ -11,15 +11,14 @@ from datetime import datetime, timedelta
 
 from psycopg2.extras import DateTimeTZRange
 
-class testContract(unittest.TestCase):
+class testContracts(unittest.TestCase):
 
+    # Create main test environment
     @classmethod
     def setUpClass(self):
         global newschool
         global newclass
-        global newclass2
         global newteacher
-        global newcontract
 
         # Create environment
         newschool = School(None, 'My school','123 Fake Ln.','San Diego','CA')
@@ -48,6 +47,10 @@ class testContract(unittest.TestCase):
         
         newteacher = Teacher(newuser.userid, classinfo)
         newteacherid = newteacher.save()
+
+    # Re-create environment for each test case        
+    def setUp(self):
+        global newcontract
 
         # Contract goal info
         goalinfo = json.dumps(
@@ -102,26 +105,54 @@ class testContract(unittest.TestCase):
 
         newcontract.contractid = newcontract.save()
 
-        # Approve contract
+    def testCreateContract(self):
+        pass
+
+    def testGetContract(self):
+        newcontractget = Contract.objects.get(newcontract.contractid)
+
+        self.assertEqual(newcontractget.studentrequirements,newcontract.studentrequirements)
+
+    def testApproveContract1(self):
+
+        # Approve 3/4 required
         newcontract.approve(1,'C',None,datetime.now(),1)
         newcontract.approve(2,'C',None,datetime.now(),1)
         newcontract.approve(3,'C',None,datetime.now(),1)
+
+        # Check approvalTS is still not set
+        newcontractget = Contract.objects.get(newcontract.contractid)
+        self.assertIsNone(newcontractget.contractapprovalts)
+
+        # Submit final approval
         newcontract.approve(4,'C',None,datetime.now(),1)
 
-        # Revise contract
+        # Check approval TS is set
+        newcontractget = Contract.objects.get(newcontract.contractid)
+        self.assertIsNotNone(newcontractget.contractapprovalts)
+
+    def testReviseContract(self):
+
         newcontract.revisiondescription = 'My revision description mang!'
         newcontract.revise()
 
-        # Approve revision
+        # Check revision approval TS is not set
+        newcontractget = Contract.objects.get(newcontract.contractid)
+        self.assertIsNone(newcontractget.revisionapprovalts)
+
+        # Approve revision (1/2 required users)
         newcontract.approve(1,'R',None,datetime.now(),1)
+        newcontractget = Contract.objects.get(newcontract.contractid)
+        self.assertIsNone(newcontractget.revisionapprovalts)
+
+        # Approve revision (2/2 required users)
         newcontract.approve(2,'R',None,datetime.now(),1)
+        newcontractget = Contract.objects.get(newcontract.contractid)
+        self.assertIsNotNone(newcontractget.revisionapprovalts)
 
     @classmethod
     def tearDownClass(self):
         newschool.delete()
-
-    def testContract(self):
-        pass
         
 if __name__ == '__main__':
     unittest.main() # Run all tests
