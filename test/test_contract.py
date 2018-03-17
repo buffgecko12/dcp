@@ -49,6 +49,36 @@ class testContract(unittest.TestCase):
         newteacher = Teacher(newuser.userid, classinfo)
         newteacherid = newteacher.save()
 
+        # Contract goal info
+        goalinfo = json.dumps(
+            { # classes info JSON
+                "currentgoals" : [
+                    {"goalid" : None, "difficultylevel" : "M", "goaldescription" : "Some yummy description", "achievedflag" : None, "acceptedflag" : True},
+                ]
+            }
+        )
+
+        # Contract reward info
+        rewardinfo = json.dumps(
+            {
+                "currentrewards" : [
+                    {"rewardid" : None, "difficultylevel" : "M", "rewarddescription" : "Some great description"}
+                ]
+            }    
+        )
+
+        # Contract party info
+        partyinfo = json.dumps(
+            {
+                "currentparties" : [
+                    {"partyuserid": 1,"contractrole": "MR"},
+                    {"partyuserid": 2,"contractrole": "PL"},
+                    {"partyuserid": 3,"contractrole": "BL"},
+                    {"partyuserid": 4,"contractrole": "PT"}
+                ]
+            }
+        )
+
         # Create new contract
         newcontract = Contract(
             None, # contractid
@@ -56,16 +86,18 @@ class testContract(unittest.TestCase):
             'G', # contracttype
             newteacher.teacheruserid, 
             DateTimeTZRange(datetime(2015, 1, 1, 0, 0, 0), datetime(2016, 1, 1, 0, 0, 0)), # Contract Valid Period
-            None, # Guardian approval flag
-            datetime(2015,7,1,0,0,0), # Revision approval ts
-            None, # Student leader reqs
-            None, # Teacher reqs 
-            None, # Student reqs
+            False, # Guardian approval flag
+            datetime.now(), # Revision deadline ts
+            'Some changes to the original contract', # Revision description
+            None, # Revision approval TS
+            'Don''t do dees!', # Student leader reqs
+            'Great teacher reqs', # Teacher reqs 
+            'Some student reqs', # Student reqs
             None, # Contract scan file
             None, # Contract approval TS
-            None, # goal info (JSON)
-            None, # reward info (JSON)
-            None  # party info (JSON)
+            goalinfo, # goal info (JSON)
+            rewardinfo, # reward info (JSON)
+            partyinfo  # party info (JSON)
             )
 
         newcontract.contractid = newcontract.save()
