@@ -76,8 +76,7 @@ class ContractGoalManager(models.Manager):
     def accept(self, myContractGoal):
         return save_data('SP_DCPAcceptContractGoal', (
                 myContractGoal.contractid,
-                myContractGoal.goalid,
-                myContractGoal.acceptedflag
+                myContractGoal.goalid
             )
         )
 
