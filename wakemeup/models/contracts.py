@@ -62,13 +62,24 @@ class ContractManager(models.Manager):
 
 class ContractGoalManager(models.Manager):
     def all(self):
-        pass
+        return self.get_contract_goals(None, None, None)
     
-    def get(self):
-        pass
+    def get(self, contractid, goalid):
+        return get_data_pk(self, 'SP_DCPGetContractGoal(%s,%s,%s)', (contractid, goalid, None))
     
-    def get_contract_goals(self):
-        pass
+    def get_contract_goals(self, contractid = None, goalid = None, difficultylevel = None):
+        return get_data(self, 'SP_DCPGetContractGoal(%s,%s,%s)', (contractid, goalid, difficultylevel))
+    
+    def modify_goals(self, contractid, goalinfo):
+        return save_data('SP_DCPModifyContractGoals', (contractid, goalinfo))
+
+    def accept(self, myContractGoal):
+        return save_data('SP_DCPAcceptContractGoal', (
+                myContractGoal.contractid,
+                myContractGoal.goalid,
+                myContractGoal.acceptedflag
+            )
+        )
 
 class ContractRewardManager(models.Manager):
     def all(self):
@@ -80,7 +91,7 @@ class ContractRewardManager(models.Manager):
     def get_contract_rewards(self):
         pass
 
-class ContractParty(models.Manager):
+class ContractPartyManager(models.Manager):
     def all(self):
         pass
     
@@ -89,7 +100,7 @@ class ContractParty(models.Manager):
     
     def get_contract_parties(self):
         pass
-    
+
 class Contract(models.Model):
     
     contractid = models.IntegerField(primary_key=True)
@@ -130,3 +141,26 @@ class Contract(models.Model):
     
     def complete(self):
         return Contract.objects.complete(self)
+    
+class ContractGoal(models.Model):
+    
+    contractid = models.IntegerField(primary_key=True)
+    goalid = models.IntegerField()
+    difficultylevel = models.CharField(max_length=1)
+    goaldescription = models.CharField(max_length=500)
+    acceptedflag = models.NullBooleanField()
+    achievedflag = models.NullBooleanField()
+
+    class Meta:
+        managed = False
+
+    objects = ContractGoalManager()
+    
+    def accept(self):
+        return ContractGoal.objects.accept(self)
+    
+    def save(self):
+        pass
+    
+    def delete(self):
+        pass

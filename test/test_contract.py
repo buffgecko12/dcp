@@ -3,7 +3,7 @@ import unittest
 
 from django.contrib.auth import get_user_model
 
-from wakemeup.models.contracts import Contract
+from wakemeup.models.contracts import Contract, ContractGoal
 from wakemeup.models.environment import School, Class, Teacher
 
 import json
@@ -56,7 +56,7 @@ class testContracts(unittest.TestCase):
         goalinfo = json.dumps(
             { # classes info JSON
                 "currentgoals" : [
-                    {"goalid" : None, "difficultylevel" : "M", "goaldescription" : "Some yummy description", "achievedflag" : None, "acceptedflag" : True},
+                    {"goalid" : None, "difficultylevel" : "M", "goaldescription" : "Some MEDIUM description"},
                 ]
             }
         )
@@ -113,7 +113,7 @@ class testContracts(unittest.TestCase):
 
         self.assertEqual(newcontractget.studentrequirements,newcontract.studentrequirements)
 
-    def testApproveContract1(self):
+    def testApproveContract(self):
 
         # Approve 3/4 required
         newcontract.approve(1,'C',None,datetime.now(),1)
@@ -149,6 +149,37 @@ class testContracts(unittest.TestCase):
         newcontract.approve(2,'R',None,datetime.now(),1)
         newcontractget = Contract.objects.get(newcontract.contractid)
         self.assertIsNotNone(newcontractget.revisionapprovalts)
+
+    def testContractGoals(self):
+        
+        allgoals = ContractGoal.objects.all()
+
+        # Get newly created goal
+        getgoal = ContractGoal.objects.get(newcontract.contractid,1)
+        self.assertIsNotNone(getgoal)
+
+        # Get all medium goals
+        getmediumgoals = ContractGoal.objects.get_contract_goals(difficultylevel = 'M')
+
+        # Accept goal
+        getgoal.accept()
+        getgoalagain = ContractGoal.objects.get(newcontract.contractid,1)
+        self.assertTrue(getgoalagain.acceptedflag)
+
+        newgoalinfo = json.dumps(
+            { # classes info JSON
+                "deletedgoals" : [1],
+                "currentgoals" : [
+                    {"goalid" : None, "difficultylevel" : "D", "goaldescription" : "Some new goal"},
+                    {"goalid" : None, "difficultylevel" : "M", "goaldescription" : "Some NEW MEDIUM goal"},
+                ]
+            }
+        )
+
+        ContractGoal.objects.modify_goals(newcontract.contractid, newgoalinfo)
+
+        getnewgoal = ContractGoal.objects.get(newcontract.contractid, 2)
+        self.assertEqual(getnewgoal.goaldescription,"Some NEW MEDIUM goal")
 
     @classmethod
     def tearDownClass(self):
