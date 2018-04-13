@@ -1,7 +1,5 @@
 ''' 
 Django version: 2.0.1
-Packages: django, psycopg2, python-decouple, django-debug-toolbar, Pillow
-
 Settings: https://docs.djangoproject.com/en/2.0/topics/settings/
 Quick-start: https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 Internationalization: https://docs.djangoproject.com/en/2.0/topics/i18n/
