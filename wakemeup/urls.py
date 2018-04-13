@@ -11,9 +11,9 @@ urlpatterns = [
     url(r'^contract/new$', views.create_contract, name="create_contract"),
     
     # Admin
-    url(r'^admin/edit_school', views.add_school, name="edit_school"),
-    url(r'^admin/edit_class', views.add_school, name="edit_class"),
-    url(r'^admin/edit_teacher', views.add_school, name="edit_teacher"),
-    url(r'^admin/edit_student', views.add_school, name="edit_student"),
+    url(r'^admin/edit_school', views.edit_school, name="edit_school"),
+    url(r'^admin/edit_class', views.edit_class, name="edit_class"),
+    url(r'^admin/edit_teacher', views.edit_teacher, name="edit_teacher"),
+    url(r'^admin/edit_student', views.edit_student, name="edit_student"),
     
 ]

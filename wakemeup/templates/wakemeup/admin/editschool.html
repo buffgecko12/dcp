@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block title %}Wake Me Up - Edit School{% endblock %}
+
+{% block content %}
+
+	<form action="{% url 'wakemeup:edit_school' %}" method="post">
+	    {% csrf_token %}
+	<!--     {{ form.as_p }} <!-- Unpacks form's fields into HTML markup -->
+	
+	<!--- Individual form fields
+		{{ form.non_field_errors }}
+		
+		<div class="fieldWrapper">
+			{{ form.schooldisplayname.errors }}
+			<label for="{{ form.schooldisplayname.id_for_label }}">Display name:</label>
+			{{ form.schooldisplayname }}
+		</div>
+	
+		<div class="fieldWrapper">
+			{{ form.address.errors }}
+			<label for="{{ form.address.id_for_label }}">Address:</label>
+			{{ form.address }}
+		</div>
+	
+	--->
+	
+	<!--- Loop through all form fields
+		{% for field in form %}
+		<div class="fieldWrapper">
+			{{ field.errors }}
+			{{ field.label_tag }} {{ field }}
+			{% if field.help_text %}
+			<p class="help">{{ field.help_text|safe }}</p>
+			{% endif %}	
+		</div>
+		{% endfor %}
+	--->
+	
+	
+	
+	{% for hidden in form.hidden_fields %}
+		{{ hidden }}
+	{% endfor %}
+	
+	{% for field in form.visible_fields %}
+		<div class="fieldWrapper">
+			{{ field.errors }}
+			{{ field.label_tag }} {{ field }}
+		</div>
+	{% endfor %}
+	
+	
+	    <input type="submit" value="Submit" />
+	</form>
+{% endblock %}
