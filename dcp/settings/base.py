@@ -97,7 +97,6 @@ USE_TZ = True
 # Static files
 STATIC_URL = '/static/' # Url for static file serving
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),] # Search directories for static files (otherwise, engine only searches within app directories
-# To-do: move general static files to "dcp" app directory
 
 # Other settings
 LOGIN_REDIRECT_URL = '/' # Where to redirect login requests if "next" is not specified

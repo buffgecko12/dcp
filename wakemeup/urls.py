@@ -15,5 +15,8 @@ urlpatterns = [
     url(r'^admin/edit_class', views.edit_class, name="edit_class"),
     url(r'^admin/edit_teacher', views.edit_teacher, name="edit_teacher"),
     url(r'^admin/edit_student', views.edit_student, name="edit_student"),
+
+    # User 
+    url(r'^login', views.login, name="login"),
     
 ]

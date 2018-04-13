@@ -21,7 +21,7 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
         <!-- Page-specific imports -->
-        {% block pageimport %}{% endblock %}
+        {% block import %}{% endblock %}
 
         <!-- Workaround to allow styling of unknown HTML elements in IE browsers older than IE9 (must be after CSS imports -->
         <!-- TO-DO: Add this -->
@@ -43,10 +43,6 @@
                 </div>
             </main>
             {% include "footer.html" %}
-
-            <!-- Bootstrap core JavaScript -->
-            <!-- <script src="{% static 'jquery/jquery.min.js' %}"></script>
-            <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script> -->
         </body>
     {% endblock %}
 </html>

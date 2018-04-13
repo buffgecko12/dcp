@@ -3,13 +3,17 @@ from django.shortcuts import render
 from .forms import SchoolForm
 from .models.environment import School
 
-# Create your views here.
 def index(request):
     return render(request, 'wakemeup/index.html')
 
 def create_contract(request):
     return render(request, 'wakemeup/create_contract.html')
 
+# User
+def login(request):
+    return render(request, 'login.html')
+
+# Admin
 def edit_school(request):
 
     # If POST request, process form data
