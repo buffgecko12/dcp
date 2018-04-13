@@ -3,7 +3,7 @@ import unittest
 
 from django.contrib.auth import get_user_model
 
-from wakemeup.models.contracts import Contract, ContractGoal
+from wakemeup.models.contracts import Contract, ContractGoal, ContractReward
 from wakemeup.models.environment import School, Class, Teacher
 
 import json
@@ -98,13 +98,18 @@ class testContracts(unittest.TestCase):
             'Some student reqs', # Student reqs
             None, # Contract scan file
             None, # Contract approval TS
+            None, # Contract status ("draft")
             goalinfo, # goal info (JSON)
             rewardinfo, # reward info (JSON)
             partyinfo  # party info (JSON)
             )
-
+                
+        # Save new contract
         newcontract.contractid = newcontract.save()
-
+        
+        # Set contract status as "draft"
+        newcontract.change_status('D')
+        
     def testCreateContract(self):
         pass
 
@@ -112,6 +117,16 @@ class testContracts(unittest.TestCase):
         newcontractget = Contract.objects.get(newcontract.contractid)
 
         self.assertEqual(newcontractget.studentrequirements,newcontract.studentrequirements)
+
+        # Check status is "draft")
+        self.assertEqual(newcontractget.contractstatus,'D')
+
+        # Set contract as pending (i.e. awaiting approval)        
+        newcontractget.change_status('P')
+        newcontractget = Contract.objects.get(newcontractget.contractid)
+
+        # Check status is changed to "pending")
+        self.assertEqual(newcontractget.contractstatus,'P')
 
     def testApproveContract(self):
 
@@ -160,12 +175,14 @@ class testContracts(unittest.TestCase):
 
         # Get all medium goals
         getmediumgoals = ContractGoal.objects.get_contract_goals(difficultylevel = 'M')
-
+        self.assertIsNotNone(getmediumgoals)
+        
         # Accept goal
         getgoal.accept()
         getgoalagain = ContractGoal.objects.get(newcontract.contractid,1)
         self.assertTrue(getgoalagain.acceptedflag)
 
+        # Modify goal info
         newgoalinfo = json.dumps(
             { # classes info JSON
                 "deletedgoals" : [1],
@@ -178,8 +195,38 @@ class testContracts(unittest.TestCase):
 
         ContractGoal.objects.modify_goals(newcontract.contractid, newgoalinfo)
 
+        # Verify updated goal info
         getnewgoal = ContractGoal.objects.get(newcontract.contractid, 2)
         self.assertEqual(getnewgoal.goaldescription,"Some NEW MEDIUM goal")
+
+    def testContractRewards(self):
+        
+        allrewards = ContractReward.objects.all()
+
+        # Get newly created reward
+        getreward = ContractReward.objects.get(newcontract.contractid,1)
+        self.assertIsNotNone(getreward)
+
+        # Get all medium rewards
+        getmediumrewards = ContractReward.objects.get_contract_rewards(difficultylevel = 'M')
+        self.assertIsNotNone(getmediumrewards)
+
+        # Modify reward info
+        newrewardinfo = json.dumps(
+            { # classes info JSON
+                "deletedrewards" : [1],
+                "currentrewards" : [
+                    {"rewardid" : None, "difficultylevel" : "D", "rewarddescription" : "Some new reward"},
+                    {"rewardid" : None, "difficultylevel" : "M", "rewarddescription" : "Some NEW MEDIUM reward"},
+                ]
+            }
+        )
+
+        ContractReward.objects.modify_rewards(newcontract.contractid, newrewardinfo)
+
+        # Verify updated reward info
+        getnewreward = ContractReward.objects.get(newcontract.contractid,2)
+        self.assertEqual(getnewreward.rewarddescription,"Some NEW MEDIUM reward")
 
     @classmethod
     def tearDownClass(self):

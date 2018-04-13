@@ -54,6 +54,14 @@ class ContractManager(models.Manager):
             )
         )
 
+    def change_status(self, myContract, contractstatus):
+        return save_data('SP_DCPChangeContractStatus', 
+            (
+                myContract.contractid, 
+                contractstatus
+            )
+        )
+    
     def complete(self):
         pass
     
@@ -82,13 +90,16 @@ class ContractGoalManager(models.Manager):
 
 class ContractRewardManager(models.Manager):
     def all(self):
-        pass
+        return self.get_contract_rewards(None, None, None)
     
-    def get(self):
-        pass
+    def get(self, contractid, rewardid):
+        return get_data_pk(self, 'SP_DCPGetContractReward(%s,%s,%s)', (contractid, rewardid, None))
     
-    def get_contract_rewards(self):
-        pass
+    def get_contract_rewards(self, contractid = None, rewardid = None, difficultylevel = None):
+        return get_data(self, 'SP_DCPGetContractReward(%s,%s,%s)', (contractid, rewardid, difficultylevel))
+    
+    def modify_rewards(self, contractid, rewardinfo):
+        return save_data('SP_DCPModifyContractRewards', (contractid, rewardinfo))
 
 class ContractPartyManager(models.Manager):
     def all(self):
@@ -116,6 +127,7 @@ class Contract(models.Model):
     studentrequirements = models.CharField(max_length=500)
     contractscanfile = models.BinaryField()
     contractapprovalts = models.DateTimeField()
+    contractstatus = models.CharField(max_length=1)
     goalinfo = JSONField() # TO-DO: Move these JSON fields to separate SP calls
     rewardinfo = JSONField()
     partyinfo = JSONField()
@@ -141,6 +153,9 @@ class Contract(models.Model):
     def complete(self):
         return Contract.objects.complete(self)
     
+    def change_status(self, contractstatus):
+        return Contract.objects.change_status(self, contractstatus)
+    
 class ContractGoal(models.Model):
     
     contractid = models.IntegerField(primary_key=True)
@@ -157,7 +172,27 @@ class ContractGoal(models.Model):
     
     def accept(self):
         return ContractGoal.objects.accept(self)
+
+    # save/delete functions are combined into "modify_goals" object manager function    
+    def save(self):
+        pass
     
+    def delete(self):
+        pass
+    
+class ContractReward(models.Model):
+    
+    contractid = models.IntegerField(primary_key=True)
+    rewardid = models.IntegerField()
+    difficultylevel = models.CharField(max_length=1)
+    rewarddescription = models.CharField(max_length=500)
+
+    class Meta:
+        managed = False
+
+    objects = ContractRewardManager()
+    
+    # save/delete functions are combined into "modify_goals" object manager function    
     def save(self):
         pass
     
