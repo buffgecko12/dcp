@@ -9,10 +9,6 @@ def index(request):
 def create_contract(request):
     return render(request, 'wakemeup/create_contract.html')
 
-# User
-def login(request):
-    return render(request, 'login.html')
-
 # Admin
 def edit_school(request):
 
