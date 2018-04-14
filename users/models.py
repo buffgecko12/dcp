@@ -28,7 +28,7 @@ class MyUserManager(BaseUserManager):
         user.set_password(password)
 
         # Save user data and update user object with newly created id
-        result = user.save()
+        result = user.save_user()
         user.userid = result
 
         return user
@@ -44,7 +44,7 @@ class MyUserManager(BaseUserManager):
     def get_user_auth(self, username = None, emailaddress = None):
         return get_data_pk(self, 'SP_DCPGetUser(%s,%s,%s)', (None, username, emailaddress))
 
-    def save(self, myUser):
+    def save_user(self, myUser):
         return save_data('SP_DCPUpsertUser', 
             (
                 myUser.userid,
@@ -115,8 +115,9 @@ class MyUser(AbstractBaseUser):
     def __str__(self):
         return self.firstname + " " + self.lastname
     
-    def save(self):
-        return MyUser.objects.save(self)
+    # Use "save_user()" instead of "save()" to allow auth views to work
+    def save_user(self):
+        return MyUser.objects.save_user(self)
 
     def delete(self):
         return MyUser.objects.delete(self)
