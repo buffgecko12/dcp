@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.contrib.auth import views as auth_views
 from . import views
 
 app_name= 'wakemeup' # qualifies url pattern names with 'wakemeup' namespace (i.e. 'wakemeup:create_contract')
@@ -17,6 +18,6 @@ urlpatterns = [
     url(r'^admin/edit_student', views.edit_student, name="edit_student"),
 
     # User 
-    url(r'^login', views.login, name="login"),
+    url(r'^login/$', auth_views.LoginView.as_view(template_name = 'login_new.html'), name="login"),
     
 ]
