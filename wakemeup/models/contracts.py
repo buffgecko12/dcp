@@ -1,5 +1,5 @@
 from django.db import models
-from UsefulFunctions.dbUtils import *
+from lib.UsefulFunctions.dbUtils import *
 from django.contrib.postgres.fields import JSONField, DateTimeRangeField # uses tstzrange
 
 # Data model managers

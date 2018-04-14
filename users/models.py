@@ -1,7 +1,7 @@
 # Model field names must match database column names for "Raw" queries to match fields properly
 
 from django.db import models
-from UsefulFunctions.dbUtils import *
+from lib.UsefulFunctions.dbUtils import *
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 

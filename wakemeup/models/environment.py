@@ -1,7 +1,7 @@
 # Model field names must match database column names for "Raw" queries to match fields properly
 
 from django.db import models
-from UsefulFunctions.dbUtils import *
+from lib.UsefulFunctions.dbUtils import *
 from django.contrib.postgres.fields import JSONField
 
 # Data model managers (interface between DB and objects)
