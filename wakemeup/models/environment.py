@@ -129,7 +129,6 @@ class Teacher(models.Model):
     phonenumber = models.CharField(max_length=25)
     emailaddress = models.CharField(max_length=250)
     reputationvalue = models.IntegerField()
-    last_login = models.DateTimeField()
     
     objects = TeacherManager()
     
@@ -155,7 +154,6 @@ class Student(models.Model):
     phonenumber = models.CharField(max_length=25)
     emailaddress = models.CharField(max_length=250)
     reputationvalue = models.IntegerField()
-    last_login = models.DateTimeField()
 
     # Object manager instance    
     objects = StudentManager()

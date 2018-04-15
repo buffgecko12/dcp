@@ -28,7 +28,7 @@ class testTeacher(unittest.TestCase):
         # Create new user
         newuser = get_user_model().objects.create_user(
             password = 'adminadmin', usertype = 'TR', firstname = 'Teacher', 
-            lastname = 'Isgood', username = 'teacher1', emailaddress = 'teacher@bufu.com'        
+            lastname = 'Isgood', username = 'teacher1', emailaddress = 'teacher@bufu.com', userrole = 'U'        
         )
 
     # Create new teacher

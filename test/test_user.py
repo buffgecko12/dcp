@@ -17,7 +17,8 @@ class testUser(unittest.TestCase):
             firstname = 'Test', 
             lastname = 'Orama',
             username = USERNAME,
-            emailaddress = EMAILADDRESS
+            emailaddress = EMAILADDRESS,
+            userrole = 'U'
         )
         
         self.assertEqual(newuser.firstname,'Test')

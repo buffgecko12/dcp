@@ -13,7 +13,8 @@ class CreateUserTests(TestCase):
             firstname = 'Test', 
             lastname = 'Orama',
             username = 'buffgecko',
-            emailaddress = 'fart@poop.com'
+            emailaddress = 'fart@poop.com',
+            userrole = 'U',
         )
             
         self.assertIs(newuser, True)

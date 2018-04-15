@@ -26,7 +26,7 @@ class testStudent(unittest.TestCase):
         # Create new user
         newuser = get_user_model().objects.create_user(
             password = 'adminadmin', usertype = 'ST', firstname = 'Test', 
-            lastname = 'Omoto', username = 'buffgecko', emailaddress = 'joe@smith.com'        
+            lastname = 'Omoto', username = 'buffgecko', emailaddress = 'joe@smith.com', userrole = 'U'        
         )
 
     # Create new student
