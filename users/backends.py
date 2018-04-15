@@ -20,4 +20,4 @@ class MyBackend(ModelBackend):
             return None
         
     def get_user(self, userid):
-        return get_user_model().objects.get(userid=userid)
+        return get_user_model().objects.get_user(userid=userid)

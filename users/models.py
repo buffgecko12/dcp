@@ -37,7 +37,7 @@ class MyUserManager(BaseUserManager):
         return get_data(self, 'SP_DCPGetUser(%s,%s,%s)', (None, None, None))
 
     # Get info for one specific user
-    def get(self, userid):
+    def get_user(self, userid):
         return get_data_pk(self, 'SP_DCPGetUser(%s,%s,%s)', (userid, None, None)) # Use tuple instead of array for input parameters
 
     # Lookup user for authentication (email / username)
@@ -107,9 +107,9 @@ class MyUser(AbstractBaseUser):
         db_table = 'users' # Point to actual DB table
         
     # Required fields
-    USERNAME_FIELD = 'userid' # specify how Django recognizes the user
+    USERNAME_FIELD = 'username' # specify how Django recognizes the user
     EMAIL_FIELD = 'emailaddress'
-    REQUIRED_FIELDS = ['usertype','username','firstname','lastname'] # Fields required when creating a user interactively (email and password are included by default)
+    REQUIRED_FIELDS = ['usertype','firstname','lastname'] # Fields required when creating a user interactively (email and password are included by default)
 
     # Methods
     def __str__(self):

@@ -23,9 +23,9 @@ class testUser(unittest.TestCase):
         self.assertEqual(newuser.firstname,'Test')
         
         # Get an existing user
-        newuserget = get_user_model().objects.get(newuser.userid)
+        newuserget = get_user_model().objects.get_user(newuser.userid)
         self.assertIsNotNone(newuserget) # positive
-        self.assertIsNone(get_user_model().objects.get(10000)) # negative
+        self.assertIsNone(get_user_model().objects.get_user(10000)) # negative
 
         # Authenticate
         self.assertTrue(authenticate(username=USERNAME,password=PASSWORD)) # positive
@@ -47,7 +47,7 @@ class testUser(unittest.TestCase):
         # Save to DB
         newuserget.firstname = 'New first name'
         newuserget.save()
-        newusergetget = get_user_model().objects.get(newuserget.userid)
+        newusergetget = get_user_model().objects.get_user(newuserget.userid)
         
         self.assertEqual(newusergetget.firstname, 'New first name')
 
@@ -58,7 +58,7 @@ class testUser(unittest.TestCase):
         # Delete user
         newusergetget.delete()
         
-        self.assertIsNone(get_user_model().objects.get(newusergetget.userid))
+        self.assertIsNone(get_user_model().objects.get_user(newusergetget.userid))
 
 if __name__ == '__main__':
     unittest.main() # Run all tests
