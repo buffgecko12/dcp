@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 from . import views
+from .forms import LoginForm
 
 app_name= 'wakemeup' # qualifies url pattern names with 'wakemeup' namespace (i.e. 'wakemeup:create_contract')
 urlpatterns = [
@@ -18,6 +19,12 @@ urlpatterns = [
     url(r'^admin/edit_student', views.edit_student, name="edit_student"),
 
     # User 
-    url(r'^login/$', auth_views.LoginView.as_view(template_name = 'login_new.html'), name="login"),
+    url(r'^login/$', auth_views.LoginView.as_view(
+            template_name = 'login_new.html', 
+            authentication_form=LoginForm
+        )
+        , name="login"),
+    
+    url(r'^logout/$', auth_views.LogoutView.as_view(), name="logout"),
     
 ]
