@@ -48,18 +48,34 @@ class testUser(unittest.TestCase):
         # Save to DB
         newuserget.firstname = 'New first name'
         newuserget.save()
-        newusergetget = get_user_model().objects.get_user(newuserget.userid)
+        newuser1 = get_user_model().objects.get_user(newuserget.userid)
         
-        self.assertEqual(newusergetget.firstname, 'New first name')
+        self.assertEqual(newuser1.firstname, 'New first name')
 
-        # Admin checks
-        self.assertIsNotNone(newusergetget.is_admin())
-        self.assertIsNotNone(newusergetget.is_superuser())
+
+        # Check user roles - regular user
+        self.assertEqual(newuser1.userrole,"U")
+        self.assertFalse(newuser1.is_admin())
+        self.assertFalse(newuser1.is_superuser())
+
+        # Check user roles - admin
+        newuser1.userrole = 'A'
+        newuser1.save()
+        newuser2 = get_user_model().objects.get_user(newuser1.userid)
+        self.assertTrue(newuser2.is_admin())
+        self.assertFalse(newuser2.is_superuser())
+
+        # Check user roles - super user
+        newuser2.userrole = 'S'
+        newuser2.save()
+        newuser3 = get_user_model().objects.get_user(newuser2.userid)
+        self.assertTrue(newuser3.is_admin())
+        self.assertTrue(newuser3.is_superuser())
 
         # Delete user
-        newusergetget.delete()
+        newuser1.delete()
         
-        self.assertIsNone(get_user_model().objects.get_user(newusergetget.userid))
+        self.assertIsNone(get_user_model().objects.get_user(newuser1.userid))
 
 if __name__ == '__main__':
     unittest.main() # Run all tests
