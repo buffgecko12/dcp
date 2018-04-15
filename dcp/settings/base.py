@@ -29,7 +29,8 @@ PREREQ_APPS = [
 PROJECT_APPS = [
     'users.apps.UsersConfig',
 #     'newage.apps.NewageConfig',
-    'wakemeup.apps.WakemeupConfig'
+    'wakemeup.apps.WakemeupConfig',
+    'crispy_forms'
 ]
 
 # Create INSTALLED_APPS setting
@@ -104,3 +105,5 @@ AUTH_USER_MODEL = 'users.MyUser' # Custom user model
 AUTHENTICATION_BACKENDS=['users.backends.MyBackend']
 # MAX_UPLOAD_SIZE = 5242880 # Limit max file upload size for RestrictedFileField class
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True # Kill session on browser close
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
