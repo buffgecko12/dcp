@@ -101,6 +101,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),] # Search directories for 
 
 # Other settings
 LOGIN_REDIRECT_URL = '/' # Where to redirect login requests if "next" is not specified
+LOGOUT_REDIRECT_URL = 'wakemeup:index' # Where to redirect login requests if "next" is not specified
 AUTH_USER_MODEL = 'users.MyUser' # Custom user model
 AUTHENTICATION_BACKENDS=['users.backends.MyBackend']
 # MAX_UPLOAD_SIZE = 5242880 # Limit max file upload size for RestrictedFileField class
