@@ -127,13 +127,13 @@ class MyUser(AbstractBaseUser):
         return MyUser.objects.delete(self)
     
     def is_admin(self):
-        if(self.usertype == 'A' or self.usertype == 'S'):
+        if(self.userrole == 'A' or self.userrole == 'S'):
             return True
         else:
             return False
 
     def is_superuser(self):
-        if(self.usertype == 'S'):
+        if(self.userrole == 'S'):
             return True
         else:
             return False
