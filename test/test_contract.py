@@ -46,7 +46,7 @@ class testContracts(unittest.TestCase):
         )
         
         newteacher = Teacher(newuser.userid, classinfo)
-        newteacherid = newteacher.save_user()
+        newteacherid = newteacher.save()
 
     # Re-create environment for each test case        
     def setUp(self):
