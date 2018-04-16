@@ -70,10 +70,18 @@ class MyUserManager(BaseUserManager):
 # Don't override default methods (get, all, save, delete) to avoid clashing with Django authentication
 class MyUser(AbstractBaseUser):
 
+    usertype_choices = [
+        ('AD','Program Admin'),
+        ('SF','School Staff'),
+        ('TR','Teacher'),
+        ('ST','Student'),
+        ('OT','Other'),
+    ]
+
     # Define attributes (inherited class includes password + last_login fields)
     userid = models.IntegerField(primary_key=True) # Specify as PK to prevent Django from creating "id" column and for queryset returns (raw)
     username = models.CharField(max_length=50, unique=True)
-    usertype = models.CharField(max_length=1)
+    usertype = models.CharField(max_length=2, choices=usertype_choices)
     firstname = models.CharField(max_length=100)
     lastname = models.CharField(max_length=100)
     defaultsignaturescanfile = models.BinaryField() # TO-DO: Verify returns data properly in "get" functions
