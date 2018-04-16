@@ -70,7 +70,7 @@ class testTeacher(unittest.TestCase):
         for myclass in allclasses:
             print (myclass.classid)
  
-        newteacher.delete()
+        newuser.delete()
 
 if __name__ == '__main__':
     unittest.main() # Run all tests

@@ -7,7 +7,7 @@ class testUser(unittest.TestCase):
     def testUser(self):
         
         USERNAME = 'oroku'
-        EMAILADDRESS = 'oroku@saki.com'
+        EMAILADDRESS = 'hamato@yoshi.com'
         PASSWORD = 'wowzers'
         
         # Create new user
