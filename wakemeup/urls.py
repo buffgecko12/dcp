@@ -26,5 +26,6 @@ urlpatterns = [
         , name="login"),
     
     url(r'^logout/$', auth_views.LogoutView.as_view(), name="logout"),
+    url(r'^admin/add_user', views.add_user, name="add_user"),
     
 ]

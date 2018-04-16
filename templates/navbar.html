@@ -28,6 +28,10 @@
 							<a class="dropdown-item {% if url_name == 'edit_class' %} active {% endif %}" href="{% url 'wakemeup:edit_class' %}">Classes</a>
 							<a class="dropdown-item {% if url_name == 'edit_teacher' %} active {% endif %}" href="{% url 'wakemeup:edit_teacher' %}">Teachers</a>
 							<a class="dropdown-item {% if url_name == 'edit_student' %} active {% endif %}" href="{% url 'wakemeup:edit_student' %}">Students</a>
+							{% if user.is_superuser %}
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item {% if url_name == 'add_user' %} active {% endif %}" href="{% url 'wakemeup:add_user' %}">Add User</a>
+							{% endif %}
 						</div>
 					</li>
 					<li class="nav-item">

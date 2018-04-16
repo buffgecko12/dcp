@@ -1,6 +1,7 @@
 from django.shortcuts import render
+from django.contrib.auth import get_user_model
 
-from .forms import SchoolForm
+from .forms import SchoolForm, SignupForm
 from .models.environment import School
 
 def index(request):
@@ -37,7 +38,7 @@ def edit_school(request):
     else:
         form = SchoolForm()
         
-    return render(request, 'wakemeup/admin/editschool.html', {'form': form})
+    return render(request, 'wakemeup/admin/edit_school.html', {'form': form})
 
 def edit_class(request):
     pass
@@ -47,3 +48,43 @@ def edit_teacher(request):
 
 def edit_student(request):
     pass
+
+
+def add_user(request):
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        
+        if form.is_valid():
+
+            # Store variables to reuse
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+
+            # Create new user
+            get_user_model().objects.create_user(
+                raw_password, 
+                username,
+                form.cleaned_data.get('usertype'),
+                form.cleaned_data.get('firstname'),
+                form.cleaned_data.get('lastname'),
+                form.cleaned_data.get('defaultsignaturescanfile'),
+                form.cleaned_data.get('phonenumber'),
+                form.cleaned_data.get('emailaddress'),
+                form.cleaned_data.get('userrole'),
+            )
+
+            # Login as newly created user
+#             myuser = authenticate(username=username, password=raw_password)
+#             login(request, user)
+
+            # Go back to index page
+            return index(request)
+    else:
+        # Return empty form
+        form = SignupForm()
+        
+    return render(request, 'wakemeup/admin/add_user.html', {'form': form})
+            
+            
+            
+            
