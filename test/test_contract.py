@@ -3,7 +3,7 @@ import unittest
 
 from django.contrib.auth import get_user_model
 
-from wakemeup.models.contracts import Contract, ContractGoal, ContractReward
+from wakemeup.models.contracts import Contract, ContractGoal, ContractReward, ContractParty
 from wakemeup.models.environment import School, Class, Teacher
 
 import json
@@ -19,6 +19,7 @@ class testContracts(unittest.TestCase):
         global newschool
         global newclass
         global newteacher
+        global newuser
 
         # Create environment
         newschool = School(None, 'My school','123 Fake Ln.','San Diego','CA')
@@ -222,15 +223,53 @@ class testContracts(unittest.TestCase):
             }
         )
 
-        ContractReward.objects.modify_rewards(newcontract.contractid, newrewardinfo)
+        ContractReward.objects.modify_contract_rewards(newcontract.contractid, newrewardinfo)
 
         # Verify updated reward info
         getnewreward = ContractReward.objects.get(newcontract.contractid,2)
         self.assertEqual(getnewreward.rewarddescription,"Some NEW MEDIUM reward")
 
+    def testContractParties(self):
+        allparties = ContractParty.objects.all()
+        
+        # Get newly created party
+        getparty = ContractParty.objects.get(newcontract.contractid,1)
+        self.assertIsNotNone(getparty)
+        
+        # Get all parties for given contract
+        getparties = ContractParty.objects.get_contract_parties(newcontract.contractid, None, None)
+        self.assertIsNotNone(getparties)
+
+        # Check backup leader
+        getbackupleader = ContractParty.objects.get_contract_parties(newcontract.contractid, None, 'BL')
+        self.assertIsNotNone(getbackupleader)
+        
+        # Modify contract parties
+        newpartyinfo = json.dumps(
+            { # parties info JSON
+                "deletedparties" : [1],
+                "currentparties" : [
+                    {"partyuserid" : 3, "contractrole" : "PT"},
+                ]
+            }
+        )
+        
+        ContractParty.objects.modify_contract_parties(newcontract.contractid, newpartyinfo)
+
+        # Verify party was deleted
+        getnewparty = ContractParty.objects.get(newcontract.contractid,1)
+        self.assertIsNone(getnewparty)
+        
+        # Check to make sure contract role was changed
+        getbackupleader = ContractParty.objects.get_contract_parties(newcontract.contractid, None, 'BL')
+
+    def tearDown(self):
+        newcontract.delete()
+
     @classmethod
     def tearDownClass(self):
         newschool.delete()
+        newuser.delete()
         
 if __name__ == '__main__':
     unittest.main() # Run all tests

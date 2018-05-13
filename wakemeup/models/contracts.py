@@ -65,7 +65,7 @@ class ContractManager(models.Manager):
     def complete(self):
         pass
     
-    def delete(self):
+    def delete(self, MyContract):
         pass
 
 class ContractGoalManager(models.Manager):
@@ -98,18 +98,21 @@ class ContractRewardManager(models.Manager):
     def get_contract_rewards(self, contractid = None, rewardid = None, difficultylevel = None):
         return get_data(self, 'SP_DCPGetContractReward(%s,%s,%s)', (contractid, rewardid, difficultylevel))
     
-    def modify_rewards(self, contractid, rewardinfo):
+    def modify_contract_rewards(self, contractid, rewardinfo):
         return save_data('SP_DCPModifyContractRewards', (contractid, rewardinfo))
 
 class ContractPartyManager(models.Manager):
     def all(self):
-        pass
+        return self.get_contract_parties(None, None)
     
-    def get(self):
-        pass
+    def get(self, contractid, partyuserid):
+        return get_data_pk(self, 'SP_DCPGetContractParty(%s,%s,%s)', (contractid, partyuserid, None))
     
-    def get_contract_parties(self):
-        pass
+    def get_contract_parties(self, contractid = None, partyuserid = None, contractrole = None):
+        return get_data(self, 'SP_DCPGetContractParty(%s,%s,%s)', (contractid, partyuserid, contractrole))
+    
+    def modify_contract_parties(self, contractid, partyinfo):
+        return save_data('SP_DCPModifyContractParties', (contractid, partyinfo))
 
 class Contract(models.Model):
     
@@ -192,7 +195,25 @@ class ContractReward(models.Model):
 
     objects = ContractRewardManager()
     
-    # save/delete functions are combined into "modify_goals" object manager function    
+    # save/delete functions are combined into "modify_rewards" object manager function    
+    def save(self):
+        pass
+    
+    def delete(self):
+        pass
+    
+class ContractParty(models.Model):
+    
+    contractid = models.IntegerField(primary_key=True)
+    partyuserid = models.IntegerField()
+    contractrole = models.CharField(max_length=2)
+    
+    class Meta:
+        managed = False
+        
+    objects = ContractPartyManager()
+    
+    # save/delete functions are combined into "modify_parties" object manager function    
     def save(self):
         pass
     
