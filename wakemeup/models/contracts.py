@@ -114,6 +114,18 @@ class ContractPartyManager(models.Manager):
     def modify_contract_parties(self, contractid, partyinfo):
         return save_data('SP_DCPModifyContractParties', (contractid, partyinfo))
 
+    def approve_contract(self, MyContractParty):
+        return save_data('SP_DCPApproveContract', 
+            (
+                MyContractParty.contractid, 
+                MyContractParty.partyuserid, 
+                'C', 
+                MyContractParty.partyapprovalsignature, 
+                MyContractParty.partyapprovalts, 
+                MyContractParty.partylogonuserid
+            )
+        )
+
 class Contract(models.Model):
     
     contractid = models.IntegerField(primary_key=True)
@@ -203,10 +215,16 @@ class ContractReward(models.Model):
         pass
     
 class ContractParty(models.Model):
-    
+
+    # Get party attributes    
     contractid = models.IntegerField(primary_key=True)
     partyuserid = models.IntegerField()
     contractrole = models.CharField(max_length=2)
+    
+    # Get approval attributes
+    partyapprovalsignature = models.BinaryField() # signaturescanfile
+    partyapprovalts = models.DateTimeField() # approvalts
+    partylogonuserid = models.IntegerField() # logonuserid
     
     class Meta:
         managed = False
@@ -219,3 +237,6 @@ class ContractParty(models.Model):
     
     def delete(self):
         pass
+    
+    def approve_contract(self):
+        return ContractParty.objects.approve_contract(self)

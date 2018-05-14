@@ -10,6 +10,7 @@ import json
 from datetime import datetime, timedelta
 
 from psycopg2.extras import DateTimeTZRange
+from psycopg2 import Binary
 
 class testContracts(unittest.TestCase):
 
@@ -20,6 +21,13 @@ class testContracts(unittest.TestCase):
         global newclass
         global newteacher
         global newuser
+        global signaturefile
+        
+        # Read in "signature" file
+        itemfile = open('sampleimg.jpg','rb')
+        mydatafile = itemfile.read()
+        signaturefile = Binary(mydatafile)
+        itemfile.close()
 
         # Create environment
         newschool = School(None, 'My school','123 Fake Ln.','San Diego','CA')
@@ -229,11 +237,13 @@ class testContracts(unittest.TestCase):
         getnewreward = ContractReward.objects.get(newcontract.contractid,2)
         self.assertEqual(getnewreward.rewarddescription,"Some NEW MEDIUM reward")
 
-    def testContractParties(self):
+    def testContractParties(self):        
+        # Get all parties
         allparties = ContractParty.objects.all()
+        self.assertIsNotNone(allparties)
         
-        # Get newly created party
-        getparty = ContractParty.objects.get(newcontract.contractid,1)
+        # Get single party
+        getparty = ContractParty.objects.get(newcontract.contractid,2)
         self.assertIsNotNone(getparty)
         
         # Get all parties for given contract
@@ -253,15 +263,24 @@ class testContracts(unittest.TestCase):
                 ]
             }
         )
-        
         ContractParty.objects.modify_contract_parties(newcontract.contractid, newpartyinfo)
 
         # Verify party was deleted
         getnewparty = ContractParty.objects.get(newcontract.contractid,1)
         self.assertIsNone(getnewparty)
         
-        # Check to make sure contract role was changed
+        # Verify contract role was changed
         getbackupleader = ContractParty.objects.get_contract_parties(newcontract.contractid, None, 'BL')
+        self.assertIsNone(getbackupleader)
+
+        # Set party attributes
+        getparty.partylogonuserid = 1
+        getparty.partyapprovalsignature = signaturefile
+        getparty.partyapprovalts = datetime.utcnow()
+
+        # Approve contract        
+        getparty.approve_contract()
+        print(newcontract.contractid)
 
     def tearDown(self):
         newcontract.delete()
