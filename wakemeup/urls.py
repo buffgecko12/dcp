@@ -20,7 +20,7 @@ urlpatterns = [
 
     # User 
     url(r'^login/$', auth_views.LoginView.as_view(
-            template_name = 'login_new.html', 
+            template_name = 'login.html', 
             authentication_form=LoginForm
         )
         , name="login"),
