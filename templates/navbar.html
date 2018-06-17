@@ -2,7 +2,7 @@
 {% with url_name=request.resolver_match.url_name %}
 
 	<nav class="navbar navbar-expand-sm bg-light navbar-light sticky-top">
-		<a class="navbar-brand" href="{% url 'wakemeup:index' %}"><span class="fa fa-home"></span> Wake Me Up</a>
+		<a class="navbar-brand" href="{% url 'wakemeup:index' %}"><span class="fa fa-home"></span></a>
 		
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
 		<span class="navbar-toggler-icon"></span>
@@ -11,36 +11,36 @@
 		<div class="collapse navbar-collapse" id="collapsibleNavbar">
 			<ul class="navbar-nav">
 				<li class="nav-item active">
-				<a class="nav-link" href="{% url 'wakemeup:index' %}">Home</a>
+				<a class="nav-link" href="{% url 'wakemeup:index' %}">Inicio</a>
 				</li>
 				
 				{% if user.is_authenticated %}
 					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Contracts</a>
+						<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Contratos</a>
 						<div class="dropdown-menu">
-							<a class="dropdown-item {% if url_name == 'create_contract' %} active {% endif %}" href="{% url 'wakemeup:create_contract' %}">Create contract</a>
+							<a class="dropdown-item {% if url_name == 'create_contract' %} active {% endif %}" href="{% url 'wakemeup:create_contract' %}">Crear contrato</a>
 						</div>
 					</li>
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Admin</a>
 						<div class="dropdown-menu">
-							<a class="dropdown-item {% if url_name == 'edit_school' %} active {% endif %}" href="{% url 'wakemeup:edit_school' %}">Schools</a>
-							<a class="dropdown-item {% if url_name == 'edit_class' %} active {% endif %}" href="{% url 'wakemeup:edit_class' %}">Classes</a>
-							<a class="dropdown-item {% if url_name == 'edit_teacher' %} active {% endif %}" href="{% url 'wakemeup:edit_teacher' %}">Teachers</a>
-							<a class="dropdown-item {% if url_name == 'edit_student' %} active {% endif %}" href="{% url 'wakemeup:edit_student' %}">Students</a>
+							<a class="dropdown-item {% if url_name == 'edit_school' %} active {% endif %}" href="{% url 'wakemeup:edit_school' %}">Colegios</a>
+							<a class="dropdown-item {% if url_name == 'edit_class' %} active {% endif %}" href="{% url 'wakemeup:edit_class' %}">Cursos</a>
+							<a class="dropdown-item {% if url_name == 'edit_teacher' %} active {% endif %}" href="{% url 'wakemeup:edit_teacher' %}">Docentes</a>
+							<a class="dropdown-item {% if url_name == 'edit_student' %} active {% endif %}" href="{% url 'wakemeup:edit_student' %}">Estudiantes</a>
 							{% if user.is_superuser %}
 								<div class="dropdown-divider"></div>
-								<a class="dropdown-item {% if url_name == 'add_user' %} active {% endif %}" href="{% url 'wakemeup:add_user' %}">Add User</a>
+								<a class="dropdown-item {% if url_name == 'add_user' %} active {% endif %}" href="{% url 'wakemeup:add_user' %}">Crear usuario</a>
 							{% endif %}
 						</div>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="{% url 'wakemeup:logout' %}">Logout</a>
+						<a class="nav-link" href="{% url 'wakemeup:logout' %}">Cerrar sesi&#243;n</a>
 					</li>
 				{% else %}
 					<ul class="nav navbar-nav navbar-right">
 						<li class="nav-item">
-							<a class="nav-link" href="{% url 'wakemeup:login' %}">Login</a>
+							<a class="nav-link" href="{% url 'wakemeup:login' %}">Iniciar sesi&#243;n</a>
 						</li>
 						<!-- 
 						<li class="nav-item">
