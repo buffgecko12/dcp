@@ -10,16 +10,26 @@ class LoginForm(AuthenticationForm):
     def __init__ (self, *args, **kwargs):
         super(LoginForm, self).__init__(*args, **kwargs)
 
+        # Create helper instance
         self.helper = FormHelper()
         self.helper.form_method = 'POST'
         self.helper.form_tag = False # Prevent <form> tags from being generated
-        self.helper.add_input(Submit('login', 'login', css_class='btn-primary'))
-        
-    username = forms.CharField(label="Username", required=True)
-    password = forms.CharField(
-        label="Password", required=True, widget=forms.PasswordInput
-    )
 
+        # Set CSS properties
+        self.helper.form_class = 'form-horizontal'
+        self.helper.label_class = 'col-md-2'
+        self.helper.field_class = 'col-md-10'
+        
+        # Set form layout
+        self.helper.layout = Layout(
+            'username',
+            'password',
+            Submit('login', 'Iniciar', css_class='btn-primary'),
+        )
+
+    # Define fields
+    username = forms.CharField(label="Nombre de usuario", required=True)
+    password = forms.CharField(label="Contrase&#241;a", required=True, widget=forms.PasswordInput)
 
 class SignupForm(UserCreationForm):
     username = forms.CharField(label='Username (or e-mail)', max_length=50)
@@ -76,5 +86,3 @@ class SchoolForm(forms.Form):
         label='Department',
         max_length=100
     )
-    
-
