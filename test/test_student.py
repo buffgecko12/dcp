@@ -26,7 +26,7 @@ class testStudent(unittest.TestCase):
         # Create new user
         newuser = get_user_model().objects.create_user(
             password = 'adminadmin', usertype = 'ST', firstname = 'Test', 
-            lastname = 'Omoto', username = 'buffgecko', emailaddress = 'new@smith.com', userrole = 'U'        
+            lastname = 'Omoto', username = 'buffgecko_test', emailaddress = 'new_user@smith.com', userrole = 'U'        
         )
 
     # Create new student
@@ -45,6 +45,9 @@ class testStudent(unittest.TestCase):
             print (mystudent.studentuserid, mystudent.classid)
 
         newstudent.delete()
+
+    def tearDown(self):
+        newuser.delete()
 
 if __name__ == '__main__':
     unittest.main() # Run all tests
