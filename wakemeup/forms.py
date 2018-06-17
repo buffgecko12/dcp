@@ -32,17 +32,17 @@ class LoginForm(AuthenticationForm):
     password = forms.CharField(label="Contrase&#241;a", required=True, widget=forms.PasswordInput)
 
 class SignupForm(UserCreationForm):
-    username = forms.CharField(label='Username (or e-mail)', max_length=50)
-    firstname = forms.CharField(label='First name', max_length=100)
-    lastname = forms.CharField(label='Last name', max_length=100)
-    usertype = forms.ChoiceField(label='User type',choices=get_user_model().usertype_choices)
-    emailaddress = forms.EmailField(label='Email address', max_length=250, required=False)
+    username = forms.CharField(label='Nombre de usuario (o correo)', max_length=50)
+    firstname = forms.CharField(label='Primer nombre', max_length=100)
+    lastname = forms.CharField(label='Apellido', max_length=100)
+    usertype = forms.ChoiceField(label='Tipo de usuario',choices=get_user_model().usertype_choices)
+    emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     userrole = forms.CharField(initial='U', widget=HiddenInput) # Default new users to "User" role
 
     helper = FormHelper()
     helper.form_method = 'POST'
 #     helper.form_tag = False # Prevent <form> tags from being generated
-    helper.add_input(Submit('login', 'Add', css_class='btn-primary'))
+    helper.add_input(Submit('login', 'Crear', css_class='btn-primary'))
 
     class Meta:
         model = get_user_model()

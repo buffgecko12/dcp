@@ -71,11 +71,11 @@ class MyUserManager(BaseUserManager):
 class MyUser(AbstractBaseUser):
 
     usertype_choices = [
-        ('AD','Program Admin'),
-        ('SF','School Staff'),
-        ('TR','Teacher'),
-        ('ST','Student'),
-        ('OT','Other'),
+        ('AD','Administrador de programa'),
+        ('SF','Administrador de colegio'),
+        ('TR','Docente'),
+        ('ST','Estudiante'),
+        ('OT','Otro'),
     ]
 
     # Define attributes (inherited class includes password + last_login fields)
