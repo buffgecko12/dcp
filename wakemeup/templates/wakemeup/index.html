@@ -1,9 +1,22 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
+{% block import %}
+    <link href="{% static 'css/buttons.css' %}" rel="stylesheet">
+{% endblock %}
+
 <!-- Set page title -->
 {% block title %}Wake Me Up - Homepage{% endblock %}
 
 {% block content %}
-    <div class="display-4">Home page</div>
+	<div class="container">
+		<br>
+	    <div class="row">
+    		<a href="#" class="btn btn-primary btn-lg btn-huge btn-block">Crear contrato</a>
+	    </div>
+	    <br>
+	    <div class="row">
+    		<a href="#" class="btn btn-primary btn-lg btn-huge btn-block">Mis contratos</a>
+	    </div>
+    </div>
 {% endblock %}
