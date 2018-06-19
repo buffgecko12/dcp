@@ -52,7 +52,6 @@ class testUser(unittest.TestCase):
         
         self.assertEqual(newuser1.firstname, 'New first name')
 
-
         # Check user roles - regular user
         self.assertEqual(newuser1.userrole,"U")
         self.assertFalse(newuser1.is_admin())
