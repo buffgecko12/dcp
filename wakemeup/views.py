@@ -11,6 +11,10 @@ def create_contract(request):
     return render(request, 'wakemeup/create_contract.html')
 
 # Admin
+def admin_list(request, list_type):
+    print(list_type)
+    return index(request)
+
 def edit_school(request):
 
     # If POST request, process form data
@@ -38,7 +42,7 @@ def edit_school(request):
     else:
         form = SchoolForm()
         
-    return render(request, 'wakemeup/admin/edit_school.html', {'form': form})
+    return render(request, 'wakemeup/admin/add_form.html', {'form': form})
 
 def edit_class(request):
     pass
@@ -49,11 +53,10 @@ def edit_teacher(request):
 def edit_student(request):
     pass
 
-
 def add_user(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
-        
+
         if form.is_valid():
 
             # Store variables to reuse
@@ -83,8 +86,4 @@ def add_user(request):
         # Return empty form
         form = SignupForm()
         
-    return render(request, 'wakemeup/admin/add_user.html', {'form': form})
-            
-            
-            
-            
+    return render(request, 'wakemeup/admin/add_form.html', {'form': form})
