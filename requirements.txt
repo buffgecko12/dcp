@@ -5,3 +5,4 @@ django-debug-toolbar
 Pillow
 django_heroku
 django-crispy-forms
+django-tables2
