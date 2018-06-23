@@ -15,7 +15,8 @@ def get_data(myobjects, sp_signature, params):
     try:
         test = resultset[0] 
     except IndexError:
-        return None
+        return myobjects.none() # return empty queryset ("not myobjects.none() evaluates to True)
+#         return None
 #         raise myobjects.model._meta.model.DoesNotExist
 
     # Return result set
