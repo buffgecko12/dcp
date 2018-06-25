@@ -11,8 +11,8 @@ class testClass(unittest.TestCase):
         newschoolid = newschool.save()
         
         # Create new class object
-        newclass = Class(None, newschoolid, 'New class 1')
-        newclass2 = Class(None, newschoolid, 'New class 2')
+        newclass = Class(classid = None, schoolid = newschoolid, classdisplayname = 'New class 1')
+        newclass2 = Class(classid = None, schoolid = newschoolid, classdisplayname = 'New class 2')
 
         self.assertEqual(newclass.classdisplayname, 'New class 1')
     
@@ -30,9 +30,7 @@ class testClass(unittest.TestCase):
         
         # Retrieve all classes
         allclasses = Class.objects.all()
-        
-        for myclass in allclasses:
-            print(myclass.classid)
+        self.assertTrue(allclasses)
         
         # Delete class
         newclassget.delete()

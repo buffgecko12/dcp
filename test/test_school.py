@@ -22,8 +22,7 @@ class testSchool(unittest.TestCase):
     
         # Get all schools
         allschools = School.objects.all()
-        for myschool in allschools:
-            print(myschool.schooldisplayname)
+        self.assertTrue(allschools)
 
         # Update school
         newschool_get.address = '123 New address'

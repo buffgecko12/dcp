@@ -1,6 +1,8 @@
 import test_setup
 import unittest
 
+import os
+
 from django.contrib.auth import get_user_model
 
 from wakemeup.models.contracts import Contract, ContractGoal, ContractReward, ContractParty
@@ -24,7 +26,10 @@ class testContracts(unittest.TestCase):
         global signaturefile
         
         # Read in "signature" file
-        itemfile = open('sampleimg.jpg','rb')
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        filepath = os.path.join(BASE_DIR,'test/sampleimg.jpg')
+
+        itemfile = open(filepath,'rb')
         mydatafile = itemfile.read()
         signaturefile = Binary(mydatafile)
         itemfile.close()
@@ -33,7 +38,7 @@ class testContracts(unittest.TestCase):
         newschool = School(None, 'My school','123 Fake Ln.','San Diego','CA')
         newschool.schoolid = newschool.save()
         
-        newclass = Class(None, newschool.schoolid, 'My Class')
+        newclass = Class(None, newschool.schoolid, 'My Class 1')
         newclass.classid = newclass.save()
         
         newclass2 = Class(None, newschool.schoolid, 'My Class 2')
@@ -280,7 +285,6 @@ class testContracts(unittest.TestCase):
 
         # Approve contract        
         getparty.approve_contract()
-        print(newcontract.contractid)
 
     def tearDown(self):
         newcontract.delete()

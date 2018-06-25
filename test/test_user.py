@@ -35,9 +35,7 @@ class testUser(unittest.TestCase):
 
         # Get all users
         allusers = get_user_model().objects.all()
-         
-        for myuser in allusers:
-            print (myuser.username)
+        self.assertTrue(allusers)
  
         # Authentication user lookup
         self.assertTrue(get_user_model().objects.get_user_auth(None, EMAILADDRESS)) # positive
