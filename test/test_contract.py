@@ -271,7 +271,7 @@ class testContracts(unittest.TestCase):
         
         # Verify contract role was changed
         getbackupleader = ContractParty.objects.get_contract_parties(newcontract.contractid, None, 'BL')
-        self.assertIsNone(getbackupleader)
+        self.assertFalse(getbackupleader)
 
         # Set party attributes
         getparty.partylogonuserid = 1
