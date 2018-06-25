@@ -10,20 +10,20 @@ class testTeacher(unittest.TestCase):
     
     def setUp(self):
         global newuser
-        global newclassid
-        global newclass2id
-        global newschoolid
+        global newclass
+        global newclass2
+        global newschool
 
         # Create new school
         newschool = School(None, 'My school','123 Fake Ln.','San Diego','CA')
-        newschoolid = newschool.save()
+        newschool.schoolid = newschool.save()
 
-        # Create new class        
-        newclass = Class(None, newschoolid, 'My Class')
-        newclassid = newclass.save()
+        # Create/save new class object
+        newclass = Class(None, newschool.schoolid, 'My Class 1')
+        newclass.classid = newclass.save()
 
-        newclass2 = Class(None, newschoolid, 'My Class')
-        newclass2id = newclass2.save()
+        newclass2 = Class(None, newschool.schoolid, 'My Class 2')
+        newclass2.classid = newclass2.save()
         
         # Create new user
         newuser = get_user_model().objects.create_user(
@@ -33,11 +33,13 @@ class testTeacher(unittest.TestCase):
 
     # Create new teacher
     def testTeacher(self):
+
+        # Define class info        
         classinfo = json.dumps(
             { # classes info JSON
                 "currentclasses" : [
-                    {"classid" : newclassid},
-                    {"classid" : newclass2id}
+                    {"classid" : newclass.classid},
+                    {"classid" : newclass2.classid}
                 ]
             }
         )
@@ -45,30 +47,35 @@ class testTeacher(unittest.TestCase):
         newclassinfo = json.dumps(
                 { # New classes info JSON
                 "currentclasses" : [
-                    {"classid" : newclassid},
-                    {"classid" : newclass2id}
+                    {"classid" : newclass.classid},
+                    {"classid" : newclass2.classid}
                 ],
-                "deletedclasses" : [newclassid]
+                "deletedclasses" : [newclass.classid]
             }
         )
 
+        # Check new user was created properly
         self.assertEqual(newuser.firstname, 'Teacher')
-        
-        newteacher = Teacher(newuser.userid, classinfo)
+
+        # Verify newly created user created as a teacher
+        newteacher = Teacher.objects.get(newuser.userid)
+        self.assertTrue(newteacher)
+
+        # Set teacher's initial class info
+        newteacher.classinfo = classinfo
         newteacher.save()
- 
+
+        # Update teacher's class info 
         newteacherget = Teacher.objects.get(newuser.userid)
         newteacherget.classinfo = newclassinfo
         newteacherget.save()
-         
+
+        # Check helper methods
         allteachers = Teacher.objects.all()
-        for myteacher in allteachers:
-            print (myteacher.teacheruserid, myteacher.classinfo)
- 
+        self.assertTrue(allteachers)
+
         allclasses = newteacherget.get_classes()
-        
-        for myclass in allclasses:
-            print (myclass.classid)
+        self.assertTrue(allclasses)
  
         newuser.delete()
 

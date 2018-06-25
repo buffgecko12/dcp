@@ -5,25 +5,27 @@ from django.contrib.auth import get_user_model
 from wakemeup.models.environment import Student, Class, School
 
 class testStudent(unittest.TestCase):
-    
-    def setUp(self):
+
+    # Setup test environment (run once)
+    @classmethod    
+    def setUpClass(self):
         global newuser
-        global newclassid
-        global newclass2id
-        global newschoolid
+        global newclass
+        global newclass2
+        global newschool
 
         # Create new school
         newschool = School(None, 'My school','123 Fake Ln.','San Diego','CA')
-        newschoolid = newschool.save()
+        newschool.schoolid = newschool.save()
 
-        # Create new class        
-        newclass = Class(None, newschoolid, 'My Class')
-        newclassid = newclass.save()
+        # Create/save new class object
+        newclass = Class(None, newschool.schoolid, 'My Class 1')
+        newclass.classid = newclass.save()
 
-        newclass2 = Class(None, newschoolid, 'My Class')
-        newclass2id = newclass2.save()
+        newclass2 = Class(None, newschool.schoolid, 'My Class 2')
+        newclass2.classid = newclass2.save()
         
-        # Create new user
+        # Create new user (student)
         newuser = get_user_model().objects.create_user(
             password = 'adminadmin', usertype = 'ST', firstname = 'Test', 
             lastname = 'Omoto', username = 'buffgecko_test', emailaddress = 'new_user@smith.com', userrole = 'U'        
@@ -31,23 +33,44 @@ class testStudent(unittest.TestCase):
 
     # Create new student
     def testStudent(self):
+        # Check to make sure new user was created
         self.assertEqual(newuser.firstname, 'Test')
-        
-        newstudent = Student(newuser.userid, newclassid)
+
+        # Check to make sure new student is not assigned to a class (i.e. classid = 0)
+        newstudent_initial = Student.objects.get(newuser.userid)
+        self.assertEqual(newstudent_initial.classid,0)
+
+        # Assign student to new class
+        newstudent = Student(newuser.userid, newclass.classid)
         newstudent.save()
-
-        newstudentget = Student.objects.get(newuser.userid)
-        newstudentget.classid = newclass2id
-        newstudentget.save()
         
+        newstudentget = Student.objects.get(newuser.userid)
+        self.assertEqual(newstudentget.classid, newclass.classid) # Check new classid was updated
+
+        # Change student's class
+        newstudentget.classid = newclass2.classid
+        newstudentget.save()
+
+        newstudentget2 = Student.objects.get(newuser.userid)
+        self.assertEqual(newstudentget2.classid,newclass2.classid)
+
+        # Check "getclass" method for updated classes
+        students_class = Student.objects.getclass(newclass2.classid)
+        self.assertTrue(students_class)
+        
+        students_class = Student.objects.getclass(newclass.classid)
+        self.assertFalse(students_class)
+
+        # Check "all" method
         allstudents = Student.objects.all()
-        for mystudent in allstudents:
-            print (mystudent.studentuserid, mystudent.classid)
+        self.assertTrue(allstudents)
 
-        newstudent.delete()
-
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(self):
         newuser.delete()
+        newclass.delete()
+        newclass2.delete()
+        newschool.delete()
 
 if __name__ == '__main__':
     unittest.main() # Run all tests
