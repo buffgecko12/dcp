@@ -6,8 +6,8 @@ def renderImageFromDb(blob):
     im = createThumbnailFromDb(blob)
 
     # serialize to HTTP response    
-    response = HttpResponse(content_type="image/jpeg")
-    im.save(response, "JPEG")    
+    response = HttpResponse(content_type="image/png")
+    im.save(response, "PNG")    
     return response
 
 def createThumbnailFromDb(blob):
