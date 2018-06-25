@@ -28,7 +28,9 @@ class testTeacher(unittest.TestCase):
         # Create new user
         newuser = get_user_model().objects.create_user(
             password = 'adminadmin', usertype = 'TR', firstname = 'Teacher', 
-            lastname = 'Isgood', username = 'teacher1', emailaddress = 'teacher@bufu.com', userrole = 'U'        
+            lastname = 'Isgood', username = 'teacher1', emailaddress = 'teacher@bufu.com', userrole = 'U',
+            defaultsignaturescanfile = test_setup.readfile('test/img/samplesig1.png')
+
         )
 
     # Create new teacher

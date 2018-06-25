@@ -28,7 +28,8 @@ class testStudent(unittest.TestCase):
         # Create new user (student)
         newuser = get_user_model().objects.create_user(
             password = 'adminadmin', usertype = 'ST', firstname = 'Test', 
-            lastname = 'Omoto', username = 'buffgecko_test', emailaddress = 'new_user@smith.com', userrole = 'U'        
+            lastname = 'Omoto', username = 'buffgecko_test', emailaddress = 'new_user@smith.com', userrole = 'U',
+            defaultsignaturescanfile = test_setup.readfile('test/img/samplesig2.png')
         )
 
     # Create new student

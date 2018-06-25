@@ -24,15 +24,9 @@ class testContracts(unittest.TestCase):
         global newteacher
         global newuser
         global signaturefile
-        
-        # Read in "signature" file
-        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        filepath = os.path.join(BASE_DIR,'test/sampleimg.jpg')
 
-        itemfile = open(filepath,'rb')
-        mydatafile = itemfile.read()
-        signaturefile = Binary(mydatafile)
-        itemfile.close()
+        # Prepare signature file        
+        signaturefile = test_setup.readfile('test/img/sampleimg.jpg')
 
         # Create environment
         newschool = School(None, 'My school','123 Fake Ln.','San Diego','CA')
