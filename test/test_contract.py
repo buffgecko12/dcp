@@ -12,7 +12,6 @@ import json
 from datetime import datetime, timedelta
 
 from psycopg2.extras import DateTimeTZRange
-from psycopg2 import Binary
 
 class testContracts(unittest.TestCase):
 
