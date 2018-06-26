@@ -7,8 +7,6 @@ from .models.environment import School, Class, Teacher, Student
 from django_tables2 import RequestConfig
 from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable
 
-from django.views.generic import DeleteView
-
 from lib.UsefulFunctions.imgUtils import renderImageFromDb
 from django.http import HttpResponse
 
