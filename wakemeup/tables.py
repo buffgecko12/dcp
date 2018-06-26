@@ -81,7 +81,7 @@ class TeachersTable(tables.Table):
         accessor=A(objectid)
     )
 
-    classes = tables.TemplateColumn(
+    classinfo = tables.TemplateColumn(
         template_name='wakemeup/admin/teacher_classes.html',
         extra_context=kwargs,
         verbose_name='Cursos',
@@ -94,7 +94,8 @@ class TeachersTable(tables.Table):
     class Meta:
         model = Teacher
         empty_text = EMPTY_TEXT
-        exclude = ('teacheruserid','classinfo',)
+        exclude = ('teacheruserid','reputationvalue')
+        sequence = ('firstname','lastname','emailaddress','phonenumber','defaultsignaturescanfile','classinfo')
 
 class StudentsTable(tables.Table):
     class Meta:

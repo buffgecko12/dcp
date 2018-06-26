@@ -87,7 +87,7 @@ def edit_object(request, objecttype, objectid):
     # Lookup form's base class
     objectClass = objectForm.Meta.model
 
-    # If POST request, process form data
+    # PROCESS FORM
     if request.method == 'POST':
         
         # Create form instance (bind data to form)
@@ -120,7 +120,15 @@ def edit_object(request, objecttype, objectid):
                         newstudent.save()
             
             elif(objecttype == 'teacher'):
-                pass
+                myobject = objectClass(
+                    teacheruserid = form.cleaned_data['teacheruserid'],
+                    classinfo = form.cleaned_data['classinfo'],
+                    firstname = form.cleaned_data['firstname'],
+                    lastname = form.cleaned_data['lastname'],
+                    defaultsignaturescanfile = form.cleaned_data['defaultsignaturescanfile'],
+                    phonenumber = form.cleaned_data['phonenumber'],
+                    emailaddress = form.cleaned_data['emailaddress'],
+                )
             
             elif(objecttype == 'student'):
                 pass
@@ -131,15 +139,16 @@ def edit_object(request, objecttype, objectid):
             # Return to main page
             return admin_list(request, objecttype)
 
-    # Create blank form for new object
+    # CREATE FORM (NEW OBJECT)
     elif(objectid == 'new'):
         form = objectForm()
 
+    # CREATE FORM (EXISTING OBJECT)
     else:
         # Lookup object
         myobject = objectClass.objects.get(objectid)
         
-        # Create new form
+        # Create form
         if(myobject):
             if(objecttype == 'school'):
                 form = objectForm(
@@ -161,7 +170,17 @@ def edit_object(request, objecttype, objectid):
                 )
             
             elif(objecttype == 'teacher'):
-                pass
+                form = objectForm(
+                    initial = {
+                        'teacheruserid': myobject.teacheruserid,
+                        'classinfo': myobject.classinfo,
+                        'firstname': myobject.firstname,
+                        'lastname': myobject.lastname,
+                        'defaultsignaturescanfile': myobject.defaultsignaturescanfile,
+                        'phonenumber': myobject.phonenumber,
+                        'emailaddress': myobject.emailaddress,
+                    }
+                )
             
             elif(objecttype == 'student'):
                 pass

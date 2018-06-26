@@ -206,7 +206,7 @@ class ClassForm(forms.Form):
         
         # Get dynamic fields
         self.fields['schoolid'].choices = School.objects.school_choices()
-        self.fields['students'].choices = Class.objects.student_choices()
+        self.fields['students'].choices = Student.objects.student_choices()
         
         # Set form helper properties
         self.helper = FormHelper()
@@ -239,7 +239,7 @@ class TeacherForm(forms.Form):
     )
 
     # Add multiple select field for list of students in class
-    classes = forms.MultipleChoiceField(
+    classinfo = forms.MultipleChoiceField(
         label='Cursos',
         widget=forms.CheckboxSelectMultiple,
         required=False
@@ -252,18 +252,18 @@ class TeacherForm(forms.Form):
         super(TeacherForm, self).__init__(*args, **kwargs)
         
         # Get dynamic fields
-        self.fields['classes'].choices = Classes.objects.class_choices()
+        self.fields['classinfo'].choices = Class.objects.class_choices(schoolid = 1) # TO-DO: Fix this to look up teacher's schoolid
 
         # Set form helper properties
         self.helper = FormHelper()
-        setFormHelper(self.Helper)
+        setFormHelper(self.helper)
         
         # Set form layout
         self.helper.layout = Layout(
             Fieldset(
                 'Crear/editar docente',
                 'teacheruserid',
-                'classes',
+                'classinfo',
             ),
             getAdminFormActions('teacher')
         )
@@ -271,7 +271,7 @@ class TeacherForm(forms.Form):
     # Specify model
     class Meta:
         model = Teacher
-        exclude = ('teacheruserid')
+        exclude = ('teacheruserid','reputationvalue')
 
 class StudentForm(forms.Form):
 

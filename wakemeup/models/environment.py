@@ -36,10 +36,13 @@ class SchoolManager(models.Manager):
             
 class ClassManager(models.Manager):
     def all(self):
-        return get_data(self, 'SP_DCPGetClass(%s)', (None,))
+        return get_data(self, 'SP_DCPGetClass(%s,%s)', (None,None))
     
     def get(self, classid):
-        return get_data_pk(self, 'SP_DCPGetClass(%s)', (classid,))
+        return get_data_pk(self, 'SP_DCPGetClass(%s,%s)', (classid,None))
+
+    def get_classes(self, classid, schoolid):
+        return get_data(self, 'SP_DCPGetClass(%s,%s)', (classid, schoolid))
     
     def save(self, myClass):
         return save_data('SP_DCPUpsertClass', (
@@ -52,13 +55,13 @@ class ClassManager(models.Manager):
     def delete(self, myClass):
         return delete_data('SP_DCPDeleteClass', (myClass.classid,))
     
-    def student_choices(self):
-        students = Student.objects.getclass(0) # Look up unassigned students
-        student_choices = [
-            (str(mystudent.studentuserid), (mystudent.firstname + ' ' + mystudent.lastname)) for mystudent in students
+    def class_choices(self, schoolid):
+        classes = Class.objects.get_classes(classid = None, schoolid = schoolid) # Look up unassigned students
+        class_choices = [
+            (str(myclass.classid), myclass.classdisplayname) for myclass in classes
         ]
         
-        return (student_choices)
+        return (class_choices)
     
 class TeacherManager(models.Manager):
     def all(self):
@@ -100,6 +103,14 @@ class StudentManager(models.Manager):
     def delete(self, myStudent):
         pass # No use-case
     
+    def student_choices(self):
+        students = Student.objects.getclass(0) # Look up unassigned students
+        student_choices = [
+            (str(mystudent.studentuserid), (mystudent.firstname + ' ' + mystudent.lastname)) for mystudent in students
+        ]
+        
+        return (student_choices)
+        
 class School(models.Model):
     
     schoolid = models.IntegerField(primary_key=True, verbose_name='ID')
