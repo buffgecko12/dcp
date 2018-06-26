@@ -1,0 +1,5 @@
+{% for myrow in value %} 
+  <a href="{% url 'wakemeup:edit_object' objecttype='class' objectid=myrow.classid %}">{{ myrow.classdisplayname }}</a><br>
+{% endfor %}
+
+

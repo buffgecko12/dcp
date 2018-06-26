@@ -26,6 +26,14 @@ class SchoolManager(models.Manager):
     def delete(self, mySchool):
         return delete_data('SP_DCPDeleteSchool', (mySchool.schoolid,))
 
+    def school_choices(self):
+        schools = self.all()
+        school_choices = [
+            (str(myschool.schoolid), str(myschool.schooldisplayname)) for myschool in schools
+        ]
+
+        return(school_choices)
+            
 class ClassManager(models.Manager):
     def all(self):
         return get_data(self, 'SP_DCPGetClass(%s)', (None,))
@@ -43,6 +51,14 @@ class ClassManager(models.Manager):
     
     def delete(self, myClass):
         return delete_data('SP_DCPDeleteClass', (myClass.classid,))
+    
+    def student_choices(self):
+        students = Student.objects.getclass(0) # Look up unassigned students
+        student_choices = [
+            (str(mystudent.studentuserid), (mystudent.firstname + ' ' + mystudent.lastname)) for mystudent in students
+        ]
+        
+        return (student_choices)
     
 class TeacherManager(models.Manager):
     def all(self):
@@ -66,10 +82,13 @@ class TeacherManager(models.Manager):
 
 class StudentManager(models.Manager):
     def all(self):
-        return get_data(self, 'SP_DCPGetStudent(%s)', (None,))
+        return get_data(self, 'SP_DCPGetStudent(%s,%s)', (None,None))
     
     def get(self, studentuserid):
-        return get_data_pk(self, 'SP_DCPGetStudent(%s)', (studentuserid,))
+        return get_data_pk(self, 'SP_DCPGetStudent(%s,%s)', (studentuserid,None))
+
+    def getclass(self, classid):
+        return get_data(self, 'SP_DCPGetStudent(%s,%s)', (None,classid))
     
     def save(self, myStudent):
         return save_data('SP_DCPUpsertStudent', (
@@ -83,11 +102,11 @@ class StudentManager(models.Manager):
     
 class School(models.Model):
     
-    schoolid = models.IntegerField(primary_key=True)
-    schooldisplayname = models.CharField(max_length=100)
-    address = models.CharField(max_length=100)
-    city = models.CharField(max_length=100)
-    department = models.CharField(max_length=100)
+    schoolid = models.IntegerField(primary_key=True, verbose_name='ID')
+    schooldisplayname = models.CharField(max_length=100, verbose_name='Colegio')
+    address = models.CharField(max_length=100, verbose_name='Direcci' + chr(243) + 'n')
+    city = models.CharField(max_length=100, verbose_name='Ciudad')
+    department = models.CharField(max_length=100, verbose_name='Departamento')
 
     class Meta:
         managed = False
@@ -103,9 +122,10 @@ class School(models.Model):
 
 class Class(models.Model):
     
-    classid = models.IntegerField(primary_key=True)
-    schoolid = models.IntegerField()
-    classdisplayname = models.CharField(max_length=100)
+    classid = models.IntegerField(primary_key=True, verbose_name='ID')
+    schoolid = models.IntegerField(verbose_name='School ID')
+    schooldisplayname = models.CharField(max_length=100, verbose_name='Colegio') # Derived field
+    classdisplayname = models.CharField(max_length=100, verbose_name='Curso')
 
     class Meta:
         managed = False
@@ -121,14 +141,14 @@ class Class(models.Model):
 
 class Teacher(models.Model):
     
-    teacheruserid = models.IntegerField(primary_key=True)
+    teacheruserid = models.IntegerField(primary_key=True,verbose_name='ID')
     classinfo = JSONField() # TO-DO: Possibly remove and use other SP
-    firstname = models.CharField(max_length=100)
-    lastname = models.CharField(max_length=100)
-    defaultsignaturescanfile = models.BinaryField()
-    phonenumber = models.CharField(max_length=25)
-    emailaddress = models.CharField(max_length=250)
-    reputationvalue = models.IntegerField()
+    firstname = models.CharField(max_length=100, verbose_name='Primer nombre')
+    lastname = models.CharField(max_length=100, verbose_name='Apellido(s)')
+    defaultsignaturescanfile = models.BinaryField(verbose_name='Firma')
+    phonenumber = models.CharField(max_length=25, verbose_name='Tel' + chr(233) + 'fono')
+    emailaddress = models.CharField(max_length=250,verbose_name='Correo')
+    reputationvalue = models.IntegerField(verbose_name='Reputaci' + chr(243) + 'n')
     
     objects = TeacherManager()
     
@@ -146,14 +166,14 @@ class Teacher(models.Model):
     
 class Student(models.Model):
 
-    studentuserid = models.IntegerField(primary_key=True)
-    classid = models.IntegerField()
-    firstname = models.CharField(max_length=100)
-    lastname = models.CharField(max_length=100)
-    defaultsignaturescanfile = models.BinaryField()
-    phonenumber = models.CharField(max_length=25)
-    emailaddress = models.CharField(max_length=250)
-    reputationvalue = models.IntegerField()
+    studentuserid = models.IntegerField(primary_key=True,verbose_name='ID')
+    classid = models.IntegerField(verbose_name='Curso')
+    firstname = models.CharField(max_length=100,verbose_name='Primer nombre')
+    lastname = models.CharField(max_length=100,verbose_name='Apellido(s)')
+    defaultsignaturescanfile = models.BinaryField(verbose_name='Firma')
+    phonenumber = models.CharField(max_length=25,verbose_name='Tel' + chr(233) + 'fono')
+    emailaddress = models.CharField(max_length=250,verbose_name='Correo')
+    reputationvalue = models.IntegerField(verbose_name='Reputaci' + chr(243) + 'n')
 
     # Object manager instance    
     objects = StudentManager()

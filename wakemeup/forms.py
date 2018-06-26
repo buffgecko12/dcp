@@ -8,6 +8,8 @@ from crispy_forms.layout import *
 from crispy_forms.bootstrap import FormActions
 from django.forms.widgets import HiddenInput
 
+from .models.environment import School, Class, Teacher, Student
+
 DEFAULT_FORM_CLASS = 'form-horizontal'
 DEFAULT_LABEL_CLASS = 'col-sm-3'
 DEFAULT_FIELD_CLASS = 'col-sm-9'
@@ -26,6 +28,12 @@ def setFormHelper(
     myFormHelper.form_class = form_class
     myFormHelper.label_class = label_class
     myFormHelper.field_class = field_class
+    
+def getAdminFormActions(objecttype):
+    return FormActions(
+        Submit('create','Enviar'),
+        HTML("""<a href="{% url 'wakemeup:admin_list' '""" + objecttype + """' %}" class="btn btn-secondary">Cancelar</a>"""),
+    )
     
 class LoginForm(AuthenticationForm):
 
@@ -77,7 +85,7 @@ class SignupForm(UserCreationForm):
 
         self.helper.layout = Layout(
             Fieldset(
-                'Crear usuario',
+                'Crear/editar usuario',
                 'username',
                 'usertype',
                 'firstname',
@@ -88,7 +96,7 @@ class SignupForm(UserCreationForm):
                 'userrole'
             ),
             FormActions(
-                Submit('login', 'Crear', css_class='btn-primary')
+                Submit('login', 'Enviar', css_class='btn-primary')
             )
         )
 
@@ -150,15 +158,123 @@ class SchoolForm(forms.Form):
         # Set form layout
         self.helper.layout = Layout(
             Fieldset(
-                'Crear colegio',
+                'Crear/editar colegio',
                 'schoolid',
                 'schooldisplayname',
                 'address',
                 'city',
                 'department',
             ),
-            FormActions(
-                Submit('crear','Crear'),
-                Reset('reset','Borrar')
-            )
+            getAdminFormActions('school'),
         )
+
+    # Specify model
+    class Meta:
+        model = School
+
+class ClassForm(forms.Form):
+
+    # Define form fields
+    classid = forms.IntegerField(
+        label='Codigo de curso', 
+        required=False, 
+        widget=forms.HiddenInput()
+    )
+
+    # Drop-down (populate choices in constructor)
+    schoolid = forms.ChoiceField(
+        label='Colegio', 
+    )
+
+    classdisplayname = forms.CharField(
+        label='Nombre para mostrar',
+        max_length=100
+    )
+    
+    # Add multiple select field for list of students in class
+    students = forms.MultipleChoiceField(
+        label='Estudiantes no asignados',
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
+    # Define constructor
+    def __init__ (self, *args, **kwargs):
+
+        # Call base class constructor (i.e. School Form)
+        super(ClassForm, self).__init__(*args, **kwargs)
+        
+        # Get dynamic fields
+        self.fields['schoolid'].choices = School.objects.school_choices()
+        self.fields['students'].choices = Class.objects.student_choices()
+        
+        # Set form helper properties
+        self.helper = FormHelper()
+        setFormHelper(self.helper)
+        
+        # Set form layout
+        self.helper.layout = Layout(
+            Fieldset(
+                'Crear/editar curso',
+                'classid',
+                'schoolid',
+                'classdisplayname',
+                'students',
+            ),
+            getAdminFormActions('class')
+        )
+
+    # Specify model
+    class Meta:
+        model = Class
+        exclude = ('schooldisplayname')
+
+class TeacherForm(forms.Form):
+
+    # Define form fields
+    teacheruserid= forms.IntegerField(
+        label='Codigo de docente', 
+        required=False, 
+        widget=forms.HiddenInput()
+    )
+
+    # Add multiple select field for list of students in class
+    classes = forms.MultipleChoiceField(
+        label='Cursos',
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+    
+    # Define constructor
+    def __init__(self, *args, **kwargs):
+
+        # Call base class constructor (i.e. Teacher Form)
+        super(TeacherForm, self).__init__(*args, **kwargs)
+        
+        # Get dynamic fields
+        self.fields['classes'].choices = Classes.objects.class_choices()
+
+        # Set form helper properties
+        self.helper = FormHelper()
+        setFormHelper(self.Helper)
+        
+        # Set form layout
+        self.helper.layout = Layout(
+            Fieldset(
+                'Crear/editar docente',
+                'teacheruserid',
+                'classes',
+            ),
+            getAdminFormActions('teacher')
+        )
+    
+    # Specify model
+    class Meta:
+        model = Teacher
+        exclude = ('teacheruserid')
+
+class StudentForm(forms.Form):
+
+    # Specify model
+    class Meta:
+        model = Student

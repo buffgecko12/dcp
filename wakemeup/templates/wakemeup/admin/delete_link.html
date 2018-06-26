@@ -1,0 +1,4 @@
+<form action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=value %}" method="post">
+    {% csrf_token %}
+	<input class="btn btn-sm" type="submit" value="Borrar" onclick="return confirm('Estas seguro que desea eliminar este objeto?')";/>
+</form>

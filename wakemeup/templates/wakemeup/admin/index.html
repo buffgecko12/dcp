@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load render_table from django_tables2 %}
+
+<!-- Set page title -->
+{% block title %}Wake Me Up - Admin{% endblock %}
+
+{% block content %}
+	<h4>
+		{{ objecttype | title }}s
+		<div class="float-right">
+			<a href="{% url 'wakemeup:edit_object' objecttype=objecttype objectid='new' %}">
+				<img src="{% static 'img/add-button.png' %}">
+			</a>
+		</div>
+	</h4>
+	
+	{% render_table objects %}
+{% endblock %}

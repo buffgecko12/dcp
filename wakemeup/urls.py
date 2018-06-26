@@ -13,20 +13,23 @@ urlpatterns = [
     url(r'^contract/new$', views.create_contract, name="create_contract"),
     
     # Admin
-    url(r'^admin/list/(?P<list_type>\w+)$', views.admin_list, name="admin_list"),
-    url(r'^admin/edit_school$', views.edit_school, name="edit_school"),
-    url(r'^admin/edit_class', views.edit_class, name="edit_class"),
-    url(r'^admin/edit_teacher', views.edit_teacher, name="edit_teacher"),
-    url(r'^admin/edit_student', views.edit_student, name="edit_student"),
-
+    url(r'^admin/(?P<objecttype>(school|class|teacher|student))(/)?$', views.admin_list, name="admin_list"), # Object list
+    url(r'^admin/(?P<objecttype>(school|class|teacher|student))/(?P<objectid>(\d+|new))$', views.edit_object, name="edit_object"), # Edit object
+    url(r'^admin/(?P<objecttype>(school|class|teacher|student))/(?P<objectid>\d+)/delete$', views.delete_object, name="delete_object"), # Delete object    
+    
     # User 
     url(r'^login/$', auth_views.LoginView.as_view(
             template_name = 'login.html', 
             authentication_form=LoginForm
         )
         , name="login"),
-    
     url(r'^logout/$', auth_views.LogoutView.as_view(), name="logout"),
     url(r'^admin/add_user', views.add_user, name="add_user"),
+
+    # Misc
+    url(r'^admin/img/(?P<objecttype>(teacher|student))/(?P<objectid>\d+)/preview$', views.preview_image, name="preview_image"), # Image preview
+
+    # Default (catch all)    
+    url(r'.*', views.index, name = "default"),
 
 ]
