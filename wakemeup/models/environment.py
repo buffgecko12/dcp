@@ -17,6 +17,7 @@ class SchoolManager(models.Manager):
             (
                 mySchool.schoolid,
                 mySchool.schooldisplayname,
+                mySchool.schoolabbreviation,
                 mySchool.address,
                 mySchool.city,
                 mySchool.department
@@ -116,6 +117,7 @@ class School(models.Model):
     
     schoolid = models.IntegerField(primary_key=True, verbose_name='ID')
     schooldisplayname = models.CharField(max_length=100, verbose_name='Colegio')
+    schoolabbreviation = models.CharField(max_length=25, verbose_name='Abreviatura')
     address = models.CharField(max_length=100, verbose_name='Direcci' + chr(243) + 'n')
     city = models.CharField(max_length=100, verbose_name='Ciudad')
     department = models.CharField(max_length=100, verbose_name='Departamento')

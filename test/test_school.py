@@ -7,7 +7,7 @@ class testSchool(unittest.TestCase):
     
     # Create new school
     def testCreateNewSchool(self):
-        newschool = School(None, 'MySchool', '123 Fake Ln', 'San Diego', 'CA')
+        newschool = School(None, 'MySchool', 'MyAbbreviation', '123 Fake Ln', 'San Diego', 'CA')
         self.assertEqual(newschool.schooldisplayname, 'MySchool')
         self.assertFalse(newschool.schoolid)
     

@@ -15,7 +15,7 @@ class testTeacher(unittest.TestCase):
         global newschool
 
         # Create new school
-        newschool = School(None, 'My school','123 Fake Ln.','San Diego','CA')
+        newschool = School(None, 'My school','My abbreviation', '123 Fake Ln.','San Diego','CA')
         newschool.schoolid = newschool.save()
 
         # Create/save new class object

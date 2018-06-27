@@ -99,6 +99,7 @@ def edit_object(request, objecttype, objectid):
                 myobject = objectClass(
                     schoolid = form.cleaned_data['schoolid'],
                     schooldisplayname = form.cleaned_data['schooldisplayname'],
+                    schoolabbreviation = form.cleaned_data['schoolabbreviation'],
                     address = form.cleaned_data['address'],
                     city = form.cleaned_data['city'],
                     department = form.cleaned_data['department'],
@@ -156,6 +157,7 @@ def edit_object(request, objecttype, objectid):
                     initial = {
                         'schoolid': myobject.schoolid,
                         'schooldisplayname': myobject.schooldisplayname,
+                        'schoolabbreviation': myobject.schoolabbreviation,
                         'address': myobject.address,
                         'city': myobject.city,
                         'department': myobject.department
@@ -191,7 +193,7 @@ def edit_object(request, objecttype, objectid):
         else:
             form = objectForm()
         
-    return render(request, 'wakemeup/admin/add_form.html', {'form': form})
+    return render(request, 'wakemeup/admin/edit_form.html', {'form': form})
 
 def add_user(request):
     if request.method == 'POST':
@@ -226,4 +228,4 @@ def add_user(request):
         # Return empty form
         form = SignupForm()
         
-    return render(request, 'wakemeup/admin/add_form.html', {'form': form})
+    return render(request, 'wakemeup/admin/edit_form.html', {'form': form})

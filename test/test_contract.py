@@ -28,7 +28,7 @@ class testContracts(unittest.TestCase):
         signaturefile = test_setup.readfile('test/img/sampleimg.jpg')
 
         # Create environment
-        newschool = School(None, 'My school','123 Fake Ln.','San Diego','CA')
+        newschool = School(None, 'My school','My abbreviation', '123 Fake Ln.','San Diego','CA')
         newschool.schoolid = newschool.save()
         
         newclass = Class(None, newschool.schoolid, 'My Class 1')
