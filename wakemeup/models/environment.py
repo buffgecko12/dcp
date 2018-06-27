@@ -4,6 +4,8 @@ from django.db import models
 from lib.UsefulFunctions.dbUtils import *
 from django.contrib.postgres.fields import JSONField
 
+from django.contrib.auth import get_user_model
+
 # Data model managers (interface between DB and objects)
 class SchoolManager(models.Manager):
     def all(self):
@@ -88,7 +90,7 @@ class TeacherManager(models.Manager):
         )[0] # Return teacheruserid
         
     def delete(self, myTeacher):
-        pass # No use-case
+        return get_user_model()(userid=myTeacher.teacheruserid).deactivate()
 
 class StudentManager(models.Manager):
     def all(self):

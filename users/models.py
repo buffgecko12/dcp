@@ -65,6 +65,9 @@ class MyUserManager(BaseUserManager):
     def delete(self, myUser):
         return delete_data('SP_DCPDeleteUser', (myUser.userid,))
 
+    def deactivate(self, myUser):
+        return save_data('SP_DCPDeactivateUser', (myUser.userid,))
+
 # Data models (i.e. tables)
 # Create custom base user
 # Don't override default methods (get, all, save, delete) to avoid clashing with Django authentication
@@ -133,7 +136,10 @@ class MyUser(AbstractBaseUser):
 
     def delete(self):
         return MyUser.objects.delete(self)
-    
+
+    def deactivate(self):
+        return MyUser.objects.deactivate(self)
+        
     def is_admin(self):
         if(self.userrole == 'A' or self.userrole == 'S'):
             return True
