@@ -24,6 +24,12 @@ class testTeacher(unittest.TestCase):
 
         newclass2 = Class(None, newschool.schoolid, 'My Class 2')
         newclass2.classid = newclass2.save()
+
+        try:
+            check_existinguser = get_user_model().objects.get(username='teacher1')
+            check_existinguser.delete()
+        except:
+            pass
         
         # Create new user
         newuser = get_user_model().objects.create_user(
@@ -46,10 +52,10 @@ class testTeacher(unittest.TestCase):
             }
         )
         
+        # Remove "newclass"
         newclassinfo = json.dumps(
                 { # New classes info JSON
                 "currentclasses" : [
-                    {"classid" : newclass.classid},
                     {"classid" : newclass2.classid}
                 ],
                 "deletedclasses" : [newclass.classid]
@@ -66,18 +72,29 @@ class testTeacher(unittest.TestCase):
         # Set teacher's initial class info
         newteacher.classinfo = classinfo
         newteacher.schoolid = newschool.schoolid
+        myfirstname = newteacher.firstname
+        newteacher.firstname = None # Firstname should not be overwritten with NULL
         newteacher.save()
 
-        # Update teacher's class info 
-        newteacherget = Teacher.objects.get(newuser.userid)
-        newteacherget.classinfo = newclassinfo
-        newteacherget.save()
+        # Re-retrieve object and check that firstname was not changed
+        newteacher = Teacher.objects.get(newuser.userid)
+        self.assertEqual(myfirstname,newteacher.firstname)
 
+        # Update more info
+        newteacher.classinfo = newclassinfo
+        mylastname = newteacher.lastname
+        newteacher.lastname = 'New lastname'
+        newteacher.save()
+
+        # Re-retrieve object and check that firstname was not changed
+        newteacher = Teacher.objects.get(newuser.userid)
+        self.assertNotEqual(mylastname,newteacher.lastname)
+        
         # Check helper methods
         allteachers = Teacher.objects.all()
         self.assertTrue(allteachers)
 
-        allclasses = newteacherget.get_classes()
+        allclasses = newteacher.get_classes()
         self.assertTrue(allclasses)
  
         newuser.delete()

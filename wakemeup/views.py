@@ -10,6 +10,8 @@ from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable
 from lib.UsefulFunctions.imgUtils import renderImageFromDb
 from django.http import HttpResponse
 
+import psycopg2
+
 # View to display images from DB
 def preview_image(request, objecttype, objectid):
     if(objecttype == 'teacher'):
@@ -91,7 +93,7 @@ def edit_object(request, objecttype, objectid):
     if request.method == 'POST':
         
         # Create form instance (bind data to form)
-        form = objectForm(request.POST)
+        form = objectForm(request.POST, request.FILES)
         
         if form.is_valid():
             # Create new object
@@ -121,13 +123,21 @@ def edit_object(request, objecttype, objectid):
                         newstudent.save()
             
             elif(objecttype == 'teacher'):
+                
+                # Read signature scan file
+                if(request.FILES.get('defaultsignaturescanfile')):
+                    myfile = request.FILES.get('defaultsignaturescanfile')
+                    mydatafile = myfile.read()
+                else:
+                    mydatafile = None
+                
                 myobject = objectClass(
                     teacheruserid = form.cleaned_data['teacheruserid'],
                     schoolid = form.cleaned_data['schoolid'],
                     classinfo = form.cleaned_data['classinfo'],
                     firstname = form.cleaned_data['firstname'],
                     lastname = form.cleaned_data['lastname'],
-                    defaultsignaturescanfile = form.cleaned_data['defaultsignaturescanfile'],
+                    defaultsignaturescanfile = psycopg2.Binary(mydatafile),
                     phonenumber = form.cleaned_data['phonenumber'],
                     emailaddress = form.cleaned_data['emailaddress'],
                 )

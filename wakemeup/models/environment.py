@@ -78,7 +78,12 @@ class TeacherManager(models.Manager):
         return save_data('SP_DCPUpsertTeacher', (
             myTeacher.teacheruserid,
             myTeacher.schoolid,
-            myTeacher.classinfo
+            myTeacher.classinfo,
+            myTeacher.firstname,
+            myTeacher.lastname,
+            myTeacher.defaultsignaturescanfile,
+            myTeacher.phonenumber,
+            myTeacher.emailaddress,
             )
         )[0] # Return teacheruserid
         
