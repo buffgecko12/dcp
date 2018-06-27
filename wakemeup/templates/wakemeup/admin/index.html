@@ -8,11 +8,13 @@
 {% block content %}
 	<h4>
 		{{ objecttype | title }}s
+		{% if objecttype not in 'teacher student' %}
 		<div class="float-right">
 			<a href="{% url 'wakemeup:edit_object' objecttype=objecttype objectid='new' %}">
 				<img src="{% static 'img/add-button.png' %}">
 			</a>
 		</div>
+		{% endif %}
 	</h4>
 	
 	{% render_table objects %}
