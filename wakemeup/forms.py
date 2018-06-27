@@ -238,6 +238,9 @@ class TeacherForm(forms.Form):
         widget=forms.HiddenInput()
     )
 
+    # Drop-down (populate choices in constructor)
+    schoolid = forms.ChoiceField(label='Colegio')
+
     # Add multiple select field for list of students in class
     classinfo = forms.MultipleChoiceField(
         label='Cursos',
@@ -245,13 +248,14 @@ class TeacherForm(forms.Form):
         required=False
     )
     
-    # Drop-down (populate choices in constructor)
-    schoolid = forms.ChoiceField(
-        label='Colegio', 
-    )
-    
+    firstname = forms.CharField(max_length=100,label='Primer nombre')
+    lastname = forms.CharField(max_length=100,label='Appelido(s)')
+    phonenumber = forms.CharField(max_length=25,label='Tel' + chr(233) + 'fono')    
+    emailaddress = forms.CharField(max_length=250,label='Correo')
+    defaultsignaturescanfile = forms.FileField(required=False)
+        
     # Define constructor
-    def __init__(self, *args, **kwargs):
+    def __init__ (self, *args, **kwargs):
 
         # Call base class constructor (i.e. Teacher Form)
         super(TeacherForm, self).__init__(*args, **kwargs)
@@ -267,10 +271,15 @@ class TeacherForm(forms.Form):
         # Set form layout
         self.helper.layout = Layout(
             Fieldset(
-                'Crear/editar docente',
+                'Editar docente',
                 'teacheruserid',
                 'schoolid',
                 'classinfo',
+                'firstname',
+                'lastname',
+                'emailaddress',
+                'phonenumber',
+                'defaultsignaturescanfile',
             ),
             getAdminFormActions('teacher')
         )
@@ -278,7 +287,7 @@ class TeacherForm(forms.Form):
     # Specify model
     class Meta:
         model = Teacher
-        exclude = ('teacheruserid','reputationvalue')
+        exclude = ('reputationvalue','schooldisplayname')
 
 class StudentForm(forms.Form):
 

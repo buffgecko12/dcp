@@ -156,7 +156,7 @@ class Teacher(models.Model):
     teacheruserid = models.IntegerField(primary_key=True,verbose_name='ID')
     schoolid = models.IntegerField(verbose_name='ID')
     schooldisplayname = models.CharField(max_length=100, verbose_name='Colegio')
-    classinfo = JSONField() # TO-DO: Possibly remove and use other SP
+    classinfo = JSONField(verbose_name='Cursos')
     firstname = models.CharField(max_length=100, verbose_name='Primer nombre')
     lastname = models.CharField(max_length=100, verbose_name='Apellido(s)')
     defaultsignaturescanfile = models.BinaryField(verbose_name='Firma')
