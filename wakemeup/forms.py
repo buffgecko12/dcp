@@ -125,7 +125,7 @@ class SchoolForm(forms.Form):
     # Define form fields
     schoolid = forms.IntegerField(label='Codigo de colegio', required=False, widget=forms.HiddenInput())
     schooldisplayname = forms.CharField(label='Nombre para mostrar',max_length=100)
-    schoolabbreviation = forms.CharField(label='Abreviatura',max_length=25)
+    schoolabbreviation = forms.CharField(label='Abreviatura', required=False, max_length=25)
     address = forms.CharField(label='Direcci' + chr(243) + 'n',max_length=100)
     city = forms.CharField(label='Ciudad',max_length=100)
     department = forms.CharField(label='Departamento',max_length=100)
