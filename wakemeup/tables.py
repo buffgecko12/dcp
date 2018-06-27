@@ -88,14 +88,16 @@ class TeachersTable(tables.Table):
         accessor=A('classinfo')
     )    
 
+    # Fix "schoolid" display to show schooldisplayname
+
     edit_link = getEditColumn(objectid, kwargs)
     delete_link = getDeleteColumn(objectid, kwargs)
     
     class Meta:
         model = Teacher
         empty_text = EMPTY_TEXT
-        exclude = ('teacheruserid','reputationvalue')
-        sequence = ('firstname','lastname','emailaddress','phonenumber','defaultsignaturescanfile','classinfo')
+        exclude = ('teacheruserid','reputationvalue','schoolid')
+        sequence = ('firstname','lastname','emailaddress','phonenumber','defaultsignaturescanfile','schooldisplayname','classinfo')
 
 class StudentsTable(tables.Table):
     class Meta:

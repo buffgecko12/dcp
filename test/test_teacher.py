@@ -65,6 +65,7 @@ class testTeacher(unittest.TestCase):
 
         # Set teacher's initial class info
         newteacher.classinfo = classinfo
+        newteacher.schoolid = newschool.schoolid
         newteacher.save()
 
         # Update teacher's class info 

@@ -52,7 +52,7 @@ class testContracts(unittest.TestCase):
             lastname = 'Isgood', username = 'teacher1', emailaddress = 'teacher@bufu.com', userrole = 'U'
         )
         
-        newteacher = Teacher(newuser.userid, classinfo)
+        newteacher = Teacher(teacheruserid=newuser.userid, schoolid=newschool.schoolid, classinfo=classinfo)
         newteacherid = newteacher.save()
 
     # Re-create environment for each test case        

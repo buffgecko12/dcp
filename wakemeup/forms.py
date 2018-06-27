@@ -245,6 +245,11 @@ class TeacherForm(forms.Form):
         required=False
     )
     
+    # Drop-down (populate choices in constructor)
+    schoolid = forms.ChoiceField(
+        label='Colegio', 
+    )
+    
     # Define constructor
     def __init__(self, *args, **kwargs):
 
@@ -252,7 +257,8 @@ class TeacherForm(forms.Form):
         super(TeacherForm, self).__init__(*args, **kwargs)
         
         # Get dynamic fields
-        self.fields['classinfo'].choices = Class.objects.class_choices(schoolid = 1) # TO-DO: Fix this to look up teacher's schoolid
+        self.fields['schoolid'].choices = School.objects.school_choices()
+        self.fields['classinfo'].choices = Class.objects.class_choices(schoolid = 1) # TO-DO: Fix this to look up values based on schoolid form field
 
         # Set form helper properties
         self.helper = FormHelper()
@@ -263,6 +269,7 @@ class TeacherForm(forms.Form):
             Fieldset(
                 'Crear/editar docente',
                 'teacheruserid',
+                'schoolid',
                 'classinfo',
             ),
             getAdminFormActions('teacher')

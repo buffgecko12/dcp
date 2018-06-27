@@ -76,6 +76,7 @@ class TeacherManager(models.Manager):
     def save(self, myTeacher):
         return save_data('SP_DCPUpsertTeacher', (
             myTeacher.teacheruserid,
+            myTeacher.schoolid,
             myTeacher.classinfo
             )
         )[0] # Return teacheruserid
@@ -153,6 +154,8 @@ class Class(models.Model):
 class Teacher(models.Model):
     
     teacheruserid = models.IntegerField(primary_key=True,verbose_name='ID')
+    schoolid = models.IntegerField(verbose_name='ID')
+    schooldisplayname = models.CharField(max_length=100, verbose_name='Colegio')
     classinfo = JSONField() # TO-DO: Possibly remove and use other SP
     firstname = models.CharField(max_length=100, verbose_name='Primer nombre')
     lastname = models.CharField(max_length=100, verbose_name='Apellido(s)')

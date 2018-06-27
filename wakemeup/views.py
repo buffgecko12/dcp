@@ -122,6 +122,7 @@ def edit_object(request, objecttype, objectid):
             elif(objecttype == 'teacher'):
                 myobject = objectClass(
                     teacheruserid = form.cleaned_data['teacheruserid'],
+                    schoolid = form.cleaned_data['schoolid'],
                     classinfo = form.cleaned_data['classinfo'],
                     firstname = form.cleaned_data['firstname'],
                     lastname = form.cleaned_data['lastname'],
@@ -173,6 +174,7 @@ def edit_object(request, objecttype, objectid):
                 form = objectForm(
                     initial = {
                         'teacheruserid': myobject.teacheruserid,
+                        'schoolid': myobject.schoolid,
                         'classinfo': myobject.classinfo,
                         'firstname': myobject.firstname,
                         'lastname': myobject.lastname,
