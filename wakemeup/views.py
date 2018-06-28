@@ -11,6 +11,33 @@ from lib.UsefulFunctions.imgUtils import renderImageFromDb
 from django.http import HttpResponse
 
 import psycopg2
+import json
+
+def convert_string_array(mystring):
+    result = []
+
+    try:
+        myarray_string = mystring.split(',') # Try to split string into an array
+    except:
+        myarray_string = list(map(int, mystring)) # Convert string array into into array
+    
+    for myvalue in myarray_string:
+        try:
+            myvalue = int(myvalue) # Check if value is integer
+            result.append(myvalue) # Add value to new array
+        except:
+            pass # Don't append value
+
+    return result
+
+def subtract_arrays(original, current):
+    result = []
+        
+    original_items = convert_string_array(original)
+    current_items = convert_string_array(current)
+    result = [myitem for myitem in original_items if myitem not in current_items]
+
+    return result
 
 # View to display images from DB
 def preview_image(request, objecttype, objectid):
@@ -34,10 +61,10 @@ def delete_object(request, objecttype, objectid):
             myobject = Class.objects.get(objectid)
         
         elif(objecttype == 'teacher'):
-            myobject = Class.objects.get(objectid)
+            myobject = Teacher.objects.get(objectid)
         
         elif(objecttype == 'student'):
-            myobject = Class.objects.get(objectid)
+            myobject = Student.objects.get(objectid)
         
         if(myobject):
             myobject.delete()
@@ -131,10 +158,31 @@ def edit_object(request, objecttype, objectid):
                 else:
                     mydatafile = None
                 
+                # Build original class list (values)
+                initial_classes = []
+                myobject = objectClass.objects.get(teacheruserid=form.cleaned_data['teacheruserid']) # Lookup teacher info
+
+                if(myobject.classinfo):
+                    for myclass in myobject.classinfo:
+                        initial_classes.append(myclass['classid'])
+
+                # Build current class list (dictionaries)
+                current_classes_final = []
+                current_classes_form = convert_string_array(form.cleaned_data['classinfo'])
+                
+                for myclass in current_classes_form:
+                    current_classes_final.append({'classid':myclass})
+                
+                # Generate class info field
+                classinfo = json.dumps({
+                    'deletedclasses' : subtract_arrays(initial_classes, current_classes_form),
+                    'currentclasses' : current_classes_final
+                })
+
                 myobject = objectClass(
                     teacheruserid = form.cleaned_data['teacheruserid'],
                     schoolid = form.cleaned_data['schoolid'],
-                    classinfo = form.cleaned_data['classinfo'],
+                    classinfo = classinfo,
                     firstname = form.cleaned_data['firstname'],
                     lastname = form.cleaned_data['lastname'],
                     defaultsignaturescanfile = psycopg2.Binary(mydatafile),
