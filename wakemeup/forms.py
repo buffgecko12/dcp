@@ -228,7 +228,7 @@ class TeacherForm(forms.Form):
     schoolid = forms.ChoiceField(label='Colegio')
 
     # Add multiple select field for list of students in class
-    classinfo = forms.MultipleChoiceField(
+    currentclasses = forms.MultipleChoiceField(
         label='Cursos',
         widget=forms.CheckboxSelectMultiple,
         required=False
@@ -248,7 +248,7 @@ class TeacherForm(forms.Form):
         
         # Update field attributes
         self.fields['schoolid'].choices = School.objects.school_choices()
-        self.fields['classinfo'].choices = Class.objects.class_choices(schoolid = 1) # TO-DO: Fix this to look up values based on schoolid form field
+        self.fields['currentclasses'].choices = Class.objects.class_choices(schoolid = 1) # TO-DO: Fix this to look up values based on schoolid form field
 
         # Set form helper properties
         self.helper = FormHelper()
@@ -260,7 +260,7 @@ class TeacherForm(forms.Form):
                 'Editar docente',
                 'teacheruserid',
                 'schoolid',
-                'classinfo',
+                'currentclasses',
                 'firstname',
                 'lastname',
                 'emailaddress',

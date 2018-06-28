@@ -168,7 +168,7 @@ def edit_object(request, objecttype, objectid):
 
                 # Build current class list (dictionaries)
                 current_classes_final = []
-                current_classes_form = convert_string_array(form.cleaned_data['classinfo'])
+                current_classes_form = convert_string_array(form.cleaned_data['currentclasses'])
                 
                 for myclass in current_classes_form:
                     current_classes_final.append({'classid':myclass})
