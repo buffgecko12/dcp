@@ -235,7 +235,7 @@ def edit_object(request, objecttype, objectid):
                     initial = {
                         'teacheruserid': myobject.teacheruserid,
                         'schoolid': myobject.schoolid,
-                        'classinfo': myobject.classinfo,
+                        'currentclasses': myobject.get_classes_id(None),
                         'firstname': myobject.firstname,
                         'lastname': myobject.lastname,
                         'defaultsignaturescanfile': myobject.defaultsignaturescanfile,

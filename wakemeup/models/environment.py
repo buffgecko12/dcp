@@ -186,6 +186,14 @@ class Teacher(models.Model):
     
     def get_classes(self, classid = None):
         return Teacher.objects.get_classes(self, classid)
+
+    def get_classes_id(self, classid = None):
+        id_list = []
+        
+        for myclass in self.get_classes(classid):
+            id_list.append(myclass.classid)
+            
+        return str(id_list).strip('[]')
     
 class Student(models.Model):
 

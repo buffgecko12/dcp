@@ -231,7 +231,7 @@ class TeacherForm(forms.Form):
     currentclasses = forms.MultipleChoiceField(
         label='Cursos',
         widget=forms.CheckboxSelectMultiple,
-        required=False
+        required=False,
     )
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
@@ -245,6 +245,8 @@ class TeacherForm(forms.Form):
 
         # Call base class constructor (i.e. Teacher Form)
         super(TeacherForm, self).__init__(*args, **kwargs)
+        
+        print(self.fields['teacheruserid'])
         
         # Update field attributes
         self.fields['schoolid'].choices = School.objects.school_choices()
