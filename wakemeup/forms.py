@@ -233,7 +233,7 @@ class TeacherForm(forms.Form):
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
-    
+
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Appelido(s)')
     phonenumber = forms.CharField(max_length=25,label='Tel' + chr(233) + 'fono')    
@@ -246,7 +246,7 @@ class TeacherForm(forms.Form):
         # Call base class constructor (i.e. Teacher Form)
         super(TeacherForm, self).__init__(*args, **kwargs)
         
-        # Get dynamic fields
+        # Update field attributes
         self.fields['schoolid'].choices = School.objects.school_choices()
         self.fields['classinfo'].choices = Class.objects.class_choices(schoolid = 1) # TO-DO: Fix this to look up values based on schoolid form field
 
