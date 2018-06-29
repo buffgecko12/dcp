@@ -9,7 +9,7 @@ from collections import namedtuple
 # Return data as a RawQuerySet object (list of objects)
 def get_data(myobjects, sp_signature, params):
     # IMPORTANT: Model field names must match column names in DB
-    resultset = myobjects.raw('select * from ' + sp_signature, params)
+    resultset = myobjects.raw('select 1 as id, * from ' + sp_signature, params)
 
     # Check if resultset has any rows
     try:
