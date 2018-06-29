@@ -1,0 +1,7 @@
+{% if classes %}
+{% for class in classes %}
+<option value="{{ class.classid }}">{{ class.classdisplayname}}</option>
+{% endfor %}
+{% else %}
+<option value="">---------</option>
+{% endif %}

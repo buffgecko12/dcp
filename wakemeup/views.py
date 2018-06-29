@@ -13,6 +13,13 @@ from django.http import HttpResponse
 import psycopg2
 import json
 
+# Sample AJAX request handler
+def load_classes(request):
+    schoolid = request.GET.get('schoolid')
+    classes = Class.objects.get_classes(classid=None, schoolid=schoolid)
+
+    return render(request, 'wakemeup/hr/class_dropdown_list_options.html', {'classes': classes})
+
 def convert_string_array(mystring):
     result = []
 
