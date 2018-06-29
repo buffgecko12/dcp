@@ -199,6 +199,9 @@ class Student(models.Model):
 
     studentuserid = models.IntegerField(primary_key=True,verbose_name='ID')
     classid = models.IntegerField(verbose_name='Curso')
+    schoolid = models.IntegerField(verbose_name='ID')
+    schooldisplayname = models.CharField(max_length=100, verbose_name='Colegio')
+    classinfo = JSONField(verbose_name='Cursos')
     firstname = models.CharField(max_length=100,verbose_name='Primer nombre')
     lastname = models.CharField(max_length=100,verbose_name='Apellido(s)')
     defaultsignaturescanfile = models.BinaryField(verbose_name='Firma')

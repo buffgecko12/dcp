@@ -146,7 +146,7 @@ def edit_object(request, objecttype, objectid):
                 # Assign students to class
                 if(students):
                     for mystudent in students:
-                        newstudent = Student(mystudent,myobject.classid)
+                        newstudent = Student(studentuserid=mystudent,classid=myobject.classid)
                         newstudent.save()
             
             elif(objecttype == 'teacher'):
