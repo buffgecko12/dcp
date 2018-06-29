@@ -65,6 +65,29 @@ class ClassesTable(tables.Table):
         empty_text = EMPTY_TEXT
         exclude = ('schoolid','classid')
 
+class UsersTable(tables.Table):
+
+    # Define constructor    
+#     def __init__(self, *args, **kwargs):
+#         pass
+#         # Call base table class constructor
+#         super(UsersTable, self).__init__(data = kwargs['data'])
+# 
+#         objectid = kwargs['objectid']
+#         objecttype = kwargs['objecttype']
+# 
+#         # Create base attributes
+#         self.objectid = objectid
+#         self.objecttype = objecttype
+#         
+#         self.mykwargs={
+#             'objecttype': objecttype,
+#             'objectid': A(objectid)
+#         }
+
+    class Meta:
+        empty_text = EMPTY_TEXT
+
 class TeachersTable(tables.Table):
 
     objectid = 'teacheruserid'
@@ -88,8 +111,6 @@ class TeachersTable(tables.Table):
         accessor=A('classinfo')
     )    
 
-    # Fix "schoolid" display to show schooldisplayname
-
     edit_link = getEditColumn(objectid, kwargs)
     delete_link = getDeleteColumn(objectid, kwargs)
     
@@ -99,6 +120,37 @@ class TeachersTable(tables.Table):
         exclude = ('teacheruserid','reputationvalue','schoolid')
         sequence = ('firstname','lastname','emailaddress','phonenumber','defaultsignaturescanfile','schooldisplayname','classinfo')
 
-class StudentsTable(tables.Table):
-    class Meta:
+class StudentsTable(UsersTable):
+
+    # Call UsersTable constructor
+    def __init__(self, *args, **kwargs):
+        super(StudentsTable, self).__init__(*args, **kwargs)
+
+    objectid = 'studentuserid'
+    
+    kwargs={
+        'objecttype': 'student',
+        'objectid': A(objectid)
+    }
+
+    defaultsignaturescanfile = tables.TemplateColumn(
+        template_name='wakemeup/admin/display_image.html',
+        extra_context=kwargs,
+        verbose_name='Firma',
+        accessor=A(objectid)
+    )
+
+    classinfo = tables.TemplateColumn(
+        template_name='wakemeup/admin/teacher_classes.html',
+        extra_context=kwargs,
+        verbose_name='Cursos',
+        accessor=A('classinfo')
+    )    
+
+    edit_link = getEditColumn(objectid, kwargs)
+    delete_link = getDeleteColumn(objectid, kwargs)
+
+    class Meta(UsersTable.Meta):
         model = Student
+        exclude = ('studentuserid','reputationvalue','schoolid','classid')
+        sequence = ('firstname','lastname','emailaddress','phonenumber','defaultsignaturescanfile','schooldisplayname')
