@@ -246,8 +246,6 @@ class TeacherForm(forms.Form):
         # Call base class constructor (i.e. Teacher Form)
         super(TeacherForm, self).__init__(*args, **kwargs)
         
-        print(self.fields['teacheruserid'])
-        
         # Update field attributes
         self.fields['schoolid'].choices = School.objects.school_choices()
         self.fields['currentclasses'].choices = Class.objects.class_choices(schoolid = 1) # TO-DO: Fix this to look up values based on schoolid form field
