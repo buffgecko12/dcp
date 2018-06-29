@@ -116,7 +116,7 @@ class StudentsTable(tables.Table):
     classinfo = tables.TemplateColumn(
         template_name='wakemeup/admin/teacher_classes.html',
         extra_context=kwargs,
-        verbose_name='Cursos',
+        verbose_name='Curso',
         accessor=A('classinfo')
     )    
 
