@@ -235,10 +235,10 @@ class TeacherForm(forms.Form):
     )
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
-    lastname = forms.CharField(max_length=100,label='Appelido(s)')
+    lastname = forms.CharField(max_length=100,label='Apellido(s)')
     phonenumber = forms.CharField(max_length=25,label='Tel' + chr(233) + 'fono')    
     emailaddress = forms.CharField(max_length=250,label='Correo')
-    defaultsignaturescanfile = forms.FileField(required=False)
+    defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
         
     # Define constructor
     def __init__ (self, *args, **kwargs):
@@ -248,7 +248,7 @@ class TeacherForm(forms.Form):
         
         # Update field attributes
         self.fields['schoolid'].choices = School.objects.school_choices()
-        self.fields['currentclasses'].choices = Class.objects.class_choices(schoolid = 1) # TO-DO: Fix this to look up values based on schoolid form field
+        self.fields['currentclasses'].choices = Class.objects.class_choices(schoolid = None) # TO-DO: Fix this to look up values based on schoolid form field
 
         # Set form helper properties
         self.helper = FormHelper()
@@ -277,6 +277,49 @@ class TeacherForm(forms.Form):
 
 class StudentForm(forms.Form):
 
+    # Define form fields
+    studentuserid = forms.IntegerField(widget=forms.HiddenInput)
+
+    # Drop-down (populate choices in constructor)
+    schoolid = forms.ChoiceField(label='Colegio')
+    classid = forms.ChoiceField(label='Curso')
+
+    firstname = forms.CharField(max_length=100,label='Primer nombre')
+    lastname = forms.CharField(max_length=100,label='Apellido(s)')
+    phonenumber = forms.CharField(max_length=25,label='Tel' + chr(233) + 'fono')    
+    emailaddress = forms.CharField(max_length=250,label='Correo')
+    defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
+
+    def __init__ (self, *args, **kwargs):
+
+        # Call base class constructor (i.e. Teacher Form)
+        super(StudentForm, self).__init__(*args, **kwargs)
+        
+        # Update field attributes
+        self.fields['schoolid'].choices = School.objects.school_choices()
+        self.fields['classid'].choices = Class.objects.class_choices(schoolid = None) # TO-DO: Update to include correct schoolid value
+
+        # Set form helper properties
+        self.helper = FormHelper()
+        setFormHelper(self.helper)
+        
+        # Set form layout
+        self.helper.layout = Layout(
+            Fieldset(
+                'Editar estudiante',
+                'studentuserid',
+                'schoolid',
+                'classid',
+                'firstname',
+                'lastname',
+                'emailaddress',
+                'phonenumber',
+                'defaultsignaturescanfile',
+            ),
+            getAdminFormActions('student')
+        )
+
     # Specify model
     class Meta:
         model = Student
+        fields = ('studentuserid','schoolid','classid','firstname','lastname','phonenumber','emailaddress')
