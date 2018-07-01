@@ -13,6 +13,59 @@ from django.http import HttpResponse
 import psycopg2
 import json
 
+from django.shortcuts import redirect
+
+view_permissions = {
+    'admin_list': {
+        'school':{'userrole':['S','A'], 'usertype':[]},
+        'class':{'userrole':['S','A'], 'usertype':[]},
+        'teacher':{'userrole':['S','A'], 'usertype':['TR']},
+        'student':{'userrole':['S','A'], 'usertype':['ST']},
+    },
+    'delete_object': {
+        'school': {'userrole':['S','A'], 'usertype':[]},
+        'class': {'userrole':['S','A'], 'usertype':[]},
+        'teacher': {'userrole':['S','A'], 'usertype':[]},
+        'student': {'userrole':['S','A'], 'usertype':[]},
+    },
+    'edit_object': {
+        'school':{'userrole':['S','A'], 'usertype':[]},
+        'class':{'userrole':['S','A'], 'usertype':[]},
+        'teacher':{'userrole':['S','A'], 'usertype':['TR']},
+        'student':{'userrole':['S','A'], 'usertype':['ST']},
+    },
+    'add_user': {
+        'all': {'userrole':['S'], 'usertype':[]},
+    }
+}
+
+def check_permissions(view):
+    viewname = view.__name__
+    
+    def view_wrapper(*args, **kwargs):
+
+        # Set objecttype
+        if('objecttype' in kwargs):
+            objecttype = kwargs['objecttype']
+        else:
+            objecttype = 'all'
+
+        myuser = args[0].user
+
+        # Check user permissions
+        if myuser.is_authenticated:
+            if (
+                myuser.userrole in view_permissions[viewname][objecttype]['userrole'] or 
+                myuser.usertype in view_permissions[viewname][objecttype]['usertype']
+            ):
+                # Valid permission - continue
+                return view(*args, **kwargs)
+
+        # Invalid permission - redirect to homepage
+        return redirect('wakemeup:index')
+    
+    return view_wrapper
+
 # Sample AJAX request handler
 def load_classes(request):
     schoolid = request.GET.get('schoolid')
@@ -58,7 +111,9 @@ def preview_image(request, objecttype, objectid):
     else:
         return HttpResponse()
 
+@check_permissions
 def delete_object(request, objecttype, objectid):
+
     if(request.method == 'POST'):
         
         if(objecttype == 'school'):
@@ -76,7 +131,7 @@ def delete_object(request, objecttype, objectid):
         if(myobject):
             myobject.delete()
 
-    return admin_list(request, objecttype)
+    return admin_list(request, objecttype = objecttype)
 
 def index(request):
     return render(request, 'wakemeup/index.html')
@@ -85,6 +140,7 @@ def create_contract(request):
     return render(request, 'wakemeup/create_contract.html')
 
 # Admin
+@check_permissions
 def admin_list(request, objecttype):
 
     # Initialize empty object set    
@@ -106,6 +162,7 @@ def admin_list(request, objecttype):
         
     return render(request, 'wakemeup/admin/index.html', {'objects' : objectSet, 'objecttype': objecttype})
 
+@check_permissions
 def edit_object(request, objecttype, objectid):
 
     # Retrieve objects
@@ -130,6 +187,14 @@ def edit_object(request, objecttype, objectid):
         form = objectForm(request.POST, request.FILES)
         
         if form.is_valid():
+            
+            # Read signature scan file
+            if(request.FILES.get('defaultsignaturescanfile')):
+                myfile = request.FILES.get('defaultsignaturescanfile')
+                mydatafile = myfile.read()
+            else:
+                mydatafile = None
+            
             # Create new object
             if(objecttype == 'school'):
                 myobject = objectClass(
@@ -201,14 +266,24 @@ def edit_object(request, objecttype, objectid):
                     emailaddress = form.cleaned_data['emailaddress'],
                 )
             
-            elif(objecttype == 'student'):
-                pass
+            elif(objecttype == 'student'):                
+                
+                myobject = objectClass(
+                    studentuserid = form.cleaned_data['studentuserid'],
+                    schoolid = form.cleaned_data['schoolid'],
+                    classid = form.cleaned_data['classid'],
+                    firstname = form.cleaned_data['firstname'],
+                    lastname = form.cleaned_data['lastname'],
+                    defaultsignaturescanfile = psycopg2.Binary(mydatafile),
+                    phonenumber = form.cleaned_data['phonenumber'],
+                    emailaddress = form.cleaned_data['emailaddress'],
+                )
 
             # Save object
             myobject.save()
 
             # Return to main page
-            return admin_list(request, objecttype)
+            return admin_list(request, objecttype = objecttype)
 
     # CREATE FORM (NEW OBJECT)
     elif(objectid == 'new'):
@@ -256,7 +331,18 @@ def edit_object(request, objecttype, objectid):
                 )
             
             elif(objecttype == 'student'):
-                pass
+                form = objectForm(
+                    initial = {
+                        'studentuserid': myobject.studentuserid,
+                        'schoolid': myobject.schoolid,
+                        'classid': myobject.classid,
+                        'firstname': myobject.firstname,
+                        'lastname': myobject.lastname,
+                        'defaultsignaturescanfile': myobject.defaultsignaturescanfile,
+                        'phonenumber': myobject.phonenumber,
+                        'emailaddress': myobject.emailaddress,
+                    }
+                )
                 
         # Handle off-case for invalid object id
         else:
@@ -264,7 +350,9 @@ def edit_object(request, objecttype, objectid):
         
     return render(request, 'wakemeup/admin/edit_form.html', {'form': form})
 
+@check_permissions
 def add_user(request):
+    
     if request.method == 'POST':
         form = SignupForm(request.POST)
 

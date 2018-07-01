@@ -24,10 +24,16 @@
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Admin</a>
 						<div class="dropdown-menu">
+							{% if user.is_admin %}
 							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='school' %}">Colegios</a>
 							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='class' %}">Cursos</a>
+							{% endif %}
+							{% if user.is_admin or user.usertype == "TR" %}
 							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='teacher' %}">Docentes</a>
+							{% endif %}
+							{% if user.is_admin or user.usertype == "ST" %}
 							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='student' %}">Estudiantes</a>
+							{% endif %}
 							{% if user.is_superuser %}
 								<div class="dropdown-divider"></div>
 								<a class="dropdown-item {% if url_name == 'add_user' %} active {% endif %}" href="{% url 'wakemeup:add_user' %}">Crear usuario</a>
@@ -37,18 +43,14 @@
 					<li class="nav-item">
 						<a class="nav-link" href="{% url 'wakemeup:logout' %}">Cerrar sesi&#243;n</a>
 					</li>
+<!-- 					<li class="nav-item nav-link">
+						{{ user.firstname }} {{ user.lastname }} ({{ user.userrole }} - {{ user.usertype }})
+					</li> #} -->
 				{% else %}
 					<ul class="nav navbar-nav navbar-right">
 						<li class="nav-item">
 							<a class="nav-link" href="{% url 'wakemeup:login' %}">Iniciar sesi&#243;n</a>
 						</li>
-						<!-- 
-						<li class="nav-item">
-							<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal">
-								Login
-							</button>
-						</li>
-						-->
 					</ul>
 				{% endif %}
 			</ul>
