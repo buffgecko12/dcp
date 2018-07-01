@@ -28,7 +28,6 @@ PREREQ_APPS = [
 # Define project apps
 PROJECT_APPS = [
     'users.apps.UsersConfig',
-#     'newage.apps.NewageConfig',
     'wakemeup.apps.WakemeupConfig',
     'crispy_forms',
     'django_tables2'
@@ -62,7 +61,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-#                'dcp.contextprocessor.userinfo'
+#                 'dcp.contextprocessor.userinfo'
             ],
         },
     },
