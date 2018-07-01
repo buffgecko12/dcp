@@ -105,12 +105,17 @@ class StudentManager(models.Manager):
     def save(self, myStudent):
         return save_data('SP_DCPUpsertStudent', (
             myStudent.studentuserid,
-            myStudent.classid
+            myStudent.classid,
+            myStudent.firstname,
+            myStudent.lastname,
+            myStudent.defaultsignaturescanfile,
+            myStudent.phonenumber,
+            myStudent.emailaddress,
             )
          )[0] # Return studentuserid
     
     def delete(self, myStudent):
-        pass # No use-case
+        return get_user_model()(userid=myStudent.studentuserid).deactivate()
     
     def student_choices(self):
         students = Student.objects.getclass(0) # Look up unassigned students
