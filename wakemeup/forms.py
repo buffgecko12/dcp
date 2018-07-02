@@ -403,4 +403,4 @@ class ContractForm(forms.Form):
 
     class Meta:
         model = Contract
-        fields = ('contractid','teacheruserid','classid','partyuserinfo','contractvalidperiod','revisiondeadlinets','contracttype')
+        fields = ('contractid','teacheruserid','classid','partyuserinfo','contractvalidperiod','revisiondeadlinets','contractstatus','contracttype')

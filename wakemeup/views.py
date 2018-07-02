@@ -162,8 +162,9 @@ def create_contract(request, contractid):
 
             # TO-DO: Update party / goal / reward info
 
-            # Save contract
-            mycontract.save()
+            # Save contract and set status to "Draft"
+            mycontract.contractid = mycontract.save()
+            mycontract.change_status('D')
 
             # Return to main page
             return redirect('wakemeup:index')
@@ -171,7 +172,7 @@ def create_contract(request, contractid):
      
     # CREATE FORM (NEW OBJECT)
     elif(contractid == 'new'):
-        form = ContractForm(request=request)
+        form = ContractForm(request=request, initial={'contractstatus':'D'})
         
     # CREATE FORM (EXISTING OBJECT)
     else:
