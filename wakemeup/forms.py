@@ -337,7 +337,7 @@ class ContractForm(forms.Form):
     contracttype = forms.CharField(max_length=1,label='Tipo de contrato',widget=forms.HiddenInput, required=False)
     partyuserinfo = forms.MultipleChoiceField(label='Participantes', widget=forms.SelectMultiple)
 #     contractvalidperiod = forms.CharField(label='Plazo de contrato', widget=RangeWidget(forms.DateInput,attrs={'class':'daterangeinputfieldempty'}))
-    contractvalidperiod = forms.DateField(label='Plazo de contrato', widget=forms.DateInput(attrs={'class':'daterangeinputfieldempty'}))
+    contractvalidperiod = forms.DateField(label='Plazo de contrato', widget=forms.DateInput(attrs={'class':'daterangeinputfieldempty'})) # TO-DO: Fix this
     revisiondeadlinets = forms.DateField(label='Fecha tope para revisar contrato', widget=forms.DateInput(attrs={'class':'dateinputfield'}))
     contractstatus = forms.CharField(max_length=1,label='Estatus del contrato', widget=forms.HiddenInput, required=False)
 #     goalinfo = JSONField() # TO-DO: Move these JSON fields to separate SP calls
