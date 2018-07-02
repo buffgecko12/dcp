@@ -94,7 +94,7 @@ class testTeacher(unittest.TestCase):
         allteachers = Teacher.objects.all()
         self.assertTrue(allteachers)
 
-        allclasses = newteacher.get_classes()
+        allclasses = newteacher.get_teacher_classes()
         self.assertTrue(allclasses)
  
         newuser.delete()
