@@ -74,9 +74,10 @@ def check_permissions(view):
 # Sample AJAX request handler
 def load_classes(request):
     schoolid = request.GET.get('schoolid')
-    classes = Class.objects.get_classes(classid=None, schoolid=schoolid)
+    teacheruserid= request.GET.get('teacheruserid')
+    classes = Class.objects.get_classes(classid=None, schoolid=schoolid, teacheruserid = teacheruserid)
 
-    return render(request, 'wakemeup/class_dropdown_list_options.html', {'classes': classes})
+    return render(request, 'wakemeup/admin/class_dropdown_list_options.html', {'classes': classes})
 
 def convert_string_array(mystring):
     result = []

@@ -15,7 +15,9 @@
 {% block content %}
 	<div class="container-fluid">
 		<br>
-		{% crispy form %}
+		<form method="post" id="contractForm" data-classes-url="{% url 'wakemeup:ajax_load_classes' %}" novalidate>
+			{% crispy form %}
+		</form>
 	</div>
 
 	<script>
@@ -63,6 +65,31 @@
 		      $(this).val('');
 		  });
 		});
-	</script>
+		
+		// Teacher / Class / Student drop-downs
+	    $("#id_teacheruserid").change(function () {
+		    update_classes($(this))
+	      });
+	    
+	    function update_classes(element) {
+	        var url = $("#contractForm").attr("data-classes-url");  // url for "get classes" view
+	        var teacherUserId = $(element).val();  					// get the selected teacherUserId from the form
 
+	        $.ajax({                       		// initialize an AJAX request
+	          url: url,                    		// set the url of the request
+	          data: {
+	            'teacheruserid': teacherUserId  // add the teacheruserid to the GET parameters
+	          },
+	          success: function (data) {   		// "data" is the return of the "get classes" view call
+	            $("#id_classid").html(data);  	// replace the contents of the "classid" field with the class list
+	          }
+	        })
+	    };
+
+	    window.onload = function() {
+	    	myobj = document.getElementById("id_teacheruserid");
+	    	myobj.selectedIndex = 0;
+			update_classes(myobj)
+    	};		
+	</script>
 {% endblock %}

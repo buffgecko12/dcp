@@ -339,7 +339,6 @@ class ContractForm(forms.Form):
     classid = forms.ChoiceField(label='Curso')
     contracttype = forms.CharField(max_length=1,label='Tipo de contrato',widget=forms.HiddenInput, required=False)
     partyuserinfo = forms.MultipleChoiceField(label='Participantes', widget=forms.SelectMultiple)
-#     contractvalidperiod = forms.CharField(label='Plazo de contrato', widget=RangeWidget(forms.DateInput,attrs={'class':'daterangeinputfieldempty'}))
     contractvalidperiod = forms.CharField(label='Plazo de contrato', widget=forms.TextInput(attrs={'class':'daterangeinputfieldempty'})) # TO-DO: Fix this
     revisiondeadlinets = forms.DateField(label='Fecha tope para revisar contrato', widget=forms.DateInput(attrs={'class':'dateinputfield'}))
     contractstatus = forms.CharField(max_length=1,label='Estatus del contrato', widget=forms.HiddenInput, required=False)
@@ -371,7 +370,8 @@ class ContractForm(forms.Form):
         
         # Set form helper properties
         self.helper = FormHelper()
-        setFormHelper(self.helper)
+        setFormHelper(self.helper)        
+        self.helper.form_tag = False # Disable auto-generation of <form> tags
         
         if(request.user.userrole in ('S','A')):
             myteacheruserid = None # Allow Super/Admin users to view all info
