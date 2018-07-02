@@ -5,7 +5,7 @@ import os
 
 from django.contrib.auth import get_user_model
 
-from wakemeup.models.contracts import Contract, ContractGoal, ContractReward, ContractParty
+from wakemeup.models.contract import Contract, ContractGoal, ContractReward, ContractParty
 from wakemeup.models.environment import School, Class, Teacher
 
 import json
