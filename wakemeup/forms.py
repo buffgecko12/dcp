@@ -9,6 +9,9 @@ from crispy_forms.bootstrap import FormActions
 from django.forms.widgets import HiddenInput
 
 from .models.environment import School, Class, Teacher, Student
+from .models.contract import Contract
+
+from django.contrib.postgres.forms import RangeWidget
 
 DEFAULT_FORM_CLASS = 'form-horizontal'
 DEFAULT_LABEL_CLASS = 'col-sm-3'
@@ -65,7 +68,7 @@ class LoginForm(AuthenticationForm):
         )
 
 class SignupForm(UserCreationForm):
-    
+
     # Define form fields
     username = forms.CharField(label='Nombre de usuario (o correo)', max_length=50)
     firstname = forms.CharField(label='Primer nombre', max_length=100)
@@ -192,7 +195,7 @@ class ClassForm(forms.Form):
         
         # Get dynamic fields
         self.fields['schoolid'].choices = School.objects.school_choices()
-        self.fields['students'].choices = Student.objects.student_choices()
+        self.fields['students'].choices = Student.objects.student_choices(classid=0)
         
         # Set form helper properties
         self.helper = FormHelper()
@@ -323,3 +326,63 @@ class StudentForm(forms.Form):
     class Meta:
         model = Student
         fields = ('studentuserid','schoolid','classid','firstname','lastname','phonenumber','emailaddress')
+
+
+
+class ContractForm(forms.Form):
+
+    contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)
+    teacheruserid = forms.ChoiceField(label='Docente', widget=forms.Select)
+    classid = forms.ChoiceField(label='Curso')
+    contracttype = forms.CharField(max_length=1,label='Tipo de contrato',widget=forms.HiddenInput, required=False)
+    partyuserinfo = forms.MultipleChoiceField(label='Participantes', widget=forms.SelectMultiple)
+#     contractvalidperiod = forms.CharField(label='Plazo de contrato', widget=RangeWidget(forms.DateInput,attrs={'class':'daterangeinputfieldempty'}))
+    contractvalidperiod = forms.DateField(label='Plazo de contrato', widget=forms.DateInput(attrs={'class':'daterangeinputfieldempty'}))
+    revisiondeadlinets = forms.DateField(label='Fecha tope para revisar contrato', widget=forms.DateInput(attrs={'class':'dateinputfield'}))
+    contractstatus = forms.CharField(max_length=1,label='Estatus del contrato', widget=forms.HiddenInput, required=False)
+#     goalinfo = JSONField() # TO-DO: Move these JSON fields to separate SP calls
+#     rewardinfo = JSONField()
+
+    def __init__ (self, *args, **kwargs):
+
+        # Extract request argument
+        request = kwargs.pop("request")
+
+        # Call base class constructor (i.e. Teacher Form)
+        super(ContractForm, self).__init__(*args, **kwargs)
+        
+        # Set form helper properties
+        self.helper = FormHelper()
+        setFormHelper(self.helper)
+        
+        if(request.user.userrole in ('S','A')):
+            myteacheruserid = None # Allow Super/Admin users to view all info
+        else:
+            myteacheruserid = request.user.userid # User currently logged-in teacher
+            self.fields['teacheruserid'].disabled = True
+            self.fields['teacheruserid'].initial = (myteacheruserid)
+        
+        self.fields['teacheruserid'].choices = Teacher.objects.teacher_choices(teacheruserid=myteacheruserid) # Populate teacher drop-down
+        self.fields['classid'].choices = Class.objects.class_choices(teacheruserid=myteacheruserid) # Populate class drop-down
+        self.fields['partyuserinfo'].choices = Student.objects.student_choices(classid=0) # TO-DO: Fix this to refer to correct classid
+        
+        # Set form layout
+        self.helper.layout = Layout(
+            Fieldset(
+                'Participantes',
+                'teacheruserid',
+                'classid',
+                'partyuserinfo',
+            ),
+            Fieldset(
+                'Fechas',
+                'contractvalidperiod',
+                'revisiondeadlinets',
+            ),
+            Submit('create','Enviar'),
+            HTML("""<a href="{% url 'wakemeup:index' %}" class="btn btn-secondary">Cancelar</a>"""),
+        )
+
+    class Meta:
+        model = Contract
+        fields = ('contractid','teacheruserid','classid','partyuserinfo','contractvalidperiod','revisiondeadlinets','contracttype')

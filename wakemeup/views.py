@@ -1,13 +1,15 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
 
-from .forms import SignupForm, SchoolForm, ClassForm, TeacherForm, StudentForm
+from .forms import SignupForm, SchoolForm, ClassForm, TeacherForm, StudentForm, ContractForm
 from .models.environment import School, Class, Teacher, Student
+from .models.contract import Contract
 
 from django_tables2 import RequestConfig
 from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable
 
 from lib.UsefulFunctions.imgUtils import renderImageFromDb
+from lib.UsefulFunctions.dateUtils import format_timestamp_range
 from django.http import HttpResponse
 
 import psycopg2
@@ -34,9 +36,12 @@ view_permissions = {
         'teacher':{'userrole':['S','A'], 'usertype':['TR']},
         'student':{'userrole':['S','A'], 'usertype':['ST']},
     },
+    'create_contract': {
+        'all': {'userrole':['S','A'], 'usertype':['TR']},
+    },
     'add_user': {
         'all': {'userrole':['S'], 'usertype':[]},
-    }
+    },
 }
 
 def check_permissions(view):
@@ -136,8 +141,64 @@ def delete_object(request, objecttype, objectid):
 def index(request):
     return render(request, 'wakemeup/index.html')
 
-def create_contract(request):
-    return render(request, 'wakemeup/create_contract.html')
+@check_permissions
+def create_contract(request, contractid):
+    # PROCESS FORM
+    if request.method == "POST":
+        # Create form instance (bind data to form)
+        form = ContractForm(request.POST, request=request)
+
+        if(form.is_valid()):
+
+            mycontract = Contract(
+                contractid = form.cleaned_data.get('contractid'),
+                teacheruserid = form.cleaned_data.get('teacheruserid'),
+                classid = form.cleaned_data.get('classid'),
+                contracttype = form.cleaned_data.get('contracttype'),
+#                partyuserinfo = form.cleaned_data.get('partyuserinfo'),
+                contractvalidperiod = format_timestamp_range(form.cleaned_data.get('contractvalidperiod'),'%d/%m/%Y'),
+                revisiondeadlinets = form.cleaned_data.get('revisiondeadlinets'),
+                contractstatus = form.cleaned_data.get('contractstatus'),
+            )
+
+            print("_______",form.cleaned_data.get('revisiondeadlinets'))
+
+            # Save contract
+            mycontract.save()
+
+            # Return to main page
+            return redirect('wakemeup:index')
+#             return admin_list(request, objecttype = objecttype)   
+     
+    # CREATE FORM (NEW OBJECT)
+    elif(contractid == 'new'):
+        form = ContractForm(request=request)
+        
+    # CREATE FORM (EXISTING OBJECT)
+    else:
+        # Lookup object
+        mycontract = Contract.objects.get(contractid=contractid)
+
+        # Create form
+        if(mycontract):
+            form = ContractForm(request=request,
+                initial = {
+                    'contractid': mycontract.contractid,
+                    'teacheruserid': mycontract.teacheruserid,
+                    'classid': mycontract.classid,
+                    'contracttype': mycontract.contracttype,
+#                     'partyuserinfo': mycontract.partyuserinfo,
+                    'contractvalidperiod': mycontract.contractvalidperiod,
+                    'revisiondeadlinets': mycontract.revisiondeadlinets,
+                    'contractstatus': mycontract.contractstatus
+                }
+            )
+                
+        # Handle off-case for invalid object id
+        else:
+            form = ContractForm(request=request)
+        
+    return render(request, 'wakemeup/edit_contract.html', {'form': form})
 
 # Admin
 @check_permissions
@@ -198,22 +259,22 @@ def edit_object(request, objecttype, objectid):
             # Create new object
             if(objecttype == 'school'):
                 myobject = objectClass(
-                    schoolid = form.cleaned_data['schoolid'],
-                    schooldisplayname = form.cleaned_data['schooldisplayname'],
-                    schoolabbreviation = form.cleaned_data['schoolabbreviation'],
-                    address = form.cleaned_data['address'],
-                    city = form.cleaned_data['city'],
-                    department = form.cleaned_data['department'],
+                    schoolid = form.cleaned_data.get('schoolid'),
+                    schooldisplayname = form.cleaned_data.get('schooldisplayname'),
+                    schoolabbreviation = form.cleaned_data.get('schoolabbreviation'),
+                    address = form.cleaned_data.get('address'),
+                    city = form.cleaned_data.get('city'),
+                    department = form.cleaned_data.get('department'),
                 )
 
             elif(objecttype == 'class'):
                 myobject = objectClass(
-                    classid = form.cleaned_data['classid'],
-                    schoolid = form.cleaned_data['schoolid'],
-                    classdisplayname = form.cleaned_data['classdisplayname'],
+                    classid = form.cleaned_data.get('classid'),
+                    schoolid = form.cleaned_data.get('schoolid'),
+                    classdisplayname = form.cleaned_data.get('classdisplayname'),
                 )
                 
-                students = form.cleaned_data['students']
+                students = form.cleaned_data.get('students')
 
                 # Assign students to class
                 if(students):
@@ -236,7 +297,7 @@ def edit_object(request, objecttype, objectid):
                 
                 # Build original class list (values)
                 initial_classes = []
-                myobject = objectClass.objects.get(teacheruserid=form.cleaned_data['teacheruserid']) # Lookup teacher info
+                myobject = objectClass.objects.get(teacheruserid=form.cleaned_data.get('teacheruserid')) # Lookup teacher info
 
                 if(myobject.classinfo):
                     for myclass in myobject.classinfo:
@@ -244,7 +305,7 @@ def edit_object(request, objecttype, objectid):
 
                 # Build current class list (dictionaries)
                 current_classes_final = []
-                current_classes_form = convert_string_array(form.cleaned_data['currentclasses'])
+                current_classes_form = convert_string_array(form.cleaned_data.get('currentclasses'))
                 
                 for myclass in current_classes_form:
                     current_classes_final.append({'classid':myclass})
@@ -256,27 +317,27 @@ def edit_object(request, objecttype, objectid):
                 })
 
                 myobject = objectClass(
-                    teacheruserid = form.cleaned_data['teacheruserid'],
-                    schoolid = form.cleaned_data['schoolid'],
+                    teacheruserid = form.cleaned_data.get('teacheruserid'),
+                    schoolid = form.cleaned_data.get('schoolid'),
                     classinfo = classinfo,
-                    firstname = form.cleaned_data['firstname'],
-                    lastname = form.cleaned_data['lastname'],
+                    firstname = form.cleaned_data.get('firstname'),
+                    lastname = form.cleaned_data.get('lastname'),
                     defaultsignaturescanfile = psycopg2.Binary(mydatafile),
-                    phonenumber = form.cleaned_data['phonenumber'],
-                    emailaddress = form.cleaned_data['emailaddress'],
+                    phonenumber = form.cleaned_data.get('phonenumber'),
+                    emailaddress = form.cleaned_data.get('emailaddress'),
                 )
             
             elif(objecttype == 'student'):                
                 
                 myobject = objectClass(
-                    studentuserid = form.cleaned_data['studentuserid'],
-                    schoolid = form.cleaned_data['schoolid'],
-                    classid = form.cleaned_data['classid'],
-                    firstname = form.cleaned_data['firstname'],
-                    lastname = form.cleaned_data['lastname'],
+                    studentuserid = form.cleaned_data.get('studentuserid'),
+                    schoolid = form.cleaned_data.get('schoolid'),
+                    classid = form.cleaned_data.get('classid'),
+                    firstname = form.cleaned_data.get('firstname'),
+                    lastname = form.cleaned_data.get('lastname'),
                     defaultsignaturescanfile = psycopg2.Binary(mydatafile),
-                    phonenumber = form.cleaned_data['phonenumber'],
-                    emailaddress = form.cleaned_data['emailaddress'],
+                    phonenumber = form.cleaned_data.get('phonenumber'),
+                    emailaddress = form.cleaned_data.get('emailaddress'),
                 )
 
             # Save object

@@ -39,13 +39,13 @@ class SchoolManager(models.Manager):
             
 class ClassManager(models.Manager):
     def all(self):
-        return get_data(self, 'SP_DCPGetClass(%s,%s)', (None,None))
+        return get_data(self, 'SP_DCPGetClass(%s,%s,%s)', (None,None,None))
     
     def get(self, classid):
-        return get_data_pk(self, 'SP_DCPGetClass(%s,%s)', (classid,None))
+        return get_data_pk(self, 'SP_DCPGetClass(%s,%s,%s)', (classid,None,None))
 
-    def get_classes(self, classid, schoolid):
-        return get_data(self, 'SP_DCPGetClass(%s,%s)', (classid, schoolid))
+    def get_classes(self, classid, schoolid, teacheruserid):
+        return get_data(self, 'SP_DCPGetClass(%s,%s,%s)', (classid, schoolid, teacheruserid))
     
     def save(self, myClass):
         return save_data('SP_DCPUpsertClass', (
@@ -58,8 +58,8 @@ class ClassManager(models.Manager):
     def delete(self, myClass):
         return delete_data('SP_DCPDeleteClass', (myClass.classid,))
     
-    def class_choices(self, schoolid):
-        classes = Class.objects.get_classes(classid = None, schoolid = schoolid) # Look up unassigned students
+    def class_choices(self, schoolid = None, teacheruserid = None):
+        classes = Class.objects.get_classes(schoolid = schoolid, teacheruserid = teacheruserid, classid = None)
         class_choices = [
             (str(myclass.classid), myclass.classdisplayname) for myclass in classes
         ]
@@ -68,13 +68,24 @@ class ClassManager(models.Manager):
     
 class TeacherManager(models.Manager):
     def all(self):
-        return get_data(self, 'SP_DCPGetTeacher(%s)', (None,))
+        return self.get_teachers(teacheruserid = None)
     
     def get(self, teacheruserid):
         return get_data_pk(self, 'SP_DCPGetTeacher(%s)', (teacheruserid,))
     
-    def get_classes(self, myTeacher, classid):
+    def get_teachers(self, teacheruserid):
+        return get_data(self, 'SP_DCPGetTeacher(%s)', (teacheruserid,))
+    
+    def get_teacher_classes(self, myTeacher, classid):
         return get_data(self, 'SP_DCPGetTeacherClass (%s, %s)', (myTeacher.teacheruserid, classid,))
+    
+    def teacher_choices(self, teacheruserid = None):
+        teachers = Teacher.objects.get_teachers(teacheruserid = teacheruserid)
+        teacher_choices = [
+            (str(myteacher.teacheruserid), myteacher.firstname + ' ' + myteacher.lastname) for myteacher in teachers
+        ]
+        
+        return (teacher_choices)
     
     def save(self, myTeacher):
         return save_data('SP_DCPUpsertTeacher', (
@@ -117,8 +128,8 @@ class StudentManager(models.Manager):
     def delete(self, myStudent):
         return get_user_model()(userid=myStudent.studentuserid).deactivate()
     
-    def student_choices(self):
-        students = Student.objects.getclass(0) # Look up unassigned students
+    def student_choices(self, classid):
+        students = Student.objects.getclass(classid = classid) # Look up unassigned students
         student_choices = [
             (str(mystudent.studentuserid), (mystudent.firstname + ' ' + mystudent.lastname)) for mystudent in students
         ]
@@ -189,13 +200,13 @@ class Teacher(models.Model):
     def delete(self):
         return Teacher.objects.delete(self)
     
-    def get_classes(self, classid = None):
-        return Teacher.objects.get_classes(self, classid)
+    def get_teacher_classes(self, classid = None):
+        return Teacher.objects.get_teacher_classes(self, classid)
 
     def get_classes_id(self, classid = None):
         id_list = []
         
-        for myclass in self.get_classes(classid):
+        for myclass in self.get_teacher_classes(classid):
             id_list.append(myclass.classid)
             
         return str(id_list).strip('[]')

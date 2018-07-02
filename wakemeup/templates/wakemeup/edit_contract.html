@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block import %}
+
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment-with-locales.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />	
+	
+{% endblock %}
+
+{% block title %}Wake Me Up - Edit contract{% endblock %}
+
+{% block content %}
+	<div class="container-fluid">
+		<br>
+		{% crispy form %}
+	</div>
+
+	<script>
+		// http://www.daterangepicker.com/#examples
+		// Date range function
+
+		$(function() {
+  		  moment.locale('es');
+		  $('.daterangeinputfieldempty').daterangepicker({
+			  autoApply: true,
+			  autoUpdateInput: false,
+			  minYear: 2018,
+			  maxYear: parseInt(moment().format('YYYY'),10),
+		      locale: {
+		          "applyLabel": "Aplicar",
+		          "cancelLabel": "Cancelar",
+		    	  }
+		  });
+		
+		  // Set initial values to empty
+		  $('.daterangeinputfieldempty').on('apply.daterangepicker', function(ev, picker) {
+		      $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+		  });
+		
+		  $('.daterangeinputfieldempty').on('cancel.daterangepicker', function(ev, picker) {
+		      $(this).val('');
+		  });
+		});
+		
+		// Single date function
+		$(function() {
+		  $('.dateinputfield').daterangepicker({
+			autoUpdateInput: false,
+		    singleDatePicker: true,
+		    minYear: 2018,
+		    maxYear: parseInt(moment().format('YYYY'),10)
+		  });
+		
+		  // Set initial values to empty
+		  $('.dateinputfield').on('apply.daterangepicker', function(ev, picker) {
+		      $(this).val(picker.startDate.format('DD/MM/YYYY'));
+		  });
+		
+		  $('.dateinputfield').on('cancel.daterangepicker', function(ev, picker) {
+		      $(this).val('');
+		  });
+		});
+	</script>
+
+{% endblock %}

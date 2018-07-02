@@ -8,10 +8,10 @@ urlpatterns = [
 
     # Index (i.e. /wakemeup)
     url(r'^$', views.index, name="index"),
-    
+
     # Contract
-    url(r'^contract/new$', views.create_contract, name="create_contract"),
-    
+    url(r'^contract/(?P<contractid>(\d+|new))$', views.create_contract, name="create_contract"),
+
     # Admin
     url(r'^admin/(?P<objecttype>(school|class|teacher|student))(/)?$', views.admin_list, name="admin_list"), # Object list
     url(r'^admin/(?P<objecttype>(school|class|teacher|student))/(?P<objectid>\d+)$', views.edit_object, name="edit_object"), # Edit object
