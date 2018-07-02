@@ -13,6 +13,9 @@ from .models.contract import Contract
 
 from django.contrib.postgres.forms import RangeWidget
 
+from django.core.exceptions import ValidationError
+import datetime
+
 DEFAULT_FORM_CLASS = 'form-horizontal'
 DEFAULT_LABEL_CLASS = 'col-sm-3'
 DEFAULT_FIELD_CLASS = 'col-sm-9'
@@ -337,11 +340,26 @@ class ContractForm(forms.Form):
     contracttype = forms.CharField(max_length=1,label='Tipo de contrato',widget=forms.HiddenInput, required=False)
     partyuserinfo = forms.MultipleChoiceField(label='Participantes', widget=forms.SelectMultiple)
 #     contractvalidperiod = forms.CharField(label='Plazo de contrato', widget=RangeWidget(forms.DateInput,attrs={'class':'daterangeinputfieldempty'}))
-    contractvalidperiod = forms.DateField(label='Plazo de contrato', widget=forms.DateInput(attrs={'class':'daterangeinputfieldempty'})) # TO-DO: Fix this
+    contractvalidperiod = forms.CharField(label='Plazo de contrato', widget=forms.TextInput(attrs={'class':'daterangeinputfieldempty'})) # TO-DO: Fix this
     revisiondeadlinets = forms.DateField(label='Fecha tope para revisar contrato', widget=forms.DateInput(attrs={'class':'dateinputfield'}))
     contractstatus = forms.CharField(max_length=1,label='Estatus del contrato', widget=forms.HiddenInput, required=False)
 #     goalinfo = JSONField() # TO-DO: Move these JSON fields to separate SP calls
 #     rewardinfo = JSONField()
+
+    def clean_contractvalidperiod(self):
+        contractvalidperiod = self.cleaned_data.get("contractvalidperiod")
+        contractvalidperiod_array = contractvalidperiod.split(" - ")
+        
+        try:
+            startdate = datetime.datetime.strptime(contractvalidperiod_array[0],'%d/%m/%Y')
+            enddate = datetime.datetime.strptime(contractvalidperiod_array[1],'%d/%m/%Y')
+        except ValueError:
+            raise ValidationError("Formato invalido.  Por favor utilizar este formato: DD/MM/YYYY - DD/MM/YYYY")
+    
+        if(startdate > enddate):
+            raise ValidationError("La fecha de inico debe ser antes de la fecha de termino.")
+    
+        return contractvalidperiod_array
 
     def __init__ (self, *args, **kwargs):
 

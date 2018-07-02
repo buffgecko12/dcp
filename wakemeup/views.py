@@ -155,13 +155,12 @@ def create_contract(request, contractid):
                 teacheruserid = form.cleaned_data.get('teacheruserid'),
                 classid = form.cleaned_data.get('classid'),
                 contracttype = form.cleaned_data.get('contracttype'),
-#                partyuserinfo = form.cleaned_data.get('partyuserinfo'),
                 contractvalidperiod = format_timestamp_range(form.cleaned_data.get('contractvalidperiod'),'%d/%m/%Y'),
                 revisiondeadlinets = form.cleaned_data.get('revisiondeadlinets'),
                 contractstatus = form.cleaned_data.get('contractstatus'),
             )
 
-            print("_______",form.cleaned_data.get('revisiondeadlinets'))
+            # TO-DO: Update party / goal / reward info
 
             # Save contract
             mycontract.save()
