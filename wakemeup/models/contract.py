@@ -103,7 +103,7 @@ class ContractRewardManager(models.Manager):
 
 class ContractPartyManager(models.Manager):
     def all(self):
-        return self.get_contract_parties(None, None)
+        return self.get_contract_parties(None, None, None)
     
     def get(self, contractid, partyuserid):
         return get_data_pk(self, 'SP_DCPGetContractParty(%s,%s,%s)', (contractid, partyuserid, None))
