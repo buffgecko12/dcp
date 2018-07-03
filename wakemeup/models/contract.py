@@ -14,6 +14,7 @@ class ContractManager(models.Manager):
         return get_data(self, 'SP_DCPGetContract(%s)', (contractid,)) # Add more fields as needed
     
     def save(self, myContract):
+        print(myContract.partyuserinfo)
         return save_data('SP_DCPUpsertContract', 
             (
                 myContract.contractid, 
@@ -30,7 +31,7 @@ class ContractManager(models.Manager):
                 myContract.contractscanfile, 
                 myContract.goalinfo, 
                 myContract.rewardinfo, 
-                myContract.partyinfo
+                myContract.partyuserinfo
             )
         )[0]
 
@@ -111,8 +112,8 @@ class ContractPartyManager(models.Manager):
     def get_contract_parties(self, contractid = None, partyuserid = None, contractrole = None):
         return get_data(self, 'SP_DCPGetContractParty(%s,%s,%s)', (contractid, partyuserid, contractrole))
     
-    def modify_contract_parties(self, contractid, partyinfo):
-        return save_data('SP_DCPModifyContractParties', (contractid, partyinfo))
+    def modify_contract_parties(self, contractid, partyuserinfo):
+        return save_data('SP_DCPModifyContractParties', (contractid, partyuserinfo))
 
     def approve_contract(self, MyContractParty):
         return save_data('SP_DCPApproveContract', 
@@ -145,7 +146,7 @@ class Contract(models.Model):
     contractstatus = models.CharField(max_length=1)
     goalinfo = JSONField() # TO-DO: Move these JSON fields to separate SP calls
     rewardinfo = JSONField()
-    partyinfo = JSONField()
+    partyuserinfo = JSONField()
 
     class Meta:
         managed = False
