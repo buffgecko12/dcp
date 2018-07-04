@@ -373,6 +373,9 @@ class ContractForm(forms.Form):
         
         # Set form layout
         self.helper.layout = Layout(
+            'contractid',
+            'contractstatus',
+            'contracttype',
             Fieldset(
                 'Participantes',
                 'teacheruserid',
@@ -383,9 +386,6 @@ class ContractForm(forms.Form):
                 'Fechas',
                 'contractvalidperiod',
                 'revisiondeadlinets',
-                'contractid',
-                'contractstatus',
-                'contracttype'
             ),
             Submit('create','Enviar'),
             HTML("""<a href="{% url 'wakemeup:index' %}" class="btn btn-secondary">Cancelar</a>"""),
