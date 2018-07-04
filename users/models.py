@@ -87,7 +87,7 @@ class MyUser(AbstractBaseUser):
     usertype = models.CharField(max_length=2, choices=usertype_choices)
     firstname = models.CharField(max_length=100)
     lastname = models.CharField(max_length=100)
-    defaultsignaturescanfile = models.BinaryField() # TO-DO: Verify returns data properly in "get" functions
+    defaultsignaturescanfile = models.BinaryField()
     phonenumber = models.CharField(max_length=25)
     emailaddress = models.CharField(max_length=250)
     userrole = models.CharField(max_length=1)
