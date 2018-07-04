@@ -1,7 +1,15 @@
 {% if classes %}
-{% for class in classes %}
-<option value="{{ class.classid }}">{{ class.classdisplayname}}</option>
-{% endfor %}
+	{% if not classid %}
+		<option value=""> -- Escoger curso -- </option>
+	{% endif %}
+	{% for class in classes %}
+		<option 
+			value="{{ class.classid }}"
+			{% if class.classid == classid %} selected="selected"{% endif %} 
+		>
+			{{ class.classdisplayname}}
+		</option>
+	{% endfor %}
 {% else %}
-<option value="">---------</option>
+	<option value="" disabled>No hay registros.</option>
 {% endif %}

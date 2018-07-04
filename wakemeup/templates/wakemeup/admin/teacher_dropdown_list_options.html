@@ -1,0 +1,15 @@
+{% if teachers %}
+	{% if not teacheruserid %}
+		<option value=""> -- Escoger docente -- </option>
+	{% endif %}
+	{% for teacher in teachers %}
+		<option 
+			value="{{ teacher.teacheruserid }}"
+			{% if teacher.teacheruserid == teacheruserid %} selected="selected"{% endif %} 
+		>
+			{{ teacher.firstname }} {{ teacher.lastname }}
+		</option>
+	{% endfor %}
+{% else %}
+	<option value="" disabled>No hay registros.</option>
+{% endif %}

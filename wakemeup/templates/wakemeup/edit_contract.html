@@ -15,7 +15,11 @@
 {% block content %}
 	<div class="container-fluid">
 		<br>
-		<form method="post" id="contractForm" data-classes-url="{% url 'wakemeup:ajax_load_classes' %}" novalidate>
+		<form method="post" id="contractForm" novalidate 
+			data-teachers-url="{% url 'wakemeup:ajax_load_teachers' %}" 
+			data-classes-url="{% url 'wakemeup:ajax_load_classes' %}" 
+			data-students-url="{% url 'wakemeup:ajax_load_students' %}" 
+		>
 			{% crispy form %}
 		</form>
 	</div>
@@ -66,30 +70,72 @@
 		  });
 		});
 		
-		// Teacher / Class / Student drop-downs
+		// Dependent drop-downs (Teacher / Class / Student)
 	    $("#id_teacheruserid").change(function () {
 		    update_classes($(this))
 	      });
-	    
-	    function update_classes(element) {
-	        var url = $("#contractForm").attr("data-classes-url");  // url for "get classes" view
-	        var teacherUserId = $(element).val();  					// get the selected teacherUserId from the form
 
-	        $.ajax({                       		// initialize an AJAX request
-	          url: url,                    		// set the url of the request
+	    $("#id_classid").change(function () {
+		    update_students($(this))
+	      });
+
+	    function update_teachers() {
+	    	// Get values from the form
+	        var url = $("#contractForm").attr("data-teachers-url");
+	        var contractId = $("#id_contractid").val();
+	        
+	        $.ajax({                       			// initialize AJAX request
+	          url: url,                    			// set the url of the request
 	          data: {
-	            'teacheruserid': teacherUserId  // add the teacheruserid to the GET parameters
+	            'contractid': contractId
 	          },
-	          success: function (data) {   		// "data" is the return of the "get classes" view call
-	            $("#id_classid").html(data);  	// replace the contents of the "classid" field with the class list
+	          success: function (data) {   			// "data" is the return of the "get teachers" view call
+	            $("#id_teacheruserid").html(data);  // replace the contents of the "teacheruserid" field with the teacher list
+	            update_classes();
 	          }
 	        })
 	    };
 
+	    function update_classes() {
+	    	// Get values from the form
+	        var url = $("#contractForm").attr("data-classes-url");
+	        var teacherUserId = $("#id_teacheruserid").val();
+	        var contractId = $("#id_contractid").val();
+
+	        $.ajax({                       		// initialize an AJAX request
+	          url: url,                    		// set the url of the request
+	          data: {
+	            'teacheruserid': teacherUserId, // add the teacheruserid to the GET parameters
+	            'contractid': contractId
+	          },
+	          success: function (data) {   		// "data" is the return of the "get classes" view call
+	            $("#id_classid").html(data);	// replace the contents of the "classid" field with the class list
+		        update_students();
+	          }
+	        })
+	    };
+
+	    function update_students() {
+	    	// Get values from the form
+	    	var url = $("#contractForm").attr("data-students-url");
+	        var classId = $("#id_classid").val();
+	        var contractId = $("#id_contractid").val();
+	        
+	        $.ajax({                       				// initialize an AJAX request
+	          url: url,                    				// set the url of the request
+	          data: {
+	            'classid': classId,						// add variables to the GET parameters
+	            'contractid': contractId
+	          },
+	          success: function (data) {   				// "data" is the return of the "get students" view call
+	            $("#id_partyuserinfo").html(data);  	// replace the contents of the "partyuserinfo" field with the data
+	          }
+	        })
+	    };
+	    
 	    window.onload = function() {
-	    	myobj = document.getElementById("id_teacheruserid");
-	    	myobj.selectedIndex = 0;
-			update_classes(myobj)
+	    	// Initial load / update of drop-down menus
+			update_teachers();
     	};		
 	</script>
 {% endblock %}

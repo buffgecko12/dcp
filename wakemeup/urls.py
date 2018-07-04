@@ -30,8 +30,10 @@ urlpatterns = [
     # Misc
     url(r'^admin/img/(?P<objecttype>(teacher|student))/(?P<objectid>\d+)/preview$', views.preview_image, name="preview_image"), # Image preview
 
-    # Sample ajax URL
+    # Ajax URLs
     url(r'^ajax/load-classes/', views.load_classes, name='ajax_load_classes'),
+    url(r'^ajax/load-students/', views.load_students, name='ajax_load_students'),
+    url(r'^ajax/load-teachers/', views.load_teachers, name='ajax_load_teachers'),
 
     # Default (catch all)    
     url(r'.*', views.index, name = "default"),

@@ -330,16 +330,14 @@ class StudentForm(forms.Form):
         model = Student
         fields = ('studentuserid','schoolid','classid','firstname','lastname','phonenumber','emailaddress')
 
-
-
 class ContractForm(forms.Form):
 
     contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)
-    teacheruserid = forms.ChoiceField(label='Docente', widget=forms.Select)
-    classid = forms.ChoiceField(label='Curso')
+    teacheruserid = forms.CharField(label='Docente', widget=forms.Select)
+    classid = forms.CharField(label='Curso', widget=forms.Select)
     contracttype = forms.CharField(max_length=1,label='Tipo de contrato',widget=forms.HiddenInput, required=False)
-    partyuserinfo = forms.MultipleChoiceField(label='Participantes', widget=forms.SelectMultiple)
-    contractvalidperiod = forms.CharField(label='Plazo de contrato', widget=forms.TextInput(attrs={'class':'daterangeinputfieldempty'})) # TO-DO: Fix this
+    partyuserinfo = forms.CharField(label='Participantes', widget=forms.SelectMultiple)
+    contractvalidperiod = forms.CharField(label='Plazo de contrato', widget=forms.TextInput(attrs={'class':'daterangeinputfieldempty'}))
     revisiondeadlinets = forms.DateField(label='Fecha tope para revisar contrato', widget=forms.DateInput(attrs={'class':'dateinputfield'}))
     contractstatus = forms.CharField(max_length=1,label='Estatus del contrato', widget=forms.HiddenInput, required=False)
 #     goalinfo = JSONField() # TO-DO: Move these JSON fields to separate SP calls
@@ -370,19 +368,8 @@ class ContractForm(forms.Form):
         
         # Set form helper properties
         self.helper = FormHelper()
-        setFormHelper(self.helper)        
+        setFormHelper(self.helper)
         self.helper.form_tag = False # Disable auto-generation of <form> tags
-        
-        if(request.user.userrole in ('S','A')):
-            myteacheruserid = None # Allow Super/Admin users to view all info
-        else:
-            myteacheruserid = request.user.userid # User currently logged-in teacher
-            self.fields['teacheruserid'].disabled = True
-            self.fields['teacheruserid'].initial = (myteacheruserid)
-        
-        self.fields['teacheruserid'].choices = Teacher.objects.teacher_choices(teacheruserid=myteacheruserid) # Populate teacher drop-down
-        self.fields['classid'].choices = Class.objects.class_choices(teacheruserid=myteacheruserid) # Populate class drop-down
-        self.fields['partyuserinfo'].choices = Student.objects.student_choices(classid=0) # TO-DO: Fix this to refer to correct classid
         
         # Set form layout
         self.helper.layout = Layout(
@@ -396,6 +383,9 @@ class ContractForm(forms.Form):
                 'Fechas',
                 'contractvalidperiod',
                 'revisiondeadlinets',
+                'contractid',
+                'contractstatus',
+                'contracttype'
             ),
             Submit('create','Enviar'),
             HTML("""<a href="{% url 'wakemeup:index' %}" class="btn btn-secondary">Cancelar</a>"""),
