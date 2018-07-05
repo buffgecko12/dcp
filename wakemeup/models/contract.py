@@ -14,7 +14,6 @@ class ContractManager(models.Manager):
         return get_data(self, 'SP_DCPGetContract(%s)', (contractid,)) # Add more fields as needed
     
     def save(self, myContract):
-        print(myContract.partyuserinfo)
         return save_data('SP_DCPUpsertContract', 
             (
                 myContract.contractid, 
@@ -30,7 +29,6 @@ class ContractManager(models.Manager):
                 myContract.studentrequirements, 
                 myContract.contractscanfile, 
                 myContract.goalinfo, 
-                myContract.rewardinfo, 
                 myContract.partyuserinfo
             )
         )[0]
@@ -79,8 +77,18 @@ class ContractGoalManager(models.Manager):
     def get_contract_goals(self, contractid = None, goalid = None, difficultylevel = None):
         return get_data(self, 'SP_DCPGetContractGoal(%s,%s,%s)', (contractid, goalid, difficultylevel))
     
-    def modify_goals(self, contractid, goalinfo):
-        return save_data('SP_DCPModifyContractGoals', (contractid, goalinfo))
+    def save(self, myContractGoal):
+        return save_data('SP_DCPUpsertContractGoal', 
+            (
+                myContractGoal.contractid, 
+                myContractGoal.goalid, 
+                myContractGoal.difficultylevel,
+                myContractGoal.goaldescription,
+                myContractGoal.achievedflag,
+                myContractGoal.acceptedflag,
+                myContractGoal.rewardinfo,
+            )
+        )[0]
 
     def accept(self, myContractGoal):
         return save_data('SP_DCPAcceptContractGoal', (
@@ -88,19 +96,34 @@ class ContractGoalManager(models.Manager):
                 myContractGoal.goalid
             )
         )
+        
+    def delete(self, myContractGoal):
+        return delete_data('SP_DCPDeleteContractGoal', (myContractGoal.contractid, myContractGoal.goalid,))
 
-class ContractRewardManager(models.Manager):
+class ContractGoalRewardManager(models.Manager):
     def all(self):
         return self.get_contract_rewards(None, None, None)
     
-    def get(self, contractid, rewardid):
-        return get_data_pk(self, 'SP_DCPGetContractReward(%s,%s,%s)', (contractid, rewardid, None))
+    def get(self, contractid, goalid, rewardid):
+        return get_data_pk(self, 'SP_DCPGetContractGoalReward(%s,%s,%s)', (contractid, goalid, rewardid))
     
-    def get_contract_rewards(self, contractid = None, rewardid = None, difficultylevel = None):
-        return get_data(self, 'SP_DCPGetContractReward(%s,%s,%s)', (contractid, rewardid, difficultylevel))
+    def get_contract_rewards(self, contractid = None, goalid= None, rewardid = None):
+        return get_data(self, 'SP_DCPGetContractGoalReward(%s,%s,%s)', (contractid, goalid, rewardid))
     
-    def modify_contract_rewards(self, contractid, rewardinfo):
-        return save_data('SP_DCPModifyContractRewards', (contractid, rewardinfo))
+    def save(self, myContractGoalReward):
+        return save_data('SP_DCPUpsertContractGoalReward', 
+            (
+                myContractGoalReward.contractid, 
+                myContractGoalReward.goalid, 
+                myContractGoalReward.rewardid,
+                myContractGoalReward.rewarddescription,
+                myContractGoalReward.rewardvalue
+            )
+        )[0]
+    
+    def delete(self, myContractGoalReward):
+        return delete_data('SP_DCPDeleteContractGoalReward', (myContractGoalReward.contractid, myContractGoalReward.goalid, myContractGoalReward.rewardid))
+
 
 class ContractPartyManager(models.Manager):
     def all(self):
@@ -145,7 +168,6 @@ class Contract(models.Model):
     contractapprovalts = models.DateTimeField()
     contractstatus = models.CharField(max_length=1)
     goalinfo = JSONField() # TO-DO: Move these JSON fields to separate SP calls
-    rewardinfo = JSONField()
     partyuserinfo = JSONField()
 
     class Meta:
@@ -180,6 +202,7 @@ class ContractGoal(models.Model):
     goaldescription = models.CharField(max_length=500)
     acceptedflag = models.NullBooleanField()
     achievedflag = models.NullBooleanField()
+    rewardinfo = JSONField()
 
     class Meta:
         managed = False
@@ -189,31 +212,30 @@ class ContractGoal(models.Model):
     def accept(self):
         return ContractGoal.objects.accept(self)
 
-    # save/delete functions are combined into "modify_goals" object manager function    
     def save(self):
-        pass
+        return ContractGoal.objects.save(self)
     
     def delete(self):
-        pass
-    
-class ContractReward(models.Model):
+        return ContractGoal.objects.delete(self)    
+
+class ContractGoalReward(models.Model):
     
     contractid = models.IntegerField(primary_key=True)
+    goalid = models.IntegerField()
     rewardid = models.IntegerField()
-    difficultylevel = models.CharField(max_length=1)
     rewarddescription = models.CharField(max_length=500)
+    rewardvalue = models.IntegerField()
 
     class Meta:
         managed = False
 
-    objects = ContractRewardManager()
+    objects = ContractGoalRewardManager()
     
-    # save/delete functions are combined into "modify_rewards" object manager function    
     def save(self):
-        pass
+        return ContractGoalReward.objects.save(self)
     
     def delete(self):
-        pass
+        return ContractGoalReward.objects.delete(self)    
     
 class ContractParty(models.Model):
 
