@@ -71,7 +71,7 @@ class ContractGoalManager(models.Manager):
     def all(self):
         return self.get_contract_goals(None, None, None)
     
-    def get(self, contractid, goalid):
+    def get(self, contractid, goalid = None):
         return get_data_pk(self, 'SP_DCPGetContractGoal(%s,%s,%s)', (contractid, goalid, None))
     
     def get_contract_goals(self, contractid = None, goalid = None, difficultylevel = None):
