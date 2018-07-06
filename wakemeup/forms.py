@@ -394,11 +394,6 @@ class ContractForm(forms.Form):
         model = Contract
         fields = ('contractid','teacheruserid','classid','partyuserinfo','contractvalidperiod','revisiondeadlinets','contractstatus','contracttype')
 
-
-
-
-
-
 # Main contract goal form
 class ContractGoalsForm(forms.Form):
 
@@ -478,5 +473,4 @@ class ContractGoalForm(forms.Form):
     class Meta:
         model = ContractGoal
         fields = ('contractid','goalid','difficultylevel','goaldescription','acceptedflag','rewardinfo')
-
 
