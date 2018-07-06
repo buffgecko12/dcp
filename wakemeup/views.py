@@ -1,16 +1,16 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
 
-from .forms import SignupForm, SchoolForm, ClassForm, TeacherForm, StudentForm, ContractForm
+from .forms import SignupForm, SchoolForm, ClassForm, TeacherForm, StudentForm, ContractForm, ContractGoalsForm
 from .models.environment import School, Class, Teacher, Student
-from .models.contract import Contract, ContractParty
+from .models.contract import Contract, ContractParty, ContractGoal, ContractGoalReward, Reward
 
 from django_tables2 import RequestConfig
 from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable
 
 from lib.UsefulFunctions.imgUtils import renderImageFromDb
 from lib.UsefulFunctions.dateUtils import format_timestamp_range
-from lib.UsefulFunctions.dataUtils import convert_array_string_to_int
+from lib.UsefulFunctions.dataUtils import *
 from django.http import HttpResponse
 
 import psycopg2
@@ -38,6 +38,9 @@ view_permissions = {
         'student':{'userrole':['S','A'], 'usertype':['ST']},
     },
     'create_contract': {
+        'all': {'userrole':['S','A'], 'usertype':['TR']},
+    },
+    'create_contract_goals': {
         'all': {'userrole':['S','A'], 'usertype':['TR']},
     },
     'add_user': {
@@ -157,31 +160,31 @@ def load_students(request):
 
     return render(request, 'wakemeup/admin/student_dropdown_list_options.html', {'students': students})
 
-def convert_string_array(mystring):
-    result = []
+def load_rewards(request):
+    contractid = request.GET.get('contractid') # Check if existing contract
+    goalid = request.GET.get('goalid') # Check if existing contract
+    userid = request.user.userid
 
-    try:
-        myarray_string = mystring.split(',') # Try to split string into an array
-    except:
-        myarray_string = list(map(int, mystring)) # Convert string array into into array
-    
-    for myvalue in myarray_string:
-        try:
-            myvalue = int(myvalue) # Check if value is integer
-            result.append(myvalue) # Add value to new array
-        except:
-            pass # Don't append value
-
-    return result
-
-def subtract_arrays(original, current):
-    result = []
+    # Get all existing rewards for given goal
+    if(contractid and goalid):
+        selectedrewards = ContractGoalReward.objects.get_contract_rewards(contractid=contractid, goalid=goalid)
         
-    original_items = convert_string_array(original)
-    current_items = convert_string_array(current)
-    result = [myitem for myitem in original_items if myitem not in current_items]
+        selectedrewards = [myreward.rewardid for myreward in selectedrewards]
+        print("SELECTED:", selectedrewards)
+        
+    else:
+        selectedrewards = []
 
-    return result
+    # Get all eligible rewards to display
+    availablerewards = Reward.objects.get_rewards(createdbyuserid = userid)
+    
+    context = {
+        'availablerewards': availablerewards,
+        'selectedrewards': selectedrewards
+    }
+    
+    return render(request, 'wakemeup/admin/reward_dropdown_list_options.html', context)
+
 
 # View to display images from DB
 def preview_image(request, objecttype, objectid):
@@ -222,7 +225,7 @@ def index(request):
 
 @check_permissions
 def create_contract(request, contractid):
-    # PROCESS FORM
+    # SAVE FORM
     if request.method == "POST":
         # Create form instance (bind data to form)
         form = ContractForm(request.POST, request=request)
@@ -273,9 +276,9 @@ def create_contract(request, contractid):
             mycontract.change_status('D')
 
             # Return to main page
-            return redirect('wakemeup:index')
+            return redirect('wakemeup:create_contract_goals', contractid=mycontract.contractid)
 #             return admin_list(request, objecttype = objecttype)   
-     
+              
     # CREATE FORM (NEW OBJECT)
     elif(contractid == 'new'):
         form = ContractForm(request=request, initial={'contractstatus':'D'})
@@ -309,6 +312,79 @@ def create_contract(request, contractid):
             form = ContractForm(request=request)
         
     return render(request, 'wakemeup/edit_contract.html', {'form': form})
+
+
+
+@check_permissions
+def create_contract_goals(request, contractid):
+    # SAVE FORM
+    if request.method == "POST":
+        # Create form instance (bind data to form)
+        form = ContractGoalsForm(request.POST, contractid=contractid)
+
+        if(form.is_valid()):
+            # TO-DO: Fix up rewardinfo
+            easyrewardinfo = convert_array_string_to_int(form.cleaned_data.get('easy_rewardinfo'))
+            easyrewardinfo_dict = {'currentrewards': []}
+
+            for myeasyreward in easyrewardinfo:
+                easyrewardinfo_dict["currentrewards"].append({'rewardid':myeasyreward})
+
+            easyrewardinfo_dict = json.dumps(easyrewardinfo_dict)
+                
+            myeasycontractgoal = ContractGoal(
+                contractid = contractid,
+                goalid = form.cleaned_data.get('easy_goalid'),
+                difficultylevel = 'E', # Difficultylevel
+                goaldescription = form.cleaned_data.get('easy_goaldescription'),
+                acceptedflag = form.cleaned_data.get('easy_acceptedflag'),
+                rewardinfo = easyrewardinfo_dict
+            )
+
+            # Save contract and set status to "Draft"
+            myeasycontractgoal.goalid = myeasycontractgoal.save()
+
+            return ValidationError
+
+            # Return to preview/submit page
+            return redirect('wakemeup:index')
+              
+    # CREATE FORM (NEW OBJECT)
+    elif(contractid == 'new'):
+        form = ContractGoalsForm(contractid=contractid)
+        
+    # CREATE FORM (EXISTING OBJECT)
+    else:
+        # Lookup object
+        myeasycontractgoal = ContractGoal.objects.get_contract_goals(contractid=contractid, difficultylevel='E')
+
+        initial = {
+            'contractid':contractid
+            }
+
+        # Create form
+        if(myeasycontractgoal):
+            
+            # Parse out reward options
+            
+            initial.update({
+                'contractid':contractid,
+                'easy_goalid':myeasycontractgoal.goalid,
+                'easy_goaldescription':myeasycontractgoal.goaldescription,
+                'easy_acceptedflag':myeasycontractgoal.acceptedflag,
+                'easy_rewardinfo':"",
+                }
+            )
+            
+            form = ContractGoalsForm(initial = initial, contractid=contractid)
+                
+        # Handle off-case for invalid object id
+        else:
+            form = ContractGoalsForm(contractid=contractid)
+        
+    return render(request, 'wakemeup/edit_contract_goals.html', {'form': form})
+
+
 
 # Admin
 @check_permissions

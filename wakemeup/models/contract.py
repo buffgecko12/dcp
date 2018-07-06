@@ -115,15 +115,12 @@ class ContractGoalRewardManager(models.Manager):
             (
                 myContractGoalReward.contractid, 
                 myContractGoalReward.goalid, 
-                myContractGoalReward.rewardid,
-                myContractGoalReward.rewarddescription,
-                myContractGoalReward.rewardvalue
+                myContractGoalReward.rewardid
             )
         )[0]
     
     def delete(self, myContractGoalReward):
         return delete_data('SP_DCPDeleteContractGoalReward', (myContractGoalReward.contractid, myContractGoalReward.goalid, myContractGoalReward.rewardid))
-
 
 class ContractPartyManager(models.Manager):
     def all(self):
@@ -149,6 +146,31 @@ class ContractPartyManager(models.Manager):
                 MyContractParty.partylogonuserid
             )
         )
+
+class RewardManager(models.Manager):
+    def all(self):
+        return self.get_rewards()
+    
+    def get(self, rewardid):
+        return get_data_pk(self, 'SP_DCPGetReward(%s,%s,%s,%s)', (rewardid, None, True, None))
+    
+    def get_rewards(self, rewardid = None, createdbyuserid = None, activeflag = True, globalflag = True):
+        return get_data(self, 'SP_DCPGetReward(%s,%s,%s,%s)', (rewardid, createdbyuserid, activeflag, globalflag))
+    
+    def save(self, myReward, createdbyuserid = None, globalflag = False):
+        return save_data('SP_DCPUpsertReward', 
+            (
+                myReward.rewardid, 
+                myReward.rewarddisplayname, 
+                myReward.rewarddescription,
+                myReward.rewardvalue,
+                globalflag, 
+                createdbyuserid,
+            )
+        )[0]
+    
+    def delete(self, myReward):
+        return delete_data('SP_DCPDeactivateReward', (myReward.rewardid,))
 
 class Contract(models.Model):
     
@@ -223,6 +245,7 @@ class ContractGoalReward(models.Model):
     contractid = models.IntegerField(primary_key=True)
     goalid = models.IntegerField()
     rewardid = models.IntegerField()
+    rewarddisplayname = models.CharField(max_length=100)
     rewarddescription = models.CharField(max_length=500)
     rewardvalue = models.IntegerField()
 
@@ -263,3 +286,22 @@ class ContractParty(models.Model):
     
     def approve_contract(self):
         return ContractParty.objects.approve_contract(self)
+    
+class Reward(models.Model):
+
+    # Get party attributes    
+    rewardid = models.IntegerField(primary_key=True)
+    rewarddisplayname = models.CharField(max_length=100)
+    rewarddescription = models.CharField(max_length=500)
+    rewardvalue = models.IntegerField()
+    
+    class Meta:
+        managed = False
+        
+    objects = RewardManager()
+    
+    def save(self, createdbyuserid):
+        return Reward.objects.save(self, createdbyuserid)
+    
+    def delete(self):
+        return Reward.objects.delete(self)

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Wake Me Up - Edit contract goals{% endblock %}
+
+{% block content %}
+	<div class="container-fluid">
+		<br>
+		<form method="post" id="goalsForm" novalidate 
+			data-rewards-url="{% url 'wakemeup:ajax_load_rewards' %}" 
+		>
+			{% crispy form %}
+		</form>
+	</div>
+
+<script>
+	function update_rewards(goalid, rewardid) {
+		// Get values from the form
+		var url = $("#goalsForm").attr("data-rewards-url");
+	    var contractId = $("#id_contractid").val();
+	    var goalId = $(goalid).val();
+	    
+	    $.ajax({                       				// initialize an AJAX request
+	      url: url,                    				// set the url of the request
+	      data: {
+	        'goalid': goalId,						// add variables to the GET parameters
+	        'contractid': contractId
+	      },
+	      success: function (data) {   				// "data" is the return of the "get students" view call
+	        $(rewardid).html(data);  	// replace the contents of the "partyuserinfo" field with the data
+	      }
+	    })
+	};
+	
+	window.onload = function() {
+		// Initial load / update of drop-down menus
+		update_rewards(document.getElementById("id_easy_goalid"), document.getElementById("id_easy_rewardinfo"))
+	};		
+
+
+</script>
+
+{% endblock %}
+

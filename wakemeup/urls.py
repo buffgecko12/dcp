@@ -11,6 +11,7 @@ urlpatterns = [
 
     # Contract
     url(r'^contract/(?P<contractid>(\d+|new))$', views.create_contract, name="create_contract"),
+    url(r'^contract/(?P<contractid>(\d+))/goals$', views.create_contract_goals, name="create_contract_goals"),
 
     # Admin
     url(r'^admin/(?P<objecttype>(school|class|teacher|student))(/)?$', views.admin_list, name="admin_list"), # Object list
@@ -34,6 +35,7 @@ urlpatterns = [
     url(r'^ajax/load-classes/', views.load_classes, name='ajax_load_classes'),
     url(r'^ajax/load-students/', views.load_students, name='ajax_load_students'),
     url(r'^ajax/load-teachers/', views.load_teachers, name='ajax_load_teachers'),
+    url(r'^ajax/load-rewards/', views.load_rewards, name='ajax_load_rewards'),
 
     # Default (catch all)    
     url(r'.*', views.index, name = "default"),
