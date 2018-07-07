@@ -307,7 +307,7 @@ def create_contract(request, contractid):
         else:
             form = ContractForm(request=request)
         
-    return render(request, 'wakemeup/edit_contract.html', {'form': form})
+    return render(request, 'wakemeup/contract/edit_contract.html', {'form': form})
 
 @check_permissions
 def create_contract_goals(request, contractid):
@@ -374,7 +374,7 @@ def create_contract_goals(request, contractid):
 
         form = ContractGoalsForm(contractid=contractid, initial = initial_data)
 
-    return render(request, 'wakemeup/edit_contract_goals.html', {'form': form})
+    return render(request, 'wakemeup/contract/edit_contract_goals.html', {'form': form})
 
 @check_permissions
 def create_contract_submit(request, contractid):
@@ -412,7 +412,7 @@ def create_contract_submit(request, contractid):
             'goalrewards':goalrewards
         } 
         
-        return render(request, 'wakemeup/edit_contract_submit.html', context)
+        return render(request, 'wakemeup/contract/edit_contract_submit.html', context)
 
 # Admin
 @check_permissions
