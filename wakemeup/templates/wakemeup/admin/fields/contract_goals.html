@@ -1,0 +1,17 @@
+{% for goal in record.goalinfo %}
+	<strong>
+		Meta #{{ forloop.counter }}
+		{% if goal.difficultylevel == "E" %} (fac&#237;l)
+		{% elif goal.difficultylevel == "M" %} (media)
+		{% elif goal.difficultylevel == "D" %} (dif&#237;cil)
+		{% endif %}
+	</strong>
+	<div class="small">
+		<i>{{ goal.goaldescription }}</i><br>
+		<strong>Premios:</strong>  
+		{% for reward in goal.rewardinfo %}
+			{{ reward.rewarddisplayname }}{% if not forloop.last %}, {% endif %}
+		{% endfor %}
+	</div>
+	<br>
+{% endfor %}

@@ -100,8 +100,11 @@ class testContracts(unittest.TestCase):
         newcontract = Contract(
             None, # contractid
             newclass.classid, 
+            None, # classdisplayname
             'G', # contracttype
             newteacher.teacheruserid, 
+            None, # teacherfirstname
+            None, # teacherlastname
             DateTimeTZRange(datetime(2015, 1, 1, 0, 0, 0), datetime(2016, 1, 1, 0, 0, 0)), # Contract Valid Period
             False, # Guardian approval flag
             datetime.now() + timedelta(days=10), # Revision deadline ts

@@ -6,7 +6,7 @@ from .models.environment import School, Class, Teacher, Student
 from .models.contract import Contract, ContractParty, ContractGoal, ContractGoalReward, Reward
 
 from django_tables2 import RequestConfig
-from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable
+from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable, ContractsTable
 
 from lib.UsefulFunctions.imgUtils import renderImageFromDb
 from lib.UsefulFunctions.dateUtils import format_timestamp_range_db, display_timestamp_range
@@ -18,43 +18,58 @@ import json
 
 from django.shortcuts import redirect
 
+# Define user permission roles
+PERM_NONE = ['NONE']
+PERM_ADMIN = ['S','A']
+PERM_SUPER = ['S']
+PERM_TEACHER = ['TR']
+PERM_STUDENT = ['ST']
+PERM_ALL = ['ALL']
+
+# Define view permissions
 view_permissions = {
     'admin_list': {
-        'school':{'userrole':['S','A'], 'usertype':[]},
-        'class':{'userrole':['S','A'], 'usertype':[]},
-        'teacher':{'userrole':['S','A'], 'usertype':['TR']},
-        'student':{'userrole':['S','A'], 'usertype':['ST']},
+        'school':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
+        'class':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
+        'teacher':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
+        'student':{'userrole':PERM_ADMIN, 'usertype':PERM_STUDENT},
     },
     'delete_object': {
-        'school': {'userrole':['S','A'], 'usertype':[]},
-        'class': {'userrole':['S','A'], 'usertype':[]},
-        'teacher': {'userrole':['S','A'], 'usertype':[]},
-        'student': {'userrole':['S','A'], 'usertype':[]},
+        'school': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
+        'class': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
+        'teacher': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
+        'student': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
     },
     'edit_object': {
-        'school':{'userrole':['S','A'], 'usertype':[]},
-        'class':{'userrole':['S','A'], 'usertype':[]},
-        'teacher':{'userrole':['S','A'], 'usertype':['TR']},
-        'student':{'userrole':['S','A'], 'usertype':['ST']},
+        'school':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
+        'class':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
+        'teacher':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
+        'student':{'userrole':PERM_ADMIN, 'usertype':PERM_STUDENT},
     },
     'create_contract': {
-        'all': {'userrole':['S','A'], 'usertype':['TR']},
+        'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
     },
     'add_user': {
-        'all': {'userrole':['S'], 'usertype':[]},
+        'all': {'userrole':PERM_SUPER, 'usertype':PERM_NONE},
+    },
+    'contract': {
+        'all': {'userrole':PERM_ALL, 'usertype':PERM_ALL},
     },
 }
 
+# Check user authentication / authorization
 def check_permissions(view):
     viewname = view.__name__
 
     # Group create contract views together
     if(viewname[0:15] == 'create_contract'):
         viewname = "create_contract"
+    elif(viewname[0:8] == 'contract'):
+        viewname = "contract"
     
     def view_wrapper(*args, **kwargs):
 
-        # Set objecttype
+        # Set objecttype (admin list)
         if('objecttype' in kwargs):
             objecttype = kwargs['objecttype']
         else:
@@ -65,8 +80,8 @@ def check_permissions(view):
         # Check user permissions
         if myuser.is_authenticated:
             if (
-                myuser.userrole in view_permissions[viewname][objecttype]['userrole'] or 
-                myuser.usertype in view_permissions[viewname][objecttype]['usertype']
+                myuser.userrole in view_permissions[viewname][objecttype]['userrole'] or view_permissions[viewname][objecttype]['userrole'][0] == 'ALL' or
+                myuser.usertype in view_permissions[viewname][objecttype]['usertype'] or view_permissions[viewname][objecttype]['usertype'][0] == 'ALL'
             ):
                 # Valid permission - continue
                 return view(*args, **kwargs)
@@ -289,7 +304,7 @@ def create_contract(request, contractid):
 
         # Create form
         if(mycontract):            
-            contractvalidperiod = display_timestamp_range(mycontract.contractvalidperiod, "%d/%m/%Y")
+            contractvalidperiod = display_timestamp_range(mycontract.contractvalidperiod)
             
             form = ContractForm(request=request,
                 initial = {
@@ -390,11 +405,12 @@ def create_contract_submit(request, contractid):
             return redirect('wakemeup:index')
     else:
         contractinfo = Contract.objects.get(contractid=contractid)
-        contractinfo.contractvalidperiod_disp = display_timestamp_range(contractinfo.contractvalidperiod,"%d/%m/%Y") # Format for display
+        contractinfo.contractvalidperiod_disp = display_timestamp_range(contractinfo.contractvalidperiod) # Format for display
         classinfo = Class.objects.get(classid=contractinfo.classid)
         
         goalrewards = []
         
+        # TO-DO: Fix this to use goalinfo from Contract object
         for mygoal in ContractGoal.objects.get_contract_goals(contractid=contractid):
             mygoalrewards = ContractGoalReward.objects.get_contract_rewards(contractid=contractid,goalid=mygoal.goalid)
     
@@ -624,6 +640,26 @@ def edit_object(request, objecttype, objectid):
             form = objectForm()
         
     return render(request, 'wakemeup/admin/edit_form.html', {'form': form})
+
+@check_permissions
+def contract_list(request):
+    
+    # Determine which contracts to display
+    if request.user.userrole in ('A','S'):
+        myargs = {} # Return all contracts
+    elif(request.user.usertype == 'TR'):
+        myargs = {'teacheruserid':request.user.userid} # Return only contracts tied to teacher
+    else:
+        myargs = {'partyuserid':request.user.userid} # Return only contracts related to student
+    
+    contracts = ContractsTable(Contract.objects.get_contracts(**myargs))
+    RequestConfig(request).configure(contracts)
+
+    context = {
+        'contracts': contracts
+    }
+        
+    return render(request, 'wakemeup/contract/list.html', context)
 
 @check_permissions
 def add_user(request):

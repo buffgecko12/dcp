@@ -19,6 +19,7 @@
 						<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Contratos</a>
 						<div class="dropdown-menu">
 							<a class="dropdown-item {% if url_name == 'create_contract' %} active {% endif %}" href="{% url 'wakemeup:create_contract' contractid='new' %}">Crear contrato</a>
+							<a class="dropdown-item {% if url_name == 'contract_list' %} active {% endif %}" href="{% url 'wakemeup:contract_list' %}">Mis contratos</a>
 						</div>
 					</li>
 					<li class="nav-item dropdown">

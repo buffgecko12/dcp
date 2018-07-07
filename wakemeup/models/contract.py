@@ -5,13 +5,13 @@ from django.contrib.postgres.fields import JSONField, DateTimeRangeField # uses 
 # Data model managers
 class ContractManager(models.Manager):
     def all(self):
-        return self.get_contracts(self, (None,))
+        return self.get_contracts(self)
     
     def get(self, contractid):
-        return get_data_pk(self, 'SP_DCPGetContract(%s)', (contractid,))
+        return get_data_pk(self, 'SP_DCPGetContract(%s,%s,%s)', (contractid, None, None))
     
-    def get_contracts(self, contractid):
-        return get_data(self, 'SP_DCPGetContract(%s)', (contractid,)) # Add more fields as needed
+    def get_contracts(self, contractid = None, partyuserid = None, teacheruserid = None):
+        return get_data(self, 'SP_DCPGetContract(%s,%s,%s)', (contractid, partyuserid, teacheruserid)) # Add more fields as needed
     
     def save(self, myContract):
         return save_data('SP_DCPUpsertContract', 
@@ -174,21 +174,24 @@ class RewardManager(models.Manager):
 
 class Contract(models.Model):
     
-    contractid = models.IntegerField(primary_key=True)
+    contractid = models.IntegerField(primary_key=True, verbose_name="ID")
     classid = models.IntegerField()
+    classdisplayname = models.CharField(max_length=100, verbose_name='Curso')
     contracttype = models.CharField(max_length=1)
     teacheruserid = models.IntegerField()
-    contractvalidperiod = DateTimeRangeField()
+    teacherfirstname = models.CharField(max_length=100, verbose_name='Primer nombre')
+    teacherlastname = models.CharField(max_length=100, verbose_name='Apellido(s)')
+    contractvalidperiod = DateTimeRangeField(verbose_name='Plazo')
     guardianapprovalflag = models.BooleanField()
-    revisiondeadlinets = models.DateTimeField()
+    revisiondeadlinets = models.DateTimeField(verbose_name='Fecha tope para revisar')
     revisiondescription = models.CharField(max_length=500)
     revisionapprovalts = models.DateTimeField()
     studentleaderrequirements = models.CharField(max_length=500)
     teacherrequirements = models.CharField(max_length=500)
     studentrequirements = models.CharField(max_length=500)
     contractscanfile = models.BinaryField()
-    contractapprovalts = models.DateTimeField()
-    contractstatus = models.CharField(max_length=1)
+    contractapprovalts = models.DateTimeField(verbose_name='Fecha de aprobaci' + chr(243) + 'n')
+    contractstatus = models.CharField(max_length=1,verbose_name='Estatus')
     goalinfo = JSONField()
     partyuserinfo = JSONField()
 
