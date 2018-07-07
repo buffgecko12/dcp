@@ -321,25 +321,30 @@ def create_contract_goals(request, contractid):
             for goaltype in ('e','m','d'):
                 goaltypeid = goaltype + '_'
 
-                rewardinfo = convert_array_string_to_int(form.cleaned_data.get(goaltypeid + 'rewardinfo'))
-                rewardinfo_dict = {'currentrewards': []}
+                myrewardinfo = form.cleaned_data.get(goaltypeid + 'rewardinfo')
+                mygoaldescription = form.cleaned_data.get(goaltypeid + 'goaldescription')
 
-                for myreward in rewardinfo:
-                    rewardinfo_dict["currentrewards"].append({'rewardid':myreward})
-
-                rewardinfo_dict = json.dumps(rewardinfo_dict)
-
-                mycontractgoal = ContractGoal(
-                    contractid = contractid,
-                    goalid = form.cleaned_data.get(goaltypeid + 'goalid'),
-                    difficultylevel = goaltype.upper(), # Difficultylevel
-                    goaldescription = form.cleaned_data.get(goaltypeid + 'goaldescription'),
-                    acceptedflag = False,
-                    rewardinfo = rewardinfo_dict
-                )
+                # Only save goal if rewards and description have been specified
+                if (myrewardinfo and mygoaldescription):
+                    rewardinfo = convert_array_string_to_int(myrewardinfo)
+                    rewardinfo_dict = {'currentrewards': []}
     
-                # Save contract goal
-                mycontractgoal.goalid = mycontractgoal.save()
+                    for myreward in rewardinfo:
+                        rewardinfo_dict["currentrewards"].append({'rewardid':myreward})
+    
+                    rewardinfo_dict = json.dumps(rewardinfo_dict)
+    
+                    mycontractgoal = ContractGoal(
+                        contractid = contractid,
+                        goalid = form.cleaned_data.get(goaltypeid + 'goalid'),
+                        difficultylevel = goaltype.upper(), # Difficultylevel
+                        goaldescription = form.cleaned_data.get(goaltypeid + 'goaldescription'),
+                        acceptedflag = False,
+                        rewardinfo = rewardinfo_dict
+                    )
+        
+                    # Save contract goal
+                    mycontractgoal.goalid = mycontractgoal.save()
 
             # Go to preview/submit page
             return redirect('wakemeup:create_contract_submit', contractid=contractid)
@@ -387,7 +392,6 @@ def create_contract_submit(request, contractid):
         contractinfo = Contract.objects.get(contractid=contractid)
         contractinfo.contractvalidperiod_disp = display_timestamp_range(contractinfo.contractvalidperiod,"%d/%m/%Y") # Format for display
         classinfo = Class.objects.get(classid=contractinfo.classid)
-        schoolinfo = School.objects.get(schoolid=classinfo.schoolid)
         
         goalrewards = []
         
@@ -404,7 +408,6 @@ def create_contract_submit(request, contractid):
             'form':ContractSubmitForm(contractid = contractid),
             'contract':contractinfo,
             'classinfo':classinfo,
-            'schoolinfo':schoolinfo,
             'contractparties':ContractParty.objects.get_contract_parties(contractid=contractid),
             'goalrewards':goalrewards
         } 
