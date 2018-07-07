@@ -6,7 +6,7 @@
 {% block content %}
 	<div class="container-fluid">
 		<h1 class="display-4">
-			Crear Contrato - Enviar
+			Finalizar
 		</h1>
 	
 		<legend>General</legend>
@@ -37,7 +37,7 @@
 		<br>		
 		{% for goal in goalrewards %}
 			<legend>
-				Opci&#243;n de meta 
+				Meta 
 				{% if goal.difficultylevel == "E" %} (fac&#237;l)
 				{% elif goal.difficultylevel == "M" %} (media)
 				{% elif goal.difficultylevel == "D" %} (dif&#237;cil)
