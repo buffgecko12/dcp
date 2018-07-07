@@ -337,9 +337,9 @@ class ContractForm(forms.Form):
     classid = forms.CharField(label='Curso', widget=forms.Select)
     contracttype = forms.CharField(max_length=1,label='Tipo de contrato',widget=forms.HiddenInput, required=False)
     partyuserinfo = forms.CharField(label='Participantes', widget=forms.SelectMultiple)
-    contractvalidperiod = forms.CharField(label='Plazo de contrato', widget=forms.TextInput(attrs={'class':'daterangeinputfieldempty'}))
-    revisiondeadlinets = forms.DateField(label='Fecha tope para revisar contrato', widget=forms.DateInput(attrs={'class':'dateinputfield'}))
-    contractstatus = forms.CharField(max_length=1,label='Estatus del contrato', widget=forms.HiddenInput, required=False)
+    contractvalidperiod = forms.CharField(label='Plazo', widget=forms.TextInput(attrs={'class':'daterangeinputfieldempty'}))
+    revisiondeadlinets = forms.DateField(label='Fecha tope para revisar', widget=forms.DateInput(attrs={'class':'dateinputfield'}))
+    contractstatus = forms.CharField(max_length=1,label='Estatus', widget=forms.HiddenInput, required=False)
 
     def clean_contractvalidperiod(self):
         contractvalidperiod = self.cleaned_data.get("contractvalidperiod")
@@ -442,19 +442,19 @@ class ContractGoalsForm(forms.Form):
             'contractid',
             TabHolder(
                 Tab(
-                    'Meta Facil',
+                    'F' + chr(225) + 'cil',
                     'e_goalid',
                     'e_goaldescription',
                     'e_rewardinfo',
                 ),
                 Tab(
-                    'Meta Media',
+                    'Media',
                     'm_goalid',
                     'm_goaldescription',
                     'm_rewardinfo',
                 ),
                 Tab(
-                    'Meta Dificil',
+                    'Dif' + chr(237) + 'cil',
                     'd_goalid',
                     'd_goaldescription',
                     'd_rewardinfo',
