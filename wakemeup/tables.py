@@ -9,13 +9,13 @@ class DeleteColumn(tables.TemplateColumn):
     def __init__(self, *args, **kwargs):
         super(DeleteColumn, self).__init__(*args, **kwargs)
         
-        self.template_name='wakemeup/admin/delete_link.html'
+        self.template_name='wakemeup/admin/fields/delete_link.html'
         self.verbose_name=''    
 '''
 
 def getDeleteColumn(accessor, kwargs):
     return tables.TemplateColumn(
-        template_name='wakemeup/admin/delete_link.html',
+        template_name='wakemeup/admin/fields/delete_link.html',
         extra_context=kwargs,
         verbose_name='',
         accessor=accessor
@@ -75,14 +75,14 @@ class TeachersTable(tables.Table):
     }
 
     defaultsignaturescanfile = tables.TemplateColumn(
-        template_name='wakemeup/admin/display_image.html',
+        template_name='wakemeup/admin/fields/display_image.html',
         extra_context=kwargs,
         verbose_name='Firma',
         accessor=A(objectid)
     )
 
     classinfo = tables.TemplateColumn(
-        template_name='wakemeup/admin/teacher_classes.html',
+        template_name='wakemeup/admin/fields/teacher_classes.html',
         extra_context=kwargs,
         verbose_name='Cursos',
         accessor=A('classinfo')
@@ -107,14 +107,14 @@ class StudentsTable(tables.Table):
     }
 
     defaultsignaturescanfile = tables.TemplateColumn(
-        template_name='wakemeup/admin/display_image.html',
+        template_name='wakemeup/admin/fields/display_image.html',
         extra_context=kwargs,
         verbose_name='Firma',
         accessor=A(objectid)
     )
 
     classinfo = tables.TemplateColumn(
-        template_name='wakemeup/admin/teacher_classes.html',
+        template_name='wakemeup/admin/fields/teacher_classes.html',
         extra_context=kwargs,
         verbose_name='Curso',
         accessor=A('classinfo')
