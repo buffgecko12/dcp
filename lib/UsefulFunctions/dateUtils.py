@@ -19,7 +19,14 @@ def format_timestamp_range_db(timestamprange, formatstring, localizeFlag = True,
     
     return DateTimeTZRange(mystarttimestamp, myendtimestamp, boundstring) # Convert to Postgres native tstzrange type
 
-def display_timestamp_range(timestamprange, formatstring):
+def display_timestamp(timestamp, formatstring = "%d/%m/%Y"):
+
+    return str(timestamp.strftime(formatstring))
+
+def display_timestamp_range(timestamprange, formatstring = "%d/%m/%Y"):
+
+    return display_timestamp(timestamprange.lower, formatstring) + ' - ' + \
+           display_timestamp(timestamprange.upper, formatstring)
 
     return str(timestamprange.lower.strftime(formatstring)) + ' - ' + \
            str(timestamprange.upper.strftime(formatstring))
