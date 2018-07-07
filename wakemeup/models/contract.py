@@ -189,7 +189,7 @@ class Contract(models.Model):
     contractscanfile = models.BinaryField()
     contractapprovalts = models.DateTimeField()
     contractstatus = models.CharField(max_length=1)
-    goalinfo = JSONField() # TO-DO: Move these JSON fields to separate SP calls
+    goalinfo = JSONField()
     partyuserinfo = JSONField()
 
     class Meta:
@@ -266,6 +266,8 @@ class ContractParty(models.Model):
     contractid = models.IntegerField(primary_key=True)
     partyuserid = models.IntegerField()
     contractrole = models.CharField(max_length=2)
+    firstname = models.CharField(max_length=100, verbose_name='Primer nombre')
+    lastname = models.CharField(max_length=100, verbose_name='Apellido(s)')
     
     # Get approval attributes
     partyapprovalsignature = models.BinaryField() # signaturescanfile

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
 
-from .forms import SignupForm, SchoolForm, ClassForm, TeacherForm, StudentForm, ContractForm, ContractGoalsForm
+from .forms import SignupForm, SchoolForm, ClassForm, TeacherForm, StudentForm, ContractForm, ContractGoalsForm, ContractSubmitForm
 from .models.environment import School, Class, Teacher, Student
 from .models.contract import Contract, ContractParty, ContractGoal, ContractGoalReward, Reward
 
@@ -9,7 +9,7 @@ from django_tables2 import RequestConfig
 from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable
 
 from lib.UsefulFunctions.imgUtils import renderImageFromDb
-from lib.UsefulFunctions.dateUtils import format_timestamp_range
+from lib.UsefulFunctions.dateUtils import format_timestamp_range_db, display_timestamp_range
 from lib.UsefulFunctions.dataUtils import *
 from django.http import HttpResponse
 
@@ -40,9 +40,6 @@ view_permissions = {
     'create_contract': {
         'all': {'userrole':['S','A'], 'usertype':['TR']},
     },
-    'create_contract_goals': {
-        'all': {'userrole':['S','A'], 'usertype':['TR']},
-    },
     'add_user': {
         'all': {'userrole':['S'], 'usertype':[]},
     },
@@ -50,6 +47,10 @@ view_permissions = {
 
 def check_permissions(view):
     viewname = view.__name__
+
+    # Group create contract views together
+    if(viewname[0:15] == 'create_contract'):
+        viewname = "create_contract"
     
     def view_wrapper(*args, **kwargs):
 
@@ -93,7 +94,7 @@ def load_teachers(request):
     # Lookup teacher classes
     teachers = Teacher.objects.get_teachers(teacheruserid = teacheruserid)
     
-    return render(request, 'wakemeup/admin/teacher_dropdown_list_options.html', {'teachers': teachers, 'teacheruserid':teacheruserid})
+    return render(request, 'wakemeup/admin/js/teacher_dropdown_list_options.html', {'teachers': teachers, 'teacheruserid':teacheruserid})
 
 def load_classes(request):
     contractid = request.GET.get('contractid') # Check for existing contract
@@ -115,7 +116,7 @@ def load_classes(request):
     else:
         classes = []
 
-    return render(request, 'wakemeup/admin/class_dropdown_list_options.html', {'classes': classes, 'classid': classid})
+    return render(request, 'wakemeup/admin/js/class_dropdown_list_options.html', {'classes': classes, 'classid': classid})
 
 def load_students(request):
     
@@ -158,7 +159,7 @@ def load_students(request):
 
         students = student_list
 
-    return render(request, 'wakemeup/admin/student_dropdown_list_options.html', {'students': students})
+    return render(request, 'wakemeup/admin/js/student_dropdown_list_options.html', {'students': students})
 
 def load_rewards(request):
     contractid = request.GET.get('contractid') # Check if existing contract
@@ -167,10 +168,8 @@ def load_rewards(request):
 
     # Get all existing rewards for given goal
     if(contractid and goalid):
-        selectedrewards = ContractGoalReward.objects.get_contract_rewards(contractid=contractid, goalid=goalid)
-        
+        selectedrewards = ContractGoalReward.objects.get_contract_rewards(contractid=contractid, goalid=goalid)        
         selectedrewards = [myreward.rewardid for myreward in selectedrewards]
-        print("SELECTED:", selectedrewards)
         
     else:
         selectedrewards = []
@@ -183,7 +182,7 @@ def load_rewards(request):
         'selectedrewards': selectedrewards
     }
     
-    return render(request, 'wakemeup/admin/reward_dropdown_list_options.html', context)
+    return render(request, 'wakemeup/admin/js/reward_dropdown_list_options.html', context)
 
 
 # View to display images from DB
@@ -237,7 +236,7 @@ def create_contract(request, contractid):
                 teacheruserid = form.cleaned_data.get('teacheruserid'),
                 classid = form.cleaned_data.get('classid'),
                 contracttype = form.cleaned_data.get('contracttype'),
-                contractvalidperiod = format_timestamp_range(form.cleaned_data.get('contractvalidperiod'),'%d/%m/%Y'),
+                contractvalidperiod = format_timestamp_range_db(form.cleaned_data.get('contractvalidperiod'),'%d/%m/%Y'),
                 revisiondeadlinets = form.cleaned_data.get('revisiondeadlinets'),
                 contractstatus = form.cleaned_data.get('contractstatus'),
             )
@@ -289,11 +288,8 @@ def create_contract(request, contractid):
         mycontract = Contract.objects.get(contractid=contractid)
 
         # Create form
-        if(mycontract):
-            
-            # Format valid period
-            contractvalidperiod = str(mycontract.contractvalidperiod.lower.strftime("%d/%m/%Y")) + ' - ' + \
-                                  str(mycontract.contractvalidperiod.upper.strftime("%d/%m/%Y"))
+        if(mycontract):            
+            contractvalidperiod = display_timestamp_range(mycontract.contractvalidperiod, "%d/%m/%Y")
             
             form = ContractForm(request=request,
                 initial = {
@@ -313,8 +309,6 @@ def create_contract(request, contractid):
         
     return render(request, 'wakemeup/edit_contract.html', {'form': form})
 
-
-
 @check_permissions
 def create_contract_goals(request, contractid):
     # SAVE FORM
@@ -323,31 +317,32 @@ def create_contract_goals(request, contractid):
         form = ContractGoalsForm(request.POST, contractid=contractid)
 
         if(form.is_valid()):
-            # TO-DO: Fix up rewardinfo
-            easyrewardinfo = convert_array_string_to_int(form.cleaned_data.get('easy_rewardinfo'))
-            easyrewardinfo_dict = {'currentrewards': []}
 
-            for myeasyreward in easyrewardinfo:
-                easyrewardinfo_dict["currentrewards"].append({'rewardid':myeasyreward})
+            for goaltype in ('e','m','d'):
+                goaltypeid = goaltype + '_'
 
-            easyrewardinfo_dict = json.dumps(easyrewardinfo_dict)
-                
-            myeasycontractgoal = ContractGoal(
-                contractid = contractid,
-                goalid = form.cleaned_data.get('easy_goalid'),
-                difficultylevel = 'E', # Difficultylevel
-                goaldescription = form.cleaned_data.get('easy_goaldescription'),
-                acceptedflag = form.cleaned_data.get('easy_acceptedflag'),
-                rewardinfo = easyrewardinfo_dict
-            )
+                rewardinfo = convert_array_string_to_int(form.cleaned_data.get(goaltypeid + 'rewardinfo'))
+                rewardinfo_dict = {'currentrewards': []}
 
-            # Save contract and set status to "Draft"
-            myeasycontractgoal.goalid = myeasycontractgoal.save()
+                for myreward in rewardinfo:
+                    rewardinfo_dict["currentrewards"].append({'rewardid':myreward})
 
-            return ValidationError
+                rewardinfo_dict = json.dumps(rewardinfo_dict)
 
-            # Return to preview/submit page
-            return redirect('wakemeup:index')
+                mycontractgoal = ContractGoal(
+                    contractid = contractid,
+                    goalid = form.cleaned_data.get(goaltypeid + 'goalid'),
+                    difficultylevel = goaltype.upper(), # Difficultylevel
+                    goaldescription = form.cleaned_data.get(goaltypeid + 'goaldescription'),
+                    acceptedflag = False,
+                    rewardinfo = rewardinfo_dict
+                )
+    
+                # Save contract goal
+                mycontractgoal.goalid = mycontractgoal.save()
+
+            # Go to preview/submit page
+            return redirect('wakemeup:create_contract_submit', contractid=contractid)
               
     # CREATE FORM (NEW OBJECT)
     elif(contractid == 'new'):
@@ -355,36 +350,66 @@ def create_contract_goals(request, contractid):
         
     # CREATE FORM (EXISTING OBJECT)
     else:
-        # Lookup object
-        myeasycontractgoal = ContractGoal.objects.get_contract_goals(contractid=contractid, difficultylevel='E')
+        # Initialize initial_data 
+        initial_data = {'contractid':contractid}
 
-        initial = {
-            'contractid':contractid
-            }
+        # Get contract goals
+        mygoals = ContractGoal.objects.get_contract_goals(contractid=contractid)
 
-        # Create form
-        if(myeasycontractgoal):
-            
-            # Parse out reward options
-            
-            initial.update({
-                'contractid':contractid,
-                'easy_goalid':myeasycontractgoal.goalid,
-                'easy_goaldescription':myeasycontractgoal.goaldescription,
-                'easy_acceptedflag':myeasycontractgoal.acceptedflag,
-                'easy_rewardinfo':"",
+        for mygoal in mygoals:
+            # Use difficultylevel (i.e. e/m/d) for id tag (assumes MAX one goal per difficultylevel)
+            goaltypeid = mygoal.difficultylevel.lower() + "_"
+
+            initial_data.update({
+                goaltypeid + 'goalid':mygoal.goalid,
+                goaltypeid + 'goaldescription':mygoal.goaldescription,
+                goaltypeid + 'rewardinfo':"",
                 }
             )
-            
-            form = ContractGoalsForm(initial = initial, contractid=contractid)
-                
-        # Handle off-case for invalid object id
-        else:
-            form = ContractGoalsForm(contractid=contractid)
-        
+
+        form = ContractGoalsForm(contractid=contractid, initial = initial_data)
+
     return render(request, 'wakemeup/edit_contract_goals.html', {'form': form})
 
+@check_permissions
+def create_contract_submit(request, contractid):
 
+    if(request.method == "POST"):
+        form = ContractSubmitForm(request.POST, contractid=contractid)
+        if(form.is_valid()):
+            Contract(contractid=contractid).change_status('P') # Change contract status to pending
+            
+            # TO-DO: Send out e-mails!
+            
+            # Go back to home page
+            return redirect('wakemeup:index')
+    else:
+        contractinfo = Contract.objects.get(contractid=contractid)
+        contractinfo.contractvalidperiod_disp = display_timestamp_range(contractinfo.contractvalidperiod,"%d/%m/%Y") # Format for display
+        classinfo = Class.objects.get(classid=contractinfo.classid)
+        schoolinfo = School.objects.get(schoolid=classinfo.schoolid)
+        
+        goalrewards = []
+        
+        for mygoal in ContractGoal.objects.get_contract_goals(contractid=contractid):
+            mygoalrewards = ContractGoalReward.objects.get_contract_rewards(contractid=contractid,goalid=mygoal.goalid)
+    
+            mygoalreward = mygoal
+            mygoalreward.rewardinfo = mygoalrewards
+            
+            goalrewards.append(mygoalreward)
+        
+        # Prepare context info
+        context = {
+            'form':ContractSubmitForm(contractid = contractid),
+            'contract':contractinfo,
+            'classinfo':classinfo,
+            'schoolinfo':schoolinfo,
+            'contractparties':ContractParty.objects.get_contract_parties(contractid=contractid),
+            'goalrewards':goalrewards
+        } 
+        
+        return render(request, 'wakemeup/edit_contract_submit.html', context)
 
 # Admin
 @check_permissions

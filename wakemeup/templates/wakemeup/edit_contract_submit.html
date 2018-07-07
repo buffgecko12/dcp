@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Wake Me Up - Enviar contrato{% endblock %}
+
+{% block content %}
+	<div class="container-fluid">
+		<h1 class="display-4">
+			Crear Contrato - Enviar
+		</h1>
+	
+		<legend>General</legend>
+		<div class="row">
+			<div class="col col-sm-3">ID</div>
+			<div class="col col-sm-9">{{ contract.contractid }}</div>
+		</div>
+		<div class="row">
+			<div class="col col-sm-3">Curso</div>
+			<div class="col col-sm-9">{{ classinfo.classdisplayname }} ({{ schoolinfo.schoolabbreviation }})</div>
+		</div>
+		<div class="row">
+			<div class="col col-sm-3">Plazo</div>
+			<div class="col col-sm-9">{{ contract.contractvalidperiod_disp }}</div>
+		</div>
+		<div class="row">
+			<div class="col col-sm-3">Fecha tope de revisar</div>
+			<div class="col col-sm-9">{{ contract.revisiondeadlinets|date:'d/m/Y' }}</div>
+		</div>
+		<br>
+		<legend>Participantes</legend>
+		{% for party in contractparties %}
+
+		<div class="row">
+			<div class="col col-sm-3">{{ party.firstname }} {{ party.lastname }}</div>
+		</div>
+		{% endfor %}
+		<br>		
+		{% for goal in goalrewards %}
+			<legend>
+				Opci&#243;n de meta 
+				{% if goal.difficultylevel == "E" %} (fac&#237;l)
+				{% elif goal.difficultylevel == "M" %} (media)
+				{% elif goal.difficultylevel == "D" %} (dif&#237;cil)
+				{% endif %}
+			</legend>
+			{{ goal.goaldescription }}<br>
+			<strong>Opciones de premio: </strong>
+			{% for reward in goal.rewardinfo %}
+				{{ reward.rewarddisplayname }}{% if not forloop.last %}, {% endif %}
+			{% endfor %}
+			<br><br>
+		{% endfor %}
+		
+		{% crispy form %}
+	</div>
+{% endblock %}

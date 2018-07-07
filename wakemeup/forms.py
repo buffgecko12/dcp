@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
-from crispy_forms.bootstrap import FormActions
+from crispy_forms.bootstrap import FormActions, TabHolder, Tab
 from django.forms.widgets import HiddenInput
 
 from .models.environment import School, Class, Teacher, Student
@@ -13,7 +13,6 @@ from .models.contract import Contract, ContractGoal
 
 from django.contrib.postgres.forms import RangeWidget
 
-from django.core.exceptions import ValidationError
 import datetime
 from django.forms.fields import MultipleChoiceField
 
@@ -350,10 +349,10 @@ class ContractForm(forms.Form):
             startdate = datetime.datetime.strptime(contractvalidperiod_array[0],'%d/%m/%Y')
             enddate = datetime.datetime.strptime(contractvalidperiod_array[1],'%d/%m/%Y')
         except ValueError:
-            raise ValidationError("Formato invalido.  Por favor utilizar este formato: DD/MM/YYYY - DD/MM/YYYY")
+            raise forms.ValidationError("Formato invalido.  Por favor utilizar este formato: DD/MM/YYYY - DD/MM/YYYY")
     
         if(startdate > enddate):
-            raise ValidationError("La fecha de inico debe ser antes de la fecha de termino.")
+            raise forms.ValidationError("La fecha de inico debe ser antes de la fecha de termino.")
     
         return contractvalidperiod_array
 
@@ -386,8 +385,10 @@ class ContractForm(forms.Form):
                 'contractvalidperiod',
                 'revisiondeadlinets',
             ),
-            HTML("""<a href="{% url 'wakemeup:index' %}" class="btn btn-secondary">Cancelar</a> """),
-            Submit('create','Siguiente'),
+            FormActions(
+                HTML("""<a href="{% url 'wakemeup:index' %}" class="btn btn-secondary">Cancelar</a> """),
+                Submit('create','Siguiente'),
+            )
         )
 
     class Meta:
@@ -397,11 +398,31 @@ class ContractForm(forms.Form):
 # Main contract goal form
 class ContractGoalsForm(forms.Form):
 
+    def clean(self):
+        
+        # Call parent form's validation
+        cleaned_data = super(ContractGoalsForm, self).clean()
+
+        # Verify that at least one goal has been filled out correctly
+        if not(cleaned_data.get("e_goaldescription") and cleaned_data.get("e_rewardinfo")) and \
+           not(cleaned_data.get("m_goaldescription") and cleaned_data.get("m_rewardinfo")) and \
+           not(cleaned_data.get("d_goaldescription") and cleaned_data.get("d_rewardinfo")):
+            
+            raise forms.ValidationError("Por favor especificar al menos una meta.")
+
     contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)
-    easy_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
-    easy_goaldescription = forms.CharField(max_length=500,label='Descripci' + chr(243) + 'n', widget=forms.Textarea(attrs={'rows':4}))
-    easy_acceptedflag = forms.BooleanField(required=False,label='Aceptado',initial=False, disabled=True)
-    easy_rewardinfo = forms.CharField(label='Opciones de premio', widget=forms.SelectMultiple)
+
+    e_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
+    e_goaldescription = forms.CharField(max_length=500,label='Descripci' + chr(243) + 'n', widget=forms.Textarea(attrs={'rows':4}), required=False)
+    e_rewardinfo = forms.CharField(label='Opciones de premio', widget=forms.SelectMultiple, required=False)
+
+    m_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
+    m_goaldescription = forms.CharField(max_length=500,label='Descripci' + chr(243) + 'n', widget=forms.Textarea(attrs={'rows':4}), required=False)
+    m_rewardinfo = forms.CharField(label='Opciones de premio', widget=forms.SelectMultiple, required=False)
+
+    d_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
+    d_goaldescription = forms.CharField(max_length=500,label='Descripci' + chr(243) + 'n', widget=forms.Textarea(attrs={'rows':4}), required=False)
+    d_rewardinfo = forms.CharField(label='Opciones de premio', widget=forms.SelectMultiple, required=False)
 
     def __init__ (self, *args, **kwargs):
 
@@ -419,58 +440,54 @@ class ContractGoalsForm(forms.Form):
         # Set form layout
         self.helper.layout = Layout(
             'contractid',
-            Fieldset(
-                'Meta Facil',
-                'easy_goalid',
-                'easy_goaldescription',
-                'easy_acceptedflag',
-                'easy_rewardinfo',
+            TabHolder(
+                Tab(
+                    'Meta Facil',
+                    'e_goalid',
+                    'e_goaldescription',
+                    'e_rewardinfo',
+                ),
+                Tab(
+                    'Meta Media',
+                    'm_goalid',
+                    'm_goaldescription',
+                    'm_rewardinfo',
+                ),
+                Tab(
+                    'Meta Dificil',
+                    'd_goalid',
+                    'd_goaldescription',
+                    'd_rewardinfo',
+                )
             ),
-            HTML("""<a href="{% url 'wakemeup:index' %}" class="btn btn-secondary">Cancelar</a> """),
-            Submit('create','Siguiente'),
-            HTML(""" <a href="{% url 'wakemeup:create_contract' contractid=""" + contractid + """  %}" class="btn btn-info">Previo</a> """),
+            FormActions(
+                HTML("""<a href="{% url 'wakemeup:index' %}" class="btn btn-secondary">Cancelar</a> """),
+                Submit('create','Siguiente'),
+                HTML(""" <a href="{% url 'wakemeup:create_contract' contractid=""" + contractid + """  %}" class="btn btn-info">Previo</a> """),
+            )
         )
 
-
-
-
-
-# Individual contract goal form
-class ContractGoalForm(forms.Form):
-
+class ContractSubmitForm(forms.Form):
+    
     contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)
 
-    goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
-    difficultylevel = forms.ChoiceField(label='Dificultad',choices=(('E','Facil'),('M','Medio'),('D','Dificil')))
-    goaldescription = forms.CharField(max_length=500,label='Descripci' + chr(243) + 'n', widget=forms.Textarea(attrs={'rows':4}))
-    acceptedflag = forms.BooleanField(required=False,label='Aceptado',initial=False, disabled=True)
-    rewardinfo = forms.CharField(max_length=1000,label='Premios') # TO-DO: Convert this into its own separate formset
-
-    def __init__ (self, *args, **kwargs):
-
-        # Call base class constructor (i.e. Teacher Form)
-        super(ContractGoalForm, self).__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        
+        contractid = kwargs.pop("contractid")
+        
+        #Call base class constructor
+        super(ContractSubmitForm, self).__init__(*args, **kwargs)
         
         # Set form helper properties
         self.helper = FormHelper()
         setFormHelper(self.helper)
-        self.helper.form_tag = False # Disable auto-generation of <form> tags
         
         # Set form layout
         self.helper.layout = Layout(
             'contractid',
-            Fieldset(
-                'Meta',
-                'difficultylevel',
-                'goaldescription',
-                'acceptedflag',
-                'rewardinfo'
-            ),
-            Submit('create','Enviar'),
-            HTML("""<a href="{% url 'wakemeup:index' %}" class="btn btn-secondary">Cancelar</a>"""),
+            FormActions(
+                HTML("""<a href="{% url 'wakemeup:index' %}" class="btn btn-secondary">Cancelar</a> """),
+                Submit('create','Enviar'),
+                HTML(""" <a href="{% url 'wakemeup:create_contract_goals' contractid=""" + contractid + """  %}" class="btn btn-info">Previo</a> """),
+            )
         )
-
-    class Meta:
-        model = ContractGoal
-        fields = ('contractid','goalid','difficultylevel','goaldescription','acceptedflag','rewardinfo')
-

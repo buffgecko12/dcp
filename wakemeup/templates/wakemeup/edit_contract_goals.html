@@ -5,7 +5,9 @@
 
 {% block content %}
 	<div class="container-fluid">
-		<br>
+		<h1 class="display-4">
+			Crear Contrato - Metas
+		</h1>
 		<form method="post" id="goalsForm" novalidate 
 			data-rewards-url="{% url 'wakemeup:ajax_load_rewards' %}" 
 		>
@@ -34,7 +36,9 @@
 	
 	window.onload = function() {
 		// Initial load / update of drop-down menus
-		update_rewards(document.getElementById("id_easy_goalid"), document.getElementById("id_easy_rewardinfo"))
+		update_rewards(document.getElementById("id_e_goalid"), document.getElementById("id_e_rewardinfo"))
+		update_rewards(document.getElementById("id_m_goalid"), document.getElementById("id_m_rewardinfo"))
+		update_rewards(document.getElementById("id_d_goalid"), document.getElementById("id_d_rewardinfo"))
 	};		
 
 
