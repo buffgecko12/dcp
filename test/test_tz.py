@@ -1,5 +1,5 @@
 import test_setup
-from UsefulFunctions.dateUtils import format_timestamp, format_timestamp_range
+from UsefulFunctions.dateUtils import format_timestamp, format_timestamp_range_db
 
 if(__name__) == "__main__":
 
@@ -14,6 +14,6 @@ if(__name__) == "__main__":
     
     format1 = '%d/%m/%Y'
         
-    date_object = format_timestamp_range(datetime_data, format1, True)
+    date_object = format_timestamp_range_db(datetime_data, format1, True)
     
     print (date_object)

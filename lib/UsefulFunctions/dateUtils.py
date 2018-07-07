@@ -12,9 +12,14 @@ def format_timestamp(timestamp, formatstring, localizeFlag = True):
 
     return mytimestamp
 
-def format_timestamp_range(timestamprange, formatstring, localizeFlag = True, boundstring = '[]'):
+def format_timestamp_range_db(timestamprange, formatstring, localizeFlag = True, boundstring = '[]'):
 
     mystarttimestamp = format_timestamp(timestamprange[0], formatstring, localizeFlag)
     myendtimestamp = format_timestamp(timestamprange[1], formatstring, localizeFlag)
     
     return DateTimeTZRange(mystarttimestamp, myendtimestamp, boundstring) # Convert to Postgres native tstzrange type
+
+def display_timestamp_range(timestamprange, formatstring):
+
+    return str(timestamprange.lower.strftime(formatstring)) + ' - ' + \
+           str(timestamprange.upper.strftime(formatstring))
