@@ -1,7 +1,7 @@
 import django_tables2 as tables
 from django_tables2.utils import A # alias for accessor
 from .models.environment import School, Class, Teacher, Student
-from .models.contract import Contract
+from .models.contract import Contract, Reward
 
 from lib.UsefulFunctions.dateUtils import display_timestamp_range, display_timestamp
 
@@ -130,6 +130,23 @@ class StudentsTable(tables.Table):
         model = Student
         exclude = ('studentuserid','reputationvalue','schoolid','classid')
         sequence = ('firstname','lastname','emailaddress','phonenumber','defaultsignaturescanfile','schooldisplayname')
+        empty_text = EMPTY_TEXT
+
+class RewardsTable(tables.Table):
+
+    objectid = 'rewardid'
+    
+    kwargs={
+        'objecttype': 'reward',
+        'objectid': A(objectid)
+    }
+
+    edit_link = getEditColumn(objectid, kwargs)
+    delete_link = getDeleteColumn(objectid, kwargs)
+
+    class Meta:
+        model = Reward
+        exclude = ('rewardid')
         empty_text = EMPTY_TEXT
 
 class ContractsTable(tables.Table):

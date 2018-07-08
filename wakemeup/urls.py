@@ -16,10 +16,10 @@ urlpatterns = [
     url(r'^contract/(?P<contractid>(\d+))/submit$', views.create_contract_submit, name="create_contract_submit"),
 
     # Admin
-    url(r'^admin/(?P<objecttype>(school|class|teacher|student))(/)?$', views.admin_list, name="admin_list"), # Object list
-    url(r'^admin/(?P<objecttype>(school|class|teacher|student))/(?P<objectid>\d+)$', views.edit_object, name="edit_object"), # Edit object
-    url(r'^admin/(?P<objecttype>(school|class))/(?P<objectid>new)$', views.edit_object, name="edit_object"), # New object
-    url(r'^admin/(?P<objecttype>(school|class|teacher|student))/(?P<objectid>\d+)/delete$', views.delete_object, name="delete_object"), # Delete object    
+    url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward))(/)?$', views.admin_list, name="admin_list"), # Object list
+    url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward))/(?P<objectid>\d+)$', views.edit_object, name="edit_object"), # Edit object
+    url(r'^admin/(?P<objecttype>(school|class|reward))/(?P<objectid>new)$', views.edit_object, name="edit_object"), # New object
+    url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward))/(?P<objectid>\d+)/delete$', views.delete_object, name="delete_object"), # Delete object    
     
     # User 
     url(r'^login/$', auth_views.LoginView.as_view(

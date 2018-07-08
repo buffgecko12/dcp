@@ -28,6 +28,7 @@
 							{% if user.is_admin %}
 							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='school' %}">Colegios</a>
 							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='class' %}">Cursos</a>
+							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='reward' %}">Premios</a>
 							{% endif %}
 							{% if user.is_admin or user.usertype == "TR" %}
 							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='teacher' %}">Docentes</a>

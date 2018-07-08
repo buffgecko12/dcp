@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
 
-from .forms import SignupForm, SchoolForm, ClassForm, TeacherForm, StudentForm, ContractForm, ContractGoalsForm, ContractSubmitForm
+from .forms import SignupForm, SchoolForm, ClassForm, TeacherForm, StudentForm, RewardForm, ContractForm, ContractGoalsForm, ContractSubmitForm
 from .models.environment import School, Class, Teacher, Student
 from .models.contract import Contract, ContractParty, ContractGoal, ContractGoalReward, Reward
 
 from django_tables2 import RequestConfig
-from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable, ContractsTable
+from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable, ContractsTable, RewardsTable
 
 from lib.UsefulFunctions.imgUtils import renderImageFromDb
 from lib.UsefulFunctions.dateUtils import format_timestamp_range_db, display_timestamp_range
@@ -27,24 +27,28 @@ PERM_STUDENT = ['ST']
 PERM_ALL = ['ALL']
 
 # Define view permissions
+#TO-DO: Move to database
 view_permissions = {
     'admin_list': {
         'school':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
         'class':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
         'teacher':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
         'student':{'userrole':PERM_ADMIN, 'usertype':PERM_STUDENT},
+        'reward':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
     },
     'delete_object': {
         'school': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
         'class': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
         'teacher': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
         'student': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
+        'reward': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
     },
     'edit_object': {
         'school':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
         'class':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
         'teacher':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
         'student':{'userrole':PERM_ADMIN, 'usertype':PERM_STUDENT},
+        'reward':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
     },
     'create_contract': {
         'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
@@ -228,6 +232,9 @@ def delete_object(request, objecttype, objectid):
         
         elif(objecttype == 'student'):
             myobject = Student.objects.get(objectid)
+        
+        elif(objecttype == 'reward'):
+            myobject = Reward.objects.get(objectid)
         
         if(myobject):
             myobject.delete()
@@ -446,6 +453,8 @@ def admin_list(request, objecttype):
         objectSet = TeachersTable(Teacher.objects.all())
     elif objecttype == 'student':
         objectSet = StudentsTable(Student.objects.all())
+    elif objecttype == 'reward':
+        objectSet = RewardsTable(Reward.objects.all())
     else:
         pass
         
@@ -465,6 +474,8 @@ def edit_object(request, objecttype, objectid):
         objectForm = TeacherForm
     elif objecttype == 'student':
         objectForm = StudentForm
+    elif objecttype == 'reward':
+        objectForm = RewardForm
     else:
         pass
 
@@ -476,8 +487,10 @@ def edit_object(request, objecttype, objectid):
         
         # Create form instance (bind data to form)
         form = objectForm(request.POST, request.FILES)
-        
+
         if form.is_valid():
+            
+            kwargs = {}
             
             # Read signature scan file
             if(request.FILES.get('defaultsignaturescanfile')):
@@ -570,8 +583,19 @@ def edit_object(request, objecttype, objectid):
                     emailaddress = form.cleaned_data.get('emailaddress'),
                 )
 
+            elif(objecttype == 'reward'):
+                
+                myobject = objectClass(
+                    rewardid = form.cleaned_data.get('rewardid'),
+                    rewarddisplayname = form.cleaned_data.get('rewarddisplayname'),
+                    rewarddescription = form.cleaned_data.get('rewarddescription'),
+                    rewardvalue = form.cleaned_data.get('rewardvalue'),
+                )
+
+                kwargs = {'createdbyuserid':request.user.userid}
+
             # Save object
-            myobject.save()
+            myobject.save(**kwargs)
 
             # Return to main page
             return admin_list(request, objecttype = objecttype)
@@ -632,6 +656,16 @@ def edit_object(request, objecttype, objectid):
                         'defaultsignaturescanfile': myobject.defaultsignaturescanfile,
                         'phonenumber': myobject.phonenumber,
                         'emailaddress': myobject.emailaddress,
+                    }
+                )
+
+            elif(objecttype == 'reward'):
+                form = objectForm(
+                    initial = {
+                        'rewardid': myobject.rewardid,
+                        'rewarddisplayname': myobject.rewarddisplayname,
+                        'rewarddescription': myobject.rewarddescription,
+                        'rewardvalue': myobject.rewardvalue,
                     }
                 )
                 

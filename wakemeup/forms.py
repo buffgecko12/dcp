@@ -9,12 +9,11 @@ from crispy_forms.bootstrap import FormActions, TabHolder, Tab
 from django.forms.widgets import HiddenInput
 
 from .models.environment import School, Class, Teacher, Student
-from .models.contract import Contract, ContractGoal
+from .models.contract import Contract, ContractGoal, Reward
 
 from django.contrib.postgres.forms import RangeWidget
 
 import datetime
-from django.forms.fields import MultipleChoiceField
 
 DEFAULT_FORM_CLASS = 'form-horizontal'
 DEFAULT_LABEL_CLASS = 'col-sm-3'
@@ -329,6 +328,41 @@ class StudentForm(forms.Form):
     class Meta:
         model = Student
         fields = ('studentuserid','schoolid','classid','firstname','lastname','phonenumber','emailaddress')
+
+class RewardForm(forms.Form):
+
+    # Define form fields
+    rewardid = forms.IntegerField(widget=forms.HiddenInput,required=False)
+
+    rewarddisplayname = forms.CharField(max_length=100,label='Premio')
+    rewarddescription = forms.CharField(max_length=500,label='Descripci' + chr(243) + 'n', widget=forms.Textarea(attrs={'rows':4}))
+    rewardvalue = forms.IntegerField(label='Valor')
+
+    def __init__ (self, *args, **kwargs):
+
+        # Call base class constructor (i.e. Teacher Form)
+        super(RewardForm, self).__init__(*args, **kwargs)
+        
+        # Set form helper properties
+        self.helper = FormHelper()
+        setFormHelper(self.helper)
+        
+        # Set form layout
+        self.helper.layout = Layout(
+            Fieldset(
+                'Editar premio',
+                'rewardid',
+                'rewarddisplayname',
+                'rewarddescription',
+                'rewardvalue',
+            ),
+            getAdminFormActions('reward')
+        )
+
+    # Specify model
+    class Meta:
+        model = Reward
+        fields = ('rewardid','rewarddisplayname','rewarddescription','rewardvalue')
 
 class ContractForm(forms.Form):
 

@@ -296,9 +296,9 @@ class Reward(models.Model):
 
     # Get party attributes    
     rewardid = models.IntegerField(primary_key=True)
-    rewarddisplayname = models.CharField(max_length=100)
-    rewarddescription = models.CharField(max_length=500)
-    rewardvalue = models.IntegerField()
+    rewarddisplayname = models.CharField(max_length=100,verbose_name='Premio')
+    rewarddescription = models.CharField(max_length=500,verbose_name='Descripci' + chr(243) + 'n de premio')
+    rewardvalue = models.IntegerField(verbose_name='Valor')
     
     class Meta:
         managed = False
