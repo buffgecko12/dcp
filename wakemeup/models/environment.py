@@ -91,6 +91,7 @@ class TeacherManager(models.Manager):
         return save_data('SP_DCPUpsertTeacher', (
             myTeacher.teacheruserid,
             myTeacher.schoolid,
+            None, # Max budget not changeable here
             myTeacher.classinfo,
             myTeacher.firstname,
             myTeacher.lastname,
