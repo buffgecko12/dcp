@@ -147,6 +147,16 @@ class ContractPartyManager(models.Manager):
             )
         )
 
+class ContractInfoManager(models.Manager):
+    def all(self):
+        return self.get_contract_info(None)
+    
+    def get(self, contractid):
+        return get_data_pk(self, 'SP_DCPGetContractInfo(%s)', (contractid,))
+    
+    def get_contract_info(self, contractid = None):
+        return get_data(self, 'SP_DCPGetContractInfo(%s)', (contractid,))
+
 class RewardManager(models.Manager):
     def all(self):
         return self.get_rewards()
@@ -291,6 +301,18 @@ class ContractParty(models.Model):
     
     def approve_contract(self):
         return ContractParty.objects.approve_contract(self)
+
+class ContractInfo(models.Model):
+
+    contractid = models.IntegerField(primary_key=True)
+    teacheruserid = models.IntegerField()
+    numparticipants = models.IntegerField()
+    maxrewardvalue = models.IntegerField()
+    
+    class Meta:
+        managed = False
+        
+    objects = ContractInfoManager()
     
 class Reward(models.Model):
 
