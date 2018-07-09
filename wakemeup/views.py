@@ -298,7 +298,6 @@ def create_contract(request, contractid):
 
             # Return to main page
             return redirect('wakemeup:create_contract_goals', contractid=mycontract.contractid)
-#             return admin_list(request, objecttype = objecttype)   
               
     # CREATE FORM (NEW OBJECT)
     elif(contractid == 'new'):
@@ -341,10 +340,12 @@ def create_contract_goals(request, contractid):
         if(form.is_valid()):
 
             for goaltype in ('e','m','d'):
+                deleted_goals = []
                 goaltypeid = goaltype + '_'
 
                 myrewardinfo = form.cleaned_data.get(goaltypeid + 'rewardinfo')
                 mygoaldescription = form.cleaned_data.get(goaltypeid + 'goaldescription')
+                mygoalid = form.cleaned_data.get(goaltypeid + 'goalid')
 
                 # Only save goal if rewards and description have been specified
                 if (myrewardinfo and mygoaldescription):
@@ -358,18 +359,25 @@ def create_contract_goals(request, contractid):
     
                     mycontractgoal = ContractGoal(
                         contractid = contractid,
-                        goalid = form.cleaned_data.get(goaltypeid + 'goalid'),
+                        goalid = mygoalid,
                         difficultylevel = goaltype.upper(), # Difficultylevel
-                        goaldescription = form.cleaned_data.get(goaltypeid + 'goaldescription'),
+                        goaldescription = mygoaldescription,
                         acceptedflag = False,
                         rewardinfo = rewardinfo_dict
                     )
         
                     # Save contract goal
                     mycontractgoal.goalid = mycontractgoal.save()
+                # Delete existing goal
+                elif (mygoalid):
+                    ContractGoal(contractid = contractid, goalid = mygoalid).delete()
 
-            # Go to preview/submit page
-            return redirect('wakemeup:create_contract_submit', contractid=contractid)
+            if('submit_previous' in request.POST):
+                # Go to previous page
+                return redirect('wakemeup:create_contract', contractid=contractid)
+            else:
+                # Go to preview/submit page
+                return redirect('wakemeup:create_contract_submit', contractid=contractid)
               
     # CREATE FORM (NEW OBJECT)
     elif(contractid == 'new'):
