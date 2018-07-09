@@ -8,8 +8,8 @@ from crispy_forms.layout import *
 from crispy_forms.bootstrap import FormActions, TabHolder, Tab
 from django.forms.widgets import HiddenInput
 
-from .models.environment import School, Class, Teacher, Student
-from .models.contract import Contract, ContractGoal, Reward
+from .models.environment import School, Class, Teacher, TeacherBudget, Student
+from .models.contract import Contract, ContractGoal, ContractInfo, Reward
 
 from django.contrib.postgres.forms import RangeWidget
 
@@ -437,6 +437,19 @@ class ContractGoalsForm(forms.Form):
         # Call parent form's validation
         cleaned_data = super(ContractGoalsForm, self).clean()
 
+        # Check for partially specified goals
+        if (cleaned_data.get("e_goaldescription") and not cleaned_data.get("e_rewardinfo")) or \
+           (cleaned_data.get("e_rewardinfo") and not cleaned_data.get("e_goaldescription")):
+            self.add_error('e_goaldescription', "Por favor verificar la meta fac" + chr(237) + "l")
+
+        if (cleaned_data.get("m_goaldescription") and not cleaned_data.get("m_rewardinfo")) or \
+           (cleaned_data.get("m_rewardinfo") and not cleaned_data.get("m_goaldescription")):
+            self.add_error('m_goaldescription', "Por favor verificar la meta media")
+
+        if (cleaned_data.get("d_goaldescription") and not cleaned_data.get("d_rewardinfo")) or \
+           (cleaned_data.get("d_rewardinfo") and not cleaned_data.get("d_goaldescription")):
+            self.add_error('d_goaldescription', "Por favor verificar la meta dific" + chr(237) + "l")
+
         # Verify that at least one goal has been filled out correctly
         if not(cleaned_data.get("e_goaldescription") and cleaned_data.get("e_rewardinfo")) and \
            not(cleaned_data.get("m_goaldescription") and cleaned_data.get("m_rewardinfo")) and \
@@ -444,7 +457,10 @@ class ContractGoalsForm(forms.Form):
             
             raise forms.ValidationError("Por favor especificar al menos una meta.")
 
-    contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)
+    # Fields used for javascript and form navigation between pages
+    contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)    
+    initialbudget = forms.IntegerField(widget=forms.HiddenInput, required=False)
+    numparticipants = forms.IntegerField(widget=forms.HiddenInput, required=False)
 
     e_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
     e_goaldescription = forms.CharField(max_length=500,label='Descripci' + chr(243) + 'n', widget=forms.Textarea(attrs={'rows':4}), required=False)
@@ -462,18 +478,23 @@ class ContractGoalsForm(forms.Form):
 
         # Extract contractid
         contractid = kwargs.pop("contractid")
-
+        
         # Call base class constructor (i.e. Teacher Form)
         super(ContractGoalsForm, self).__init__(*args, **kwargs)
+        mycontractinfo = ContractInfo.objects.get(contractid)
         
         # Set form helper properties
         self.helper = FormHelper()
         setFormHelper(self.helper)
         self.helper.form_tag = False # Disable auto-generation of <form> tags
+        self.fields['initialbudget'].initial = TeacherBudget.objects.get(mycontractinfo.teacheruserid).availablebudget
+        self.fields['numparticipants'].initial = mycontractinfo.numparticipants # Get number of participants (used to calculate budget)
         
         # Set form layout
         self.helper.layout = Layout(
             'contractid',
+            'initialbudget',
+            'numparticipants',
             TabHolder(
                 Tab(
                     'F' + chr(225) + 'cil',
@@ -496,8 +517,13 @@ class ContractGoalsForm(forms.Form):
             ),
             FormActions(
                 HTML("""<a href="{% url 'wakemeup:index' %}" class="btn btn-secondary">Cancelar</a> """),
-                Submit('create','Siguiente'),
-                HTML(""" <a href="{% url 'wakemeup:create_contract' contractid=""" + contractid + """  %}" class="btn btn-info">Previo</a> """),
+                Submit('submit_next','Siguiente'),
+                Submit('submit_previous','Previo', css_class='btn btn-info'),
+#                HTML(""" <a href="{% url 'wakemeup:create_contract' contractid=""" + contractid + """  %}" class="btn btn-info">Previo</a> """),
+                Div(
+                    HTML('Presupuesto: $<span id="id_availablebudget"></span>'), 
+                    css_class='float-right'
+                )
             )
         )
 

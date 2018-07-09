@@ -104,6 +104,16 @@ class TeacherManager(models.Manager):
     def delete(self, myTeacher):
         return get_user_model()(userid=myTeacher.teacheruserid).deactivate()
 
+class TeacherBudgetManager(models.Manager):
+    def all(self):
+        return self.get_teacher_budgets(teacheruserid = None)
+    
+    def get(self, teacheruserid):
+        return get_data_pk(self, 'SP_DCPGetTeacherBudget(%s)', (teacheruserid,))
+    
+    def get_teacher_budgets(self, teacheruserid):
+        return get_data(self, 'SP_DCPGetTeacherBudget(%s)', (teacheruserid,))
+
 class StudentManager(models.Manager):
     def all(self):
         return get_data(self, 'SP_DCPGetStudent(%s,%s)', (None,None))
@@ -211,6 +221,18 @@ class Teacher(models.Model):
             id_list.append(myclass.classid)
             
         return str(id_list).strip('[]')
+
+class TeacherBudget(models.Model):
+    
+    teacheruserid = models.IntegerField(primary_key=True,verbose_name='ID')
+    maxbudget = models.IntegerField()
+    budgetspent = models.IntegerField()
+    availablebudget = models.IntegerField()
+    
+    objects = TeacherBudgetManager()
+    
+    class Meta:
+        managed = False
     
 class Student(models.Model):
 
