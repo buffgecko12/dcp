@@ -340,7 +340,6 @@ def create_contract_goals(request, contractid):
         if(form.is_valid()):
 
             for goaltype in ('e','m','d'):
-                deleted_goals = []
                 goaltypeid = goaltype + '_'
 
                 myrewardinfo = form.cleaned_data.get(goaltypeid + 'rewardinfo')
