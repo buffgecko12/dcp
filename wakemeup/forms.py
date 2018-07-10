@@ -375,6 +375,10 @@ class ContractForm(forms.Form):
     revisiondeadlinets = forms.DateField(label='Fecha tope para revisar', widget=forms.DateInput(attrs={'class':'dateinputfield'}))
     contractstatus = forms.CharField(max_length=1,label='Estatus', widget=forms.HiddenInput, required=False)
 
+    # Fields used for javascript and form navigation between pages
+    initialbudget = forms.IntegerField(widget=forms.HiddenInput, required=False)
+    maxrewardvalue = forms.IntegerField(widget=forms.HiddenInput, required=False)
+
     def clean_contractvalidperiod(self):
         contractvalidperiod = self.cleaned_data.get("contractvalidperiod")
         contractvalidperiod_array = contractvalidperiod.split(" - ")
@@ -394,20 +398,39 @@ class ContractForm(forms.Form):
 
         # Extract request argument
         request = kwargs.pop("request")
+        contractid = kwargs.pop("contractid")
 
         # Call base class constructor (i.e. Teacher Form)
         super(ContractForm, self).__init__(*args, **kwargs)
         
+        if(contractid != "new"):
+            mycontractinfo = ContractInfo.objects.get(contractid)
+            mybudget = TeacherBudget.objects.get(mycontractinfo.teacheruserid).availablebudget
+            mymaxrewardvalue = mycontractinfo.maxrewardvalue
+        else:
+            mymaxrewardvalue = 0
+            myteacherbudget = TeacherBudget.objects.get(teacheruserid = request.user.userid)
+
+            # Lookup default budget for teacher
+            if(myteacherbudget):
+                mybudget = myteacherbudget.availablebudget
+            else:
+                mybudget = 0
+
         # Set form helper properties
         self.helper = FormHelper()
         setFormHelper(self.helper)
         self.helper.form_tag = False # Disable auto-generation of <form> tags
+        self.fields['initialbudget'].initial = mybudget # TO-DO: Fix this!!
+        self.fields['maxrewardvalue'].initial = mymaxrewardvalue # Get number of participants (used to calculate budget)
         
         # Set form layout
         self.helper.layout = Layout(
             'contractid',
             'contractstatus',
             'contracttype',
+            'initialbudget',
+            'maxrewardvalue',
             Fieldset(
                 'Participantes',
                 'teacheruserid',
@@ -420,8 +443,12 @@ class ContractForm(forms.Form):
                 'revisiondeadlinets',
             ),
             FormActions(
-                HTML("""<a href="{% url 'wakemeup:index' %}" class="btn btn-secondary">Cancelar</a> """),
-                Submit('create','Siguiente'),
+                Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='submit_cancel'),
+                Submit('submit_next','Siguiente', css_id='submit_next'),
+                Div(
+                    HTML('<span id="id_availablebudget"></span>'), 
+                    css_class='float-right'
+                )
             )
         )
 
@@ -516,12 +543,11 @@ class ContractGoalsForm(forms.Form):
                 )
             ),
             FormActions(
-                HTML("""<a href="{% url 'wakemeup:index' %}" class="btn btn-secondary">Cancelar</a> """),
-                Submit('submit_next','Siguiente'),
-                Submit('submit_previous','Previo', css_class='btn btn-info'),
-#                HTML(""" <a href="{% url 'wakemeup:create_contract' contractid=""" + contractid + """  %}" class="btn btn-info">Previo</a> """),
+                Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='submit_cancel'),
+                Submit('submit_next','Siguiente', css_id='submit_next'),
+                Submit('submit_previous','Previo', css_class='btn btn-info', css_id='submit_previous'),
                 Div(
-                    HTML('Presupuesto: $<span id="id_availablebudget"></span>'), 
+                    HTML('<span id="id_availablebudget"></span>'), 
                     css_class='float-right'
                 )
             )
@@ -546,8 +572,8 @@ class ContractSubmitForm(forms.Form):
         self.helper.layout = Layout(
             'contractid',
             FormActions(
-                HTML("""<a href="{% url 'wakemeup:index' %}" class="btn btn-secondary">Cancelar</a> """),
-                Submit('create','Enviar'),
-                HTML(""" <a href="{% url 'wakemeup:create_contract_goals' contractid=""" + contractid + """  %}" class="btn btn-info">Previo</a> """),
+                Submit('submit_cancel','Cancelar',css_class='btn btn-secondary'),
+                Submit('submit_next','Enviar'),
+                Submit('submit_previous','Previo',css_class='btn btn-info'),
             )
         )
