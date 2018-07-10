@@ -247,9 +247,15 @@ def index(request):
 @check_permissions
 def create_contract(request, contractid):
     # SAVE FORM
+
     if request.method == "POST":
+
+        # Go to homepage if user clicked "cancel" button        
+        if('submit_cancel' in request.POST):
+            return redirect('wakemeup:index')
+        
         # Create form instance (bind data to form)
-        form = ContractForm(request.POST, request=request)
+        form = ContractForm(request.POST, request=request, contractid=contractid)
 
         if(form.is_valid()):
 
@@ -301,7 +307,7 @@ def create_contract(request, contractid):
               
     # CREATE FORM (NEW OBJECT)
     elif(contractid == 'new'):
-        form = ContractForm(request=request, initial={'contractstatus':'D'})
+        form = ContractForm(request=request, contractid=contractid,initial={'contractstatus':'D'})
         
     # CREATE FORM (EXISTING OBJECT)
     else:
@@ -312,7 +318,7 @@ def create_contract(request, contractid):
         if(mycontract):            
             contractvalidperiod = display_timestamp_range(mycontract.contractvalidperiod)
             
-            form = ContractForm(request=request,
+            form = ContractForm(request=request, contractid=contractid,
                 initial = {
                     'contractid': mycontract.contractid,
                     'teacheruserid': mycontract.teacheruserid,
@@ -326,7 +332,7 @@ def create_contract(request, contractid):
                 
         # Handle off-case for invalid object id
         else:
-            form = ContractForm(request=request)
+            form = ContractForm(request=request,contractid=contractid)
         
     return render(request, 'wakemeup/contract/edit_contract.html', {'form': form})
 
@@ -334,6 +340,11 @@ def create_contract(request, contractid):
 def create_contract_goals(request, contractid):
     # SAVE FORM
     if request.method == "POST":
+
+        # Go to homepage if user clicked "cancel" button        
+        if('submit_cancel' in request.POST):
+            return redirect('wakemeup:index')
+        
         # Create form instance (bind data to form)
         form = ContractGoalsForm(request.POST, contractid=contractid)
 
@@ -409,6 +420,14 @@ def create_contract_goals(request, contractid):
 def create_contract_submit(request, contractid):
 
     if(request.method == "POST"):
+
+        # Go to homepage if user clicked "cancel" button        
+        if('submit_cancel' in request.POST):
+            return redirect('wakemeup:index')
+        # Go to previous page
+        elif('submit_previous' in request.POST):
+            return redirect('wakemeup:create_contract_goals',contractid = contractid)
+        
         form = ContractSubmitForm(request.POST, contractid=contractid)
         if(form.is_valid()):
             Contract(contractid=contractid).change_status('P') # Change contract status to pending
