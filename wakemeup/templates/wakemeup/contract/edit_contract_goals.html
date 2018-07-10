@@ -22,15 +22,40 @@
 	var currentBudget = parseInt($("#id_initialbudget").val(),10); // Lookup initial values from hidden form fields
 	var numParticipants = parseInt($("#id_numparticipants").val(),10);
 	
+	function get_budget_HTML(){
+
+		var currentBudgetHTML = undefined
+		if(currentBudget < 0) {
+			currentBudgetHTML = '<span class="bg-warning">Presupuesto: $' + String(currentBudget) + '</span>'
+		} else {
+			currentBudgetHTML = 'Presupuesto: $' + currentBudget
+		}
+		
+		return currentBudgetHTML;
+	}
+	
 	// TO-DO: Move this into a common function
 	$("#id_e_rewardinfo").change(function () {
 		var result = get_max_rewardValue();
 
 		if(maxRewardValue === undefined || maxRewardValue != result) {
-			var delta = (maxRewardValue - result)
-			currentBudget = currentBudget + (delta * numParticipants)
-            $("#id_availablebudget").html(currentBudget);
+			var disabledFlag = undefined;
+			var delta = (maxRewardValue - result);
+			currentBudget = currentBudget + (delta * numParticipants);
+			
+            $("#id_availablebudget").html(get_budget_HTML());
 			maxRewardValue = result; // Store new value
+			
+			if(currentBudget < 0) {
+				disabledFlag = true;
+			} else {
+				disabledFlag = false;
+			}
+
+			// Update buttons
+			document.getElementById("submit_cancel").disabled = disabledFlag;
+			document.getElementById("submit_next").disabled = disabledFlag;
+			document.getElementById("submit_previous").disabled = disabledFlag;
 		}		
 	  });
 
@@ -38,10 +63,23 @@
 		var result = get_max_rewardValue();
 
 		if(maxRewardValue === undefined || maxRewardValue != result) {
-			var delta = (maxRewardValue - result)
-			currentBudget = currentBudget + (delta * numParticipants)
-            $("#id_availablebudget").html(currentBudget);
+			var disabledFlag = undefined;
+			var delta = (maxRewardValue - result);
+			currentBudget = currentBudget + (delta * numParticipants);
+			
+            $("#id_availablebudget").html(get_budget_HTML());
 			maxRewardValue = result; // Store new value
+			
+			if(currentBudget < 0) {
+				disabledFlag = true;
+			} else {
+				disabledFlag = false;
+			}
+
+			// Update buttons
+			document.getElementById("submit_cancel").disabled = disabledFlag;
+			document.getElementById("submit_next").disabled = disabledFlag;
+			document.getElementById("submit_previous").disabled = disabledFlag;
 		}		
 	  });
 
@@ -49,10 +87,23 @@
 		var result = get_max_rewardValue();
 
 		if(maxRewardValue === undefined || maxRewardValue != result) {
-			var delta = (maxRewardValue - result)
-			currentBudget = currentBudget + (delta * numParticipants)
-            $("#id_availablebudget").html(currentBudget);
+			var disabledFlag = undefined;
+			var delta = (maxRewardValue - result);
+			currentBudget = currentBudget + (delta * numParticipants);
+			
+            $("#id_availablebudget").html(get_budget_HTML());
 			maxRewardValue = result; // Store new value
+			
+			if(currentBudget < 0) {
+				disabledFlag = true;
+			} else {
+				disabledFlag = false;
+			}
+
+			// Update buttons
+			document.getElementById("submit_cancel").disabled = disabledFlag;
+			document.getElementById("submit_next").disabled = disabledFlag;
+			document.getElementById("submit_previous").disabled = disabledFlag;
 		}		
 	  });
 
@@ -98,9 +149,8 @@
 	      },
 	      success: function (data) {   				// "data" is the return of the "get students" view call
 	        $(rewardid).html(data);  				// replace the contents of the "partyuserinfo" field with the data
-	        var result = get_max_rewardValue();
-            $("#id_availablebudget").html(currentBudget);  // replace the contents of the "teacheruserid" field with the teacher list
-	        maxRewardValue = result;	// Set initial maxRewardValue value
+            $("#id_availablebudget").html(get_budget_HTML());	// Get and store initial values
+	        maxRewardValue = get_max_rewardValue();	
 	      }
 	    })
 	};
