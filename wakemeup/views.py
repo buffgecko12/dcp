@@ -41,7 +41,8 @@ view_permissions = {
         'class': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
         'teacher': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
         'student': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
-        'reward': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
+        'reward': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER}, # TO-DO: Update so user can only delete own objects
+        'contract': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER}, # TO-DO: Update so user can only delete own objects
     },
     'edit_object': {
         'school':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
@@ -80,7 +81,7 @@ def check_permissions(view):
             objecttype = 'all'
 
         myuser = args[0].user
-
+        
         # Check user permissions
         if myuser.is_authenticated:
             if (
@@ -218,8 +219,13 @@ def preview_image(request, objecttype, objectid):
 
 @check_permissions
 def delete_object(request, objecttype, objectid):
-
+    if(objecttype == 'contract'):        
+        myredirect = redirect('wakemeup:contract_list')
+    else:
+        myredirect = redirect('wakemeup:admin_list', objecttype = objecttype)
+        
     if(request.method == 'POST'):
+        # Set default redirect
         
         if(objecttype == 'school'):
             myobject = School.objects.get(objectid)
@@ -235,11 +241,14 @@ def delete_object(request, objecttype, objectid):
         
         elif(objecttype == 'reward'):
             myobject = Reward.objects.get(objectid)
-        
+
+        elif(objecttype == 'contract'):
+            myobject = Contract.objects.get(objectid)
+
         if(myobject):
             myobject.delete()
 
-    return admin_list(request, objecttype = objecttype)
+    return myredirect
 
 def index(request):
     return render(request, 'wakemeup/index.html')

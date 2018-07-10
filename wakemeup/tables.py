@@ -151,6 +151,17 @@ class RewardsTable(tables.Table):
 
 class ContractsTable(tables.Table):
 
+    objectid = 'contractid'
+
+    kwargs={
+        'objecttype':'contract', 
+        'objectid': A(objectid)
+    }
+
+    # Generate admin columns
+#     edit_link = getEditColumn(objectid, kwargs)
+    delete_link = getDeleteColumn(objectid, kwargs) #TO-DO: Update to only display link if contract status is 'D' (draft)
+
     def render_contractvalidperiod(self, value):
         return display_timestamp_range(value)
     

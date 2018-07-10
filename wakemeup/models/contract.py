@@ -64,8 +64,8 @@ class ContractManager(models.Manager):
     def complete(self):
         pass
     
-    def delete(self, MyContract):
-        pass
+    def delete(self, myContract):
+        return delete_data('SP_DCPDeleteContract', (myContract.contractid,))
 
 class ContractGoalManager(models.Manager):
     def all(self):
