@@ -8,10 +8,10 @@ class ContractManager(models.Manager):
         return self.get_contracts(self)
     
     def get(self, contractid):
-        return get_data_pk(self, 'SP_DCPGetContract(%s,%s,%s)', (contractid, None, None))
+        return get_data_pk(self, 'SP_DCPGetContract(%s,%s,%s,%s)', (contractid, None, None, None))
     
-    def get_contracts(self, contractid = None, partyuserid = None, teacheruserid = None):
-        return get_data(self, 'SP_DCPGetContract(%s,%s,%s)', (contractid, partyuserid, teacheruserid)) # Add more fields as needed
+    def get_contracts(self, contractid = None, partyuserid = None, teacheruserid = None, excludedraftsflag = None):
+        return get_data(self, 'SP_DCPGetContract(%s,%s,%s,%s)', (contractid, partyuserid, teacheruserid, excludedraftsflag)) # Add more fields as needed
     
     def save(self, myContract):
         return save_data('SP_DCPUpsertContract', 

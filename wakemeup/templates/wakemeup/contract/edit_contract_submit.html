@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
+{% load humanize %}
 
 {% block title %}Wake Me Up - Enviar contrato{% endblock %}
 
@@ -50,7 +51,15 @@
 			{% endfor %}
 			<br><br>
 		{% endfor %}
-		
+		<legend>Presupuesto</legend>
+		<div class="row">
+			<div class="col col-sm-3">Costo</div>
+			<div class="col col-sm-9">${{ contractinfo.contractvalue|intcomma}}</div>
+		</div>
+		<div class="row">
+			<div class="col col-sm-3">Saldo</div>
+			<div class="col col-sm-9">${{ teacherbudgetinfo.availablebudget|intcomma}}</div>
+		</div><br>
 		{% crispy form %}
 	</div>
 {% endblock %}

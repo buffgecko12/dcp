@@ -30,7 +30,8 @@ PROJECT_APPS = [
     'users.apps.UsersConfig',
     'wakemeup.apps.WakemeupConfig',
     'crispy_forms',
-    'django_tables2'
+    'django_tables2',
+    'django.contrib.humanize',
 ]
 
 # Create INSTALLED_APPS setting

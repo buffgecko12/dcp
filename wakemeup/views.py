@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.contrib.auth import get_user_model
 
 from .forms import SignupForm, SchoolForm, ClassForm, TeacherForm, StudentForm, RewardForm, ContractForm, ContractGoalsForm, ContractSubmitForm
-from .models.environment import School, Class, Teacher, Student
-from .models.contract import Contract, ContractParty, ContractGoal, ContractGoalReward, Reward
+from .models.environment import School, Class, Teacher, Student, TeacherBudget
+from .models.contract import Contract, ContractParty, ContractGoal, ContractGoalReward, Reward, ContractInfo
 
 from django_tables2 import RequestConfig
 from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable, ContractsTable, RewardsTable
@@ -255,9 +255,8 @@ def index(request):
 
 @check_permissions
 def create_contract(request, contractid):
-    # SAVE FORM
-
-    if request.method == "POST":
+    # SAVE CONTRACT
+    if request.method == "POST" and 'submit_other' not in request.POST: # Ignore submits from other forms
 
         # Go to homepage if user clicked "cancel" button        
         if('submit_cancel' in request.POST):
@@ -314,34 +313,38 @@ def create_contract(request, contractid):
             # Return to main page
             return redirect('wakemeup:create_contract_goals', contractid=mycontract.contractid)
               
-    # CREATE FORM (NEW OBJECT)
+    # NEW CONTRACT
     elif(contractid == 'new'):
         form = ContractForm(request=request, contractid=contractid,initial={'contractstatus':'D'})
         
-    # CREATE FORM (EXISTING OBJECT)
+    # EDIT EXISTING CONTRACT
     else:
         # Lookup object
         mycontract = Contract.objects.get(contractid=contractid)
 
-        # Create form
-        if(mycontract):            
-            contractvalidperiod = display_timestamp_range(mycontract.contractvalidperiod)
-            
-            form = ContractForm(request=request, contractid=contractid,
-                initial = {
-                    'contractid': mycontract.contractid,
-                    'teacheruserid': mycontract.teacheruserid,
-                    'classid': mycontract.classid,
-                    'contracttype': mycontract.contracttype,
-                    'contractvalidperiod': contractvalidperiod,
-                    'revisiondeadlinets': mycontract.revisiondeadlinets,
-                    'contractstatus': mycontract.contractstatus,
-                }
-            )
-                
+        if(mycontract):
+            # Populate exusting form only for "Draft" contracts and if user is contract's owner or super / admin user
+            if(mycontract.contractstatus == 'D' and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
+                contractvalidperiod = display_timestamp_range(mycontract.contractvalidperiod)
+
+                form = ContractForm(request=request, contractid=contractid,
+                    initial = {
+                        'contractid': mycontract.contractid,
+                        'teacheruserid': mycontract.teacheruserid,
+                        'classid': mycontract.classid,
+                        'contracttype': mycontract.contracttype,
+                        'contractvalidperiod': contractvalidperiod,
+                        'revisiondeadlinets': mycontract.revisiondeadlinets,
+                        'contractstatus': mycontract.contractstatus,
+                    }
+                )
+            else:
+                # Unauthorized access
+                return redirect('wakemeup:index') 
+
         # Handle off-case for invalid object id
         else:
-            form = ContractForm(request=request,contractid=contractid)
+            return redirect('wakemeup:index')
         
     return render(request, 'wakemeup/contract/edit_contract.html', {'form': form})
 
@@ -446,9 +449,11 @@ def create_contract_submit(request, contractid):
             # Go back to home page
             return redirect('wakemeup:index')
     else:
-        contractinfo = Contract.objects.get(contractid=contractid)
-        contractinfo.contractvalidperiod_disp = display_timestamp_range(contractinfo.contractvalidperiod) # Format for display
-        classinfo = Class.objects.get(classid=contractinfo.classid)
+        mycontract = Contract.objects.get(contractid=contractid)
+        mycontract.contractvalidperiod_disp = display_timestamp_range(mycontract.contractvalidperiod) # Format for display
+        classinfo = Class.objects.get(classid=mycontract.classid)
+        contractinfo = ContractInfo.objects.get(contractid)
+        teacherbudgetinfo = TeacherBudget.objects.get(teacheruserid=mycontract.teacheruserid)
         
         goalrewards = []
         
@@ -464,10 +469,12 @@ def create_contract_submit(request, contractid):
         # Prepare context info
         context = {
             'form':ContractSubmitForm(contractid = contractid),
-            'contract':contractinfo,
+            'contract':mycontract,
             'classinfo':classinfo,
             'contractparties':ContractParty.objects.get_contract_parties(contractid=contractid),
-            'goalrewards':goalrewards
+            'goalrewards':goalrewards,
+            'contractinfo':contractinfo, #Contains budget info
+            'teacherbudgetinfo':teacherbudgetinfo
         } 
         
         return render(request, 'wakemeup/contract/edit_contract_submit.html', context)
@@ -714,12 +721,12 @@ def edit_object(request, objecttype, objectid):
 def contract_list(request):
     
     # Determine which contracts to display
-    if request.user.userrole in ('A','S'):
+    if request.user.userrole in PERM_ADMIN:
         myargs = {} # Return all contracts
     elif(request.user.usertype == 'TR'):
         myargs = {'teacheruserid':request.user.userid} # Return only contracts tied to teacher
     else:
-        myargs = {'partyuserid':request.user.userid} # Return only contracts related to student
+        myargs = {'partyuserid':request.user.userid,'excludedraftsflag':True} # Return only contracts related to student
     
     contracts = ContractsTable(Contract.objects.get_contracts(**myargs))
     RequestConfig(request).configure(contracts)
