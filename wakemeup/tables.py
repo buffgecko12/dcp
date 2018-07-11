@@ -12,13 +12,13 @@ class DeleteColumn(tables.TemplateColumn):
     def __init__(self, *args, **kwargs):
         super(DeleteColumn, self).__init__(*args, **kwargs)
         
-        self.template_name='wakemeup/admin/fields/delete_link.html'
+        self.template_name='wakemeup/admin/fields/delete_button.html'
         self.verbose_name=''    
 '''
 
 def getDeleteColumn(accessor, kwargs):
     return tables.TemplateColumn(
-        template_name='wakemeup/admin/fields/delete_link.html',
+        template_name='wakemeup/admin/fields/delete_button.html',
         extra_context=kwargs,
         verbose_name='',
         accessor=accessor
@@ -158,9 +158,12 @@ class ContractsTable(tables.Table):
         'objectid': A(objectid)
     }
 
-    # Generate admin columns
-#     edit_link = getEditColumn(objectid, kwargs)
-    delete_link = getDeleteColumn(objectid, kwargs) #TO-DO: Update to only display link if contract status is 'D' (draft)
+    manage_buttons = tables.TemplateColumn(
+        template_name='wakemeup/admin/fields/contract_buttons.html',
+        extra_context=kwargs,
+        verbose_name='',
+        accessor=A(objectid)
+    )    
 
     def render_contractvalidperiod(self, value):
         return display_timestamp_range(value)

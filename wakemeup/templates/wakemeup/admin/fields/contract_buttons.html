@@ -1,0 +1,23 @@
+<div class="text-nowrap">
+{% if record.contractstatus == "D" %}
+	<form style="display:inline-block" action="{% url 'wakemeup:create_contract' contractid=value %}" method="post">
+		<input type="hidden" name="contractid" value=4/>
+	    {% csrf_token %}
+		<input class="btn btn-sm btn-primary" name="submit_other" type="submit" value="Editar"/>
+	</form>
+	<form style="display:inline-block" action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=value %}" method="post">
+	    {% csrf_token %}
+		<input class="btn btn-sm btn-warning" name="delete" type="submit" value="Borrar" onclick="return confirm('Estas seguro que desea eliminar este objeto?');"/>
+	</form>
+{% elif record.contractstatus == "A" %}
+	<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
+	    {% csrf_token %}
+		<input class="btn btn-sm btn-success" name="revise" type="submit" value="Revisar"/>
+	</form>
+{% elif record.contractstatus == "P" %}
+	<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
+	    {% csrf_token %}
+		<input class="btn btn-sm btn-primary" name="manage" type="submit" value="Gestionar"/>
+	</form>
+{% endif %}
+</div>
