@@ -33,6 +33,7 @@ class ContractManager(models.Manager):
             )
         )[0]
 
+    # TO-DO: Remove this (unused)
     def approve(self, myContract, partyuserid, approvaltype, signaturescanfile, approvalts, logonuserid):
         return save_data('SP_DCPApproveContract', 
             (
