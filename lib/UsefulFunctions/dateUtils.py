@@ -3,7 +3,7 @@ from django.utils.timezone import get_current_timezone
 
 from psycopg2.extras import DateTimeTZRange
 
-def format_timestamp(timestamp, formatstring, localizeFlag = True):
+def format_timestamp_db(timestamp, formatstring = '%d/%m/%Y', localizeFlag = True):
     mytimestamp = datetime.datetime.strptime(timestamp, formatstring)
     
     if(localizeFlag):
@@ -14,8 +14,8 @@ def format_timestamp(timestamp, formatstring, localizeFlag = True):
 
 def format_timestamp_range_db(timestamprange, formatstring, localizeFlag = True, boundstring = '[]'):
 
-    mystarttimestamp = format_timestamp(timestamprange[0], formatstring, localizeFlag)
-    myendtimestamp = format_timestamp(timestamprange[1], formatstring, localizeFlag)
+    mystarttimestamp = format_timestamp_db(timestamprange[0], formatstring, localizeFlag)
+    myendtimestamp = format_timestamp_db(timestamprange[1], formatstring, localizeFlag)
     
     return DateTimeTZRange(mystarttimestamp, myendtimestamp, boundstring) # Convert to Postgres native tstzrange type
 
@@ -30,3 +30,6 @@ def display_timestamp_range(timestamprange, formatstring = "%d/%m/%Y"):
 
     return str(timestamprange.lower.strftime(formatstring)) + ' - ' + \
            str(timestamprange.upper.strftime(formatstring))
+           
+def get_current_timestamp_db():
+    return format_timestamp_db(datetime.datetime.now())

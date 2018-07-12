@@ -32,3 +32,13 @@ def subtract_arrays(original, current):
 
     return result
 
+def convert_form_binary_to_db(formfieldname):
+
+    # Read signature scan file
+    if(formfieldname):
+        myfile = formfieldname
+        mydatafile = myfile.read()
+    else:
+        mydatafile = None
+
+    return mydatafile
