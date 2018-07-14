@@ -11,6 +11,8 @@ urlpatterns = [
 
     # Contract
     url(r'^contract/$', views.contract_list, name="contract_list"),
+    url(r'^contract/(?P<contractid>(\d+))/detail$', views.contract_detail, name="contract_detail"),
+    url(r'^contract/accept$', views.contract_accept, name="contract_accept"),
     url(r'^contract/(?P<contractid>(\d+|new))$', views.create_contract, name="create_contract"),
     url(r'^contract/(?P<contractid>(\d+))/goals$', views.create_contract_goals, name="create_contract_goals"),
     url(r'^contract/(?P<contractid>(\d+))/submit$', views.create_contract_submit, name="create_contract_submit"),

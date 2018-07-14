@@ -40,8 +40,8 @@ class ContractManager(models.Manager):
                 myContract.contractid, 
                 partyuserid, 
                 approvaltype, 
+                None, #preferredgoalid
                 signaturescanfile, 
-                approvalts, 
                 logonuserid
             )
         )
@@ -142,8 +142,8 @@ class ContractPartyManager(models.Manager):
                 MyContractParty.contractid, 
                 MyContractParty.partyuserid, 
                 'C', 
+                MyContractParty.preferredgoalid,
                 MyContractParty.partyapprovalsignature, 
-                MyContractParty.partyapprovalts, 
                 MyContractParty.partylogonuserid
             )
         )
@@ -284,6 +284,7 @@ class ContractParty(models.Model):
     lastname = models.CharField(max_length=100, verbose_name='Apellido(s)')
     
     # Get approval attributes
+    preferredgoalid = models.IntegerField()
     partyapprovalsignature = models.BinaryField() # signaturescanfile
     partyapprovalts = models.DateTimeField() # approvalts
     partylogonuserid = models.IntegerField() # logonuserid

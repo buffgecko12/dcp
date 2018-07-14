@@ -456,6 +456,38 @@ class ContractForm(forms.Form):
         model = Contract
         fields = ('contractid','teacheruserid','classid','partyuserinfo','contractvalidperiod','revisiondeadlinets','contractstatus','contracttype')
 
+class ContractPartyAcceptForm(forms.Form):
+
+    contractid = forms.IntegerField(widget=forms.HiddenInput)
+    partyuserid = forms.IntegerField(widget=forms.HiddenInput)
+    preferredgoalid = forms.IntegerField(widget=forms.HiddenInput)
+    partyapprovalsignature = forms.FileField(label='Firma', required=False) # Approval signature scan file
+
+    def __init__ (self, *args, **kwargs):
+
+        # Call base class constructor (i.e. Teacher Form)
+        super(ContractPartyAcceptForm, self).__init__(*args, **kwargs)
+        
+        # Set form helper properties
+        self.helper = FormHelper()
+        setFormHelper(self.helper)
+        
+        # Set form layout
+        self.helper.layout = Layout(
+            'contractid',
+            'preferredgoalid',
+            'partyuserid',
+            'partyapprovalsignature',
+            FormActions(
+                Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='submit_cancel'),
+                Submit('submit_next','Enviar', css_id='submit_next'),
+            )
+        )
+
+    class Meta:
+        model = Contract
+        fields = ('contractid','preferredgoalid','partyuserid','partyapprovalsignature')
+
 # Main contract goal form
 class ContractGoalsForm(forms.Form):
 

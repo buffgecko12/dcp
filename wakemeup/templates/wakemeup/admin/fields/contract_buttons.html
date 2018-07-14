@@ -1,7 +1,6 @@
 <div class="text-nowrap">
 {% if record.contractstatus == "D" %}
 	<form style="display:inline-block" action="{% url 'wakemeup:create_contract' contractid=value %}" method="post">
-		<input type="hidden" name="contractid" value=4/>
 	    {% csrf_token %}
 		<input class="btn btn-sm btn-primary" name="submit_other" type="submit" value="Editar"/>
 	</form>
@@ -12,12 +11,12 @@
 {% elif record.contractstatus == "A" %}
 	<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
 	    {% csrf_token %}
-		<input class="btn btn-sm btn-success" name="revise" type="submit" value="Revisar"/>
+		<input class="btn btn-sm btn-success" name="revise" type="submit" value="Modificar"/>
 	</form>
 {% elif record.contractstatus == "P" %}
-	<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
+	<form style="display:inline-block" action="{% url 'wakemeup:contract_detail' contractid=value %}" method="post">
 	    {% csrf_token %}
-		<input class="btn btn-sm btn-primary" name="manage" type="submit" value="Gestionar"/>
+		<input class="btn btn-sm btn-primary" name="manage" type="submit" value="Revisar"/>
 	</form>
 {% endif %}
 </div>
