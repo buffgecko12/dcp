@@ -116,14 +116,29 @@ class SignupForm(UserCreationForm):
         emailaddress = self.cleaned_data.get('emailaddress')
 
         # Check to see if any users already exist with this email as a username.
-        match = get_user_model().objects.get_user_auth(emailaddress=emailaddress)
+        emailmatch = get_user_model().objects.get_user_auth(emailaddress=emailaddress)
+        usernamematch = get_user_model().objects.get_user_auth(username=emailaddress)
         
-        # Unable to find a user, this is fine
-        if not match:
-            return emailaddress
+        # If email is already in use, raise an error
+        if emailmatch or usernamematch:
+            raise forms.ValidationError('Este correo ya esta en uso.')
 
-        # A user was found with this as a username, raise an error.
-        raise forms.ValidationError('Este correo ya esta en uso.')
+        return emailaddress
+
+    # Make sure email address does not already exist
+    def clean_username(self):
+        # Get the email
+        username = self.cleaned_data.get('username')
+
+        # Check to see if any users already exist with this e-mail / username
+        usernamematch = get_user_model().objects.get_user_auth(username=username)
+        emailmatch = get_user_model().objects.get_user_auth(emailaddress=username)
+
+        # If username is already in use, raise an error
+        if usernamematch or emailmatch:
+            raise forms.ValidationError('Este nombre de usuario / correo ya esta en uso.')
+        
+        return username
 
 class SchoolForm(forms.Form):
 
@@ -516,22 +531,25 @@ class ContractGoalsForm(forms.Form):
             
             raise forms.ValidationError("Por favor especificar al menos una meta.")
 
+    goaldescription_label = 'Descripci' + chr(243) + 'n<br><small><i>Una descripci' + chr(243) + 'n detallada con instrucciones claras para c' + chr(243) + 'mo medir ' + chr(233) + 'xito</i></small>'
+    rewardinfo_label = 'Opciones de premio<br><small><i>Al cumplir con ' + chr(233) + 'xito la meta, cada participante podr' + chr(225) + ' escoger un premio de esta lista</i></small>'
+
     # Fields used for javascript and form navigation between pages
     contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)    
     initialbudget = forms.IntegerField(widget=forms.HiddenInput, required=False)
     numparticipants = forms.IntegerField(widget=forms.HiddenInput, required=False)
 
     e_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
-    e_goaldescription = forms.CharField(max_length=500,label='Descripci' + chr(243) + 'n', widget=forms.Textarea(attrs={'rows':4}), required=False)
-    e_rewardinfo = forms.CharField(label='Opciones de premio', widget=forms.SelectMultiple, required=False)
+    e_goaldescription = forms.CharField(max_length=500,label=goaldescription_label, widget=forms.Textarea(attrs={'rows':4}), required=False)
+    e_rewardinfo = forms.CharField(label=rewardinfo_label, widget=forms.SelectMultiple, required=False)
 
     m_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
-    m_goaldescription = forms.CharField(max_length=500,label='Descripci' + chr(243) + 'n', widget=forms.Textarea(attrs={'rows':4}), required=False)
-    m_rewardinfo = forms.CharField(label='Opciones de premio', widget=forms.SelectMultiple, required=False)
+    m_goaldescription = forms.CharField(max_length=500,label=goaldescription_label, widget=forms.Textarea(attrs={'rows':4}), required=False)
+    m_rewardinfo = forms.CharField(label=rewardinfo_label, widget=forms.SelectMultiple, required=False)
 
     d_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
-    d_goaldescription = forms.CharField(max_length=500,label='Descripci' + chr(243) + 'n', widget=forms.Textarea(attrs={'rows':4}), required=False)
-    d_rewardinfo = forms.CharField(label='Opciones de premio', widget=forms.SelectMultiple, required=False)
+    d_goaldescription = forms.CharField(max_length=500,label=goaldescription_label, widget=forms.Textarea(attrs={'rows':4}), required=False)
+    d_rewardinfo = forms.CharField(label=rewardinfo_label, widget=forms.SelectMultiple, required=False)
 
     def __init__ (self, *args, **kwargs):
 
