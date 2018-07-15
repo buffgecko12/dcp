@@ -130,11 +130,11 @@ def load_classes(request):
         classid = mycontract.classid
         teacheruserid = mycontract.teacheruserid
 
-        classes = Class.objects.get_classes(classid=classid, schoolid=None, teacheruserid = teacheruserid)
+        classes = Class.objects.get_classes(classid=classid, teacheruserid = teacheruserid)
         
     # Lookup teacher classes
     elif teacheruserid:
-        classes = Class.objects.get_classes(classid=classid, schoolid=None, teacheruserid = teacheruserid)
+        classes = Class.objects.get_classes(classid=classid, teacheruserid = teacheruserid)
     else:
         classes = []
 

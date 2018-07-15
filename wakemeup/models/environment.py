@@ -39,13 +39,13 @@ class SchoolManager(models.Manager):
             
 class ClassManager(models.Manager):
     def all(self):
-        return get_data(self, 'SP_DCPGetClass(%s,%s,%s)', (None,None,None))
+        return get_data(self, 'SP_DCPGetClass(%s,%s,%s,%s)', (None,None,None,None))
     
     def get(self, classid):
-        return get_data_pk(self, 'SP_DCPGetClass(%s,%s,%s)', (classid,None,None))
+        return get_data_pk(self, 'SP_DCPGetClass(%s,%s,%s,%s)', (classid,None,None,None))
 
-    def get_classes(self, classid, schoolid, teacheruserid):
-        return get_data(self, 'SP_DCPGetClass(%s,%s,%s)', (classid, schoolid, teacheruserid))
+    def get_classes(self, classid = None, schoolid = None, teacheruserid = None, classdisplayname = None):
+        return get_data(self, 'SP_DCPGetClass(%s,%s,%s,%s)', (classid, schoolid, teacheruserid, classdisplayname))
     
     def save(self, myClass):
         return save_data('SP_DCPUpsertClass', (
@@ -59,7 +59,7 @@ class ClassManager(models.Manager):
         return delete_data('SP_DCPDeleteClass', (myClass.classid,))
     
     def class_choices(self, schoolid = None, teacheruserid = None):
-        classes = Class.objects.get_classes(schoolid = schoolid, teacheruserid = teacheruserid, classid = None)
+        classes = Class.objects.get_classes(schoolid = schoolid, teacheruserid = teacheruserid)
         class_choices = [
             (str(myclass.classid), myclass.classdisplayname) for myclass in classes
         ]

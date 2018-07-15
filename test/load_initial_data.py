@@ -88,7 +88,7 @@ def load_users():
 
         # Convert class name list to classid list
         for myclass in teacher[3]:
-            myclassid = Class.objects.get_classes(schoolid = myschoolid, classid = None, classdisplayname = myclass, teacheruserid = None)[0].classid
+            myclassid = Class.objects.get_classes(schoolid = myschoolid, classdisplayname = myclass)[0].classid
             myclassinfo['currentclasses'].append({'classid':myclassid})
         
         # Assign teacher classes
@@ -116,7 +116,7 @@ def load_users():
 
     for student in student_list:
         mystudentuserid = create_user('ST', student[0], student[1], 'U').userid
-        myclassid = Class.objects.get_classes(schoolid = student[2], classid = None, classdisplayname = myclass, teacheruserid = None)[0].classid
+        myclassid = Class.objects.get_classes(schoolid = student[2], classdisplayname = myclass)[0].classid
 
         # Assign student class / info
         mystudent = Student(
