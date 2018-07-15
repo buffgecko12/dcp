@@ -95,14 +95,12 @@ def load_users():
         myteacher = Teacher(
             teacheruserid = myteacheruserid,
             schoolid = myschoolid,
-#             maxbudget = MAX_BUDGET,
             classinfo = json.dumps(myclassinfo)
         )
         
-        myteacher.maxbudget = MAX_BUDGET
-
         # Save teacher info
         myteacher.save()
+        myteacher.update_budget(maxbudget = MAX_BUDGET)
 
     student_list = [
         ('Daniel Esteban','Nino Mosquera',1,'904',),
@@ -116,7 +114,7 @@ def load_users():
 
     for student in student_list:
         mystudentuserid = create_user('ST', student[0], student[1], 'U').userid
-        myclassid = Class.objects.get_classes(schoolid = student[2], classdisplayname = myclass)[0].classid
+        myclassid = Class.objects.get_classes(schoolid = student[2], classdisplayname = student[3])[0].classid
 
         # Assign student class / info
         mystudent = Student(

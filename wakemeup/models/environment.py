@@ -86,6 +86,13 @@ class TeacherManager(models.Manager):
         ]
         
         return (teacher_choices)
+
+    def update_budget(self, myTeacher, maxbudget):
+        return save_data('SP_DCPUpsertTeacherBudget', (
+            myTeacher.teacheruserid,
+            maxbudget,
+            )
+        )
     
     def save(self, myTeacher):
         return save_data('SP_DCPUpsertTeacher', (
@@ -207,6 +214,9 @@ class Teacher(models.Model):
 
     def save(self):
         return Teacher.objects.save(self)
+    
+    def update_budget(self, maxbudget):
+        return Teacher.objects.update_budget(self, maxbudget)
     
     def delete(self):
         return Teacher.objects.delete(self)
