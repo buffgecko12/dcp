@@ -256,8 +256,8 @@ class TeacherForm(forms.Form):
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
-    phonenumber = forms.CharField(max_length=25,label='Tel' + chr(233) + 'fono')    
-    emailaddress = forms.CharField(max_length=250,label='Correo')
+    phonenumber = forms.CharField(max_length=25,label='Tel' + chr(233) + 'fono', required=False)    
+    emailaddress = forms.CharField(max_length=250,label='Correo', required=False)
     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
         
     # Define constructor
