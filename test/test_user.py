@@ -3,6 +3,18 @@ import unittest
 
 from django.contrib.auth import authenticate, get_user_model, get_user
 
+''' TO-DO: New test cases to add
+username field: 
+Case #1a - Input e-mail that already exists as username (FAIL)
+Case #1b - Input e-mail that already exists as e-mail (FAIL)
+Case #2 - Input e-mail, leave emailaddress field blank --> emailaddress field should populate
+Case #3 - Input non-email that already exists as username (FAIL)
+
+emailaddress field:
+Case #1 - Input email that already exists as username (FAIL)
+Case #2 - Input email that already exist as email (FAIL)
+'''
+
 class testUser(unittest.TestCase):
     def testUser(self):
         
