@@ -18,6 +18,8 @@ import json
 
 from django.shortcuts import redirect
 
+from django.core.validators import validate_email
+
 # Define user permission roles
 PERM_NONE = ['NONE']
 PERM_ADMIN = ['S','A']
@@ -824,6 +826,19 @@ def add_user(request):
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
 
+            # Check if username is an e-mail address
+            try:
+                validate_email(username)
+                username_isemail = True
+            except:
+                username_isemail = False
+
+            # If user provides e-mail address as username, use it as emailaddress if not provided
+            if not form.cleaned_data.get('emailaddress') and username_isemail:
+                myemailaddress = username
+            else:
+                myemailaddress = form.cleaned_data.get('emailaddress')
+
             # Create new user
             get_user_model().objects.create_user(
                 raw_password, 
@@ -833,7 +848,7 @@ def add_user(request):
                 form.cleaned_data.get('lastname'),
                 form.cleaned_data.get('defaultsignaturescanfile'),
                 form.cleaned_data.get('phonenumber'),
-                form.cleaned_data.get('emailaddress'),
+                myemailaddress,
                 form.cleaned_data.get('userrole'),
             )
 
