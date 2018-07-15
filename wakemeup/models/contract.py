@@ -318,7 +318,7 @@ class ContractInfo(models.Model):
     
 class Reward(models.Model):
 
-    # Get party attributes    
+    # Get party attributes
     rewardid = models.IntegerField(primary_key=True)
     rewarddisplayname = models.CharField(max_length=100,verbose_name='Premio')
     rewarddescription = models.CharField(max_length=500,verbose_name='Descripci' + chr(243) + 'n de premio')
@@ -329,8 +329,8 @@ class Reward(models.Model):
         
     objects = RewardManager()
     
-    def save(self, createdbyuserid):
-        return Reward.objects.save(self, createdbyuserid)
+    def save(self, **kwargs):
+        return Reward.objects.save(self, **kwargs)
     
     def delete(self):
         return Reward.objects.delete(self)
