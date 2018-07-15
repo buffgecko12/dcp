@@ -22,26 +22,28 @@
 							<a class="dropdown-item {% if url_name == 'contract_list' %} active {% endif %}" href="{% url 'wakemeup:contract_list' %}">Mis contratos</a>
 						</div>
 					</li>
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Admin</a>
-						<div class="dropdown-menu">
-							{% if user.is_admin %}
-							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='school' %}">Colegios</a>
-							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='class' %}">Cursos</a>
-							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='reward' %}">Premios</a>
-							{% endif %}
-							{% if user.is_admin or user.usertype == "TR" %}
-							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='teacher' %}">Docentes</a>
-							{% endif %}
-							{% if user.is_admin or user.usertype == "ST" %}
-							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='student' %}">Estudiantes</a>
-							{% endif %}
-							{% if user.is_superuser %}
-								<div class="dropdown-divider"></div>
-								<a class="dropdown-item {% if url_name == 'add_user' %} active {% endif %}" href="{% url 'wakemeup:add_user' %}">Crear usuario</a>
-							{% endif %}
-						</div>
-					</li>
+					{% if user.is_admin or user.usertype == "TR" or user.usertype == "ST" %}
+						<li class="nav-item dropdown">
+							<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Admin</a>
+							<div class="dropdown-menu">
+								{% if user.is_admin %}
+								<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='school' %}">Colegios</a>
+								<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='class' %}">Cursos</a>
+								<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='reward' %}">Premios</a>
+								{% endif %}
+								{% if user.is_admin or user.usertype == "TR" %}
+								<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='teacher' %}">Docentes</a>
+								{% endif %}
+								{% if user.is_admin or user.usertype == "ST" %}
+								<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='student' %}">Estudiantes</a>
+								{% endif %}
+								{% if user.is_superuser %}
+									<div class="dropdown-divider"></div>
+									<a class="dropdown-item {% if url_name == 'add_user' %} active {% endif %}" href="{% url 'wakemeup:add_user' %}">Crear usuario</a>
+								{% endif %}
+							</div>
+						</li>
+					{% endif %}
 					<li class="nav-item">
 						<a class="nav-link" href="{% url 'wakemeup:logout' %}">Cerrar sesi&#243;n</a>
 					</li>
