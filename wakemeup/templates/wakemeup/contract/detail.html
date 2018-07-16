@@ -82,13 +82,17 @@
 							</div>
 						{% endfor %}
 					<div class="col ">
-						{% if not party.preferredgoalid %}
-							{% if party.partyuserid == request.user.userid or request.user.is_admin %}
-								<input type="submit" class="btn btn-sm btn-primary" name="submit" id="submit_{{party.partyuserid}}" value="Aceptar" disabled/>
+						<small><i>
+							{% if not party.preferredgoalid %}
+								{% if party.partyuserid == request.user.userid or request.user.is_admin %}
+									<input type="submit" class="btn btn-sm btn-primary" name="submit" id="submit_{{party.partyuserid}}" value="Aceptar" disabled/>
+								{% else %}
+								N/A
+								{% endif %}
+							{% else %}
+								{{ party.partyapprovalts|date:'d/m/Y'}}
 							{% endif %}
-						{% else %}
-							<small><i>{{ party.partyapprovalts|date:'d/m/Y'}}</i></small>
-						{% endif %}
+						</i></small>
 					</div>
 				</div>
 				<input type="hidden" name="contractid" value="{{ contract.contractid }}" />

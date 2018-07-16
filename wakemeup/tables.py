@@ -135,6 +135,11 @@ class StudentsTable(tables.Table):
 class RewardsTable(tables.Table):
 
     objectid = 'rewardid'
+
+    rewardvalue = tables.TemplateColumn(
+        template_name='wakemeup/admin/fields/currency_field.html',
+        verbose_name='Valor',
+    )
     
     kwargs={
         'objecttype': 'reward',
