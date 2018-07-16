@@ -459,10 +459,11 @@ def addreward(request):
                 rewarddisplayname = form.cleaned_data.get('rewarddisplayname'),
                 rewarddescription = form.cleaned_data.get('rewarddescription'),
                 rewardvalue = form.cleaned_data.get('rewardvalue'),
+                createdbyuserid=request.user.userid
             )
 
             # Save object
-            myreward.save(createdbyuserid=request.user.userid)
+            myreward.save()
 
             return HttpResponse("Premio guardado.")
     else:
@@ -606,11 +607,14 @@ def edit_object(request, objecttype, objectid):
 
         # Try to lookup object creator
         try:
-            myreward = Reward.objects.get(int(objectid))
+            myreward = Reward.objects.get(rewardid=int(objectid))
+            print(myreward)
             createdbyuserid = myreward.createdbyuserid
         except:
             createdbyuserid = None
-            
+        
+        print(request.user.usertype,request.user.userid,createdbyuserid,int(objectid))
+        
         # Teachers can only view their own rewards
         if not (
             (request.user.usertype == 'TR' and request.user.userid == createdbyuserid) or

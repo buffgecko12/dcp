@@ -138,9 +138,10 @@ def load_rewards():
             rewarddisplayname = reward[0],
             rewarddescription = reward[1],
             rewardvalue = reward[2],
+            createdbyuserid = 0, 
         )
         
-        myreward.save(createdbyuserid = 0, globalflag = True)
+        myreward.save(globalflag = True)
 
 def load_all():
     # Clean out any existing schools

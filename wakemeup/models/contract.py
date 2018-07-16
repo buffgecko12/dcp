@@ -168,7 +168,7 @@ class RewardManager(models.Manager):
     def get_rewards(self, rewardid = None, createdbyuserid = None, activeflag = True, globalflag = True):
         return get_data(self, 'SP_DCPGetReward(%s,%s,%s,%s)', (rewardid, createdbyuserid, activeflag, globalflag))
     
-    def save(self, myReward, createdbyuserid = None, globalflag = False):
+    def save(self, myReward, globalflag = False):
         return save_data('SP_DCPUpsertReward', 
             (
                 myReward.rewardid, 
@@ -176,7 +176,7 @@ class RewardManager(models.Manager):
                 myReward.rewarddescription,
                 myReward.rewardvalue,
                 globalflag, 
-                createdbyuserid,
+                myReward.createdbyuserid,
             )
         )[0]
     
@@ -323,6 +323,7 @@ class Reward(models.Model):
     rewarddisplayname = models.CharField(max_length=100,verbose_name='Premio')
     rewarddescription = models.CharField(max_length=500,verbose_name='Descripci' + chr(243) + 'n de premio')
     rewardvalue = models.IntegerField(verbose_name='Valor')
+    createdbyuserid = models.IntegerField()
     
     class Meta:
         managed = False

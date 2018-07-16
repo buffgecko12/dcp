@@ -151,7 +151,7 @@ class RewardsTable(tables.Table):
 
     class Meta:
         model = Reward
-        exclude = ('rewardid')
+        exclude = ('rewardid','createdbyuserid')
         empty_text = EMPTY_TEXT
 
 class ContractsTable(tables.Table):

@@ -59,10 +59,12 @@ class testContracts(unittest.TestCase):
 
         # Create new rewards
         newreward1 = Reward(rewardid = 101, rewarddescription = 'Goal #101', rewardvalue = 755)
-        newreward1.rewardid = newreward1.save(createdbyuserid = 0)
+        newreward1.createdbyuserid = 0
+        newreward1.rewardid = newreward1.save()
 
         newreward2 = Reward(rewardid = 102, rewarddescription = 'Goal #102', rewardvalue = 50)
-        newreward2.rewardid = newreward2.save(createdbyuserid = 0)
+        newreward2.createdbyuserid = 0
+        newreward2.rewardid = newreward2.save()
  
     # Re-create environment for each test case        
     def setUp(self):
@@ -131,7 +133,8 @@ class testContracts(unittest.TestCase):
 
     def testReward(self):
         newreward2.description = "New Description text"
-        newreward2.save(createdbyuserid=0)
+        newreward2.createdbyuserid=0
+        newreward2.save()
         newrewardget = Reward.objects.get(rewardid=102)
         self.assertEqual(newrewardget.rewarddescription,"Goal #102")
 
