@@ -11,7 +11,7 @@
 {% block content %}
 	<div class="container">
 		<br>
-		{% if request.user.is_admin %}
+		{% if request.user.is_admin or request.user.usertype == 'TR' %}
 	    <div class="row">
     		<a href="{% url 'wakemeup:create_contract' contractid='new' %}" class="btn btn-primary btn-lg btn-huge btn-block">Crear contrato</a>
 	    </div>
