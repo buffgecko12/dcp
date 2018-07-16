@@ -41,6 +41,8 @@ urlpatterns = [
     url(r'^ajax/load-teachers/', views.load_teachers, name='ajax_load_teachers'),
     url(r'^ajax/load-rewards/', views.load_rewards, name='ajax_load_rewards'),
 
+    url(r'^ajax/addreward/', views.addreward, name='ajax_add_reward'),
+
     # Default (catch all)    
     url(r'.*', views.index, name = "default"),
 

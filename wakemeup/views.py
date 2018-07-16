@@ -56,6 +56,9 @@ view_permissions = {
     'create_contract': {
         'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
     },
+    'addreward': {
+        'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
+    },
     'add_user': {
         'all': {'userrole':PERM_SUPER, 'usertype':PERM_NONE},
     },
@@ -440,7 +443,32 @@ def create_contract_goals(request, contractid):
             # Unauthorized access
             return redirect_home() 
 
-    return render(request, 'wakemeup/contract/edit_contract_goals.html', {'form': form})
+    return render(request, 'wakemeup/contract/edit_contract_goals.html', {'form': form, 'addRewardForm': RewardForm()})
+
+@check_permissions
+def addreward(request):
+
+    if request.method == 'POST':
+
+        # Create form instance (bind data to form)
+        form = RewardForm(request.POST)
+
+        if form.is_valid():
+            myreward = Reward(
+                rewardid = form.cleaned_data.get('rewardid'),
+                rewarddisplayname = form.cleaned_data.get('rewarddisplayname'),
+                rewarddescription = form.cleaned_data.get('rewarddescription'),
+                rewardvalue = form.cleaned_data.get('rewardvalue'),
+            )
+
+            # Save object
+            myreward.save(createdbyuserid=request.user.userid)
+
+            return HttpResponse("Premio guardado.")
+    else:
+        form = RewardForm
+
+    return render(request, 'wakemeup/contract/edit_contract_goals_addreward.html', {'form': form})
 
 @check_permissions
 def create_contract_submit(request, contractid):
@@ -510,14 +538,34 @@ def admin_list(request, objecttype):
     # Retrieve objects
     if objecttype == 'school':
         objectSet = SchoolsTable(School.objects.all())
+
     elif objecttype == 'class':
         objectSet = ClassesTable(Class.objects.all())
+
     elif objecttype == 'teacher':
-        objectSet = TeachersTable(Teacher.objects.all())
+    
+        # Only list info for logged on teacher
+        if request.user.usertype == 'TR':
+            teacheruserid = request.user.userid
+        else:
+            teacheruserid = None
+            
+        objectSet = TeachersTable(Teacher.objects.get_teachers(teacheruserid = teacheruserid))
+
     elif objecttype == 'student':
         objectSet = StudentsTable(Student.objects.all())
+
     elif objecttype == 'reward':
-        objectSet = RewardsTable(Reward.objects.all())
+
+        # Only show rewards created by logged on teacher
+        if request.user.usertype == 'TR':
+            createdbyuserid = request.user.userid
+        else:
+            createdbyuserid = None
+
+        # Look up rewards
+        objectSet = RewardsTable(Reward.objects.get_rewards(createdbyuserid = createdbyuserid, globalflag = False))
+
     else:
         pass
         
@@ -535,10 +583,41 @@ def edit_object(request, objecttype, objectid):
         objectForm = ClassForm
     elif objecttype == 'teacher':
         objectForm = TeacherForm
+
+        # Teachers can only view their own information
+        if not (
+            (request.user.usertype == 'TR' and request.user.userid == int(objectid)) or
+            request.user.is_admin()
+        ):
+            return redirect_home()
+
     elif objecttype == 'student':
         objectForm = StudentForm
+
+        # Students can only view their own information
+        if not (
+            (request.user.usertype == 'ST' and request.user.userid == int(objectid)) or
+            request.user.is_admin()
+        ):
+            return redirect_home()
+
     elif objecttype == 'reward':
         objectForm = RewardForm
+
+        # Try to lookup object creator
+        try:
+            myreward = Reward.objects.get(int(objectid))
+            createdbyuserid = myreward.createdbyuserid
+        except:
+            createdbyuserid = None
+            
+        # Teachers can only view their own rewards
+        if not (
+            (request.user.usertype == 'TR' and request.user.userid == createdbyuserid) or
+            request.user.is_admin()
+        ):
+            return redirect_home()
+
     else:
         pass
 
@@ -547,6 +626,11 @@ def edit_object(request, objecttype, objectid):
 
     # PROCESS FORM
     if request.method == 'POST':
+
+        # Go to main admin page if user clicked "cancel" button        
+        if('submit_cancel' in request.POST):
+            return redirect('wakemeup:admin_list',objecttype = objecttype)
+
         
         # Create form instance (bind data to form)
         form = objectForm(request.POST, request.FILES)
@@ -726,7 +810,7 @@ def edit_object(request, objecttype, objectid):
                 
         # Handle off-case for invalid object id
         else:
-            form = objectForm()
+            return redirect_home()
         
     return render(request, 'wakemeup/admin/edit_form.html', {'form': form})
 
@@ -792,8 +876,6 @@ def contract_accept(request):
     else:
         return redirect_home()
 
-
-
 @check_permissions
 def contract_list(request):
     
@@ -804,8 +886,16 @@ def contract_list(request):
         myargs = {'teacheruserid':request.user.userid} # Return only contracts tied to teacher
     else:
         myargs = {'partyuserid':request.user.userid,'excludedraftsflag':True} # Return only contracts related to student
+
+    # Exclude un-necessary columns
+    if(request.user.usertype == 'TR'):
+        exclude = ('teacheruserid',)
+    elif(request.user.usertype == 'ST'):
+        exclude = ('classdisplayname',)
+    else:
+        exclude = ()
     
-    contracts = ContractsTable(Contract.objects.get_contracts(**myargs))
+    contracts = ContractsTable(Contract.objects.get_contracts(**myargs), exclude=exclude, request=request)
     RequestConfig(request).configure(contracts)
 
     context = {
