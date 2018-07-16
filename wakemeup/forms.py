@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
-from crispy_forms.bootstrap import FormActions, TabHolder, Tab
+from crispy_forms.bootstrap import FormActions, TabHolder, Tab, PrependedText
 from django.forms.widgets import HiddenInput
 
 from .models.environment import School, Class, Teacher, TeacherBudget, Student
@@ -36,8 +36,8 @@ def setFormHelper(
     
 def getAdminFormActions(objecttype):
     return FormActions(
-        Submit('create','Enviar'),
-        HTML("""<a href="{% url 'wakemeup:admin_list' '""" + objecttype + """' %}" class="btn btn-secondary">Cancelar</a>"""),
+        Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='cancel'), # Don't change the "cancel" id, it's used by javascript
+        Submit('submit_next','Siguiente', css_id='next'),
     )
     
 class LoginForm(AuthenticationForm):
@@ -159,6 +159,7 @@ class SchoolForm(forms.Form):
         # Set form helper properties
         self.helper = FormHelper()
         setFormHelper(self.helper)
+        self.helper.form_tag = False
         
         # Set form layout
         self.helper.layout = Layout(
@@ -217,6 +218,7 @@ class ClassForm(forms.Form):
         # Set form helper properties
         self.helper = FormHelper()
         setFormHelper(self.helper)
+        self.helper.form_tag = False
         
         # Set form layout
         self.helper.layout = Layout(
@@ -273,6 +275,7 @@ class TeacherForm(forms.Form):
         # Set form helper properties
         self.helper = FormHelper()
         setFormHelper(self.helper)
+        self.helper.form_tag = False
         
         # Set form layout
         self.helper.layout = Layout(
@@ -306,8 +309,8 @@ class StudentForm(forms.Form):
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
-    phonenumber = forms.CharField(max_length=25,label='Tel' + chr(233) + 'fono')    
-    emailaddress = forms.CharField(max_length=250,label='Correo')
+    phonenumber = forms.CharField(max_length=25,label='Tel' + chr(233) + 'fono', required=False)    
+    emailaddress = forms.CharField(max_length=250,label='Correo', required=False)
     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
 
     def __init__ (self, *args, **kwargs):
@@ -322,6 +325,7 @@ class StudentForm(forms.Form):
         # Set form helper properties
         self.helper = FormHelper()
         setFormHelper(self.helper)
+        self.helper.form_tag = False
         
         # Set form layout
         self.helper.layout = Layout(
@@ -361,6 +365,7 @@ class RewardForm(forms.Form):
         # Set form helper properties
         self.helper = FormHelper()
         setFormHelper(self.helper)
+        self.helper.form_tag = False
         
         # Set form layout
         self.helper.layout = Layout(
@@ -369,7 +374,7 @@ class RewardForm(forms.Form):
                 'rewardid',
                 'rewarddisplayname',
                 'rewarddescription',
-                'rewardvalue',
+                PrependedText('rewardvalue', '$'),
             ),
             getAdminFormActions('reward')
         )
@@ -532,7 +537,7 @@ class ContractGoalsForm(forms.Form):
             raise forms.ValidationError("Por favor especificar al menos una meta.")
 
     goaldescription_label = 'Descripci' + chr(243) + 'n<br><small><i>Una descripci' + chr(243) + 'n detallada con instrucciones claras para c' + chr(243) + 'mo medir ' + chr(233) + 'xito</i></small>'
-    rewardinfo_label = 'Opciones de premio<br><small><i>Al cumplir con ' + chr(233) + 'xito la meta, cada participante podr' + chr(225) + ' escoger un premio de esta lista</i></small>'
+    rewardinfo_label = 'Opciones de premio<small><i> <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addRewardModal">A' + chr(241) + 'adir</button><br>Al cumplir con ' + chr(233) + 'xito la meta, cada participante podr' + chr(225) + ' escoger un premio de esta lista</i></small>'
 
     # Fields used for javascript and form navigation between pages
     contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)    
