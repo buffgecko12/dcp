@@ -36,7 +36,7 @@ def setFormHelper(
     
 def getAdminFormActions(objecttype):
     return FormActions(
-        Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='cancel'), # Don't change the "cancel" id, it's used by javascript
+        Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='cancel'), # Don't change the "cancel" id, it's used by javascript (i.e. reward modal)
         Submit('submit_next','Siguiente', css_id='next'),
     )
     
