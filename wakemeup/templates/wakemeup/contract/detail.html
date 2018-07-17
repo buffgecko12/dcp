@@ -58,7 +58,7 @@
 			{% endfor %}
 			<div class="col"><small><strong>Aceptado</strong></small></div>
 		</div>
-		{% for party in contractparties %}
+		{% for party in contract.partyuserinfo.currentparties %}
 			<form action="{% url 'wakemeup:contract_accept' %}" method="post" name="partyForm_{{ party.partyuserid }}">{% csrf_token %}
 				<div class="row">
 					<div class="col form-group">

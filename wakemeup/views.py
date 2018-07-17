@@ -420,16 +420,17 @@ def create_contract_goals(request, contractid):
 
         # Get contract goals
         mycontract = Contract.objects.get(contractid=contractid)
+        mygoals = ContractGoal.objects.get_contract_goals(contractid=contractid)
 
         if(mycontract):
             if(mycontract.contractstatus == 'D' and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
-                for mygoal in mycontract.goalinfo['currentgoals']:
+                for mygoal in mygoals:
                     # Use difficultylevel (i.e. e/m/d) for id tag (assumes MAX one goal per difficultylevel)
-                    goaltypeid = mygoal['difficultylevel'].lower() + "_"
+                    goaltypeid = mygoal.difficultylevel.lower() + "_"
         
                     initial_data.update({
-                        goaltypeid + 'goalid':mygoal['goalid'],
-                        goaltypeid + 'goaldescription':mygoal['goaldescription'],
+                        goaltypeid + 'goalid':mygoal.goalid,
+                        goaltypeid + 'goaldescription':mygoal.goaldescription,
                         goaltypeid + 'rewardinfo':"",
                         }
                     )
@@ -506,7 +507,6 @@ def create_contract_submit(request, contractid):
                     'form':ContractSubmitForm(contractid = contractid),
                     'contract':mycontract,
                     'classinfo':classinfo,
-                    'contractparties':ContractParty.objects.get_contract_parties(contractid=contractid),
                     'contractinfo':contractinfo, #Contains budget info
                     'teacherbudgetinfo':teacherbudgetinfo
                 } 
@@ -819,7 +819,6 @@ def contract_detail(request, contractid):
             'form':ContractSubmitForm(contractid = contractid),
             'contract':mycontract,
             'classinfo':classinfo,
-            'contractparties':ContractParty.objects.get_contract_parties(contractid=contractid),
             'contractinfo':contractinfo, #Contains budget info
         } 
     

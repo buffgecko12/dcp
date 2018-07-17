@@ -1,6 +1,6 @@
 {% load staticfiles %}
 
-{% for party in record.partyuserinfo %}
+{% for party in record.partyuserinfo.currentparties %}
 	<span>
 		{% if party.approvalts %}
 			<img src="{% static 'img/web_check.png' %}" /> 

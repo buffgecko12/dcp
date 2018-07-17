@@ -29,7 +29,7 @@
 		</div>
 		<br>
 		<legend><u>Participantes</u></legend>
-		{% for party in contractparties %}
+		{% for party in contract.partyuserinfo.currentparties %}
 
 		<div class="row">
 			<div class="col col-sm-3">{{ party.firstname }} {{ party.lastname }}</div>
