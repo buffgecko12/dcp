@@ -1,6 +1,6 @@
 {% load staticfiles %}
 
-{% for goal in record.goalinfo %}
+{% for goal in record.goalinfo.currentgoals %}
 	{% if record.contractapprovalts and goal.acceptedflag or not record.contractapprovalts %}
 		<div>
 			<strong>
@@ -19,7 +19,7 @@
 				<i>{{ goal.goaldescription }}</i><br>
 		
 				<strong>Opciones de premio: </strong>
-				<i>{% for reward in goal.rewardinfo %}
+				<i>{% for reward in goal.rewardinfo.currentrewards %}
 					{{ reward.rewarddisplayname }}{% if not forloop.last %}, {% endif %}
 				{% endfor %}</i>
 			</div>
