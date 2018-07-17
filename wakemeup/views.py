@@ -614,12 +614,11 @@ def edit_object(request, objecttype, objectid):
     objectClass = objectForm.Meta.model
 
     # PROCESS FORM
-    if request.method == 'POST':
+    if request.method == 'POST' and 'submit_other' not in request.POST: # Ignore submits from other forms
 
         # Go to main admin page if user clicked "cancel" button        
         if('submit_cancel' in request.POST):
             return redirect('wakemeup:admin_list',objecttype = objecttype)
-
         
         # Create form instance (bind data to form)
         form = objectForm(request.POST, request.FILES)

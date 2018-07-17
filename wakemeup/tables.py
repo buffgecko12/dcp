@@ -7,44 +7,19 @@ from lib.UsefulFunctions.dateUtils import display_timestamp_range, display_times
 
 EMPTY_TEXT = 'No hay registros.'
 
-'''
-class DeleteColumn(tables.TemplateColumn):
-    def __init__(self, *args, **kwargs):
-        super(DeleteColumn, self).__init__(*args, **kwargs)
-        
-        self.template_name='wakemeup/admin/fields/delete_button.html'
-        self.verbose_name=''    
-'''
-
-def getDeleteColumn(accessor, kwargs):
+def getManageButtons(accessor = None, kwargs = None):
     return tables.TemplateColumn(
-        template_name='wakemeup/admin/fields/delete_button.html',
+        template_name='wakemeup/admin/fields/manage_buttons.html',
         extra_context=kwargs,
         verbose_name='',
-        accessor=accessor
+        accessor=A(accessor)
     )    
-
-def getEditColumn(accessor, kwargs):
-    return tables.LinkColumn(
-        viewname='wakemeup:edit_object',
-        kwargs=kwargs,
-        verbose_name='',
-        text='Editar',
-        accessor=accessor
-    )
 
 class SchoolsTable(tables.Table):
 
     objectid = 'schoolid'
 
-    kwargs={
-        'objecttype':'school', 
-        'objectid': A(objectid)
-    }
-
-    # Generate admin columns
-    edit_link = getEditColumn(objectid, kwargs)
-    delete_link = getDeleteColumn(objectid, kwargs)
+    manage_buttons = getManageButtons(accessor=objectid)
     
     class Meta:
         model = School
@@ -55,13 +30,7 @@ class ClassesTable(tables.Table):
 
     objectid = 'classid'
 
-    kwargs={
-        'objecttype': 'class', 
-        'objectid': A(objectid)
-    }
-
-    edit_link = getEditColumn(objectid,kwargs)
-    delete_link = getDeleteColumn(objectid, kwargs)
+    manage_buttons = getManageButtons(accessor=objectid)
 
     class Meta:
         model = Class
@@ -91,8 +60,7 @@ class TeachersTable(tables.Table):
         accessor=A('classinfo')
     )    
 
-    edit_link = getEditColumn(objectid, kwargs)
-    delete_link = getDeleteColumn(objectid, kwargs)
+    manage_buttons = getManageButtons(accessor=objectid)
     
     class Meta:
         model = Teacher
@@ -123,8 +91,7 @@ class StudentsTable(tables.Table):
         accessor=A('classinfo')
     )
 
-    edit_link = getEditColumn(objectid, kwargs)
-    delete_link = getDeleteColumn(objectid, kwargs)
+    manage_buttons = getManageButtons(accessor=objectid)
 
     class Meta:
         model = Student
@@ -141,13 +108,7 @@ class RewardsTable(tables.Table):
         verbose_name='Valor',
     )
     
-    kwargs={
-        'objecttype': 'reward',
-        'objectid': A(objectid)
-    }
-
-    edit_link = getEditColumn(objectid, kwargs)
-    delete_link = getDeleteColumn(objectid, kwargs)
+    manage_buttons = getManageButtons(accessor=objectid)
 
     class Meta:
         model = Reward
