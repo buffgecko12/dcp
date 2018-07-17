@@ -392,7 +392,7 @@ def create_contract_goals(request, contractid):
                         goalid = mygoalid,
                         difficultylevel = goaltype.upper(), # Difficultylevel
                         goaldescription = mygoaldescription,
-                        acceptedflag = False,
+#                         acceptedflag = False,
                         rewardinfo = rewardinfo_dict
                     )
         
