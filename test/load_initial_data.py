@@ -25,6 +25,10 @@ def create_user(usertype,firstname,lastname,userrole):
     return newuser
 
 def load_schools_classes():
+
+    global GLV_SCHOOLID
+    global ITIRR_SCHOOLID
+
     glv_classinfo = [
         '901', '902', '903', '904', '905', '906', '907', '908', '909', '910', '911', '912', \
         '1001','1002','1003','1004','1005','1006','1007','1008','1009','1010','1011', \
@@ -34,13 +38,13 @@ def load_schools_classes():
     rr_classinfo = []
     
     school_list = [
-        (1, 'Guillermo Leon Valencia Colegio (sede integrado)','GLV (Integrado)', 'Calle 15A Nro 7 - 48','Duitama','Boyaca',glv_classinfo),
-        (2, 'Instituto T�cnico Industrial Rafael Reyes', 'ITIRR', 'Carrera 18 # 23-116','Duitama','Boyaca',rr_classinfo),
+        ('GLV','Guillermo Leon Valencia Colegio (sede integrado)','GLV (Integrado)', 'Calle 15A Nro 7 - 48','Duitama','Boyaca',glv_classinfo),
+        ('ITIRR','Instituto T�cnico Industrial Rafael Reyes', 'ITIRR', 'Carrera 18 # 23-116','Duitama','Boyaca',rr_classinfo),
     ]
     
     for school in school_list:
         myschool = School(
-            schoolid = school[0], 
+            schoolid = None, 
             schooldisplayname = school[1], 
             schoolabbreviation = school[2], 
             address = school[3], 
@@ -50,6 +54,11 @@ def load_schools_classes():
         
         # Create school
         myschoolid = myschool.save()
+
+        if(school[0] == "GLV"):
+            GLV_SCHOOLID = myschoolid
+        elif(school[0] == "ITIRR"):
+            ITIRR_SCHOOLID = myschoolid
 
         # Save classes        
         for myclass in school[6]:
@@ -68,16 +77,16 @@ def load_users():
         create_user(admin[0], admin[1], admin[2], admin[3])
 
     teacher_list = [        
-        ('Suleima','Ferrer',1,['904','905','906'],),
-        ('Alba Nelly','Salamanca',1,['901','902','903','1006','1007'],),
-        ('Diana','Vera',1,['1004','1005','1101','1102','1103'],),
-        ('Diego','Cruz',1,[],),
-        ('Clara','Sanchez',1,['907','908','909','910'],),
-        ('Adriana','Saenz',1,['1003','1108','1109','1110','1111'],),
-        ('Liliana','Lizarazo',1,['1001','1104','1105','1106','1107'],),
-        ('Lorena','Rojas',1,['1002','1008','1009','1010','1011'],),
-        ('Doris','Avella',1,[],),
-        ('Patricia','Conde',1,['911','912'],),
+        ('Suleima','Ferrer',GLV_SCHOOLID,['904','905','906'],),
+        ('Alba Nelly','Salamanca',GLV_SCHOOLID,['901','902','903','1006','1007'],),
+        ('Diana','Vera',GLV_SCHOOLID,['1004','1005','1101','1102','1103'],),
+        ('Diego','Cruz',GLV_SCHOOLID,[],),
+        ('Clara','Sanchez',GLV_SCHOOLID,['907','908','909','910'],),
+        ('Adriana','Saenz',GLV_SCHOOLID,['1003','1108','1109','1110','1111'],),
+        ('Liliana','Lizarazo',GLV_SCHOOLID,['1001','1104','1105','1106','1107'],),
+        ('Lorena','Rojas',GLV_SCHOOLID,['1002','1008','1009','1010','1011'],),
+        ('Doris','Avella',GLV_SCHOOLID,[],),
+        ('Patricia','Conde',GLV_SCHOOLID,['911','912'],),
     ]
 
     for teacher in teacher_list:
@@ -103,13 +112,13 @@ def load_users():
         myteacher.update_budget(maxbudget = MAX_BUDGET)
 
     student_list = [
-        ('Daniel Esteban','Nino Mosquera',1,'904',),
-        ('Dianni Brithey','Hoyos Camacho',1,'904',),
-        ('Diego Andrey','Rueda Bayona',1,'904',),
-        ('Emerson Javier','Perez',1,'904',),
-        ('Jennifer Carolina','Galvis P',1,'904',),
-        ('Johan Santiago','Solano',1,'904',),
-        ('Juan Diego','Bautista Corredor',1,'904',),
+        ('Daniel Esteban','Nino Mosquera',GLV_SCHOOLID,'904',),
+        ('Dianni Brithey','Hoyos Camacho',GLV_SCHOOLID,'904',),
+        ('Diego Andrey','Rueda Bayona',GLV_SCHOOLID,'904',),
+        ('Emerson Javier','Perez',GLV_SCHOOLID,'904',),
+        ('Jennifer Carolina','Galvis P',GLV_SCHOOLID,'904',),
+        ('Johan Santiago','Solano',GLV_SCHOOLID,'904',),
+        ('Juan Diego','Bautista Corredor',GLV_SCHOOLID,'904',),
     ]
 
     for student in student_list:
