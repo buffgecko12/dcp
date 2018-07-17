@@ -321,7 +321,7 @@ class Reward(models.Model):
     # Get party attributes
     rewardid = models.IntegerField(primary_key=True)
     rewarddisplayname = models.CharField(max_length=100,verbose_name='Premio')
-    rewarddescription = models.CharField(max_length=500,verbose_name='Descripci' + chr(243) + 'n de premio')
+    rewarddescription = models.CharField(max_length=500,verbose_name='Descripci' + chr(243) + 'n')
     rewardvalue = models.IntegerField(verbose_name='Valor')
     createdbyuserid = models.IntegerField()
     
