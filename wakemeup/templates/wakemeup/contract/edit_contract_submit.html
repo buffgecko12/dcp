@@ -38,7 +38,7 @@
 		<br>
 
 		<legend><u>Metas</u></legend>
-		{% for goal in goalrewards %}
+		{% for goal in contract.goalinfo.currentgoals %}
 			<strong>Opci&#243;n 
 			{% if goal.difficultylevel == "E" %} Fac&#237;l
 			{% elif goal.difficultylevel == "M" %} Media
@@ -46,7 +46,7 @@
 			{% endif %}</strong><br>
 			<i>{{ goal.goaldescription }}</i><br>
 			<strong>Opciones de premio: </strong>
-			<i>{% for reward in goal.rewardinfo %}
+			<i>{% for reward in goal.rewardinfo.currentrewards %}
 				{{ reward.rewarddisplayname }}{% if not forloop.last %}, {% endif %}
 			{% endfor %}</i>
 			<br><br>

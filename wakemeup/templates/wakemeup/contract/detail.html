@@ -44,7 +44,7 @@
 		</div>
 		<div class="row">
 			<div class="col"></div>
-			{% for goal in goalrewards %}
+			{% for goal in contract.goalinfo.currentgoals %}
 				<div class="col col-2 text-center">
 					<small>
 						<strong>
@@ -64,7 +64,7 @@
 					<div class="col form-group">
 						<small>{{ party.firstname }} {{ party.lastname }}</small>
 					</div>
-						{% for goal in goalrewards %}
+						{% for goal in contract.goalinfo.currentgoals %}
 							<div class="col col-2 text-center ">
 								{% if party.preferredgoalid %}
 									{% if party.preferredgoalid == goal.goalid %}
@@ -101,7 +101,7 @@
 		{% endfor %}<br>
 		
 		<legend><u>Metas</u></legend>
-		{% for goal in goalrewards %}
+		{% for goal in contract.goalinfo.currentgoals %}
 			<div {% if goal.acceptedflag %} class="bg-light" {% elif contract.contractstatus == "A" %} class="text-muted"{% endif %}>
 				<strong>
 					Opci&#243;n 
@@ -119,7 +119,7 @@
 				<i>{{ goal.goaldescription }}</i><br>
 
 				<strong>Opciones de premio: </strong>
-				<i>{% for reward in goal.rewardinfo %}
+				<i>{% for reward in goal.rewardinfo.currentrewards %}
 					{{ reward.rewarddisplayname }}{% if not forloop.last %}, {% endif %}
 				{% endfor %}</i>
 				<br><br>

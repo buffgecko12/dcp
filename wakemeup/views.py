@@ -420,17 +420,16 @@ def create_contract_goals(request, contractid):
 
         # Get contract goals
         mycontract = Contract.objects.get(contractid=contractid)
-        mygoals = ContractGoal.objects.get_contract_goals(contractid=contractid)
 
         if(mycontract):
             if(mycontract.contractstatus == 'D' and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
-                for mygoal in mygoals:
+                for mygoal in mycontract.goalinfo['currentgoals']:
                     # Use difficultylevel (i.e. e/m/d) for id tag (assumes MAX one goal per difficultylevel)
-                    goaltypeid = mygoal.difficultylevel.lower() + "_"
+                    goaltypeid = mygoal['difficultylevel'].lower() + "_"
         
                     initial_data.update({
-                        goaltypeid + 'goalid':mygoal.goalid,
-                        goaltypeid + 'goaldescription':mygoal.goaldescription,
+                        goaltypeid + 'goalid':mygoal['goalid'],
+                        goaltypeid + 'goaldescription':mygoal['goaldescription'],
                         goaltypeid + 'rewardinfo':"",
                         }
                     )
@@ -502,24 +501,12 @@ def create_contract_submit(request, contractid):
                 contractinfo = ContractInfo.objects.get(contractid)
                 teacherbudgetinfo = TeacherBudget.objects.get(teacheruserid=mycontract.teacheruserid)
                 
-                goalrewards = []
-                
-                # TO-DO: Fix this to use goalinfo from Contract object
-                for mygoal in ContractGoal.objects.get_contract_goals(contractid=contractid):
-                    mygoalrewards = ContractGoalReward.objects.get_contract_rewards(contractid=contractid,goalid=mygoal.goalid)
-            
-                    mygoalreward = mygoal
-                    mygoalreward.rewardinfo = mygoalrewards
-                    
-                    goalrewards.append(mygoalreward)
-                
                 # Prepare context info
                 context = {
                     'form':ContractSubmitForm(contractid = contractid),
                     'contract':mycontract,
                     'classinfo':classinfo,
                     'contractparties':ContractParty.objects.get_contract_parties(contractid=contractid),
-                    'goalrewards':goalrewards,
                     'contractinfo':contractinfo, #Contains budget info
                     'teacherbudgetinfo':teacherbudgetinfo
                 } 
@@ -827,24 +814,12 @@ def contract_detail(request, contractid):
         classinfo = Class.objects.get(classid=mycontract.classid)
         contractinfo = ContractInfo.objects.get(contractid)
         
-        goalrewards = []
-        
-        # TO-DO: Fix this to use goalinfo from Contract object
-        for mygoal in ContractGoal.objects.get_contract_goals(contractid=contractid):
-            mygoalrewards = ContractGoalReward.objects.get_contract_rewards(contractid=contractid,goalid=mygoal.goalid)
-    
-            mygoalreward = mygoal
-            mygoalreward.rewardinfo = mygoalrewards
-            
-            goalrewards.append(mygoalreward)
-        
         # Prepare context info
         context = {
             'form':ContractSubmitForm(contractid = contractid),
             'contract':mycontract,
             'classinfo':classinfo,
             'contractparties':ContractParty.objects.get_contract_parties(contractid=contractid),
-            'goalrewards':goalrewards,
             'contractinfo':contractinfo, #Contains budget info
         } 
     
