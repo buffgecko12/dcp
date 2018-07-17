@@ -595,17 +595,15 @@ def edit_object(request, objecttype, objectid):
         # Try to lookup object creator
         try:
             myreward = Reward.objects.get(rewardid=int(objectid))
-            print(myreward)
             createdbyuserid = myreward.createdbyuserid
         except:
             createdbyuserid = None
         
-        print(request.user.usertype,request.user.userid,createdbyuserid,int(objectid))
-        
         # Teachers can only view their own rewards
         if not (
             (request.user.usertype == 'TR' and request.user.userid == createdbyuserid) or
-            request.user.is_admin()
+            request.user.is_admin() or
+            objectid == 'new' # Used in case of adding a reward
         ):
             return redirect_home()
 
@@ -720,9 +718,8 @@ def edit_object(request, objecttype, objectid):
                     rewarddisplayname = form.cleaned_data.get('rewarddisplayname'),
                     rewarddescription = form.cleaned_data.get('rewarddescription'),
                     rewardvalue = form.cleaned_data.get('rewardvalue'),
+                    createdbyuserid = request.user.userid,
                 )
-
-                kwargs = {'createdbyuserid':request.user.userid}
 
             # Save object
             myobject.save(**kwargs)

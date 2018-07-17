@@ -8,11 +8,13 @@
 {% block content %}
 	<h4>
 		{{ "contrato" | title }}s
+		{% if request.user.is_admin or request.user.usertype == "TR" %}
 		<div class="float-right">
 			<a href="{% url 'wakemeup:create_contract' contractid='new' %}">
 				<img src="{% static 'img/add-button.png' %}">
 			</a>
 		</div>
+		{% endif %}
 	</h4>
 	
 	{% render_table contracts %}
