@@ -13,12 +13,19 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-# from django.contrib import admin
-# from django.urls import path
+
 from django.conf.urls import url, include
+
+from django.contrib.auth import views as auth_views
+from wakemeup.forms import LoginForm
 
 urlpatterns = [
 #     path('admin/', admin.site.urls),
     url('^wakemeup/', include('wakemeup.urls', namespace='wakemeup'), name='index'),
-    url(r'^', include('django.contrib.auth.urls')),
+    url(r'^login/$', auth_views.LoginView.as_view( # Catch login before default url
+            template_name = 'registration/login.html', 
+            authentication_form=LoginForm
+        )
+        , name="login"),
+    url(r'^', include('django.contrib.auth.urls')), # Auth views (login, logout, reset password)
 ]

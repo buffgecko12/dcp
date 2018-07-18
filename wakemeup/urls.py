@@ -1,7 +1,5 @@
 from django.conf.urls import url
-from django.contrib.auth import views as auth_views
 from . import views
-from .forms import LoginForm
 
 app_name= 'wakemeup' # qualifies url pattern names with 'wakemeup' namespace (i.e. 'wakemeup:create_contract')
 urlpatterns = [
@@ -22,14 +20,8 @@ urlpatterns = [
     url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward))/(?P<objectid>\d+)$', views.edit_object, name="edit_object"), # Edit object
     url(r'^admin/(?P<objecttype>(school|class|reward))/(?P<objectid>new)$', views.edit_object, name="edit_object"), # New object
     url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward|contract))/(?P<objectid>\d+)/delete$', views.delete_object, name="delete_object"), # Delete object    
-    
-    # User 
-    url(r'^login/$', auth_views.LoginView.as_view(
-            template_name = 'login.html', 
-            authentication_form=LoginForm
-        )
-        , name="login"),
-    url(r'^logout/$', auth_views.LogoutView.as_view(), name="logout"),
+
+    # User (TO-DO: Move to root)    
     url(r'^admin/add_user', views.add_user, name="add_user"),
 
     # Misc

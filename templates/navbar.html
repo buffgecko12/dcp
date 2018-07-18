@@ -45,7 +45,7 @@
 						</li>
 					{% endif %}
 					<li class="nav-item">
-						<a class="nav-link" href="{% url 'wakemeup:logout' %}">Cerrar sesi&#243;n</a>
+						<a class="nav-link" href="{% url 'logout' %}">Cerrar sesi&#243;n</a>
 					</li>
 <!-- 					<li class="nav-item nav-link">
 						{{ user.firstname }} {{ user.lastname }} ({{ user.userrole }} - {{ user.usertype }})
@@ -53,7 +53,7 @@
 				{% else %}
 					<ul class="nav navbar-nav navbar-right">
 						<li class="nav-item">
-							<a class="nav-link" href="{% url 'wakemeup:login' %}">Iniciar sesi&#243;n</a>
+							<a class="nav-link" href="{% url 'login' %}">Iniciar sesi&#243;n</a>
 						</li>
 					</ul>
 				{% endif %}
