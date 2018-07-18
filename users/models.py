@@ -92,29 +92,31 @@ class MyUser(AbstractBaseUser):
     emailaddress = models.CharField(max_length=250)
     userrole = models.CharField(max_length=1)
     reputationvalue = models.IntegerField()
+    is_active = models.BooleanField()
 
     # Define data manager
     objects = MyUserManager()
     
     # Create new constructor (must be passed in correct order) -- i.e. inherited columns first)
-    def __init__(self, password = None, last_login = None, userid = None, username = None, usertype = None, firstname = None, lastname = None, defaultsignaturescanfile = None, phonenumber = None, emailaddress = None, userrole = None, reputationvalue = None):
-        
-        # Call parent's init function
-        super(get_user_model(), self).__init__()
-        
-        # Set properties
-        self.userid = userid
-        self.username = username
-        self.usertype = usertype
-        self.firstname = firstname
-        self.lastname = lastname
-        self.defaultsignaturescanfile = defaultsignaturescanfile
-        self.phonenumber = phonenumber
-        self.emailaddress = emailaddress
-        self.userrole = userrole
-        self.reputationvalue = reputationvalue
-        self.last_login = last_login
-        self.password = password
+#     def __init__(self, password = None, last_login = None, userid = None, username = None, usertype = None, firstname = None, lastname = None, defaultsignaturescanfile = None, phonenumber = None, emailaddress = None, userrole = None, reputationvalue = None, is_active = None):
+#         
+#         # Call parent's init function
+#         super(get_user_model(), self).__init__()
+#         
+#         # Set properties
+#         self.userid = userid
+#         self.username = username
+#         self.usertype = usertype
+#         self.firstname = firstname
+#         self.lastname = lastname
+#         self.defaultsignaturescanfile = defaultsignaturescanfile
+#         self.phonenumber = phonenumber
+#         self.emailaddress = emailaddress
+#         self.userrole = userrole
+#         self.reputationvalue = reputationvalue
+#         self.is_active = is_active
+#         self.last_login = last_login
+#         self.password = password
 
     # Class info
     class Meta:
