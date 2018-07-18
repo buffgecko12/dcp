@@ -57,7 +57,7 @@ class testUser(unittest.TestCase):
 
         # Save to DB
         newuserget.firstname = 'New first name'
-        newuserget.save()
+        newuserget.save_user()
         newuser1 = get_user_model().objects.get_user(newuserget.userid)
         
         self.assertEqual(newuser1.firstname, 'New first name')
@@ -69,14 +69,14 @@ class testUser(unittest.TestCase):
 
         # Check user roles - admin
         newuser1.userrole = 'A'
-        newuser1.save()
+        newuser1.save_user()
         newuser2 = get_user_model().objects.get_user(newuser1.userid)
         self.assertTrue(newuser2.is_admin())
         self.assertFalse(newuser2.is_superuser())
 
         # Check user roles - super user
         newuser2.userrole = 'S'
-        newuser2.save()
+        newuser2.save_user()
         newuser3 = get_user_model().objects.get_user(newuser2.userid)
         self.assertTrue(newuser3.is_admin())
         self.assertTrue(newuser3.is_superuser())
