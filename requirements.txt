@@ -8,3 +8,4 @@ django-crispy-forms
 django-tables2
 django-widget-tweaks
 gunicorn
+dj-database-url
