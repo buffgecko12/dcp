@@ -1,6 +1,5 @@
 from .base import *
 from decouple import config
-import dj_database_url
 
 DEBUG = True
 ALLOWED_HOSTS += ['localhost','127.0.0.1',]
@@ -18,5 +17,4 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 
 # Configure Django App for Heroku.
-DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 django_heroku.settings(locals())

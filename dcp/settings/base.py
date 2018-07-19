@@ -9,6 +9,7 @@ import os
 from decouple import config
 
 import django_heroku
+import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -73,21 +74,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'dcp.wsgi.application'
 
-DATABASE_URL=""
+DATABASE_URL = 'postgres://qwjabuvbukzyik:f61cacc5d4b419343352c8f5a885a98c28973f23ab3bc9cdded51c70662c4c0b@ec2-54-243-31-34.compute-1.amazonaws.com:5432/de6gbeq19knf3c?currentSchema=DCPViews'
+DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 
-# Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+# # Database
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
 #         'NAME': config('DB_NAME'), # DatabaseName
 #         'USER': config('DB_USER'),
 #         'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'OPTIONS': {
-            'options': '-c search_path=DCPViews' # default schema name
-        },
-    }
-}
+#         'HOST': config('DB_HOST'),
+#         'OPTIONS': {
+#             'options': '-c search_path=' + config('DB_SCHEMA_NAME') # default schema name
+#         },
+#     }
+# }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
