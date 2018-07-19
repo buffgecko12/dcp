@@ -77,10 +77,13 @@ WSGI_APPLICATION = 'dcp.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': config('DB_NAME'),
+        'NAME': config('DB_NAME'), # DatabaseName
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST'),
+        'OPTIONS': {
+            'options': '-c search_path=' + config('DB_SCHEMA_NAME') # default schema name
+        },
     }
 }
 
