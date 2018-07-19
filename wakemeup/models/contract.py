@@ -201,7 +201,7 @@ class Contract(models.Model):
     teacherrequirements = models.CharField(max_length=500)
     studentrequirements = models.CharField(max_length=500)
     contractscanfile = models.BinaryField()
-    contractapprovalts = models.DateTimeField()
+    contractapprovalts = models.DateTimeField(verbose_name='Fecha de aprobaci' + chr(243) + 'n')
     contractstatus = models.CharField(max_length=1,verbose_name='Estatus')
     goalinfo = JSONField()
     partyuserinfo = JSONField()
@@ -321,7 +321,7 @@ class Reward(models.Model):
     # Get party attributes
     rewardid = models.IntegerField(primary_key=True)
     rewarddisplayname = models.CharField(max_length=100,verbose_name='Premio')
-    rewarddescription = models.CharField()
+    rewarddescription = models.CharField(max_length=500,verbose_name='Descripci' + chr(243) + 'n')
     rewardvalue = models.IntegerField(verbose_name='Valor')
     createdbyuserid = models.IntegerField()
     
