@@ -82,7 +82,7 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST'),
         'OPTIONS': {
-            'options': '-c search_path=' + config('DB_SCHEMA_NAME') # default schema name
+            'options': '-c search_path=DCPViews' # default schema name
         },
     }
 }
