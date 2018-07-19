@@ -77,9 +77,9 @@ WSGI_APPLICATION = 'dcp.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': config('DB_NAME'), # DatabaseName
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
+#         'NAME': config('DB_NAME'), # DatabaseName
+#         'USER': config('DB_USER'),
+#         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST'),
         'OPTIONS': {
             'options': '-c search_path=DCPViews' # default schema name
