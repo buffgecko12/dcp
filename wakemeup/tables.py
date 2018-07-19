@@ -4,6 +4,7 @@ from .models.environment import School, Class, Teacher, Student
 from .models.contract import Contract, Reward
 
 from lib.UsefulFunctions.dateUtils import display_timestamp_range, display_timestamp
+from django.urls import reverse
 
 EMPTY_TEXT = 'No hay registros.'
 
@@ -152,3 +153,9 @@ class ContractsTable(tables.Table):
         model = Contract
         exclude = ('contracttype','classid','guardianapprovalflag','contractapprovalts','revisiondescription','revisionapprovalts','revisiondeadlinets','studentleaderrequirements','teacherrequirements','studentrequirements','contractscanfile','teacherfirstname','teacherlastname')
         empty_text = EMPTY_TEXT
+        
+        row_attrs = {
+            'class': "clickable-row mouseicon",
+            'data-href': lambda record: reverse('wakemeup:contract_detail', kwargs={'contractid':record.contractid}),
+            'style': "cursor: pointer;"
+        }
