@@ -73,6 +73,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'dcp.wsgi.application'
 
+DATABASE_URL=""
+
 # Database
 DATABASES = {
     'default': {
