@@ -15,6 +15,8 @@ from django.contrib.postgres.forms import RangeWidget
 
 import datetime
 
+from lib.UsefulFunctions.stringUtils import *
+
 DEFAULT_FORM_CLASS = 'form-horizontal'
 DEFAULT_LABEL_CLASS = 'col-sm-3'
 DEFAULT_FIELD_CLASS = 'col-sm-9'
@@ -146,7 +148,7 @@ class SchoolForm(forms.Form):
     schoolid = forms.IntegerField(label='Codigo de colegio', required=False, widget=forms.HiddenInput())
     schooldisplayname = forms.CharField(label='Nombre para mostrar',max_length=100)
     schoolabbreviation = forms.CharField(label='Abreviatura', required=False, max_length=25)
-    address = forms.CharField(label='Direcci' + chr(243) + 'n',max_length=100)
+    address = forms.CharField(label='Direcci' + mychr('o') + 'n',max_length=100)
     city = forms.CharField(label='Ciudad',max_length=100)
     department = forms.CharField(label='Departamento',max_length=100)
 
@@ -258,7 +260,7 @@ class TeacherForm(forms.Form):
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
-    phonenumber = forms.CharField(max_length=25,label='Tel' + chr(233) + 'fono', required=False)    
+    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
     emailaddress = forms.CharField(max_length=250,label='Correo', required=False)
     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
         
@@ -309,7 +311,7 @@ class StudentForm(forms.Form):
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
-    phonenumber = forms.CharField(max_length=25,label='Tel' + chr(233) + 'fono', required=False)    
+    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
     emailaddress = forms.CharField(max_length=250,label='Correo', required=False)
     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
 
@@ -354,7 +356,7 @@ class RewardForm(forms.Form):
     rewardid = forms.IntegerField(widget=forms.HiddenInput,required=False)
 
     rewarddisplayname = forms.CharField(max_length=100,label='Premio')
-    rewarddescription = forms.CharField(max_length=500,label='Descripci' + chr(243) + 'n', widget=forms.Textarea(attrs={'rows':4}))
+    rewarddescription = forms.CharField(max_length=500,label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}))
     rewardvalue = forms.IntegerField(label='Valor')
 
     def __init__ (self, *args, **kwargs):
@@ -519,7 +521,7 @@ class ContractGoalsForm(forms.Form):
         # Check for partially specified goals
         if (cleaned_data.get("e_goaldescription") and not cleaned_data.get("e_rewardinfo")) or \
            (cleaned_data.get("e_rewardinfo") and not cleaned_data.get("e_goaldescription")):
-            self.add_error('e_goaldescription', "Por favor verificar la meta fac" + chr(237) + "l")
+            self.add_error('e_goaldescription', "Por favor verificar la meta f" + mychr('a') + "cil")
 
         if (cleaned_data.get("m_goaldescription") and not cleaned_data.get("m_rewardinfo")) or \
            (cleaned_data.get("m_rewardinfo") and not cleaned_data.get("m_goaldescription")):
@@ -527,7 +529,7 @@ class ContractGoalsForm(forms.Form):
 
         if (cleaned_data.get("d_goaldescription") and not cleaned_data.get("d_rewardinfo")) or \
            (cleaned_data.get("d_rewardinfo") and not cleaned_data.get("d_goaldescription")):
-            self.add_error('d_goaldescription', "Por favor verificar la meta dific" + chr(237) + "l")
+            self.add_error('d_goaldescription', "Por favor verificar la meta dific" + mychr('i') + "l")
 
         # Verify that at least one goal has been filled out correctly
         if not(cleaned_data.get("e_goaldescription") and cleaned_data.get("e_rewardinfo")) and \
@@ -536,7 +538,7 @@ class ContractGoalsForm(forms.Form):
             
             raise forms.ValidationError("Por favor especificar al menos una meta.")
 
-    goaldescription_label = 'Descripci' + chr(243) + 'n<br><small><i>Una descripci' + chr(243) + 'n detallada con instrucciones claras para c' + chr(243) + 'mo medir ' + chr(233) + 'xito</i></small>'
+    goaldescription_label = 'Descripci' + mychr('o') + 'n<br><small><i>Una descripci' + mychr('o') + 'n detallada con instrucciones claras para c' + chr(243) + 'mo medir ' + chr(233) + 'xito</i></small>'
     rewardinfo_label = 'Opciones de premio<small><i> <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addRewardModal">A' + chr(241) + 'adir</button><br>Al cumplir con ' + chr(233) + 'xito la meta, cada participante podr' + chr(225) + ' escoger un premio de esta lista</i></small>'
 
     # Fields used for javascript and form navigation between pages
@@ -579,7 +581,7 @@ class ContractGoalsForm(forms.Form):
             'numparticipants',
             TabHolder(
                 Tab(
-                    'F' + chr(225) + 'cil',
+                    'F' + mychr('a') + 'cil',
                     'e_goalid',
                     'e_goaldescription',
                     'e_rewardinfo',
@@ -591,7 +593,7 @@ class ContractGoalsForm(forms.Form):
                     'm_rewardinfo',
                 ),
                 Tab(
-                    'Dif' + chr(237) + 'cil',
+                    'Dif' + mychr('i') + 'cil',
                     'd_goalid',
                     'd_goaldescription',
                     'd_rewardinfo',
