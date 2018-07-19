@@ -32,6 +32,7 @@ PROJECT_APPS = [
     'crispy_forms',
     'django_tables2',
     'django.contrib.humanize',
+    'widget_tweaks',    
 ]
 
 # Create INSTALLED_APPS setting
