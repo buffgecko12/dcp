@@ -84,6 +84,8 @@ DATABASE_URL = 'postgres://' + \
                 '?currentSchema=' + config('DB_SCHEMA_NAME')
 DATABASES['default'] = dj_database_url.config(default=DATABASE_URL,conn_max_age=600, ssl_require=True)
 
+DATABASE_URL = 'postgres://postgres:postgres@194.100.100.129:5432/DCP?currentSchema=DCPViews'
+
 # # Database
 # DATABASES = {
 #     'default': {
