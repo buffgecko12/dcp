@@ -1,24 +1,26 @@
-from django.shortcuts import render
 from django.contrib.auth import get_user_model
 
-from .forms import SignupForm, SchoolForm, ClassForm, TeacherForm, StudentForm, RewardForm, ContractForm, ContractGoalsForm, ContractSubmitForm, ContractPartyAcceptForm
-from .models.environment import School, Class, Teacher, Student, TeacherBudget
-from .models.contract import Contract, ContractParty, ContractGoal, ContractGoalReward, Reward, ContractInfo
+from django.shortcuts import redirect, render
+from django.http import HttpResponse
+from django.urls import reverse
+
+from django.core.validators import validate_email
+from django.core.mail import send_mail
 
 from django_tables2 import RequestConfig
-from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable, ContractsTable, RewardsTable
 
 from lib.UsefulFunctions.imgUtils import renderImageFromDb
 from lib.UsefulFunctions.dateUtils import *
 from lib.UsefulFunctions.dataUtils import *
-from django.http import HttpResponse
+from lib.UsefulFunctions.stringUtils import *
 
 import psycopg2
 import json
 
-from django.shortcuts import redirect
-
-from django.core.validators import validate_email
+from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable, ContractsTable, RewardsTable
+from .forms import SignupForm, SchoolForm, ClassForm, TeacherForm, StudentForm, RewardForm, ContractForm, ContractGoalsForm, ContractSubmitForm, ContractPartyAcceptForm
+from .models.environment import School, Class, Teacher, Student, TeacherBudget
+from .models.contract import Contract, ContractParty, ContractGoal, ContractGoalReward, Reward, ContractInfo
 
 # Define user permission roles
 PERM_NONE = ['NONE']
@@ -66,6 +68,16 @@ view_permissions = {
         'all': {'userrole':PERM_ALL, 'usertype':PERM_ALL},
     },
 }
+
+# Move to util library
+def send_email(subject, body, sender, to_list):
+    try:
+        if(to_list):
+            send_mail(subject, body, sender, to_list)
+    except:
+        print("ERROR - Could not send e-mail(s)")
+
+    return
 
 # Check user authentication / authorization
 def check_permissions(view):
@@ -485,10 +497,28 @@ def create_contract_submit(request, contractid):
         
         form = ContractSubmitForm(request.POST, contractid=contractid)
         if(form.is_valid()):
-            Contract(contractid=contractid).change_status('P') # Change contract status to pending
             
-            # TO-DO: Send out e-mails!
+            # Change status to "Pending"
+            mycontract = Contract.objects.get(contractid=contractid)
+            mycontract.change_status('P') # Change contract status to pending
+
+            # Get teacher's e-mail
+            myteacheremail = Teacher.objects.get(teacheruserid = mycontract.teacheruserid).emailaddress
+
+            # Generate e-mail list
+            contractpartyemail_list = []
             
+            for contractparty in mycontract.partyuserinfo['currentparties']:
+                contractpartyemail_list.append(contractparty['emailaddress'])
+
+            EMAIL_FROM = 'duitamacolegioproject@gmail.com'
+            EMAIL_SUBJECT = 'Contrato nuevo (#' + str(contractid) + ')'
+            EMAIL_BODY = 'Se envi' + mychr('o') + ' un contrato nuevo: ' + request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':contractid}))
+
+            # Send e-mails
+            send_email(EMAIL_SUBJECT, EMAIL_BODY, EMAIL_FROM, contractpartyemail_list)
+            send_email(EMAIL_SUBJECT, EMAIL_BODY, EMAIL_FROM, [myteacheremail])
+
             # Go back to home page
             return redirect_home()
     else:
