@@ -100,7 +100,7 @@ class MyUser(AbstractBaseUser):
     # Class info
     class Meta:
         managed = False # Ensure Django doesn't "manage" the table
-        db_table = 'users' # Point to actual DB table
+        db_table = 'de6gbeq19knf3c.users_base' # Point to actual DB table
         
     # Required fields
     USERNAME_FIELD = 'username' # specify how Django recognizes the user
