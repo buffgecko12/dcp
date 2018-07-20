@@ -74,6 +74,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'dcp.wsgi.application'
 
+DATABASES = {}
 DATABASE_URL = 'postgres://' + \
                 config('DB_USER') + ':' + \
                 config('DB_PASSWORD') + '@' + \
@@ -81,9 +82,7 @@ DATABASE_URL = 'postgres://' + \
                 config('DB_PORT') + '/' + \
                 config('DB_NAME') + \
                 '?currentSchema=' + config('DB_SCHEMA_NAME')
-DATABASES = {'default': dj_database_url.config(default=DATABASE_URL,conn_max_age=600, ssl_require=True)}
-
-DATABASE_URL = 'postgres://postgres:postgres@194.100.100.129:5432/DCP?currentSchema=DCPViews'
+DATABASES['default'] = dj_database_url.config(default=DATABASE_URL,conn_max_age=600, ssl_require=True)
 
 # # Database
 # DATABASES = {
