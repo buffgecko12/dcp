@@ -74,19 +74,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'dcp.wsgi.application'
 
+DATABASE_URL = 'postgres://' + \
+                config('DB_USER') + ':' + \
+                config('DB_PASSWORD') + '@' + \
+                config('DB_HOST') + ':' + \
+                config('DB_PORT') + '/' + \
+                config('DB_NAME') + \
+                '?currentSchema=' + config('DB_SCHEMA_NAME')
+DATABASES = {'default': dj_database_url.config(default=DATABASE_URL,conn_max_age=600, ssl_require=True)}
+
+DATABASE_URL = 'postgres://postgres:postgres@194.100.100.129:5432/DCP?currentSchema=DCPViews'
+
 # # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': config('DB_NAME'), # DatabaseName
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'OPTIONS': {
-            'options': '-c search_path=' + config('DB_SCHEMA_NAME') # default schema name
-        },
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': config('DB_NAME'), # DatabaseName
+#         'USER': config('DB_USER'),
+#         'PASSWORD': config('DB_PASSWORD'),
+#         'HOST': config('DB_HOST'),
+#         'OPTIONS': {
+#             'options': '-c search_path=' + config('DB_SCHEMA_NAME') # default schema name
+#         },
+#     }
+# }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
