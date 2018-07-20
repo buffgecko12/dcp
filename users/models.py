@@ -35,15 +35,15 @@ class MyUserManager(BaseUserManager):
         return user
 
     def all(self):
-        return get_data(self, 'de6gbeq19knf3c.SP_DCPGetUser(%s,%s,%s)', (None, None, None))
+        return get_data(self, 'SP_DCPGetUser(%s,%s,%s)', (None, None, None))
 
     # Get info for one specific user
     def get_user(self, userid):
-        return get_data_pk(self, 'de6gbeq19knf3c.SP_DCPGetUser(%s,%s,%s)', (userid, None, None)) # Use tuple instead of array for input parameters
+        return get_data_pk(self, 'SP_DCPGetUser(%s,%s,%s)', (userid, None, None)) # Use tuple instead of array for input parameters
 
     # Lookup user for authentication (email / username)
     def get_user_auth(self, username = None, emailaddress = None):
-        return get_data_pk(self, 'de6gbeq19knf3c.SP_DCPGetUser(%s,%s,%s)', (None, username, emailaddress))
+        return get_data_pk(self, 'SP_DCPGetUser(%s,%s,%s)', (None, username, emailaddress))
 
     def save_user(self, myUser):
         return save_data('SP_DCPUpsertUser', 
