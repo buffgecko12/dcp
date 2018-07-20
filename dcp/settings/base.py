@@ -74,7 +74,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'dcp.wsgi.application'
 
-DATABASE_URL='postgres://qwjabuvbukzyik:f61cacc5d4b419343352c8f5a885a98c28973f23ab3bc9cdded51c70662c4c0b@ec2-54-243-31-34.compute-1.amazonaws.com:5432/de6gbeq19knf3c?currentSchema=DCPViews'
+DATABASE_URL='FART'
 
 # # Database
 # DATABASES = {
