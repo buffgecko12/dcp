@@ -82,7 +82,7 @@ DATABASE_URL = 'postgres://' + \
                 config('DB_PORT') + '/' + \
                 config('DB_NAME') + \
                 '?currentSchema=' + config('DB_SCHEMA_NAME')
-DATABASES['default'] = dj_database_url.config(default=DATABASE_URL,conn_max_age=600, ssl_require=True)
+# DATABASES['default'] = dj_database_url.config(default=DATABASE_URL,conn_max_age=600, ssl_require=True)
 
 # # Database
 # DATABASES = {
