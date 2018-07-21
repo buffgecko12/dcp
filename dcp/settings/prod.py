@@ -1,14 +1,10 @@
 from .base import *
+import django_heroku
+
 DEBUG = False
 
-ALLOWED_HOSTS += ['0.0.0.0', 'localhost', 'thawing-spire-81058.herokuapp.com']
-
-print("BEFORE",ALLOWED_HOSTS)
-
-# Configure Django App for Heroku.
+# Configure Django App for Heroku (DATABASE_URL, ALLOWED_HOSTS, WhiteNoise Logging, Heroku CI)
 django_heroku.settings(locals())
-
-print("AFTER",ALLOWED_HOSTS)
 
 LOGGING = {
     'version': 1,

@@ -8,7 +8,6 @@ Internationalization: https://docs.djangoproject.com/en/2.0/topics/i18n/
 import os
 from decouple import config
 
-import django_heroku
 import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -101,8 +100,10 @@ USE_L10N = True
 USE_TZ = True
 
 # Static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/' # Url for static file serving
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),] # Search directories for static files (otherwise, engine only searches within app directories
+
 
 # Other settings
 LOGIN_REDIRECT_URL = '/' # Where to redirect login requests if "next" is not specified
