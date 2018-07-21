@@ -51,13 +51,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-
-# MIDDLEWARE_CLASSES = (
-#     # Simplified static file serving.
-#     # https://warehouse.python.org/project/whitenoise/
-#     'whitenoise.middleware.WhiteNoiseMiddleware',
-# )
-
 ROOT_URLCONF = 'dcp.urls'
 
 TEMPLATES = [
@@ -111,7 +104,6 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/' # Url for static file serving
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),] # Search directories for static files (otherwise, engine only searches within app directories
-
 
 # Other settings
 LOGIN_REDIRECT_URL = '/' # Where to redirect login requests if "next" is not specified
