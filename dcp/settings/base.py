@@ -74,7 +74,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'dcp.wsgi.application'
 
-# Hard-coded environment variable (used to generate DATABASES dictionary 'default'
+# Hard-coded environment variable (used to generate DATABASES dictionary 'default')
 DATABASE_URL = 'postgres://' + \
                 config('DB_USER') + ':' + \
                 config('DB_PASSWORD') + '@' + \
@@ -89,8 +89,7 @@ if(os.environ.get('ENV') != 'development'):
 else:
     ssl_require = False
 
-ssl_require = os.environ.get('ENV') != 'development' # Reads if "ENV" environment variable = 'development'
-
+# Use DATABASE_URL specified above if no environment variable provided
 DATABASES = {'default' : dj_database_url.config(default=DATABASE_URL,conn_max_age=600, ssl_require=ssl_require)}
 
 # Password validation

@@ -21,6 +21,8 @@ def readfile(myfilepath):
 
 BASE_DIR = get_basedir()
 sys.path.append(BASE_DIR)
+
+# TO-DO: May need to add check here to determine which module to use
 os.environ['DJANGO_SETTINGS_MODULE'] = 'dcp.settings.dev'
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dcp.settings.dev")
 
