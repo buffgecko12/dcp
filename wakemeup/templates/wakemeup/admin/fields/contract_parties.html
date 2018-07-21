@@ -2,7 +2,7 @@
 
 {% for party in record.partyuserinfo.currentparties %}
 	<span>
-		{% if party.approvalts %}
+		{% if party.partyapprovalts %}
 			<img src="{% static 'img/web_check.png' %}" /> 
 		{% endif %}
 	</span>
