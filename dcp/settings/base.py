@@ -83,7 +83,15 @@ DATABASE_URL = 'postgres://' + \
                 config('DB_NAME') + \
                 '?currentSchema=' + config('DB_SCHEMA_NAME')
 
-DATABASES = {'default' : dj_database_url.config(default=DATABASE_URL,conn_max_age=600, ssl_require=True)}
+# Pass correct setting (depends on "ENV" variable)
+if(os.environ.get('ENV') != 'development'):
+    ssl_require = True
+else:
+    ssl_require = False
+
+ssl_require = os.environ.get('ENV') != 'development' # Reads if "ENV" environment variable = 'development'
+
+DATABASES = {'default' : dj_database_url.config(default=DATABASE_URL,conn_max_age=600, ssl_require=ssl_require)}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

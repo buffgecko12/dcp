@@ -3,7 +3,14 @@ import os
 import sys
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dcp.settings.prod")
+
+    # Point to correct settings file (depends on "ENV" variable)
+    if(os.environ.get('ENV') != 'development'):
+        mymodule = 'dcp.settings.prod'
+    else:
+        mymodule = 'dcp.settings.dev'
+    
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", mymodule)
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

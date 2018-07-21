@@ -11,6 +11,12 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dcp.settings.prod")
+# Point to correct settings file (depends on "ENV" variable)
+if(os.environ.get('ENV') != 'development'):
+    mymodule = 'dcp.settings.prod'
+else:
+    mymodule = 'dcp.settings.dev'
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", mymodule)
 
 application = get_wsgi_application()
