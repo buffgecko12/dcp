@@ -148,10 +148,10 @@ class UserReputationEventManager(models.Manager):
         return save_data('SP_DCPUpsertUserReputationEvent', 
              (
                 myUserReputationEvent.userid,
-                myUserReputationEvent.eventtype,
+                myUserReputationEvent.sourceeventid,
+                myUserReputationEvent.contractid,
+                myUserReputationEvent.actualpointvalue,
                 myUserReputationEvent.eventts,
-                myUserReputationEvent.pointvalue,
-                myUserReputationEvent.contractid
             )
         )[0] # Return eventid
         
@@ -162,10 +162,10 @@ class UserReputationEvent(models.Model):
     
     eventid = models.BigIntegerField(primary_key=True)
     userid = models.IntegerField()
-    eventtype = models.CharField(max_length=2)
-    eventts = models.DateTimeField()
-    pointvalue = models.IntegerField()
+    sourceeventid = models.IntegerField()
     contractid = models.IntegerField()
+    actualpointvalue = models.IntegerField()
+    eventts = models.DateTimeField()
     
     class Meta:
         managed = False
