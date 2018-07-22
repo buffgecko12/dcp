@@ -166,6 +166,7 @@ class UserReputationEvent(models.Model):
     contractid = models.IntegerField()
     actualpointvalue = models.IntegerField()
     eventts = models.DateTimeField()
+    eventdisplayname = models.CharField(max_length=100)
     
     class Meta:
         managed = False
