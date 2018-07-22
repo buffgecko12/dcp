@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 import os
 import sys
+from lib.UsefulFunctions.envUtils import get_env_settings
 
 if __name__ == "__main__":
-
-    # Point to correct settings file (depends on "ENV" variable)
-    if(os.environ.get('ENV') != 'development'):
-        mymodule = 'dcp.settings.prod'
-    else:
-        mymodule = 'dcp.settings.dev'
     
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", mymodule)
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", get_env_settings().get("settingsmodule"))
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

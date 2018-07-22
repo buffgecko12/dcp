@@ -10,13 +10,8 @@ https://docs.djangoproject.com/en/2.0/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
+from lib.UsefulFunctions.envUtils import get_env_settings
 
-# Point to correct settings file (depends on "ENV" variable)
-if(os.environ.get('ENV') != 'development'):
-    mymodule = 'dcp.settings.prod'
-else:
-    mymodule = 'dcp.settings.dev'
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", mymodule)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", get_env_settings().get("settingsmodule"))
 
 application = get_wsgi_application()

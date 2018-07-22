@@ -7,6 +7,7 @@ Internationalization: https://docs.djangoproject.com/en/2.0/topics/i18n/
 
 import os
 from decouple import config
+from lib.UsefulFunctions.envUtils import get_env_settings
 
 import dj_database_url
 
@@ -83,14 +84,8 @@ DATABASE_URL = 'postgres://' + \
                 config('DB_NAME') + \
                 '?currentSchema=' + config('DB_SCHEMA_NAME')
 
-# Pass correct setting (depends on "ENV" variable)
-if(os.environ.get('ENV') != 'development'):
-    ssl_require = True
-else:
-    ssl_require = False
-
 # Use DATABASE_URL specified above if no environment variable provided
-DATABASES = {'default' : dj_database_url.config(default=DATABASE_URL,conn_max_age=600, ssl_require=ssl_require)}
+DATABASES = {'default' : dj_database_url.config(default=DATABASE_URL,conn_max_age=600, ssl_require=get_env_settings().get('ssl_require'))}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
