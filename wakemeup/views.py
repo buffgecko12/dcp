@@ -293,7 +293,7 @@ def myaccount(request):
             )
 
             # Save user
-            myuser.save()
+            myuser.save_user()
     else:
         myuser = get_user_model().objects.get(userid=request.user.userid)
         if(myuser):
@@ -306,6 +306,7 @@ def myaccount(request):
                     'emailaddress':myuser.emailaddress,
                 }
             )
+        # Return empty form
         else:
             form=MyUserForm()
 

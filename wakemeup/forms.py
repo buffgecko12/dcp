@@ -39,7 +39,7 @@ def setFormHelper(
 def getAdminFormActions():
     return FormActions(
         Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='cancel'), # Don't change the "cancel" id, it's used by javascript (i.e. reward modal)
-        Submit('submit_next','Siguiente', css_id='next'),
+        Submit('submit_next','Enviar', css_id='next'),
     )
     
 
@@ -369,7 +369,7 @@ class MyUserForm(forms.Form):
 
         # Call base class constructor (i.e. Teacher Form)
         super(MyUserForm, self).__init__(*args, **kwargs)
-        
+
         # Set form helper properties
         self.helper = FormHelper()
         setFormHelper(self.helper)
@@ -386,14 +386,21 @@ class MyUserForm(forms.Form):
             getAdminFormActions()
         )
 
+    # Make sure email address does not already exist
+    def clean_emailaddress(self):
+        formemail = self.cleaned_data.get('emailaddress')
+        useremail = get_user_model().objects.get(userid=self.cleaned_data.get('userid')).emailaddress
+
+        # Ignore validation if e-mail address is unchanged
+        if(useremail == formemail):
+           return formemail
+        else:
+            return validate_emailaddress(self.cleaned_data.get('emailaddress'))
+
     # Specify model
     class Meta:
         model = get_user_model()
         fields = ('userid','firstname','lastname','phonenumber','emailaddress')
-
-    # Make sure email address does not already exist
-    def clean_emailaddress(self):
-        return validate_emailaddress(self.cleaned_data.get('emailaddress'))
 
 class RewardForm(forms.Form):
 
