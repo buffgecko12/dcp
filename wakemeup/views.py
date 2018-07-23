@@ -18,7 +18,7 @@ import psycopg2
 import json
 
 from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable, ContractsTable, RewardsTable
-from .forms import SignupForm, SchoolForm, ClassForm, TeacherForm, StudentForm, RewardForm, ContractForm, ContractGoalsForm, ContractSubmitForm, ContractPartyAcceptForm
+from .forms import *
 from .models.environment import School, Class, Teacher, Student, TeacherBudget
 from .models.contract import Contract, ContractParty, ContractGoal, ContractGoalReward, Reward, ContractInfo
 
@@ -29,6 +29,8 @@ PERM_SUPER = ['S']
 PERM_TEACHER = ['TR']
 PERM_STUDENT = ['ST']
 PERM_ALL = ['ALL']
+
+NO_PERM_REQUIRED = {'all': {'userrole':PERM_ALL, 'usertype':PERM_ALL}}
 
 # Define view permissions
 #TO-DO: Move to database
@@ -64,9 +66,8 @@ view_permissions = {
     'add_user': {
         'all': {'userrole':PERM_SUPER, 'usertype':PERM_NONE},
     },
-    'contract': {
-        'all': {'userrole':PERM_ALL, 'usertype':PERM_ALL},
-    },
+    'contract': NO_PERM_REQUIRED,
+    'myaccount': NO_PERM_REQUIRED,
 }
 
 # Move to util library
@@ -107,7 +108,10 @@ def check_permissions(view):
             ):
                 # Valid permission - continue
                 return view(*args, **kwargs)
-
+        else:
+            # TO-DO: Re-direct to login page
+            return redirect('login')
+        
         # Invalid permission - redirect to homepage
         return redirect_home()
     
@@ -271,6 +275,41 @@ def delete_object(request, objecttype, objectid):
 
 def index(request):
     return render(request, 'wakemeup/index.html')
+
+@check_permissions
+def myaccount(request):
+    
+    if request.method == "POST":
+        form = MyUserForm(request.POST, request.FILES)
+        
+        if(form.is_valid()):
+            
+            myuser = get_user_model()(
+                userid = form.cleaned_data.get('userid'),
+                firstname = form.cleaned_data.get('firstname'),
+                lastname = form.cleaned_data.get('lastname'),
+                phonenumber = form.cleaned_data.get('phonenumber'),
+                emailaddress = form.cleaned_data.get('emailaddress'),
+            )
+
+            # Save user
+            myuser.save()
+    else:
+        myuser = get_user_model().objects.get(userid=request.user.userid)
+        if(myuser):
+            form=MyUserForm(
+                initial={
+                    'userid':myuser.userid,
+                    'firstname':myuser.firstname,
+                    'lastname':myuser.lastname,
+                    'phonenumber':myuser.phonenumber,
+                    'emailaddress':myuser.emailaddress,
+                }
+            )
+        else:
+            form=MyUserForm()
+
+    return render(request, 'wakemeup/myaccount.html', {'form':form})
 
 @check_permissions
 def create_contract(request, contractid):

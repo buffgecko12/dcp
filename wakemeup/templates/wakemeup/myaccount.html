@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+<!-- Set page title -->
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+	<br>
+	<div class="container-fluid">
+		<!-- Nav tabs -->
+		<ul class="nav nav-tabs">
+		  <li class="nav-item">
+		    <a class="nav-link active" data-toggle="tab" href="#profile">Perfil</a>
+		  </li>
+		  <li class="nav-item">
+		    <a class="nav-link" data-toggle="tab" href="#reputation">Reputaci&#243;n</a>
+		  </li>
+		  <li class="nav-item">
+		    <a class="nav-link" data-toggle="tab" href="#badges">Medallas</a>
+		  </li>
+		</ul>
+		
+		<!-- Tab panes -->
+		<div class="tab-content">
+		<br>
+		  <div class="tab-pane active" id="profile">
+			<form method="POST" enctype="multipart/form-data" novalidate>
+			    {% csrf_token %}
+				{% crispy form %}
+			</form>
+		  </div>
+		  <div class="tab-pane fade" id="reputation">Reputation info</div>
+		  <div class="tab-pane fade" id="badges">Badge info</div>
+		</div>
+    </div>
+{% endblock %}

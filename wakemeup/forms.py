@@ -36,12 +36,26 @@ def setFormHelper(
     myFormHelper.label_class = label_class
     myFormHelper.field_class = field_class
     
-def getAdminFormActions(objecttype):
+def getAdminFormActions():
     return FormActions(
         Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='cancel'), # Don't change the "cancel" id, it's used by javascript (i.e. reward modal)
         Submit('submit_next','Siguiente', css_id='next'),
     )
     
+
+# Validate email
+def validate_emailaddress(emailaddress):
+
+    # Check to see if any users already exist with this email as a username.
+    emailmatch = get_user_model().objects.get_user_auth(emailaddress=emailaddress)
+    usernamematch = get_user_model().objects.get_user_auth(username=emailaddress)
+    
+    # If email is already in use, raise an error
+    if emailmatch or usernamematch:
+        raise forms.ValidationError('Este correo ya esta en uso.')
+
+    return emailaddress
+
 class LoginForm(AuthenticationForm):
 
     # Define form fields
@@ -114,18 +128,7 @@ class SignupForm(UserCreationForm):
 
     # Make sure email address does not already exist
     def clean_emailaddress(self):
-        # Get the email
-        emailaddress = self.cleaned_data.get('emailaddress')
-
-        # Check to see if any users already exist with this email as a username.
-        emailmatch = get_user_model().objects.get_user_auth(emailaddress=emailaddress)
-        usernamematch = get_user_model().objects.get_user_auth(username=emailaddress)
-        
-        # If email is already in use, raise an error
-        if emailmatch or usernamematch:
-            raise forms.ValidationError('Este correo ya esta en uso.')
-
-        return emailaddress
+        return validate_emailaddress(self.cleaned_data.get('emailaddress'))
 
     # Make sure email address does not already exist
     def clean_username(self):
@@ -174,7 +177,7 @@ class SchoolForm(forms.Form):
                 'city',
                 'department',
             ),
-            getAdminFormActions('school'),
+            getAdminFormActions()
         )
 
     # Specify model
@@ -231,7 +234,7 @@ class ClassForm(forms.Form):
                 'classdisplayname',
                 'students',
             ),
-            getAdminFormActions('class')
+            getAdminFormActions()
         )
 
     # Specify model
@@ -292,7 +295,7 @@ class TeacherForm(forms.Form):
                 'phonenumber',
                 'defaultsignaturescanfile',
             ),
-            getAdminFormActions('teacher')
+            getAdminFormActions()
         )
     
     # Specify model
@@ -342,13 +345,55 @@ class StudentForm(forms.Form):
                 'phonenumber',
                 'defaultsignaturescanfile',
             ),
-            getAdminFormActions('student')
+            getAdminFormActions()
         )
 
     # Specify model
     class Meta:
         model = Student
         fields = ('studentuserid','schoolid','classid','firstname','lastname','phonenumber','emailaddress')
+
+# TO-DO: Combine this with TeacherForm & StudentForm
+class MyUserForm(forms.Form):
+
+    # Define form fields
+    userid = forms.IntegerField(widget=forms.HiddenInput)
+
+    firstname = forms.CharField(max_length=100,label='Primer nombre')
+    lastname = forms.CharField(max_length=100,label='Apellido(s)')
+    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
+    emailaddress = forms.CharField(max_length=250,label='Correo', required=False)
+#     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
+
+    def __init__ (self, *args, **kwargs):
+
+        # Call base class constructor (i.e. Teacher Form)
+        super(MyUserForm, self).__init__(*args, **kwargs)
+        
+        # Set form helper properties
+        self.helper = FormHelper()
+        setFormHelper(self.helper)
+        self.helper.form_tag = False
+        
+        # Set form layout
+        self.helper.layout = Layout(
+            'userid',
+            'firstname',
+            'lastname',
+            'emailaddress',
+            'phonenumber',
+#             'defaultsignaturescanfile',
+            getAdminFormActions()
+        )
+
+    # Specify model
+    class Meta:
+        model = get_user_model()
+        fields = ('userid','firstname','lastname','phonenumber','emailaddress')
+
+    # Make sure email address does not already exist
+    def clean_emailaddress(self):
+        return validate_emailaddress(self.cleaned_data.get('emailaddress'))
 
 class RewardForm(forms.Form):
 
@@ -378,7 +423,7 @@ class RewardForm(forms.Form):
                 'rewarddescription',
                 PrependedText('rewardvalue', '$'),
             ),
-            getAdminFormActions('reward')
+            getAdminFormActions()
         )
 
     # Specify model
