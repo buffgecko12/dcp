@@ -5,8 +5,6 @@ from lib.UsefulFunctions.dbUtils import *
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-# Data model managers (i.e. interface between DB and objects)
-
 # Don't override default methods (get, all, save, delete) to avoid clashing with Django authentication
 class MyUserManager(BaseUserManager):
 
@@ -68,7 +66,54 @@ class MyUserManager(BaseUserManager):
     def deactivate(self, myUser):
         return save_data('SP_DCPDeactivateUser', (myUser.userid,))
 
-# Data models (i.e. tables)
+class UserReputationEventManager(models.Manager):
+    
+    def all(self):
+        return self.get_events(None, None, None,)
+    
+    def get(self, eventid):
+        return get_data_pk(self, 'SP_DCPGetUserReputationEvent(%s,%s,%s)', (None, None, eventid,))
+    
+    def get_events(self, userid, contractid, eventid):
+        return get_data(self, 'SP_DCPGetUserReputationEvent(%s,%s,%s)', (userid, contractid, eventid,))
+    
+    def save(self, myUserReputationEvent):
+        return save_data('SP_DCPUpsertUserReputationEvent', 
+             (
+                myUserReputationEvent.userid,
+                myUserReputationEvent.sourceeventid,
+                myUserReputationEvent.contractid,
+                myUserReputationEvent.actualpointvalue,
+                myUserReputationEvent.eventts,
+            )
+        )[0] # Return eventid
+        
+    def delete(self, myUserReputationEvent):
+        pass # No use-case
+
+class UserBadgeManager(models.Manager):
+    
+    def all(self):
+        return self.get_badges(None, None,)
+    
+    def get(self, userid, badgeid):
+        return get_data_pk(self, 'SP_DCPGetUserBadge(%s,%s)', (userid, badgeid))
+    
+    def get_badges(self, userid = None, badgeid = None ):
+        return get_data(self, 'SP_DCPGetUserBadge(%s,%s)', (userid, badgeid,))
+    
+    def save(self, myUserBadge):
+        return save_data('SP_DCPUpsertUserBadge', 
+             (
+                myUserBadge.userid,
+                myUserBadge.badgeid,
+                None, # Use default (current_timestamp)
+            )
+        )[0]
+        
+    def delete(self, myUserBadge):
+        pass # No use-case
+
 # Create custom base user
 # Don't override default methods (get, all, save, delete) to avoid clashing with Django authentication
 class MyUser(AbstractBaseUser):
@@ -133,31 +178,6 @@ class MyUser(AbstractBaseUser):
         else:
             return False
 
-class UserReputationEventManager(models.Manager):
-    
-    def all(self):
-        return self.get_events(None, None, None,)
-    
-    def get(self, eventid):
-        return get_data_pk(self, 'SP_DCPGetUserReputationEvent(%s,%s,%s)', (None, None, eventid,))
-    
-    def get_events(self, userid, contractid, eventid):
-        return get_data(self, 'SP_DCPGetUserReputationEvent(%s,%s,%s)', (userid, contractid, eventid,))
-    
-    def save(self, myUserReputationEvent):
-        return save_data('SP_DCPUpsertUserReputationEvent', 
-             (
-                myUserReputationEvent.userid,
-                myUserReputationEvent.sourceeventid,
-                myUserReputationEvent.contractid,
-                myUserReputationEvent.actualpointvalue,
-                myUserReputationEvent.eventts,
-            )
-        )[0] # Return eventid
-        
-    def delete(self, myUserReputationEvent):
-        pass # No use-case
-    
 class UserReputationEvent(models.Model):
     
     eventid = models.BigIntegerField(primary_key=True)
@@ -178,3 +198,24 @@ class UserReputationEvent(models.Model):
     
     def delete(self):
         return UserReputationEvent.objects.delete(self)
+
+# TO-DO: May need to add primary_key=True reference here
+class UserBadge(models.Model):
+    
+    userid = models.IntegerField()
+    badgeid = models.IntegerField()
+    badgelevel = models.CharField(max_length=1)
+    badgeshortname = models.CharField(max_length=50)
+    badgetitle = models.CharField(max_length=50)
+    badgeachievedts = models.DateTimeField()
+    
+    class Meta:
+        managed = False
+        
+    objects = UserBadgeManager()
+    
+    def save(self):
+        return UserBadge.objects.save(self)
+    
+    def delete(self):
+        return UserBadge.objects.delete(self)
