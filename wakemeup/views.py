@@ -280,6 +280,10 @@ def index(request):
 def myaccount(request):
     
     if request.method == "POST":
+        # Go to homepage if user clicked "cancel" button        
+        if('submit_cancel' in request.POST):
+            return redirect_home()
+
         form = MyUserForm(request.POST, request.FILES)
         
         if(form.is_valid()):
