@@ -78,16 +78,8 @@ class UserReputationEventManager(models.Manager):
         return get_data(self, 'SP_DCPGetUserReputationEvent(%s,%s,%s)', (userid, contractid, eventid,))
     
     def save(self, myUserReputationEvent):
-        return save_data('SP_DCPUpsertUserReputationEvent', 
-             (
-                myUserReputationEvent.userid,
-                myUserReputationEvent.sourceeventid,
-                myUserReputationEvent.contractid,
-                myUserReputationEvent.actualpointvalue,
-                myUserReputationEvent.eventts,
-            )
-        )[0] # Return eventid
-        
+        pass # No use case
+
     def delete(self, myUserReputationEvent):
         pass # No use-case
 
@@ -103,13 +95,7 @@ class UserBadgeManager(models.Manager):
         return get_data(self, 'SP_DCPGetUserBadge(%s,%s)', (userid, badgeid,))
     
     def save(self, myUserBadge):
-        return save_data('SP_DCPUpsertUserBadge', 
-             (
-                myUserBadge.userid,
-                myUserBadge.badgeid,
-                None, # Use default (current_timestamp)
-            )
-        )[0]
+        pass # No use-case
         
     def delete(self, myUserBadge):
         pass # No use-case
@@ -184,7 +170,7 @@ class UserReputationEvent(models.Model):
     userid = models.IntegerField()
     sourceeventid = models.IntegerField()
     contractid = models.IntegerField()
-    actualpointvalue = models.IntegerField()
+    pointvalue = models.IntegerField()
     eventts = models.DateTimeField()
     eventdisplayname = models.CharField(max_length=100)
     
@@ -206,7 +192,7 @@ class UserBadge(models.Model):
     badgeid = models.IntegerField()
     badgelevel = models.CharField(max_length=1)
     badgeshortname = models.CharField(max_length=50)
-    badgetitle = models.CharField(max_length=50)
+    badgedisplayname = models.CharField(max_length=50)
     badgeachievedts = models.DateTimeField()
     
     class Meta:
