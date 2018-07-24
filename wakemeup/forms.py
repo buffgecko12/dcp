@@ -264,7 +264,7 @@ class TeacherForm(forms.Form):
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
     phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
-    emailaddress = forms.CharField(max_length=250,label='Correo', required=False)
+    emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
         
     # Define constructor
@@ -315,7 +315,7 @@ class StudentForm(forms.Form):
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
     phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
-    emailaddress = forms.CharField(max_length=250,label='Correo', required=False)
+    emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
 
     def __init__ (self, *args, **kwargs):
@@ -362,7 +362,7 @@ class MyUserForm(forms.Form):
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
     phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
-    emailaddress = forms.CharField(max_length=250,label='Correo', required=False)
+    emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
 #     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
 
     def __init__ (self, *args, **kwargs):
