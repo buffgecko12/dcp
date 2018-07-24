@@ -21,8 +21,10 @@
     		<a href="{% url 'wakemeup:contract_list' %}" class="btn btn-primary btn-lg btn-huge btn-block">Mis contratos</a>
 	    </div>
 	    <br>
+	    {% if request.user.usertype == 'ST' %}
 	    <div class="row">
     		<a href="{% url 'wakemeup:myaccount' %}" class="btn btn-primary btn-lg btn-huge btn-block">Mi cuenta</a>
 	    </div>
+	    {% endif %}
     </div>
 {% endblock %}
