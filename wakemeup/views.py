@@ -874,22 +874,26 @@ def edit_object(request, objecttype, objectid):
 def contract_detail(request, contractid):
     mycontract = Contract.objects.get(contractid=contractid)
 
+    # Make sure contract exists
     if(mycontract):
-        mycontract.contractvalidperiod_disp = display_timestamp_range(mycontract.contractvalidperiod) # Format for display
-        classinfo = Class.objects.get(classid=mycontract.classid)
-        contractinfo = ContractInfo.objects.get(contractid)
+        # Check contract is not a draft
+        if(mycontract.contractstatus != 'D'):
+            mycontract.contractvalidperiod_disp = display_timestamp_range(mycontract.contractvalidperiod) # Format for display
+            classinfo = Class.objects.get(classid=mycontract.classid)
+            contractinfo = ContractInfo.objects.get(contractid)
+            
+            # Prepare context info
+            context = {
+                'form':ContractSubmitForm(contractid = contractid),
+                'contract':mycontract,
+                'classinfo':classinfo,
+                'contractinfo':contractinfo, #Contains budget info
+            } 
         
-        # Prepare context info
-        context = {
-            'form':ContractSubmitForm(contractid = contractid),
-            'contract':mycontract,
-            'classinfo':classinfo,
-            'contractinfo':contractinfo, #Contains budget info
-        } 
-    
-        return render(request, 'wakemeup/contract/detail.html', context)
-    else:
-        return redirect_home()
+            return render(request, 'wakemeup/contract/detail.html', context)
+
+    # Contract doesn't exist or is a "Draft"
+    return redirect_home()
         
 @check_permissions
 def contract_accept(request):
