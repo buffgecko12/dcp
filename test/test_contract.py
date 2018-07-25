@@ -153,24 +153,6 @@ class testContracts(unittest.TestCase):
         # Check status is changed to "pending")
         self.assertEqual(newcontractget.contractstatus,'P')
 
-    def testApproveContract(self):
-
-        # Approve 3/4 required
-        newcontract.approve(1,'C',None,datetime.now(),1)
-        newcontract.approve(2,'C',None,datetime.now(),1)
-        newcontract.approve(3,'C',None,datetime.now(),1)
-
-        # Check approvalTS is still not set
-        newcontractget = Contract.objects.get(newcontract.contractid)
-        self.assertIsNone(newcontractget.contractapprovalts)
-
-        # Submit final approval
-        newcontract.approve(4,'C',None,datetime.now(),1)
-
-        # Check approval TS is set
-        newcontractget = Contract.objects.get(newcontract.contractid)
-        self.assertIsNotNone(newcontractget.contractapprovalts)
-
     def testReviseContract(self):
 
         newcontract.revisiondescription = 'My revision description mang!'
@@ -325,8 +307,27 @@ class testContracts(unittest.TestCase):
         getparty.partyapprovalsignature = signaturefile
         getparty.partyapprovalts = datetime.utcnow()
 
-        # Approve contract        
-        getparty.approve_contract()
+        # Setup remaining parties
+        getparty3 = ContractParty.objects.get(newcontract.contractid,partyuserid=3)
+        getparty3.partylogonuserid = 1
+
+        getparty4 = ContractParty.objects.get(newcontract.contractid,partyuserid=4)
+        getparty4.partylogonuserid = 1
+
+        # Approve contract (2 out of required 3 users)
+        getparty.approve_contract() # Userid = 2
+        getparty3.approve_contract()
+        
+        # Check contract has not been approved yet (2 out of required 3 have approved)
+        newcontractget = Contract.objects.get(newcontract.contractid)
+        self.assertIsNone(newcontractget.contractapprovalts)
+
+        # Submit final approval (3 out of 3)
+        getparty4.approve_contract()
+
+        # Check contract is approved
+        newcontractget = Contract.objects.get(newcontract.contractid)
+        self.assertIsNotNone(newcontractget.contractapprovalts)
 
     def tearDown(self):
         

@@ -33,19 +33,6 @@ class ContractManager(models.Manager):
             )
         )[0]
 
-    # TO-DO: Remove this (unused)
-    def approve(self, myContract, partyuserid, approvaltype, signaturescanfile, approvalts, logonuserid):
-        return save_data('SP_DCPApproveContract', 
-            (
-                myContract.contractid, 
-                partyuserid, 
-                approvaltype, 
-                None, #preferredgoalid
-                signaturescanfile, 
-                logonuserid
-            )
-        )
-    
     def revise(self, myContract):
         return save_data('SP_DCPReviseContract', 
             (
@@ -207,10 +194,6 @@ class Contract(models.Model):
     
     def save(self):
         return Contract.objects.save(self)
-    
-    # TO-DO: Remove this (unused)
-    def approve(self, partyuserid, approvaltype, signaturescanfile, approvalts, logonuserid):
-        return Contract.objects.approve(self, partyuserid, approvaltype, signaturescanfile, approvalts, logonuserid)
     
     def revise(self):
         return Contract.objects.revise(self)
