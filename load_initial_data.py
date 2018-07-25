@@ -96,7 +96,7 @@ def load_users():
         myclassinfo = {'currentclasses':[]}
         myschoolid = teacher[2]
 
-        myteacheruserid = create_user('TR', teacher[0], teacher[1], 'U').userid
+        myuser = create_user('TR', teacher[0], teacher[1], 'U')
 
         # Convert class name list to classid list
         for myclass in teacher[3]:
@@ -105,9 +105,14 @@ def load_users():
         
         # Assign teacher classes
         myteacher = Teacher(
-            teacheruserid = myteacheruserid,
+            teacheruserid = myuser.userid,
             schoolid = myschoolid,
-            classinfo = json.dumps(myclassinfo)
+            classinfo = json.dumps(myclassinfo),
+            firstname = myuser.firstname,
+            lastname = myuser.lastname,
+            emailaddress = myuser.emailaddress,
+            phonenumber = myuser.phonenumber,
+            defaultsignaturescanfile = myuser.defaultsignaturescanfile
         )
         
         # Save teacher info
@@ -125,13 +130,19 @@ def load_users():
     ]
 
     for student in student_list:
-        mystudentuserid = create_user('ST', student[0], student[1], 'U').userid
+
+        myuser = create_user('ST', student[0], student[1], 'U')
         myclassid = Class.objects.get_classes(schoolid = student[2], classdisplayname = student[3])[0].classid
 
         # Assign student class / info
         mystudent = Student(
-            studentuserid = mystudentuserid,
-            classid = myclassid
+            studentuserid = myuser.userid,
+            classid = myclassid,
+            firstname = myuser.firstname,
+            lastname = myuser.lastname,
+            emailaddress = myuser.emailaddress,
+            phonenumber = myuser.phonenumber,
+            defaultsignaturescanfile = myuser.defaultsignaturescanfile
         )
         
         mystudent.save()
