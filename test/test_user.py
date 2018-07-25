@@ -16,18 +16,26 @@ Case #2 - Input email that already exist as email (FAIL)
 '''
 
 class testUser(unittest.TestCase):
-    def testUser(self):
-        
-        USERNAME = 'oroku'
-        EMAILADDRESS = 'hamato@yoshi.com'
-        PASSWORD = 'wowzers'
+    global clean_user
+    global create_user
 
+    global USERNAME
+    global EMAILADDRESS
+    global PASSWORD
+
+    USERNAME = 'oroku'
+    EMAILADDRESS = 'hamato@yoshi.com'
+    PASSWORD = 'wowzers'
+    
+    def clean_user(username):
         # Delete user if exists
         try:
             checkuser = get_user_model().objects.get(username = USERNAME)
             checkuser.delete()
         except:
             pass
+
+    def create_user(password, username, usertype, firstname, lastname, emailaddress, userrole):
         
         # Create new user
         newuser = get_user_model().objects.create_user(
@@ -39,6 +47,13 @@ class testUser(unittest.TestCase):
             emailaddress = EMAILADDRESS,
             userrole = 'U'
         )
+
+        return newuser
+
+    def testUser(self):
+
+        clean_user(USERNAME)
+        newuser = create_user(password=PASSWORD,usertype='ST',firstname='Test',lastname='Orama',username=USERNAME,emailaddress=EMAILADDRESS,userrole='U')
         
         self.assertEqual(newuser.firstname,'Test')
         
@@ -65,33 +80,34 @@ class testUser(unittest.TestCase):
         # Save to DB
         nenwuser.firstname = 'New first name'
         nenwuser.save_user()
-        newuser1 = get_user_model().objects.get_user(nenwuser.userid)
+        newuser = get_user_model().objects.get_user(nenwuser.userid)
         
-        self.assertEqual(newuser1.firstname, 'New first name')
+        self.assertEqual(newuser.firstname, 'New first name')
 
         # Check user roles - regular user
-        self.assertEqual(newuser1.userrole,"U")
-        self.assertFalse(newuser1.is_admin())
-        self.assertFalse(newuser1.is_superuser())
+        self.assertEqual(newuser.userrole,"U")
+        self.assertFalse(newuser.is_admin())
+        self.assertFalse(newuser.is_superuser())
 
         # Check user roles - admin
-        newuser1.userrole = 'A'
-        newuser1.save_user()
-        newuser2 = get_user_model().objects.get_user(newuser1.userid)
-        self.assertTrue(newuser2.is_admin())
-        self.assertFalse(newuser2.is_superuser())
+        newuser.userrole = 'A'
+        newuser.save_user()
+        newuser = get_user_model().objects.get_user(newuser.userid)
+        self.assertTrue(newuser.is_admin())
+        self.assertFalse(newuser.is_superuser())
 
         # Check user roles - super user
-        newuser2.userrole = 'S'
-        newuser2.save_user()
-        newuser3 = get_user_model().objects.get_user(newuser2.userid)
-        self.assertTrue(newuser3.is_admin())
-        self.assertTrue(newuser3.is_superuser())
+        newuser.userrole = 'S'
+        newuser.save_user()
+        newuser = get_user_model().objects.get_user(newuser.userid)
+        self.assertTrue(newuser.is_admin())
+        self.assertTrue(newuser.is_superuser())
 
         # Delete user
-        newuser1.delete()
-        
-        self.assertIsNone(get_user_model().objects.get_user(newuser1.userid))
+        newuser.delete()
+
+        self.assertIsNone(get_user_model().objects.get_user(newuser.userid))
+
 
 if __name__ == '__main__':
     unittest.main() # Run all tests
