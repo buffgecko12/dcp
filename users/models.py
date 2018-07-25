@@ -66,6 +66,9 @@ class MyUserManager(BaseUserManager):
     def deactivate(self, myUser):
         return save_data('SP_DCPDeactivateUser', (myUser.userid,))
 
+    def update_reputation(self, myUser, eventid = None, contractid = None):
+        return save_data('SP_DCPUpdateUserReputation', (myUser.userid, eventid, contractid,))
+
 class UserReputationEventManager(models.Manager):
     
     def all(self):
@@ -74,11 +77,11 @@ class UserReputationEventManager(models.Manager):
     def get(self, eventid):
         return get_data_pk(self, 'SP_DCPGetUserReputationEvent(%s,%s,%s)', (None, None, eventid,))
     
-    def get_events(self, userid, contractid, eventid):
+    def get_events(self, userid = None, contractid = None, eventid = None):
         return get_data(self, 'SP_DCPGetUserReputationEvent(%s,%s,%s)', (userid, contractid, eventid,))
     
     def save(self, myUserReputationEvent):
-        pass # No use case
+        pass # Handled by user-level method
 
     def delete(self, myUserReputationEvent):
         pass # No use-case
@@ -95,7 +98,7 @@ class UserBadgeManager(models.Manager):
         return get_data(self, 'SP_DCPGetUserBadge(%s,%s)', (userid, badgeid,))
     
     def save(self, myUserBadge):
-        pass # No use-case
+        pass # Handled by user-level method
         
     def delete(self, myUserBadge):
         pass # No use-case
@@ -151,6 +154,9 @@ class MyUser(AbstractBaseUser):
 
     def deactivate(self):
         return MyUser.objects.deactivate(self)
+    
+    def update_reputation(self, eventid = None, contractid = None):
+        return MyUser.objects.update_reputation(self, eventid, contractid)
         
     def is_admin(self):
         if(self.userrole == 'A' or self.userrole == 'S'):
