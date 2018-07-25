@@ -76,7 +76,7 @@ def update_reputation(userid, eventid, contractid = None):
     myuser.update_reputation(eventid=eventid, contractid=contractid)
 
 # Move to util library
-def send_email(subject, body, sender, to_list):
+def send_email(subject, body, to_list, sender = 'duitamacolegioproject@gmail.com'):
     try:
         if(to_list):
             send_mail(subject, body, sender, to_list)
@@ -551,22 +551,12 @@ def create_contract_submit(request, contractid):
             mycontract = Contract.objects.get(contractid=contractid)
             mycontract.change_status('P') # Change contract status to pending
 
-            # Get teacher's e-mail
-            myteacheremail = Teacher.objects.get(teacheruserid = mycontract.teacheruserid).emailaddress
-
-            # Generate e-mail list
-            contractpartyemail_list = []
-            
-            for contractparty in mycontract.partyuserinfo['currentparties']:
-                contractpartyemail_list.append(contractparty['emailaddress'])
-
-            EMAIL_FROM = 'duitamacolegioproject@gmail.com'
             EMAIL_SUBJECT = 'Contrato nuevo (#' + str(contractid) + ')'
             EMAIL_BODY = 'Se envi' + mychr('o') + ' un contrato nuevo: ' + request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':contractid}))
 
             # Send e-mails
-            send_email(EMAIL_SUBJECT, EMAIL_BODY, EMAIL_FROM, contractpartyemail_list)
-            send_email(EMAIL_SUBJECT, EMAIL_BODY, EMAIL_FROM, [myteacheremail])
+            send_email(subject=EMAIL_SUBJECT, body=EMAIL_BODY, to_list=mycontract.get_emails("party"))
+            send_email(subject=EMAIL_SUBJECT, body=EMAIL_BODY, to_list=mycontract.get_emails("teacher"))
 
             # Go back to home page
             return redirect_home()
@@ -911,6 +901,7 @@ def contract_accept(request):
 
             mydatafile = convert_form_binary_to_db(request.FILES.get('partyapprovalsignature'))
             mycontractid = form.cleaned_data.get('contractid')
+            mycontract = Contract.objects.get(contractid=mycontractid) # Used to generate e-mails
             
             # Create new contractparty object
             mycontractparty = ContractParty(
@@ -922,7 +913,17 @@ def contract_accept(request):
             )
             
             # Accept contract
-            mycontractparty.approve_contract()
+            approveresult = mycontractparty.approve_contract()
+
+            # Send e-mails if contract approved by all parties
+            if(approveresult):
+                
+                # Send e-mails
+                EMAIL_SUBJECT = 'Contrato #' + str(mycontractid) + ' ha sido aprobado'
+                EMAIL_BODY = 'Se aprob' + mychr('o') + ' contrato #' + str(mycontractid) + '\n\n' + request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':mycontractid}))
+    
+                send_email(subject=EMAIL_SUBJECT, body=EMAIL_BODY, to_list=mycontract.get_emails("party"))
+                send_email(subject=EMAIL_SUBJECT, body=EMAIL_BODY, to_list=mycontract.get_emails("teacher"))
             
             # Update reputation (accept contract goal)
             update_reputation(mycontractparty.partyuserid, 2)

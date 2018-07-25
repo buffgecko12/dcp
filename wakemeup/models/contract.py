@@ -2,6 +2,8 @@ from django.db import models
 from lib.UsefulFunctions.dbUtils import *
 from django.contrib.postgres.fields import JSONField, DateTimeRangeField # uses tstzrange
 
+from wakemeup.models.environment import Teacher
+
 # Data model managers
 class ContractManager(models.Manager):
     def all(self):
@@ -54,6 +56,21 @@ class ContractManager(models.Manager):
     
     def delete(self, myContract):
         return delete_data('SP_DCPDeleteContract', (myContract.contractid,))
+
+    def get_emails(self, myContract, emailtype):
+        emails = []
+
+        # Get contract party e-mails
+        if(emailtype == "party"):
+            
+            for contractparty in myContract.partyuserinfo['currentparties']:
+                emails.append(contractparty['emailaddress'])
+        
+        # Get teacher e-mail
+        elif(emailtype == "teacher"):
+            emails.append(Teacher.objects.get(teacheruserid = myContract.teacheruserid).emailaddress)
+
+        return emails
 
 class ContractGoalManager(models.Manager):
     def all(self):
@@ -126,7 +143,7 @@ class ContractPartyManager(models.Manager):
                 MyContractParty.partyapprovalsignature, 
                 MyContractParty.partylogonuserid
             )
-        )
+        )[0]
 
 class ContractInfoManager(models.Manager):
     def all(self):
@@ -206,7 +223,10 @@ class Contract(models.Model):
     
     def change_status(self, contractstatus):
         return Contract.objects.change_status(self, contractstatus)
-    
+
+    def get_emails(self, emailtype):
+        return Contract.objects.get_emails(self, emailtype)
+
 class ContractGoal(models.Model):
     
     contractid = models.IntegerField(primary_key=True)
