@@ -70,6 +70,11 @@ view_permissions = {
     'myaccount': NO_PERM_REQUIRED,
 }
 
+# Helper function to update reputation without user object
+def update_reputation(userid, eventid, contractid = None):
+    myuser = get_user_model()(userid=userid)
+    myuser.update_reputation(eventid=eventid, contractid=contractid)
+
 # Move to util library
 def send_email(subject, body, sender, to_list):
     try:
@@ -918,6 +923,9 @@ def contract_accept(request):
             
             # Accept contract
             mycontractparty.approve_contract()
+            
+            # Update reputation (accept contract goal)
+            update_reputation(mycontractparty.partyuserid, 2)
 
             # Redirect
             return redirect('wakemeup:contract_detail', mycontractid)
@@ -978,7 +986,7 @@ def add_user(request):
                 myemailaddress = form.cleaned_data.get('emailaddress')
 
             # Create new user
-            get_user_model().objects.create_user(
+            newuser = get_user_model().objects.create_user(
                 raw_password, 
                 username,
                 form.cleaned_data.get('usertype'),
@@ -990,9 +998,9 @@ def add_user(request):
                 form.cleaned_data.get('userrole'),
             )
 
-            # Login as newly created user
-#             myuser = authenticate(username=username, password=raw_password)
-#             login(request, user)
+            # Update reputation (new user account)
+            if(newuser):
+                newuser.update_reputation(eventid=1)
 
             # Go back to index page
             return index(request)
