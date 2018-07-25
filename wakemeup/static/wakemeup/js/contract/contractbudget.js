@@ -41,10 +41,6 @@ function update_maxvalue() {
 	}		
 }
 
-$("#id_e_rewardinfo").change(function () {update_maxvalue()});
-$("#id_m_rewardinfo").change(function () {update_maxvalue()});
-$("#id_d_rewardinfo").change(function () {update_maxvalue()});
-
 function get_max_rewardValue() {
     var maxValue = 0; // Set minimum value in case there are no elements selected
 	

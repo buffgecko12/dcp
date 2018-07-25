@@ -36,6 +36,7 @@
 	<script src="{% static 'wakemeup/js/contract/addrewardmodal.js' %}"></script>
 	
 	<script>
+	
 		// Show modal: get new form
 		$("#addRewardModal").on('show.bs.modal', function(e) {
 			update_rewardform("new")
@@ -52,10 +53,22 @@
 			update_rewardform()
 			return false // Ignore default submit behavior
 		});
-	
-		window.onload = function() {
+
+		$(document).ready(function(){ // Wait until HTML has loaded (doesn't include images)
 			// Initial load / update of drop-down menus
 			update_all_rewards();
-		};		
+
+			// Reward change listener
+		    $('#id_e_rewardinfo,#id_m_rewardinfo,#id_d_rewardinfo').change(function() {
+		    	// Update max reward value
+		    	update_maxvalue();
+		    	
+				// Open "Add reward" modal if "add" button is clicked
+		        var optionvalue = $(this).val();
+		        if(optionvalue=="-1"){
+		        	$('#addRewardModal').modal("show");
+		        }
+		    });
+		});
 	</script>
 {% endblock %}

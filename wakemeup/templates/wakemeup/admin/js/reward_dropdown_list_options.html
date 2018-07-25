@@ -1,12 +1,9 @@
-{% if availablerewards %}
-	{% for reward in availablerewards %}
-		<option 
-			value="{{ reward.rewardid }}"
-			{% if reward.rewardid in selectedrewards %} selected="selected"{% endif %} 
-		>
-			{{ reward.rewarddisplayname}} - ${{ reward.rewardvalue }}
-		</option>
-	{% endfor %}
-{% else %}
-	<option value="" disabled>No hay registros.</option>
-{% endif %}
+<option value="-1" id="new">-- A&#241;adir nuevo --</option>
+{% for reward in availablerewards %}
+	<option 
+		value="{{ reward.rewardid }}"
+		{% if reward.rewardid in selectedrewards %} selected="selected"{% endif %} 
+	>
+		{{ reward.rewarddisplayname}} - ${{ reward.rewardvalue }}
+	</option>
+{% endfor %}
