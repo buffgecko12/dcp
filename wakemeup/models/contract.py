@@ -215,6 +215,7 @@ class Contract(models.Model):
     def save(self):
         return Contract.objects.save(self)
     
+    # TO-DO: Remove this (unused)
     def approve(self, partyuserid, approvaltype, signaturescanfile, approvalts, logonuserid):
         return Contract.objects.approve(self, partyuserid, approvaltype, signaturescanfile, approvalts, logonuserid)
     

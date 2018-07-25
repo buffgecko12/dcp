@@ -22,6 +22,9 @@ def create_user(usertype,firstname,lastname,userrole):
         userrole = userrole
     )
     
+    if(newuser):
+        newuser.update_reputation(eventid=1)
+    
     return newuser
 
 def load_schools_classes():
