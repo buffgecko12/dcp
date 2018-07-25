@@ -218,11 +218,6 @@ class testContracts(unittest.TestCase):
         mycontractgoal = ContractGoal.objects.get(contractid = newcontract.contractid, goalid = 2)
         self.assertEqual(mycontractgoal.difficultylevel, "E")
 
-        # Accept goal
-        mycontractgoal.accept()
-        mycontractgoal = ContractGoal.objects.get(contractid = newcontract.contractid, goalid=2)
-        self.assertTrue(mycontractgoal.acceptedflag)
-
         # Update existing goal and verify save
         mycontractgoal.difficultylevel = "D"
         mycontractgoal.save()

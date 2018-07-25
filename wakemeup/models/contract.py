@@ -91,13 +91,6 @@ class ContractGoalManager(models.Manager):
             )
         )[0]
 
-    def accept(self, myContractGoal):
-        return save_data('SP_DCPAcceptContractGoal', (
-                myContractGoal.contractid,
-                myContractGoal.goalid
-            )
-        )
-        
     def delete(self, myContractGoal):
         return delete_data('SP_DCPDeleteContractGoal', (myContractGoal.contractid, myContractGoal.goalid,))
 
@@ -246,9 +239,6 @@ class ContractGoal(models.Model):
 
     objects = ContractGoalManager()
     
-    def accept(self):
-        return ContractGoal.objects.accept(self)
-
     def save(self):
         return ContractGoal.objects.save(self)
     
