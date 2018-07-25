@@ -22,6 +22,29 @@ DEFAULT_LABEL_CLASS = 'col-sm-3'
 DEFAULT_FIELD_CLASS = 'col-sm-9'
 DEFAULT_FORM_METHOD = 'POST'
 
+def validate_emailaddress(userid, emailaddress):
+    
+    # Try to lookup user with matching email address
+    try:
+        useremail = get_user_model().objects.get(userid=userid).emailaddress
+    except get_user_model().DoesNotExist:
+        useremail = None
+
+    # Ignore validation if e-mail address is unchanged or current user does not have e-mail specified (i.e. new user)
+    if(useremail == emailaddress or not useremail):
+       return emailaddress
+    else:
+
+        # Check to see if any users already exist with this email as a username
+        emailmatch = get_user_model().objects.get_user_auth(emailaddress=emailaddress)
+        usernamematch = get_user_model().objects.get_user_auth(username=emailaddress)
+        
+        # If email is already in use, raise an error
+        if emailmatch or usernamematch:
+            raise forms.ValidationError('Este correo ya esta en uso.')
+    
+        return emailaddress
+
 def setFormHelper(
     myFormHelper, 
     form_method = DEFAULT_FORM_METHOD, # Use defaults if no values are specified
@@ -41,20 +64,6 @@ def getAdminFormActions():
         Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='cancel'), # Don't change the "cancel" id, it's used by javascript (i.e. reward modal)
         Submit('submit_next','Enviar', css_id='next'),
     )
-    
-
-# Validate email
-def validate_emailaddress(emailaddress):
-
-    # Check to see if any users already exist with this email as a username.
-    emailmatch = get_user_model().objects.get_user_auth(emailaddress=emailaddress)
-    usernamematch = get_user_model().objects.get_user_auth(username=emailaddress)
-    
-    # If email is already in use, raise an error
-    if emailmatch or usernamematch:
-        raise forms.ValidationError('Este correo ya esta en uso.')
-
-    return emailaddress
 
 class LoginForm(AuthenticationForm):
 
@@ -128,7 +137,7 @@ class SignupForm(UserCreationForm):
 
     # Make sure email address does not already exist
     def clean_emailaddress(self):
-        return validate_emailaddress(self.cleaned_data.get('emailaddress'))
+        return validate_emailaddress(self.cleaned_data.get("userid"), self.cleaned_data.get("emailaddress"))
 
     # Make sure email address does not already exist
     def clean_username(self):
@@ -266,6 +275,10 @@ class TeacherForm(forms.Form):
     phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
+
+    # Make sure email address does not already exist
+    def clean_emailaddress(self):
+        return validate_emailaddress(self.cleaned_data.get("teacheruserid"), self.cleaned_data.get("emailaddress"))
         
     # Define constructor
     def __init__ (self, *args, **kwargs):
@@ -348,6 +361,10 @@ class StudentForm(forms.Form):
             getAdminFormActions()
         )
 
+    # Make sure email address does not already exist
+    def clean_emailaddress(self):
+        return validate_emailaddress(self.cleaned_data.get("studentuserid"), self.cleaned_data.get("emailaddress"))
+
     # Specify model
     class Meta:
         model = Student
@@ -388,14 +405,7 @@ class MyUserForm(forms.Form):
 
     # Make sure email address does not already exist
     def clean_emailaddress(self):
-        formemail = self.cleaned_data.get('emailaddress')
-        useremail = get_user_model().objects.get(userid=self.cleaned_data.get('userid')).emailaddress
-
-        # Ignore validation if e-mail address is unchanged
-        if(useremail == formemail):
-           return formemail
-        else:
-            return validate_emailaddress(self.cleaned_data.get('emailaddress'))
+        return validate_emailaddress(self.cleaned_data.get("userid"), self.cleaned_data.get("emailaddress"))
 
     # Specify model
     class Meta:
