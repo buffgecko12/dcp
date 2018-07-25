@@ -73,7 +73,7 @@ class testTeacher(unittest.TestCase):
         newteacher.classinfo = classinfo
         newteacher.schoolid = newschool.schoolid
         myfirstname = newteacher.firstname
-        newteacher.firstname = None # Firstname should not be overwritten with NULL
+        newteacher.firstname = '' # Firstname should not be overwritten with NULL
         newteacher.save()
 
         # Re-retrieve object and check that firstname was not changed

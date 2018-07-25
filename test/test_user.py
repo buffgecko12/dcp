@@ -21,6 +21,13 @@ class testUser(unittest.TestCase):
         USERNAME = 'oroku'
         EMAILADDRESS = 'hamato@yoshi.com'
         PASSWORD = 'wowzers'
+
+        # Delete user if exists
+        try:
+            checkuser = get_user_model().objects.get(username = USERNAME)
+            checkuser.delete()
+        except:
+            pass
         
         # Create new user
         newuser = get_user_model().objects.create_user(
@@ -36,8 +43,8 @@ class testUser(unittest.TestCase):
         self.assertEqual(newuser.firstname,'Test')
         
         # Get an existing user
-        newuserget = get_user_model().objects.get_user(newuser.userid)
-        self.assertIsNotNone(newuserget) # positive
+        nenwuser = get_user_model().objects.get_user(newuser.userid)
+        self.assertIsNotNone(nenwuser) # positive
         self.assertIsNone(get_user_model().objects.get_user(10000)) # negative
 
         # Authenticate
@@ -56,9 +63,9 @@ class testUser(unittest.TestCase):
         self.assertFalse(get_user_model().objects.get_user_auth('elsha', None)) # negative
 
         # Save to DB
-        newuserget.firstname = 'New first name'
-        newuserget.save_user()
-        newuser1 = get_user_model().objects.get_user(newuserget.userid)
+        nenwuser.firstname = 'New first name'
+        nenwuser.save_user()
+        newuser1 = get_user_model().objects.get_user(nenwuser.userid)
         
         self.assertEqual(newuser1.firstname, 'New first name')
 

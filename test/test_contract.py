@@ -22,8 +22,7 @@ class testContracts(unittest.TestCase):
         global newuser
         global signaturefile
 
-        global newreward1
-        global newreward2
+        global newreward
 
         # Prepare signature file        
         signaturefile = test_setup.readfile('test/img/sampleimg.jpg')
@@ -48,6 +47,13 @@ class testContracts(unittest.TestCase):
             }
         )
         
+        # Delete user if already exists
+        try:
+            checkuser = get_user_model().objects.get(username = 'teacher1')
+            checkuser.delete()
+        except:
+            pass
+        
         # Create new teacher
         newuser = get_user_model().objects.create_user(
             password = 'adminadmin', usertype = 'TR', firstname = 'Teacher', 
@@ -57,15 +63,10 @@ class testContracts(unittest.TestCase):
         newteacher = Teacher(teacheruserid=newuser.userid, schoolid=newschool.schoolid, classinfo=classinfo)
         newteacherid = newteacher.save()
 
-        # Create new rewards
-        newreward1 = Reward(rewardid = 101, rewarddescription = 'Goal #101', rewardvalue = 755)
-        newreward1.createdbyuserid = 0
-        newreward1.rewardid = newreward1.save()
+        # Create new reward
+        newreward = Reward(rewarddescription = 'Goal #101', rewardvalue = 755, createdbyuserid = newuser.userid)
+        newreward.rewardid = newreward.save()
 
-        newreward2 = Reward(rewardid = 102, rewarddescription = 'Goal #102', rewardvalue = 50)
-        newreward2.createdbyuserid = 0
-        newreward2.rewardid = newreward2.save()
- 
     # Re-create environment for each test case        
     def setUp(self):
         global newcontract
@@ -132,11 +133,10 @@ class testContracts(unittest.TestCase):
         pass
 
     def testReward(self):
-        newreward2.description = "New Description text"
-        newreward2.createdbyuserid=0
-        newreward2.save()
-        newrewardget = Reward.objects.get(rewardid=102)
-        self.assertEqual(newrewardget.rewarddescription,"Goal #102")
+        newreward.rewarddescription = "New Description text"
+        newreward.save()
+        newrewardget = Reward.objects.get(rewardid=newreward.rewardid)
+        self.assertNotEqual(newrewardget.rewarddescription,"Goal #102")
 
     def testGetContract(self):
         newcontractget = Contract.objects.get(newcontract.contractid)
@@ -231,7 +231,7 @@ class testContracts(unittest.TestCase):
 
         # Create new goal
         newcontractgoal = ContractGoal(newcontract.contractid, None, 'M', 'Manual goal', None, None, 
-                                       json.dumps({"currentrewards" : [{"rewardid" : 101}]})
+                                       json.dumps({"currentrewards" : [{"rewardid" : newreward.rewardid}]})
                                    )
 
         newcontractgoalid = newcontractgoal.save()
@@ -247,21 +247,21 @@ class testContracts(unittest.TestCase):
         self.assertIsNone(mycontractgoal)        
         
         # Check reward info set properly
-        mycontractgoalreward = ContractGoalReward.objects.get(contractid = newcontract.contractid, goalid=3, rewardid=101)
+        mycontractgoalreward = ContractGoalReward.objects.get(contractid = newcontract.contractid, goalid=3, rewardid=newreward.rewardid)
         self.assertEqual(mycontractgoalreward.rewarddescription,"Goal #101")
 
-        mycontractgoalreward = ContractGoalReward.objects.get(contractid = newcontract.contractid, goalid=3, rewardid=101)
+        mycontractgoalreward = ContractGoalReward.objects.get(contractid = newcontract.contractid, goalid=3, rewardid=newreward.rewardid)
         self.assertEqual(mycontractgoalreward.rewardvalue,755)
 
         # Create new reward
-        newcontractgoalreward = ContractGoalReward(newcontract.contractid, 1, 101)
+        newcontractgoalreward = ContractGoalReward(newcontract.contractid, 1, newreward.rewardid)
         newcontractgoalrewardid = newcontractgoalreward.save()
-        newcontractgoalreward = ContractGoalReward.objects.get(newcontract.contractid, 1, 101)
+        newcontractgoalreward = ContractGoalReward.objects.get(newcontract.contractid, 1, newreward.rewardid)
         self.assertEqual(newcontractgoalreward.rewarddescription,'Goal #101')
 
         # Check delete reward
         mycontractgoalreward.delete()
-        mycontractgoalreward = ContractGoalReward.objects.get(contractid = newcontract.contractid, goalid=3, rewardid=101)
+        mycontractgoalreward = ContractGoalReward.objects.get(contractid = newcontract.contractid, goalid=3, rewardid=newreward.rewardid)
         self.assertIsNone(mycontractgoalreward)
 
     def testContractGoalRewards(self):
@@ -334,14 +334,16 @@ class testContracts(unittest.TestCase):
         getparty.approve_contract()
 
     def tearDown(self):
+        
+        # Set back to draft and delete
+        newcontract.change_status('D')
         newcontract.delete()
 
     @classmethod
     def tearDownClass(self):
         newschool.delete()
         newuser.delete()
-        newreward1.delete()
-        newreward2.delete()
+        newreward.delete()
         
 if __name__ == '__main__':
     unittest.main() # Run all tests
