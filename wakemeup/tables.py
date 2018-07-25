@@ -118,6 +118,8 @@ class RewardsTable(tables.Table):
 
 class ContractsTable(tables.Table):
 
+    global get_rowlink
+
     objectid = 'contractid'
 
     kwargs={
@@ -145,6 +147,12 @@ class ContractsTable(tables.Table):
         status_dict = {'P':'Pendiente','D':'Borrador','A':'Activo','C':'Completo'}
         return status_dict[value]
 
+    def get_rowlink(record):
+        if(record.contractstatus == "D"):
+            return reverse('wakemeup:create_contract', kwargs={'contractid':record.contractid})
+        else:
+            return reverse('wakemeup:contract_detail', kwargs={'contractid':record.contractid})
+    
     teacheruserid = tables.Column(verbose_name="Docente")
     goalinfo = tables.TemplateColumn(template_name='wakemeup/admin/fields/contract_goals.html', verbose_name='Metas')
     partyuserinfo = tables.TemplateColumn(template_name='wakemeup/admin/fields/contract_parties.html', verbose_name='Participantes')
@@ -156,6 +164,6 @@ class ContractsTable(tables.Table):
         
         row_attrs = {
             'class': "clickable-row mouseicon",
-            'data-href': lambda record: reverse('wakemeup:contract_detail', kwargs={'contractid':record.contractid}),
+            'data-href': lambda record: get_rowlink(record),
             'style': "cursor: pointer;"
         }
