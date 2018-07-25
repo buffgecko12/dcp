@@ -95,16 +95,28 @@ class TeacherManager(models.Manager):
         )
     
     def save(self, myTeacher):
-        return save_data('SP_DCPUpsertTeacher', (
+        # Save teacher-specific info
+        save_data('SP_DCPUpsertTeacher', (
             myTeacher.teacheruserid,
             myTeacher.schoolid,
             None, # Max budget not changeable here
             myTeacher.classinfo,
+            )
+        )
+
+        # Save general user info
+        return save_data('SP_DCPUpsertUser', (
+            myTeacher.teacheruserid,
+            '', # Username # Pass empty string to avoid NOT NULL requirement
+            '', # Usertype
             myTeacher.firstname,
             myTeacher.lastname,
             myTeacher.defaultsignaturescanfile,
             myTeacher.phonenumber,
             myTeacher.emailaddress,
+            '', # Password
+            '', # Role
+            None, # Last login
             )
         )[0] # Return teacheruserid
         
@@ -132,14 +144,26 @@ class StudentManager(models.Manager):
         return get_data(self, 'SP_DCPGetStudent(%s,%s)', (None,classid))
     
     def save(self, myStudent):
-        return save_data('SP_DCPUpsertStudent', (
+         # Save student-specific info
+        save_data('SP_DCPUpsertStudent', (
             myStudent.studentuserid,
             myStudent.classid,
+            )
+         )
+
+         # Save general user info
+        return save_data('SP_DCPUpsertUser', (
+            myStudent.studentuserid,
+            '', # Username
+            '', # Usertype
             myStudent.firstname,
             myStudent.lastname,
             myStudent.defaultsignaturescanfile,
             myStudent.phonenumber,
             myStudent.emailaddress,
+            '', # Password
+            '', # Role
+            None, # Last login
             )
          )[0] # Return studentuserid
     
