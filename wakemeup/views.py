@@ -551,7 +551,7 @@ def create_contract_submit(request, contractid):
             mycontract = Contract.objects.get(contractid=contractid)
             mycontract.change_status('P') # Change contract status to pending
 
-            EMAIL_SUBJECT = 'Contrato nuevo (#' + str(contractid) + ')'
+            EMAIL_SUBJECT = 'Duitama Colegio Project - Contrato nuevo (#' + str(contractid) + ')'
             EMAIL_BODY = 'Se envi' + mychr('o') + ' un contrato nuevo: ' + request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':contractid}))
 
             # Send e-mails
@@ -919,7 +919,7 @@ def contract_accept(request):
             if(approveresult):
                 
                 # Send e-mails
-                EMAIL_SUBJECT = 'Contrato #' + str(mycontractid) + ' ha sido aprobado'
+                EMAIL_SUBJECT = 'Duitama Colegio Project - Contrato #' + str(mycontractid) + ' ha sido aprobado'
                 EMAIL_BODY = 'Se aprob' + mychr('o') + ' contrato #' + str(mycontractid) + '\n\n' + request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':mycontractid}))
     
                 send_email(subject=EMAIL_SUBJECT, body=EMAIL_BODY, to_list=mycontract.get_emails("party"))
