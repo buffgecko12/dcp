@@ -601,7 +601,8 @@ class ContractGoalsForm(forms.Form):
             raise forms.ValidationError("Por favor especificar al menos una meta.")
 
     goaldescription_label = 'Descripci' + mychr('o') + 'n<br><small><i>Una descripci' + mychr('o') + 'n detallada con instrucciones claras para c' + chr(243) + 'mo medir ' + chr(233) + 'xito</i></small>'
-    rewardinfo_label = 'Opciones de premio<small><i> <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addRewardModal">A' + chr(241) + 'adir</button><br>Al cumplir con ' + chr(233) + 'xito la meta, cada participante podr' + chr(225) + ' escoger un premio de esta lista</i></small>'
+    rewardinfo_label = 'Opciones de premio<small><i> <br>Al cumplir con ' + chr(233) + 'xito la meta, cada participante podr' + chr(225) + ' escoger un premio de esta lista</i></small>'
+#     rewardinfo_label = 'Opciones de premio<small><i> <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addRewardModal">A' + chr(241) + 'adir</button><br>Al cumplir con ' + chr(233) + 'xito la meta, cada participante podr' + chr(225) + ' escoger un premio de esta lista</i></small>'
 
     # Fields used for javascript and form navigation between pages
     contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)    
