@@ -6,7 +6,7 @@ from wakemeup.models.contract import Reward
 import json
 
 PASSWORD = 'adminadmin'
-MAX_BUDGET = 600000
+MAX_BUDGET = 500000
 
 def normalize_field(mystring):
     return mystring.replace(" ","").lower()
@@ -21,9 +21,6 @@ def create_user(usertype,firstname,lastname,userrole):
         emailaddress = normalize_field(firstname) + '@' + normalize_field(lastname) + '.com', 
         userrole = userrole
     )
-    
-    if(newuser):
-        newuser.update_reputation(eventid=2001)
     
     return newuser
 
