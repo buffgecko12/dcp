@@ -70,11 +70,6 @@ view_permissions = {
     'myaccount': NO_PERM_REQUIRED,
 }
 
-# Helper function to update reputation without user object
-def update_reputation(userid, eventid, contractid = None):
-    myuser = get_user_model()(userid=userid)
-    myuser.update_reputation(eventid=eventid, contractid=contractid)
-
 # Move to util library
 def send_email(subject, body, to_list, sender = 'duitamacolegioproject@gmail.com'):
     try:
@@ -916,7 +911,7 @@ def contract_accept(request):
                 partylogonuserid = request.user.userid,
             )
             
-            # Accept contract
+            # Accept contract (creates "accept contract" event --> reputation, badge, notification)
             approveresult = mycontractparty.approve_contract()
 
             # Send e-mails if contract approved by all parties
@@ -929,11 +924,8 @@ def contract_accept(request):
                 send_email(subject=EMAIL_SUBJECT, body=EMAIL_BODY, to_list=mycontract.get_emails("party"))
                 send_email(subject=EMAIL_SUBJECT, body=EMAIL_BODY, to_list=mycontract.get_emails("teacher"))
             
-            # Update reputation (accept contract goal)
-            update_reputation(mycontractparty.partyuserid, 2002)
-
-            # Redirect
-            return redirect('wakemeup:contract_detail', mycontractid)
+            # Redirect to contract list
+            return redirect('wakemeup:contract_list')
     else:
         return redirect_home()
 
@@ -1002,10 +994,6 @@ def add_user(request):
                 myemailaddress,
                 form.cleaned_data.get('userrole'),
             )
-
-            # Update reputation (new user account)
-            if(newuser):
-                newuser.update_reputation(eventid=2001)
 
             # Go back to index page
             return index(request)

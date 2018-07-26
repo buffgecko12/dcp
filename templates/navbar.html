@@ -53,7 +53,11 @@
 					</li>
 					<li class="nav-item">
 						<a class="nav-link" href="#">
-							<div title="reputaci&#243;n"><span class="badge badge-secondary">{{user.reputationvalue}}</span></div>
+							<div title="reputaci&#243;n">
+								<span class="badge badge-secondary">
+									{{user.reputationvalue}} {% if userinfo.reputationvaluedelta != 0 %} ({{ userinfo.reputationvaluedelta }}) {% endif %}
+								</span>
+							</div>
 						</a>
 					</li>
 					<li class="nav-item">

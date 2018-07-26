@@ -66,11 +66,16 @@ class MyUserManager(BaseUserManager):
     def deactivate(self, myUser):
         return save_data('SP_DCPDeactivateUser', (myUser.userid,))
 
-    def update_reputation(self, myUser, eventid, contractid):
-        return save_data('SP_DCPUpdateUserInfo', (myUser.userid, eventid, contractid,))
+    def manage_reputation(self, myUser, actiontype):
+        return save_data('SP_DCPManageUserReputation', (myUser.userid, actiontype,))[0]
 
-    def add_notification(self, myUser, notificationid):
-        return save_data('SP_DCPUpsertUserNotification', (myUser.userid, notificationid, ))
+    # TO-DO: possibly remove
+    def add_event(self, myUser, eventid, contractid):
+        return save_data('SP_DCPProcessUserEvent', (myUser.userid, eventid, contractid,))
+
+    # TO-DO: possibly remove
+    def add_notification(self, myUser, notificationid, contractid):
+        return save_data('SP_DCPUpsertUserNotification', (myUser.userid, notificationid, contractid))
 
 class UserReputationEventManager(models.Manager):
     
@@ -95,10 +100,10 @@ class UserNotificationManager(models.Manager):
         return self.get_notifications(None, None,)
     
     def get(self, notificationid):
-        return get_data_pk(self, 'SP_DCPGetUserNotification(%s,%s)', (None, notificationid,))
+        return get_data_pk(self, 'SP_DCPGetUserNotification(%s,%s,%s,%s)', (None, None, notificationid, None))
     
-    def get_notifications(self, userid = None, notificationid = None):
-        return get_data(self, 'SP_DCPGetUserNotification(%s,%s)', (userid, notificationid,))
+    def get_notifications(self, userid = None, sourceeventid = None, notificationid = None, activeonlyflag = True):
+        return get_data(self, 'SP_DCPGetUserNotification(%s,%s,%s,%s)', (userid, sourceeventid, notificationid, activeonlyflag))
     
     def save(self, myUserNotification):
         pass # Handled by user-level method
@@ -146,6 +151,7 @@ class MyUser(AbstractBaseUser):
     emailaddress = models.CharField(max_length=250)
     userrole = models.CharField(max_length=1)
     reputationvalue = models.IntegerField()
+    reputationvaluelastseents = models.DateTimeField()
     is_active = models.BooleanField()
 
     # Define data manager
@@ -175,11 +181,16 @@ class MyUser(AbstractBaseUser):
     def deactivate(self):
         return MyUser.objects.deactivate(self)
     
-    def update_reputation(self, eventid, contractid = None):
-        return MyUser.objects.update_reputation(self, eventid, contractid)
+    def manage_reputation(self, actiontype):
+        return MyUser.objects.manage_reputation(self, actiontype)
         
-    def add_notification(self, notificationid):
-        return MyUser.objects.add_notification(self, notificationid)
+    # TO-DO: possibly remove
+    def add_event(self, eventid, contractid = None):
+        return MyUser.objects.add_event(self, eventid, contractid)
+        
+    # TO-DO: possibly remove
+    def add_notification(self, notificationid, contractid = None):
+        return MyUser.objects.add_notification(self, notificationid, contractid)
         
     def is_admin(self):
         if(self.userrole == 'A' or self.userrole == 'S'):
