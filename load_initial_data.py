@@ -23,7 +23,7 @@ def create_user(usertype,firstname,lastname,userrole):
     )
     
     if(newuser):
-        newuser.update_reputation(eventid=1)
+        newuser.update_reputation(eventid=2001)
     
     return newuser
 

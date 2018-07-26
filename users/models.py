@@ -66,8 +66,11 @@ class MyUserManager(BaseUserManager):
     def deactivate(self, myUser):
         return save_data('SP_DCPDeactivateUser', (myUser.userid,))
 
-    def update_reputation(self, myUser, eventid = None, contractid = None):
+    def update_reputation(self, myUser, eventid, contractid):
         return save_data('SP_DCPUpdateUserReputation', (myUser.userid, eventid, contractid,))
+
+    def add_notification(self, myUser, notificationid):
+        return save_data('SP_DCPUpsertUserNotification', (myUser.userid, notificationid, ))
 
 class UserReputationEventManager(models.Manager):
     
@@ -84,6 +87,23 @@ class UserReputationEventManager(models.Manager):
         pass # Handled by user-level method
 
     def delete(self, myUserReputationEvent):
+        pass # No use-case
+
+class UserNotificationManager(models.Manager):
+    
+    def all(self):
+        return self.get_notifications(None, None,)
+    
+    def get(self, notificationid):
+        return get_data_pk(self, 'SP_DCPGetUserNotification(%s,%s)', (None, notificationid,))
+    
+    def get_notifications(self, userid = None, notificationid = None):
+        return get_data(self, 'SP_DCPGetUserNotification(%s,%s)', (userid, notificationid,))
+    
+    def save(self, myUserNotification):
+        pass # Handled by user-level method
+
+    def delete(self, myUserNotification):
         pass # No use-case
 
 class UserBadgeManager(models.Manager):
@@ -155,8 +175,11 @@ class MyUser(AbstractBaseUser):
     def deactivate(self):
         return MyUser.objects.deactivate(self)
     
-    def update_reputation(self, eventid = None, contractid = None):
+    def update_reputation(self, eventid, contractid = None):
         return MyUser.objects.update_reputation(self, eventid, contractid)
+        
+    def add_notification(self, notificationid):
+        return MyUser.objects.add_notification(self, notificationid)
         
     def is_admin(self):
         if(self.userrole == 'A' or self.userrole == 'S'):
@@ -191,7 +214,26 @@ class UserReputationEvent(models.Model):
     def delete(self):
         return UserReputationEvent.objects.delete(self)
 
-# TO-DO: May need to add primary_key=True reference here
+class UserNotification(models.Model):
+    
+    userid = models.IntegerField()
+    notificationid = models.BigIntegerField()
+    notificationts = models.DateTimeField()
+    notificationseen = models.BooleanField()
+    notificationtext = models.CharField(max_length=500)
+    sourceeventid = models.IntegerField()
+    
+    class Meta:
+        managed = False
+        
+    objects = UserNotificationManager()
+    
+    def save(self):
+        return UserNotification.objects.save(self)
+    
+    def delete(self):
+        return UserNotification.objects.delete(self)
+
 class UserBadge(models.Model):
     
     userid = models.IntegerField()

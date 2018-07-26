@@ -930,7 +930,7 @@ def contract_accept(request):
                 send_email(subject=EMAIL_SUBJECT, body=EMAIL_BODY, to_list=mycontract.get_emails("teacher"))
             
             # Update reputation (accept contract goal)
-            update_reputation(mycontractparty.partyuserid, 2)
+            update_reputation(mycontractparty.partyuserid, 2002)
 
             # Redirect
             return redirect('wakemeup:contract_detail', mycontractid)
@@ -1005,7 +1005,7 @@ def add_user(request):
 
             # Update reputation (new user account)
             if(newuser):
-                newuser.update_reputation(eventid=1)
+                newuser.update_reputation(eventid=2001)
 
             # Go back to index page
             return index(request)
