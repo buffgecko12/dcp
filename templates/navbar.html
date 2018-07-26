@@ -46,6 +46,16 @@
 			</ul>
 			<ul class="nav navbar-nav">
 				{% if user.is_authenticated %}
+<!-- 					<li class="nav-item">
+						<a class="nav-link" href="#">
+							<img src="{% static 'img/inbox.png' %}" title="notificaciones"></img>
+						</a> -->
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#">
+							<div title="reputaci&#243;n"><span class="badge badge-secondary">{{user.reputationvalue}}</span></div>
+						</a>
+					</li>
 					<li class="nav-item">
 						<a class="nav-link {% if url_name == 'myaccount' %} active {% endif %}" href="{% url 'wakemeup:myaccount' %}">
 							<img src="{% static 'img/account_circle_grey.png' %}" title="{{ request.user }}"></img>
