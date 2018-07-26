@@ -67,7 +67,7 @@ class MyUserManager(BaseUserManager):
         return save_data('SP_DCPDeactivateUser', (myUser.userid,))
 
     def update_reputation(self, myUser, eventid, contractid):
-        return save_data('SP_DCPUpdateUserReputation', (myUser.userid, eventid, contractid,))
+        return save_data('SP_DCPUpdateUserInfo', (myUser.userid, eventid, contractid,))
 
     def add_notification(self, myUser, notificationid):
         return save_data('SP_DCPUpsertUserNotification', (myUser.userid, notificationid, ))
