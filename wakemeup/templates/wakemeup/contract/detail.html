@@ -85,7 +85,7 @@
 						<small><i>
 							{% if not party.preferredgoalid %}
 								{% if party.partyuserid == request.user.userid or request.user.is_admin %}
-									<input type="submit" class="btn btn-sm btn-primary" name="submit" id="submit_{{party.partyuserid}}" value="Aceptar" disabled/>
+									<input type="submit" class="btn btn-xs btn-primary" name="submit" id="submit_{{party.partyuserid}}" value="Aceptar" disabled/>
 								{% else %}
 								N/A
 								{% endif %}

@@ -3,23 +3,23 @@
 	{% if record.contractstatus == "D" %}
 		<form style="display:inline-block" action="{% url 'wakemeup:create_contract' contractid=value %}" method="post">
 		    {% csrf_token %}
-			<input class="btn btn-sm btn-primary" name="submit_other" type="submit" value="Editar"/>
+			<input class="btn btn-xs btn-primary" name="submit_other" type="submit" value="Editar"/>
 		</form>
 		<form style="display:inline-block" action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=value %}" method="post">
 		    {% csrf_token %}
-			<input class="btn btn-sm btn-warning" name="delete" type="submit" value="Borrar" onclick="return confirm('Estas seguro que desea eliminar este objeto?');"/>
+			<input class="btn btn-xs btn-warning" name="delete" type="submit" value="Borrar" onclick="return confirm('Estas seguro que desea eliminar este objeto?');"/>
 		</form>
 	{% elif record.contractstatus == "A" %}
 		<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
 		    {% csrf_token %}
-			<input class="btn btn-sm btn-success" name="revise" type="submit" value="Modificar"/>
+			<input class="btn btn-xs btn-success" name="revise" type="submit" value="Modificar"/>
 		</form>
 	{% endif %}
 {% endif %}
 {% if record.contractstatus == "P" %}
 	<form style="display:inline-block" action="{% url 'wakemeup:contract_detail' contractid=value %}" method="post">
 	    {% csrf_token %}
-		<input class="btn btn-sm btn-primary" name="manage" type="submit" value="Revisar"/>
+		<input class="btn btn-xs btn-primary" name="manage" type="submit" value="Revisar"/>
 	</form>
 {% endif %}
 </div>

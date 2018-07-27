@@ -3,3 +3,10 @@
 	font-size: 30px;
 	border-radius: 10px;	
 }
+
+.btn-xs {
+  padding  : .25rem .4rem;
+  font-size  : .75rem;
+  line-height  : .75;
+  border-radius : .2rem;
+}
