@@ -1,6 +1,6 @@
 <!-- Base template -->
 {% load staticfiles %}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <!-- Meta info -->
@@ -9,15 +9,10 @@
         <meta name="description" content="">
         <meta name="author" content="">
 
-        <!-- Page title -->
-        <title class="title">
-            Wake Me Up - {% block title %}Inicio{% endblock %}
-        </title>    
-    
-        <!-- Import Bootstrap Core files (files read and attributes overidden in order) -->
-        <!-- TO-DO: Update to support fallback CDN server -->
+        <!-- Import Bootstrap core files  -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
 	    <!-- Custom styles for footer -->
@@ -26,12 +21,16 @@
         <!-- Page-specific imports -->
         {% block import %}{% endblock %}
 
-        <!-- Workaround to allow styling of unknown HTML elements in IE browsers older than IE9 (must be after CSS imports -->
-        <!-- TO-DO: Add this -->
+        <!-- Workaround to allow styling of unknown HTML elements in IE browsers older than IE9 (must be after CSS imports) -->
         <!--[if lt IE 9]>
             <script src="{% static 'js/html5shiv.js' %}"></script>
         <![endif]-->
 
+        <!-- Page title -->
+        <title class="title">
+            Wake Me Up - {% block title %}Inicio{% endblock %}
+        </title>    
+    
         <!-- Image to use for favorite/bookmark icon -->        
         <link rel="icon" href="{% static 'img/favicon.png' %}" />
     </head>
