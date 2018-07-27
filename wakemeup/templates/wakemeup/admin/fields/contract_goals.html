@@ -3,6 +3,7 @@
 {% for goal in record.goalinfo.currentgoals %}
 	{% if record.contractapprovalts and goal.acceptedflag or not record.contractapprovalts %}
 		<div>
+			<span class="text-nowrap">
 			<strong>
 				Opci&#243;n 
 				{% if goal.difficultylevel == "E" %} Fac&#237;l
@@ -12,13 +13,16 @@
 			</strong>
 
 			{% if goal.acceptedflag %} 
-				<img src="{% static 'img/web_check.png' %}" />
+				<img src="{% static 'img/web_check15.png' %}" />
 			{% endif %}
+			</span>				
 
-			<div class="small">
+			<div>
 				<i>{{ goal.goaldescription }}</i><br>
 		
-				<strong>Opciones de premio: </strong>
+				<span class="text-nowrap">
+					<strong>Opciones de premio</strong>
+				</span><br>
 				<i>{% for reward in goal.rewardinfo.currentrewards %}
 					{{ reward.rewarddisplayname }}{% if not forloop.last %}, {% endif %}
 				{% endfor %}</i>

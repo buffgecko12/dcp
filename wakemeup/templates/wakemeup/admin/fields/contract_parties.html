@@ -1,10 +1,11 @@
 {% load staticfiles %}
 
-{% for party in record.partyuserinfo.currentparties %}
-	<span>
-		{% if party.partyapprovalts %}
-			<img src="{% static 'img/web_check.png' %}" /> 
-		{% endif %}
-	</span>
-	{{ party.firstname }} {{party.lastname }}<br>
-{% endfor %}
+	{% for party in record.partyuserinfo.currentparties %}
+		<span class="text-nowrap">
+			{{ party.firstname }}
+			{% if party.partyapprovalts %}
+				<img src="{% static 'img/web_check15.png' %}" /> 
+			{% endif %}
+			<br>
+		</span>
+	{% endfor %}

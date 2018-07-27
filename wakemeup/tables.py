@@ -163,7 +163,7 @@ class ContractsTable(tables.Table):
         empty_text = EMPTY_TEXT
         
         row_attrs = {
-            'class': "clickable-row mouseicon",
+            'class': "clickable-row mouseicon small",
             'data-href': lambda record: get_rowlink(record),
             'style': "cursor: pointer;"
         }
