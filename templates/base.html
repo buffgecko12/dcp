@@ -45,6 +45,10 @@
                 </div>
             </main>
             {% include "footer.html" %}
+
+
+	        <!-- Page-specific imports -->
+	        {% block bodyimport %}{% endblock %}
         </body>
     {% endblock %}
 </html>
