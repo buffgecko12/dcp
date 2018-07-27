@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
+{% load staticfiles %}
 
 <!-- Set page title -->
 {% block title %}Inicio{% endblock %}
@@ -8,7 +9,7 @@
 	<br>
 	<div class="container-fluid">
 		<!-- Nav tabs -->
-		<ul class="nav nav-tabs">
+		<ul class="nav nav-tabs nav-tabs-sticky">
 		  <li class="nav-item">
 		    <a class="nav-link active" data-toggle="tab" href="#profile">Perfil</a>
 		  </li>
@@ -33,4 +34,16 @@
 		  <div class="tab-pane fade" id="badges">Badge info</div>
 		</div>
     </div>
+{% endblock %}
+
+{% block bodyimport %}
+
+	<!-- Javascript to maintain tab positioning -->
+	<script src="{% static 'js/jquery.stickytabs.js' %}"></script>
+	
+	<script>
+		$(document).ready(function() {
+			$('.nav-tabs-sticky').stickyTabs();
+		});
+	</script>
 {% endblock %}
