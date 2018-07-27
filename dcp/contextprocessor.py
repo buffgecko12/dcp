@@ -1,5 +1,6 @@
 # Define custom context processor to add context to all pages
 from django.contrib.auth import get_user_model
+from users.models import UserNotification
 
 # Access via userinfo.keyname
 def userinfo(request):
@@ -9,7 +10,8 @@ def userinfo(request):
         if(myuser):
             return {
                 "userinfo": {
-                    'reputationvaluedelta':myuser.manage_reputation(actiontype='getdelta')
+                    'reputationvaluedelta':myuser.manage_reputation(actiontype='getdelta'),
+                    'notifications':UserNotification.objects.get_notifications(userid=myuser.userid,activeonlyflag=True)
                 }
             }        
             
