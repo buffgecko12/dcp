@@ -7,7 +7,7 @@
 		</form>
 		<form style="display:inline-block" action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=value %}" method="post">
 		    {% csrf_token %}
-			<input class="btn btn-xs btn-warning" name="delete" type="submit" value="Borrar" onclick="return confirm('Estas seguro que desea eliminar este objeto?');"/>
+			<input class="btn btn-xs btn-warning" name="delete" type="submit" value="Borrar" onclick="return confirm('Esta seguro que desea eliminar este objeto?');"/>
 		</form>
 	{% elif record.contractstatus == "A" %}
 		<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
