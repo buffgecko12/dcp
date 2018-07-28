@@ -10,8 +10,9 @@ def userinfo(request):
         if(myuser):
             return {
                 "userinfo": {
-                    'reputationvaluedelta':myuser.manage_reputation(actiontype='getdelta'),
-                    'notifications':UserNotification.objects.get_notifications(userid=myuser.userid,activeonlyflag=True)
+                    'reputationvaluedelta':myuser.manage_display_info(actiontype='getreputationdelta'),
+                    'opennotifications':myuser.manage_display_info(actiontype='checkopennotifications'),
+                    'notifications':UserNotification.objects.get_notifications(userid=myuser.userid,maxrows=10)
                 }
             }        
             

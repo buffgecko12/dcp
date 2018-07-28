@@ -66,8 +66,8 @@ class MyUserManager(BaseUserManager):
     def deactivate(self, myUser):
         return save_data('SP_DCPDeactivateUser', (myUser.userid,))
 
-    def manage_reputation(self, myUser, actiontype):
-        return save_data('SP_DCPManageUserReputation', (myUser.userid, actiontype,))[0]
+    def manage_display_info(self, myUser, actiontype):
+        return save_data('SP_DCPManageUserDisplayInfo', (myUser.userid, actiontype,))[0]
 
     # TO-DO: possibly remove
     def add_event(self, myUser, eventid, contractid):
@@ -100,10 +100,10 @@ class UserNotificationManager(models.Manager):
         return self.get_notifications(None, None,)
     
     def get(self, notificationid):
-        return get_data_pk(self, 'SP_DCPGetUserNotification(%s,%s,%s,%s)', (None, None, notificationid, None))
+        return get_data_pk(self, 'SP_DCPGetUserNotification(%s,%s,%s,%s,%s)', (None, None, notificationid, None, None))
     
-    def get_notifications(self, userid = None, sourceeventid = None, notificationid = None, activeonlyflag = True):
-        return get_data(self, 'SP_DCPGetUserNotification(%s,%s,%s,%s)', (userid, sourceeventid, notificationid, activeonlyflag))
+    def get_notifications(self, userid = None, sourceeventid = None, notificationid = None, activeonlyflag = True, maxrows = None):
+        return get_data(self, 'SP_DCPGetUserNotification(%s,%s,%s,%s,%s)', (userid, sourceeventid, notificationid, activeonlyflag, maxrows))
     
     def save(self, myUserNotification):
         pass # Handled by user-level method
@@ -181,8 +181,8 @@ class MyUser(AbstractBaseUser):
     def deactivate(self):
         return MyUser.objects.deactivate(self)
     
-    def manage_reputation(self, actiontype):
-        return MyUser.objects.manage_reputation(self, actiontype)
+    def manage_display_info(self, actiontype):
+        return MyUser.objects.manage_display_info(self, actiontype)
         
     # TO-DO: possibly remove
     def add_event(self, eventid, contractid = None):
