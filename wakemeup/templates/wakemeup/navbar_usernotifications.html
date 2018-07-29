@@ -8,6 +8,8 @@
 					{% url 'wakemeup:myaccount' %}#badges 
 				{% elif notification.eventclass == 'RP' %} 
 					{% url 'wakemeup:myaccount' %}#reputation
+				{% elif notification.eventclass == 'CT' %} 
+					{% url 'wakemeup:contract_list' %}#reputation
 				{% endif %}"
 		>
 			{{ notification.notificationtext }}
