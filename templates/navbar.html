@@ -55,10 +55,8 @@ unseennotification {
 							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='student' %}">Estudiantes</a>
 							{% endif %}
 							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='reward' %}">Premios</a>
-							{% if user.is_superuser %}
-								<div class="dropdown-divider"></div>
-								<a class="dropdown-item {% if url_name == 'add_user' %} active {% endif %}" href="{% url 'wakemeup:add_user' %}">Crear usuario</a>
-							{% endif %}
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item {% if url_name == 'add_user' %} active {% endif %}" href="{% url 'wakemeup:add_user' %}">Crear usuario</a>
 						</div>
 					</li>
 				{% endif %}

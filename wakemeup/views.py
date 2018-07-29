@@ -64,7 +64,7 @@ view_permissions = {
         'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
     },
     'add_user': {
-        'all': {'userrole':PERM_SUPER, 'usertype':PERM_NONE},
+        'all': {'userrole':PERM_SUPER, 'usertype':PERM_TEACHER},
     },
     'contract': NO_PERM_REQUIRED,
     'myaccount': NO_PERM_REQUIRED,
@@ -153,9 +153,13 @@ def load_classes(request):
         
     # Lookup teacher classes
     elif teacheruserid:
+        # If id = 0, include all teachers (used for add user form)
+        if str(teacheruserid) == "0":
+            teacheruserid = None
+            
         classes = Class.objects.get_classes(classid=classid, teacheruserid = teacheruserid)
     else:
-        classes = []
+        classes = [] # Return empty list (create contract form)
 
     return render(request, 'wakemeup/admin/js/class_dropdown_list_options.html', {'classes': classes, 'classid': classid})
 
@@ -788,7 +792,7 @@ def edit_object(request, objecttype, objectid):
             myobject.save(**kwargs)
 
             # Return to main page
-            return admin_list(request, objecttype = objecttype)
+            return redirect('wakemeup:admin_list', objecttype=objecttype)
 
     # CREATE FORM (NEW OBJECT)
     elif(objectid == 'new'):
@@ -961,7 +965,12 @@ def contract_list(request):
 def add_user(request):
     
     if request.method == 'POST':
-        form = SignupForm(request.POST)
+        # Go home if user clicks cancel
+        if("submit_cancel" in request.POST):
+            return redirect_home()
+        
+        # Bind form
+        form = SignupForm(request.POST, request=request)
 
         if form.is_valid():
 
@@ -995,10 +1004,15 @@ def add_user(request):
                 form.cleaned_data.get('userrole'),
             )
 
+            # If student, save additional data
+            if(form.cleaned_data.get('usertype') == "ST"):
+                mystudent = Student(studentuserid=newuser.userid,classid=form.cleaned_data.get("classid"))
+                mystudent.save()
+
             # Go back to index page
-            return index(request)
+            return redirect_home()
     else:
         # Return empty form
-        form = SignupForm()
+        form = SignupForm(request=request)
         
-    return render(request, 'wakemeup/admin/edit_form.html', {'form': form})
+    return render(request, 'wakemeup/admin/add_user.html', {'form': form})

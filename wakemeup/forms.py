@@ -96,19 +96,33 @@ class LoginForm(AuthenticationForm):
 
 class SignupForm(UserCreationForm):
 
+    # Hidden teacheruserid
+    teacheruserid = forms.IntegerField(required=False, widget=forms.HiddenInput(), initial=0) # value 0 = no teacher
+
     # Define form fields
     username = forms.CharField(label='Nombre de usuario (o correo)', max_length=50)
     firstname = forms.CharField(label='Primer nombre', max_length=100)
     lastname = forms.CharField(label='Apellido', max_length=100)
     usertype = forms.ChoiceField(label='Tipo de usuario',choices=get_user_model().usertype_choices)
+    classid = forms.CharField(label='Curso', widget=forms.Select, required=False)
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     userrole = forms.CharField(initial='U', widget=HiddenInput) # Default new users to "User" role
 
     # Define constructor
     def __init__(self, *args, **kwargs):
+        
+        # Extract "request" parameter
+        request = kwargs.pop('request')
+        
         # Call base class constructor (i.e. SignupForm)
         super(SignupForm, self).__init__(*args, **kwargs)
-        
+
+        # Teachers can only add students
+        if(request.user.usertype == "TR"):
+            self.fields['teacheruserid'].initial = request.user.userid
+            self.fields['usertype'].choices = [("ST","Estudiante")]
+            self.fields['classid'].required=True
+
         # Set helper properties
         self.helper = FormHelper()
         self.helper.form_method = DEFAULT_FORM_METHOD
@@ -116,8 +130,10 @@ class SignupForm(UserCreationForm):
         self.helper.layout = Layout(
             Fieldset(
                 'Crear/editar usuario',
+                'teacheruserid',
                 'username',
                 'usertype',
+                'classid',
                 'firstname',
                 'lastname',
                 'emailaddress',
@@ -125,15 +141,13 @@ class SignupForm(UserCreationForm):
                 'password2',
                 'userrole'
             ),
-            FormActions(
-                Submit('login', 'Enviar', css_class='btn-primary')
-            )
+            getAdminFormActions()
         )
 
     # Specify model and which fields to include in form
     class Meta:
         model = get_user_model()
-        fields = ('username','usertype','firstname','lastname','emailaddress','password1','password2','userrole')
+        fields = ('teacheruserid','username','usertype','classid','firstname','lastname','emailaddress','password1','password2','userrole')
 
     # Make sure email address does not already exist
     def clean_emailaddress(self):

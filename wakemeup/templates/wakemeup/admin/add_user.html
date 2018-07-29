@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Crear usuario{% endblock %}
+
+{% block content %}
+	<div class="container-fluid">
+		<br>
+		<form method="POST" enctype="multipart/form-data" novalidate id="myform" 
+			data-classes-url="{% url 'wakemeup:ajax_load_classes' %}" 
+		>
+		    {% csrf_token %}
+			{% crispy form %}
+		</form>
+	</div>
+{% endblock %}
+
+{% block bodyimport %}
+<script>
+	function update_classes() {
+		// Get values from the form
+	    var url = $("#myform").attr("data-classes-url");
+	    var teacherUserId = $("#id_teacheruserid").val();
+
+	    $.ajax({                       		// initialize an AJAX request
+	      url: url,                    		// set the url of the request
+	      data: {
+	        'teacheruserid': teacherUserId, // add the teacheruserid to the GET parameters
+	      },
+	      success: function (data) {   		// "data" is the return of the "get classes" view call
+	        $("#id_classid").html(data);	// replace the contents of the "classid" field with the class list
+	      }
+	    })
+	};
+	
+	$(document).ready(function(){
+		update_classes();
+	});
+</script>
+{% endblock %}
