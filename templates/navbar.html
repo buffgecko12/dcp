@@ -36,7 +36,7 @@ unseennotification {
 		<ul class="navbar-nav mr-auto">
 			{% if user.is_authenticated %}
 			
-				<!-- CONTRATOS -->
+				<!-- CONTRACTS -->
 				<li class="nav-item dropdown">				
 					<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Contratos</a>
 					<div class="dropdown-menu">
@@ -81,42 +81,26 @@ unseennotification {
 				</li>
 				
 				<!--  NOTIFICATIONS -->
-				<li class="nav-item dropdown">
+				<li class="nav-item dropdown" id="NotificationInboxDropdown">
 				
 					<!-- Notifications - Inbox icon -->
 					<span 
-						style="fill:{% if userinfo.opennotifications %}red{% else %}grey{% endif %}" 
 						class="btn" 
-						id="dropdownMenuLink" 
+						id="NotificationInboxIcon" 
 						data-toggle="dropdown" 
 						aria-haspopup="true" 
 						aria-expanded="false"
+						style="fill:{% if userinfo.opennotifications %}red{% else %}grey{% endif %}" 
 					>
 					{% svg 'inbox3' %}
 					</span>
 					
 					<!--  Notifications - Drop-down menu -->
-					<div class="dropdown-menu scrollable-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
-						<div class="small">
-							{% for notification in userinfo.notifications %}
-								<a 
-									class="dropdown-item" 
-									{% if not notification.notificationseen %} style="font-weight:bold;line-height:10px;"{% endif %}
-									href="
-										{% if notification.eventclass == 'BD' %} 
-											{% url 'wakemeup:myaccount' %}#badges 
-										{% elif notification.eventclass == 'RP' %} 
-											{% url 'wakemeup:myaccount' %}#reputation
-										{% endif %}"
-								>
-									{{ notification.notificationtext }}
-								</a>
-								{% if not forloop.last %}
-								 <div class="dropdown-divider"></div>
-							 	{% endif %}
-							{% endfor %}		
-						</div>
-					</div>
+					<div 
+						class="dropdown-menu scrollable-menu dropdown-menu-right" 
+						aria-labelledby="dropdownMenuLink" 
+						id="NotificationInboxItems"
+					></div>
 				</li>		
 				
 				<!-- PROFILE -->			

@@ -1,0 +1,19 @@
+<div class="small">
+	{% for notification in usernotifications %}
+		<a 
+			class="dropdown-item" 
+			style="line-height:10px;{% if not notification.notificationseen %}font-weight:bold{% endif %}"
+			href="
+				{% if notification.eventclass == 'BD' %} 
+					{% url 'wakemeup:myaccount' %}#badges 
+				{% elif notification.eventclass == 'RP' %} 
+					{% url 'wakemeup:myaccount' %}#reputation
+				{% endif %}"
+		>
+			{{ notification.notificationtext }}
+		</a>
+		{% if not forloop.last %}
+		 <div class="dropdown-divider"></div>
+	 	{% endif %}
+	{% endfor %}		
+</div>

@@ -22,7 +22,7 @@ from .forms import *
 from .models.environment import School, Class, Teacher, Student, TeacherBudget
 from .models.contract import Contract, ContractParty, ContractGoal, ContractGoalReward, Reward, ContractInfo
 
-from users.models import UserReputationEvent, UserBadge
+from users.models import UserReputationEvent, UserBadge, UserNotification
 
 # Define user permission roles
 PERM_NONE = ['NONE']
@@ -230,6 +230,21 @@ def load_rewards(request):
     }
     
     return render(request, 'wakemeup/admin/js/reward_dropdown_list_options.html', context)
+
+def manage_user_display(request):
+    actiontype = request.GET.get('actiontype') # Check if existing contract
+
+    # Load notifications
+    if(actiontype == 'loadnotifications'):
+        mynotifications = UserNotification.objects.get_notifications(userid=request.user.userid,activeonlyflag=False,maxrows=10)
+
+        return render(request, 'wakemeup/navbar_usernotifications.html', {'usernotifications': mynotifications})
+
+    # Set notifications as "seen"
+    elif(actiontype == "clearnotifications"):
+        get_user_model()(userid=request.user.userid).manage_display_info('clearusernotifications')
+        
+        return HttpResponse()
 
 # View to display images from DB
 def preview_image(request, objecttype, objectid):
