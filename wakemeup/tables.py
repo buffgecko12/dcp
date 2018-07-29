@@ -169,8 +169,6 @@ class ContractsTable(tables.Table):
             'style': "cursor: pointer;"
         }
         
-        
-
 class UserReputationEventsTable(tables.Table):
 
     class Meta:
