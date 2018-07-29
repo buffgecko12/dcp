@@ -1,9 +1,30 @@
 {% load staticfiles %}
+{% load svg %}
 {% with url_name=request.resolver_match.url_name %}
+
+{% block headimport %}
+<style>
+	.navbar-nav li a {
+	 line-height: 30px;
+	}
+	
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  height:30px;
+}
+
+unseennotification {
+	font-weight:bold;
+}
+	
+</style>
+{% endblock %}
+
 <nav class="navbar navbar-expand-sm bg-light navbar-light sticky-top">
 
 	<!-- Logo -->
-	<a class="navbar-brand" href="{% url 'wakemeup:index' %}"><span class="fa fa-home"></span></a>
+	<a class="navbar-brand" href="{% url 'wakemeup:index' %}"><i class="fa fa-home" style="color:grey"></i></a>
 	
 	<!-- Navbar toggler icon -->
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
@@ -13,10 +34,6 @@
 	<!--  Collapsible items -->		
 	<div class="collapse navbar-collapse" id="collapsibleNavbar">
 		<ul class="navbar-nav mr-auto">
-			<li class="nav-item active">
-				<a class="nav-link" href="{% url 'wakemeup:index' %}">Inicio</a>
-			</li>
-
 			{% if user.is_authenticated %}
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Contratos</a>
@@ -52,26 +69,35 @@
 				<li class="nav-item">
 					<a class="nav-link" href="{% url 'wakemeup:myaccount' %}#reputation">
 						<div title="reputaci&#243;n">
-							<span class="badge badge-lg badge-secondary">
+							<span class="badge badge-secondary">
 								{{user.reputationvalue}} {% if userinfo.reputationvaluedelta != 0 %} ({{ userinfo.reputationvaluedelta }}) {% endif %}
 							</span>
 						</div>
 					</a>
 				</li>
-				<li class="dropdown">
-					<span class="btn" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						<svg style="fill:grey" aria-hidden="true" width="20" height="18" viewBox="0 0 20 18">
-							<path d="M15.19 1H4.63c-.85 0-1.6.54-1.85 1.35L0 10.79V15c0 1.1.9 2 2 2h16a2 2 0 0 0 2-2v-4.21l-2.87-8.44A2 2 0 0 0 15.19 1zm-.28 10l-2 2h-6l-2-2H1.96L4.4 3.68A1 1 0 0 1 5.35 3h9.12a1 1 0 0 1 .95.68L17.86 11h-2.95z"/>
-						</svg>
+				<li class="nav-item dropdown">
+					<span style="fill:{% if userinfo.opennotifications %}red{% else %}grey{% endif %}" class="btn" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					{% svg 'inbox3' %}
 					</span>
 					
 					<div class="dropdown-menu scrollable-menu dropdown-menu-right" aria-labelledby="dropdownMenuLink">
 						<div class="small">
 							{% for notification in userinfo.notifications %}
-								<a class="dropdown-item" href="#">
-									{{ notification.notificationtext }}<br>
-									{{ notification.notificationts|date:'d/m/y' }}
+								<a 
+									class="dropdown-item" 
+									{% if not notification.notificationseen %} style="font-weight:bold;line-height:10px;"{% endif %}
+									href="
+										{% if notification.eventclass == 'BD' %} 
+											{% url 'wakemeup:myaccount' %}#badges 
+										{% elif notification.eventclass == 'RP' %} 
+											{% url 'wakemeup:myaccount' %}#reputation
+										{% endif %}"
+								>
+									{{ notification.notificationtext }}
 								</a>
+								{% if not forloop.last %}
+								 <div class="dropdown-divider"></div>
+							 	{% endif %}
 							{% endfor %}		
 						</div>
 					</div>
