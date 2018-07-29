@@ -2,6 +2,7 @@ import django_tables2 as tables
 from django_tables2.utils import A # alias for accessor
 from .models.environment import School, Class, Teacher, Student
 from .models.contract import Contract, Reward
+from users.models import UserReputationEvent, UserBadge
 
 from lib.UsefulFunctions.dateUtils import display_timestamp_range, display_timestamp
 from django.urls import reverse
@@ -167,3 +168,21 @@ class ContractsTable(tables.Table):
             'data-href': lambda record: get_rowlink(record),
             'style': "cursor: pointer;"
         }
+        
+        
+
+class UserReputationEventsTable(tables.Table):
+
+    class Meta:
+        model = UserReputationEvent
+        sequence = ('eventts','pointvalue','eventdisplayname')
+        exclude = ('eventid','userid','sourceeventid','contractid')
+        empty_text = EMPTY_TEXT
+
+class UserBadgesTable(tables.Table):
+
+    class Meta:
+        model = UserBadge
+        sequence = ('badgeachievedts', 'badgelevel', 'badgedisplayname')
+        exclude = ('badgeid','userid','badgeshortname')
+        empty_text = EMPTY_TEXT

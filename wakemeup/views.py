@@ -17,10 +17,12 @@ from lib.UsefulFunctions.stringUtils import *
 import psycopg2
 import json
 
-from .tables import SchoolsTable, ClassesTable, TeachersTable, StudentsTable, ContractsTable, RewardsTable
+from .tables import *
 from .forms import *
 from .models.environment import School, Class, Teacher, Student, TeacherBudget
 from .models.contract import Contract, ContractParty, ContractGoal, ContractGoalReward, Reward, ContractInfo
+
+from users.models import UserReputationEvent, UserBadge
 
 # Define user permission roles
 PERM_NONE = ['NONE']
@@ -282,16 +284,18 @@ def index(request):
 
 @check_permissions
 def myaccount(request):
-    
     if request.method == "POST":
+        
         # Go to homepage if user clicked "cancel" button        
         if('submit_cancel' in request.POST):
             return redirect_home()
 
+        # Bind form data
         form = MyUserForm(request.POST, request.FILES)
         
         if(form.is_valid()):
             
+            # Create user object
             myuser = get_user_model()(
                 userid = form.cleaned_data.get('userid'),
                 firstname = form.cleaned_data.get('firstname'),
@@ -304,6 +308,7 @@ def myaccount(request):
             myuser.save_user()
     else:
         myuser = get_user_model().objects.get(userid=request.user.userid)
+        
         if(myuser):
             form=MyUserForm(
                 initial={
@@ -318,7 +323,21 @@ def myaccount(request):
         else:
             form=MyUserForm()
 
-    return render(request, 'wakemeup/myaccount.html', {'form':form})
+    # Get user objects
+    myreputationevents = UserReputationEventsTable(UserReputationEvent.objects.get_events(userid=request.user.userid))
+    mybadges = UserBadgesTable(UserBadge.objects.get_badges(userid=request.user.userid))
+
+    # Config object for tables
+    RequestConfig(request).configure(myreputationevents)
+    RequestConfig(request).configure(mybadges)
+
+    context = {
+        'form': form,
+        'reputationevents': myreputationevents,
+        'badges': mybadges
+        }
+
+    return render(request, 'wakemeup/myaccount.html', context)
 
 @check_permissions
 def create_contract(request, contractid):
