@@ -20,7 +20,7 @@ $("#NotificationInboxDropdown").on("hide.bs.dropdown", function(){
 		data : {'actiontype':'clearnotifications'},
 		success: function(data) {
 			$("#NotificationInboxItems").html(""); // Clear dropdown
-			$("#NotificationInboxIcon").attr('style','fill:grey'); // Change inbox icon to grey
+			$("#NotificationInboxIcon").attr('style','fill:grey;cursor:pointer;'); // Change inbox icon to grey
 		}
 	})
   });

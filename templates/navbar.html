@@ -18,13 +18,19 @@ unseennotification {
 	font-weight:bold;
 }
 	
+.faicon {
+    margin-left: 10px;
+    font-size: 30px;
+    height: 30px;
+    vertical-align: middle;
+}	
 </style>
 {% endblock %}
 
 <nav class="navbar navbar-expand-sm bg-light navbar-light sticky-top">
 
 	<!-- Logo -->
-	<a class="navbar-brand" href="{% url 'wakemeup:index' %}"><i class="fa fa-home" style="color:grey"></i></a>
+	<a class="navbar-brand" href="{% url 'wakemeup:index' %}"><i class="fas fa-home faicon" style="color:grey"></i></a>
 	
 	<!-- Navbar toggler icon -->
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
@@ -73,8 +79,9 @@ unseennotification {
 				<li class="nav-item">
 					<a class="nav-link" href="{% url 'wakemeup:myaccount' %}#reputation">
 						<div title="reputaci&#243;n">
-							<span class="badge {% if userinfo.reputationvaluedelta != 0 %}badge-primary{% else %}badge-secondary{% endif %}">
-								{{user.reputationvalue}}
+							<h4 style="display:inline">{{ user.reputationvalue }}</h4>
+							<span style="vertical-align:top; {% if userinfo.reputationvaluedelta != 0 %}background-color:red;color:white{% endif %}" class="badge">
+								+{{ userinfo.reputationvaluedelta }}
 							</span>
 						</div>
 					</a>
@@ -84,16 +91,16 @@ unseennotification {
 				<li class="nav-item dropdown" id="NotificationInboxDropdown">
 				
 					<!-- Notifications - Inbox icon -->
-					<span 
-						class="btn" 
+					<a 
+						class="btn nav-link float-left" 
 						id="NotificationInboxIcon" 
 						data-toggle="dropdown" 
 						aria-haspopup="true" 
 						aria-expanded="false"
-						style="fill:{% if userinfo.opennotifications %}red{% else %}grey{% endif %}" 
+						style="color:{% if userinfo.opennotifications %}red{% endif %}" 
 					>
-					{% svg 'inbox3' %}
-					</span>
+						<i class="fas fa-inbox faicon"></i>
+					</a>
 					
 					<!--  Notifications - Drop-down menu -->
 					<div 
@@ -106,7 +113,7 @@ unseennotification {
 				<!-- PROFILE -->			
 				<li class="nav-item">
 					<a class="nav-link" href="{% url 'wakemeup:myaccount' %}#profile">
-						<img src="{% static 'img/account_circle_grey.png' %}" title="{{ request.user }}"></img>
+						<i class="fas fa-user faicon"></i>
 					</a>
 				</li>
 				
