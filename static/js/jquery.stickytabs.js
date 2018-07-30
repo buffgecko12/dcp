@@ -20,6 +20,7 @@
           var hash = settings.selectorAttribute == "href" ? window.location.hash : window.location.hash.substring(1);
           var selector = hash ? 'a[' + settings.selectorAttribute +'="' + hash + '"]' : settings.initialTab;
           $(selector, context).tab('show');
+          if(hash == "#reputation") {clearReputationNotification()} // Clear notification when on "reputation" tab
           setTimeout(backToTop, 1);
         }
 
@@ -53,6 +54,7 @@
           var hash = this.href.split('#')[1];
           var adjustedhash = settings.getHashCallback(hash, this);
           changeHash(adjustedhash);
+          if(hash == "reputation") {clearReputationNotification()} // Clear notification when on "reputation" tab
           setTimeout(backToTop, 1);
         });
 

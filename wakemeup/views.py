@@ -244,7 +244,11 @@ def manage_user_display(request):
     elif(actiontype == "clearnotifications"):
         get_user_model()(userid=request.user.userid).manage_display_info('clearusernotifications')
         
-        return HttpResponse()
+    # Set notifications as "seen"
+    elif(actiontype == "clearnewrepnotification"):
+        get_user_model()(userid=request.user.userid).manage_display_info('clearnewrepnotification')
+        
+    return HttpResponse()
 
 # View to display images from DB
 def preview_image(request, objecttype, objectid):
