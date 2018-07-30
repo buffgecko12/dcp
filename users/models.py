@@ -210,8 +210,8 @@ class UserReputationEvent(models.Model):
     userid = models.IntegerField()
     sourceeventid = models.IntegerField()
     contractid = models.IntegerField()
-    pointvalue = models.IntegerField(verbose_name="Valor de punto")
-    eventts = models.DateTimeField(verbose_name="Marca de tiempo")
+    pointvalue = models.IntegerField(verbose_name="Puntos")
+    eventts = models.DateTimeField(verbose_name="Fecha")
     eventdisplayname = models.CharField(max_length=100,verbose_name="Evento")
     
     class Meta:
@@ -252,7 +252,7 @@ class UserBadge(models.Model):
     badgelevel = models.CharField(max_length=1,verbose_name='Nivel')
     badgeshortname = models.CharField(max_length=50)
     badgedisplayname = models.CharField(max_length=50,verbose_name='Titulo')
-    badgeachievedts = models.DateTimeField(verbose_name='Marca de tiempo')
+    badgeachievedts = models.DateTimeField(verbose_name='Fecha')
     
     class Meta:
         managed = False
