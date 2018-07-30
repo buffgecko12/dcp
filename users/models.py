@@ -2,6 +2,7 @@
 
 from django.db import models
 from lib.UsefulFunctions.dbUtils import *
+from lib.UsefulFunctions.stringUtils import mychr
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
@@ -232,6 +233,7 @@ class UserNotification(models.Model):
     notificationts = models.DateTimeField()
     notificationseen = models.BooleanField()
     notificationtext = models.CharField(max_length=500)
+    contractid = models.IntegerField()
     sourceeventid = models.IntegerField()
     
     class Meta:
@@ -253,6 +255,7 @@ class UserBadge(models.Model):
     badgeshortname = models.CharField(max_length=50)
     badgedisplayname = models.CharField(max_length=50,verbose_name='Titulo')
     badgeachievedts = models.DateTimeField(verbose_name='Fecha')
+    badgedescription = models.CharField(max_length=500, verbose_name='Descripci' + mychr('o') + 'n')
     
     class Meta:
         managed = False

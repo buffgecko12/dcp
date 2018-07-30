@@ -179,8 +179,13 @@ class UserReputationEventsTable(tables.Table):
 
 class UserBadgesTable(tables.Table):
 
+    mybadge = tables.TemplateColumn(
+        template_name='wakemeup/admin/fields/badge.html',
+        verbose_name='Nivel',
+    )    
+
     class Meta:
         model = UserBadge
-        sequence = ('badgeachievedts', 'badgelevel', 'badgedisplayname')
-        exclude = ('badgeid','userid','badgeshortname')
+        sequence = ('badgeachievedts', 'mybadge', 'badgedisplayname', 'badgedescription')
+        exclude = ('badgeid','userid','badgeshortname', 'badgelevel', )
         empty_text = EMPTY_TEXT

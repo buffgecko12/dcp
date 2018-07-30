@@ -1,0 +1,7 @@
+{% if record.badgelevel == "B" %}
+<i class="fas fa-certificate" style="color:#CD7F32" title="Bronce"></i>
+{% elif record.badgelevel == "S" %}
+<i class="fas fa-medal" style="color:silver" title="Plata"></i>
+{% elif record.badgelevel == "G" %}
+<i class="fas fa-trophy" style="color:gold" title="Oro"></i>
+{% endif %}

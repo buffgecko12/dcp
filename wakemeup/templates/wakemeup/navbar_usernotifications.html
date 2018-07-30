@@ -9,7 +9,7 @@
 				{% elif notification.eventclass == 'RP' %} 
 					{% url 'wakemeup:myaccount' %}#reputation
 				{% elif notification.eventclass == 'CT' %} 
-					{% url 'wakemeup:contract_list' %}#reputation
+					{% url 'wakemeup:contract_detail' contractid=notification.contractid %}
 				{% endif %}"
 		>
 			{{ notification.notificationtext }}
