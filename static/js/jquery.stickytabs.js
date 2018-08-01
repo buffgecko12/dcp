@@ -21,6 +21,7 @@
           var selector = hash ? 'a[' + settings.selectorAttribute +'="' + hash + '"]' : settings.initialTab;
           $(selector, context).tab('show');
           if(hash == "#reputation") {clearReputationNotification()} // Clear notification when on "reputation" tab
+          else if(hash == "#badges") {clearBadgeNotification()} // Clear notification when on "badge" tab
           setTimeout(backToTop, 1);
         }
 
@@ -55,6 +56,7 @@
           var adjustedhash = settings.getHashCallback(hash, this);
           changeHash(adjustedhash);
           if(hash == "reputation") {clearReputationNotification()} // Clear notification when on "reputation" tab
+          else if(hash == "badges") {clearBadgeNotification()} // Clear notification when on "badge" tab
           setTimeout(backToTop, 1);
         });
 

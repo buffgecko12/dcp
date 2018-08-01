@@ -57,6 +57,7 @@ class MyUserManager(BaseUserManager):
                 self.normalize_email(myUser.emailaddress),
                 myUser.password,
                 myUser.userrole,
+                myUser.profilepictureid,
                 myUser.last_login,
             )
          )[0] # Return userid
@@ -67,8 +68,14 @@ class MyUserManager(BaseUserManager):
     def deactivate(self, myUser):
         return save_data('SP_DCPDeactivateUser', (myUser.userid,))
 
-    def manage_display_info(self, myUser, actiontype):
-        return save_data('SP_DCPManageUserDisplayInfo', (myUser.userid, actiontype,))[0]
+    def manage_display_info(self, myUser, actiontype, notificationtype):
+        mydata = save_data('SP_DCPManageUserDisplayInfo', (myUser.userid, actiontype, notificationtype, ))
+        
+        return ({
+            'reputationvaluedelta':mydata[0],
+            'opennotificationsflag':mydata[1],
+            'profilepicturefile':mydata[2]
+        })
 
     # TO-DO: possibly remove
     def add_event(self, myUser, eventid, contractid):
@@ -122,6 +129,23 @@ class UserBadgeManager(models.Manager):
     
     def get_badges(self, userid = None, badgeid = None ):
         return get_data(self, 'SP_DCPGetUserBadge(%s,%s)', (userid, badgeid,))
+ 
+    def badge_profile_picture_choices(self, userid):
+       badges = self.get_badges(userid=userid)
+
+       # Add default "N/A" option
+       picture_choices = [(0,None)]
+
+       for mybadge in badges:
+           if(mybadge.profilepictureid):
+               picture_choices.append(
+                   (
+                   str(mybadge.profilepictureid), 
+                   str(mybadge.profilepicturefilepath + mybadge.profilepicturefilename)
+                   )
+               )
+    
+       return(picture_choices)
     
     def save(self, myUserBadge):
         pass # Handled by user-level method
@@ -151,6 +175,7 @@ class MyUser(AbstractBaseUser):
     phonenumber = models.CharField(max_length=25)
     emailaddress = models.CharField(max_length=250)
     userrole = models.CharField(max_length=1)
+    profilepictureid = models.IntegerField()
     reputationvalue = models.IntegerField()
     reputationvaluelastseents = models.DateTimeField()
     is_active = models.BooleanField()
@@ -162,7 +187,7 @@ class MyUser(AbstractBaseUser):
     class Meta:
         managed = False # Ensure Django doesn't "manage" the table
         db_table = 'users' # Point to actual DB table
-        
+
     # Required fields
     USERNAME_FIELD = 'username' # specify how Django recognizes the user
     EMAIL_FIELD = 'emailaddress'
@@ -182,8 +207,8 @@ class MyUser(AbstractBaseUser):
     def deactivate(self):
         return MyUser.objects.deactivate(self)
     
-    def manage_display_info(self, actiontype):
-        return MyUser.objects.manage_display_info(self, actiontype)
+    def manage_display_info(self, actiontype, notificationtype = None):
+        return MyUser.objects.manage_display_info(self, actiontype, notificationtype)
         
     # TO-DO: possibly remove
     def add_event(self, eventid, contractid = None):
@@ -256,6 +281,9 @@ class UserBadge(models.Model):
     badgedisplayname = models.CharField(max_length=50,verbose_name='Titulo')
     badgeachievedts = models.DateTimeField(verbose_name='Fecha')
     badgedescription = models.CharField(max_length=500, verbose_name='Descripci' + mychr('o') + 'n')
+    profilepictureid = models.IntegerField()
+    profilepicturefilepath = models.CharField(max_length=250)
+    profilepicturefilename = models.CharField(max_length=250)
     
     class Meta:
         managed = False

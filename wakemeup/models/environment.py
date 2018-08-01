@@ -116,6 +116,7 @@ class TeacherManager(models.Manager):
             myTeacher.emailaddress,
             '', # Password
             '', # Role
+            myTeacher.profilepictureid,
             None, # Last login
             )
         )[0] # Return teacheruserid
@@ -163,6 +164,7 @@ class StudentManager(models.Manager):
             myStudent.emailaddress,
             '', # Password
             '', # Role
+            myStudent.profilepictureid,
             None, # Last login
             )
          )[0] # Return studentuserid
@@ -230,6 +232,7 @@ class Teacher(models.Model):
     phonenumber = models.CharField(max_length=25, verbose_name='Tel' + chr(233) + 'fono')
     emailaddress = models.CharField(max_length=250,verbose_name='Correo')
     reputationvalue = models.IntegerField(verbose_name='Reputaci' + chr(243) + 'n')
+    profilepictureid = models.IntegerField()
     
     objects = TeacherManager()
     
@@ -281,6 +284,7 @@ class Student(models.Model):
     phonenumber = models.CharField(max_length=25,verbose_name='Tel' + chr(233) + 'fono')
     emailaddress = models.CharField(max_length=250,verbose_name='Correo')
     reputationvalue = models.IntegerField(verbose_name='Reputaci' + chr(243) + 'n')
+    profilepictureid = models.IntegerField()
 
     # Object manager instance    
     objects = StudentManager()

@@ -1,0 +1,6 @@
+{% load static %}
+{% if record.profilepicturefilepath %}
+<img src="{% static 'img/avatar/'|add:record.profilepicturefilepath|add:record.profilepicturefilename %}" height="32px"></img>
+{% else %}
+--
+{% endif %}

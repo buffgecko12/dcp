@@ -1,0 +1,46 @@
+{% load static %}
+{% load crispy_forms_filters %}
+{% load l10n %}
+
+{% if field.is_hidden %}
+    {{ field }}
+{% else %}
+    <div id="div_{{ field.auto_id }}" class="form-group{% if 'form-horizontal' in form_class %} row{% endif %}{% if wrapper_class %} {{ wrapper_class }}{% endif %}{% if form_show_errors and field.errors %} has-danger{% endif %}{% if field.css_classes %} {{ field.css_classes }}{% endif %}">
+
+        {% if field.label %}
+            <label for="{{ field.auto_id }}"  class="{{ label_class }}{% if not inline_class %} col-form-label{% endif %}{% if field.field.required %} requiredField{% endif %}">
+                {{ field.label|safe }}{% if field.field.required %}<span class="asteriskField">*</span>{% endif %}
+            </label>
+        {% endif %}
+
+		<div class="{% if inline_class %}form-check{% endif %}{% if field_class %} {{ field_class }}{% endif %}"{% if flat_attrs %} {{ flat_attrs|safe }}{% endif %}>
+		    {% include 'bootstrap4/layout/field_errors_block.html' %}
+		
+		    {% for choice in field.field.choices %}
+		      {% if not inline_class %}<div class="form-check">{% endif %}
+		        <label for="id_{{ field.id_for_label }}_{{ forloop.counter }}" class="form-check-{% if inline_class %}{{ inline_class }}{% else %}label{% endif %}">
+					<div style="text-align:center">
+						{% if choice.0 != 0 %}
+			            	<img src="{% static 'img/avatar/'|add:choice.1|unlocalize %}" height="48px" width="48px"></img><br>&nbsp;
+						{% else %}
+	 						<i class="fas fa-user faicon" style="font-size:48px;height:48px;color:grey"></i><br>&nbsp;&nbsp;&nbsp;
+						{% endif %}
+			            <input 
+			            	type="radio" 
+			            	class="form-check-input"
+			            	{% if choice.0|stringformat:"s" == field.value|default_if_none:""|stringformat:"s" %} checked="checked"{% endif %} 
+			            	name="{{ field.html_name }}" 
+			            	id="id_{{ field.id_for_label }}_{{ forloop.counter }}" 
+			            	value="{{ choice.0|unlocalize }}" 
+			            	{{ field.field.widget.attrs|flatatt }}
+		            	>
+	            	</div>&nbsp;
+		        </label>
+		      {% if not inline_class %}</div>{% endif %}
+		    {% endfor %}
+		
+		    {% include 'bootstrap4/layout/help_text.html' %}
+		</div>
+
+    </div>
+{% endif %}

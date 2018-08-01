@@ -17,6 +17,17 @@ def getManageButtons(accessor = None, kwargs = None):
         accessor=A(accessor)
     )    
 
+def get_table_attrs(textcenterflag = None, nowrapflag = None):
+    attrs = {}
+    
+    if(textcenterflag):
+        attrs['th'] = {'style':'text-align:center'}
+        attrs['td'] = {'style':'text-align:center'}
+    if(nowrapflag):
+        attrs['td'] = {'style':'white-space:nowrap'}
+
+    return attrs
+
 class SchoolsTable(tables.Table):
 
     objectid = 'schoolid'
@@ -171,21 +182,39 @@ class ContractsTable(tables.Table):
         
 class UserReputationEventsTable(tables.Table):
 
+    eventts = tables.DateTimeColumn(attrs=get_table_attrs(nowrapflag=True),verbose_name="Fecha")
+    pointvalue = tables.Column(attrs=get_table_attrs(textcenterflag=True),verbose_name="Puntos")
+
     class Meta:
         model = UserReputationEvent
         sequence = ('eventts','pointvalue','eventdisplayname')
         exclude = ('eventid','userid','sourceeventid','contractid')
         empty_text = EMPTY_TEXT
 
+        row_attrs = {
+            'class': "small",
+        }
+
 class UserBadgesTable(tables.Table):
+
+    badgeachievedts = tables.DateTimeColumn(attrs=get_table_attrs(nowrapflag=True),verbose_name="Fecha")
+    badgedisplayname = tables.Column(attrs=get_table_attrs(nowrapflag=True),verbose_name="Titulo")
 
     mybadge = tables.TemplateColumn(
         template_name='wakemeup/admin/fields/badge.html',
         verbose_name='Nivel',
+        attrs = get_table_attrs(textcenterflag=True)
     )    
+
+    avatar = tables.TemplateColumn(
+        template_name='wakemeup/admin/fields/avatar.html',
+        verbose_name='Avatar',
+        attrs = get_table_attrs(textcenterflag=True)
+    )
 
     class Meta:
         model = UserBadge
         sequence = ('badgeachievedts', 'mybadge', 'badgedisplayname', 'badgedescription')
-        exclude = ('badgeid','userid','badgeshortname', 'badgelevel', )
+        exclude = ('badgeid','userid','badgeshortname', 'badgelevel', 'profilepictureid', 'profilepicturefilepath','profilepicturefilename' )
         empty_text = EMPTY_TEXT
+        row_attrs={"class":"small"}

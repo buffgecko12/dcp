@@ -5,12 +5,14 @@ from django.contrib.auth import get_user_model
 def userinfo(request):
     if(request.user.is_authenticated):
         myuser = get_user_model().objects.get_user(userid=request.user.userid)
+        mydisplayinfo = myuser.manage_display_info(actiontype='getuserdisplayinfo')
 
         if(myuser):
             return {
                 "userinfo": {
-                    'reputationvaluedelta':myuser.manage_display_info(actiontype='getreputationdelta'),
-                    'opennotifications':myuser.manage_display_info(actiontype='checkopennotifications'),
+                    'reputationvaluedelta':mydisplayinfo['reputationvaluedelta'],
+                    'opennotificationsflag':mydisplayinfo['opennotificationsflag'],
+                    'profilepicturefile':mydisplayinfo['profilepicturefile'],
                 }
             }        
             

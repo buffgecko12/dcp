@@ -241,12 +241,13 @@ def manage_user_display(request):
         return render(request, 'wakemeup/navbar_usernotifications.html', {'usernotifications': mynotifications})
 
     # Set notifications as "seen"
-    elif(actiontype == "clearnotifications"):
-        get_user_model()(userid=request.user.userid).manage_display_info('clearusernotifications')
+    elif(actiontype == "clearusernotifications"):
+        notificationtype = request.GET.get('notificationtype')
+        get_user_model()(userid=request.user.userid).manage_display_info(actiontype='clearusernotifications',notificationtype=notificationtype)
         
     # Set notifications as "seen"
     elif(actiontype == "clearnewrepnotification"):
-        get_user_model()(userid=request.user.userid).manage_display_info('clearnewrepnotification')
+        get_user_model()(userid=request.user.userid).manage_display_info(actiontype='clearnewrepnotification')
         
     return HttpResponse()
 
@@ -310,8 +311,8 @@ def myaccount(request):
             return redirect_home()
 
         # Bind form data
-        form = MyUserForm(request.POST, request.FILES)
-        
+        form = MyUserForm(request.POST, request.FILES, request=request)
+
         if(form.is_valid()):
             
             # Create user object
@@ -321,6 +322,7 @@ def myaccount(request):
                 lastname = form.cleaned_data.get('lastname'),
                 phonenumber = form.cleaned_data.get('phonenumber'),
                 emailaddress = form.cleaned_data.get('emailaddress'),
+                profilepictureid = form.cleaned_data.get('profilepictureid'),
             )
 
             # Save user
@@ -329,18 +331,19 @@ def myaccount(request):
         myuser = get_user_model().objects.get(userid=request.user.userid)
         
         if(myuser):
-            form=MyUserForm(
+            form=MyUserForm(request=request,
                 initial={
                     'userid':myuser.userid,
                     'firstname':myuser.firstname,
                     'lastname':myuser.lastname,
                     'phonenumber':myuser.phonenumber,
                     'emailaddress':myuser.emailaddress,
+                    'profilepictureid':myuser.profilepictureid,
                 }
             )
         # Return empty form
         else:
-            form=MyUserForm()
+            form=MyUserForm(request=request)
 
     # Get user objects
     myreputationevents = UserReputationEventsTable(UserReputationEvent.objects.get_events(userid=request.user.userid))
@@ -363,7 +366,7 @@ def create_contract(request, contractid):
     # SAVE CONTRACT
     if request.method == "POST" and 'submit_other' not in request.POST: # Ignore submits from other forms
 
-        # Go to homepage if user clicked "cancel" button        
+        # Go to homepage if user clicked "cancel" button      
         if('submit_cancel' in request.POST):
             return redirect_home()
         
@@ -798,6 +801,7 @@ def edit_object(request, objecttype, objectid):
                     defaultsignaturescanfile = psycopg2.Binary(mydatafile),
                     phonenumber = form.cleaned_data.get('phonenumber'),
                     emailaddress = form.cleaned_data.get('emailaddress'),
+                    profilepictureid = form.cleaned_data.get('profilepictureid'),
                 )
             
             elif(objecttype == 'student'):
@@ -814,6 +818,7 @@ def edit_object(request, objecttype, objectid):
                     defaultsignaturescanfile = psycopg2.Binary(mydatafile),
                     phonenumber = form.cleaned_data.get('phonenumber'),
                     emailaddress = form.cleaned_data.get('emailaddress'),
+                    profilepictureid = form.cleaned_data.get('profilepictureid'),
                 )
 
             elif(objecttype == 'reward'):
@@ -874,6 +879,7 @@ def edit_object(request, objecttype, objectid):
                         'defaultsignaturescanfile': myobject.defaultsignaturescanfile,
                         'phonenumber': myobject.phonenumber,
                         'emailaddress': myobject.emailaddress,
+                        'profilepictureid': myobject.profilepictureid,
                     }
                 )
             
@@ -888,6 +894,7 @@ def edit_object(request, objecttype, objectid):
                         'defaultsignaturescanfile': myobject.defaultsignaturescanfile,
                         'phonenumber': myobject.phonenumber,
                         'emailaddress': myobject.emailaddress,
+                        'profilepictureid': myobject.profilepictureid,
                     }
                 )
 

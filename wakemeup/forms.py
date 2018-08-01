@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
-from crispy_forms.bootstrap import FormActions, TabHolder, Tab, PrependedText
+from crispy_forms.bootstrap import FormActions, TabHolder, Tab, PrependedText, InlineRadios
 from django.forms.widgets import HiddenInput
 
 from .models.environment import School, Class, Teacher, TeacherBudget, Student
@@ -14,6 +14,8 @@ from .models.contract import Contract, ContractGoal, ContractInfo, Reward
 from django.contrib.postgres.forms import RangeWidget
 
 import datetime
+
+from users.models import UserBadge
 
 from lib.UsefulFunctions.stringUtils import *
 
@@ -286,9 +288,10 @@ class TeacherForm(forms.Form):
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
-    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
+    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
+    profilepictureid = forms.ChoiceField(label='Avatar', required=False)
 
     # Make sure email address does not already exist
     def clean_emailaddress(self):
@@ -320,6 +323,7 @@ class TeacherForm(forms.Form):
                 'lastname',
                 'emailaddress',
                 'phonenumber',
+                'profilepictureid',
                 'defaultsignaturescanfile',
             ),
             getAdminFormActions()
@@ -344,6 +348,7 @@ class StudentForm(forms.Form):
     phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
+    profilepictureid = forms.ChoiceField(label='Avatar', required=False)
 
     def __init__ (self, *args, **kwargs):
 
@@ -370,6 +375,7 @@ class StudentForm(forms.Form):
                 'lastname',
                 'emailaddress',
                 'phonenumber',
+                'profilepictureid',
                 'defaultsignaturescanfile',
             ),
             getAdminFormActions()
@@ -382,7 +388,7 @@ class StudentForm(forms.Form):
     # Specify model
     class Meta:
         model = Student
-        fields = ('studentuserid','schoolid','classid','firstname','lastname','phonenumber','emailaddress')
+        fields = ('studentuserid','schoolid','classid','firstname','lastname','phonenumber','emailaddress', 'profilepictureid')
 
 # TO-DO: Combine this with TeacherForm & StudentForm
 class MyUserForm(forms.Form):
@@ -395,8 +401,12 @@ class MyUserForm(forms.Form):
     phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
 #     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
+    profilepictureid = forms.IntegerField(label='Avatar', required=False)
 
     def __init__ (self, *args, **kwargs):
+
+        # Extract request info
+        request = kwargs.pop("request")
 
         # Call base class constructor (i.e. Teacher Form)
         super(MyUserForm, self).__init__(*args, **kwargs)
@@ -406,6 +416,8 @@ class MyUserForm(forms.Form):
         setFormHelper(self.helper)
         self.helper.form_tag = False
         
+        self.fields['profilepictureid'].choices=UserBadge.objects.badge_profile_picture_choices(userid=request.user.userid)
+        
         # Set form layout
         self.helper.layout = Layout(
             'userid',
@@ -414,6 +426,8 @@ class MyUserForm(forms.Form):
             'emailaddress',
             'phonenumber',
 #             'defaultsignaturescanfile',
+            InlineRadios('profilepictureid', template = 'wakemeup/admin/profilepicture.html'),
+#             InlineRadios('profilepictureid', template = 'wakemeup/admin/profilepicture.html'),
             getAdminFormActions()
         )
 
@@ -424,7 +438,7 @@ class MyUserForm(forms.Form):
     # Specify model
     class Meta:
         model = get_user_model()
-        fields = ('userid','firstname','lastname','phonenumber','emailaddress')
+        fields = ('userid','firstname','lastname','phonenumber','emailaddress','profilepictureid')
 
 class RewardForm(forms.Form):
 

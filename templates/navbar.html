@@ -73,7 +73,7 @@
 						data-toggle="dropdown" 
 						aria-haspopup="true" 
 						aria-expanded="false"
-						style="color:{% if userinfo.opennotifications %}red{% endif %}" 
+						style="color:{% if userinfo.opennotificationsflag %}red{% endif %}" 
 						title="Notificaciones"
 					>
 						<i class="fas fa-inbox faicon"></i>
@@ -91,7 +91,11 @@
 				<!-- PROFILE -->			
 				<li class="nav-item">
 					<a class="nav-link" href="{% url 'wakemeup:myaccount' %}#profile" title="Perfil">
-						<i class="fas fa-user faicon"></i>
+						{% if userinfo.profilepicturefile %}
+							<img src="{% static 'img/avatar/'|add:userinfo.profilepicturefile %}" alt="Avatar" height="32px" width="32px" style="display:inline-block">
+						{% else %}
+	 						<i class="fas fa-user faicon"></i>
+						{% endif %}
 					</a>
 				</li>
 				

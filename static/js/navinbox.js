@@ -21,7 +21,19 @@ function clearReputationNotification() {
 		}
 	});
 }
-	
+
+//Clear Badge notifications (called when user loads Badge tab)
+function clearBadgeNotification() {
+	// Set Reputation Value "seen" TS
+	$.ajax({
+		url : manageUrl,
+		data : {
+			'actiontype':'clearusernotifications',
+			'notificationtype':'BD' // Badge
+		},
+	});
+}
+
 // NOTIFICATIONS - Show dropdown
 $("#NotificationInboxIcon").on("click", function() {
 
@@ -44,7 +56,7 @@ $("#NotificationInboxDropdown").on("hide.bs.dropdown", function(){
 	// Clear notifications
 	$.ajax({
 		url : manageUrl,
-		data : {'actiontype':'clearnotifications'},
+		data : {'actiontype':'clearusernotifications'},
 		success: function(data) {
 			$("#NotificationInboxIcon").attr('style','fill:grey;cursor:pointer;'); // Change inbox icon to grey
 		}
