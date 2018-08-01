@@ -36,7 +36,7 @@ PROJECT_APPS = [
     'django_tables2',
     'django.contrib.humanize',
     'widget_tweaks',
-    'svg',
+#    'svg',
 ]
 
 # Create INSTALLED_APPS setting
@@ -118,3 +118,9 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True # Kill session on browser close
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4' # Set default template for forms
 DJANGO_TABLES2_TEMPLATE = 'django_tables2/bootstrap-responsive.html' # Set default template for tables
+
+# TO-DO: Check into these
+DATETIME_FORMAT = 'j/n/y'
+DATE_FORMAT = 'j/n/y'
+
+SHORT_DATETIME_FORMAT = 'j/n/y' # Used for django-tables2
