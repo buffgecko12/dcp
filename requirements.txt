@@ -10,3 +10,5 @@ django-widget-tweaks
 gunicorn
 dj-database-url
 whitenoise
+
+#django-inline-svg

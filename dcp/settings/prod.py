@@ -1,7 +1,7 @@
 from .base import *
 import django_heroku
 
-DEBUG = True
+DEBUG = False
 
 # Configure Django App for Heroku (DATABASE_URL, ALLOWED_HOSTS, WhiteNoise Logging, Heroku CI)
 django_heroku.settings(locals())
@@ -17,7 +17,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'ERROR'),
         },
     },
 }
