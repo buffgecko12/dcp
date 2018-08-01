@@ -291,7 +291,7 @@ class TeacherForm(forms.Form):
     phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
-    profilepictureid = forms.ChoiceField(label='Avatar', required=False)
+    profilepictureid = forms.IntegerField(label='Avatar', required=False)
 
     # Make sure email address does not already exist
     def clean_emailaddress(self):
@@ -348,7 +348,7 @@ class StudentForm(forms.Form):
     phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
-    profilepictureid = forms.ChoiceField(label='Avatar', required=False)
+#     profilepictureid = forms.IntegerField(label='Avatar', required=False)
 
     def __init__ (self, *args, **kwargs):
 
