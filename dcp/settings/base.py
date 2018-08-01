@@ -108,11 +108,8 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/' # Url for static file serving
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),] # Search directories for static files (otherwise, engine only searches within app directories
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-print("TEMPLATES",os.path.join(BASE_DIR, 'templates'))
-print("ROOT",STATIC_ROOT)
-print("DIRS",STATICFILES_DIRS)
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
 
 # Other settings
 LOGIN_REDIRECT_URL = '/' # Where to redirect login requests if "next" is not specified
