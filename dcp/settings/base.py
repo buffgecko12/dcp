@@ -107,7 +107,7 @@ USE_TZ = True
 # Static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/' # Url for static file serving
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),] # Search directories for static files (otherwise, engine only searches within app directories
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),] # Search directories for static files (otherwise, engine only searches within app directories
 # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_STORAGE = 'dcp.storage.WhiteNoiseStaticFilesStorage'
 
