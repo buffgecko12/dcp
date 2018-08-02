@@ -12,15 +12,13 @@ from lib.UsefulFunctions.envUtils import get_env_settings
 import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # Extra os.path.dirname due to nested settings file
 
 SECRET_KEY = config('SECRET_KEY')
 ALLOWED_HOSTS = []
 
 # Define required apps
 PREREQ_APPS = [
-#    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -109,11 +107,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/' # Url for static file serving
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),] # Search directories for static files (otherwise, engine only searches within app directories
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-# STATICFILES_STORAGE = 'dcp.storage.WhiteNoiseStaticFilesStorage'
 
-# Other settings
+# URL Redirects
 LOGIN_REDIRECT_URL = '/' # Where to redirect login requests if "next" is not specified
 LOGOUT_REDIRECT_URL = 'wakemeup:index' # Where to redirect login requests if "next" is not specified
+
+# Authentication
 AUTH_USER_MODEL = 'users.MyUser' # Custom user model
 AUTHENTICATION_BACKENDS=['users.backends.MyBackend']
 # MAX_UPLOAD_SIZE = 5242880 # Limit max file upload size for RestrictedFileField class
