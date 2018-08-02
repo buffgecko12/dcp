@@ -118,6 +118,15 @@ AUTHENTICATION_BACKENDS=['users.backends.MyBackend']
 # MAX_UPLOAD_SIZE = 5242880 # Limit max file upload size for RestrictedFileField class
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True # Kill session on browser close
 
+# E-mail config
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+
+# Templates config
 CRISPY_TEMPLATE_PACK = 'bootstrap4' # Set default template for forms
 DJANGO_TABLES2_TEMPLATE = 'django_tables2/bootstrap-responsive.html' # Set default template for tables
 
