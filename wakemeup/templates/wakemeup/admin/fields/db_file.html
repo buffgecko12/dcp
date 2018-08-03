@@ -1,0 +1,5 @@
+{% if record.datausepolicyfileid %}
+	<a href="{% url 'wakemeup:download_file_fromdb' fileid=record.datausepolicyfileid %}"><i class="fas fa-file-download faicon"></i></a>
+{% else %}
+	--
+{% endif %}

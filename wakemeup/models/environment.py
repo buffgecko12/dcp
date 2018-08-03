@@ -6,6 +6,33 @@ from django.contrib.postgres.fields import JSONField
 
 from django.contrib.auth import get_user_model
 
+from lib.UsefulFunctions.stringUtils import mychr
+
+# Data model managers (interface between DB and objects)
+class FileManager(models.Manager):
+    def all(self):
+        return get_data(self, 'SP_DCPGetFile(%s)', (None,))
+    
+    def get(self, fileid):
+        return get_data_pk(self, 'SP_DCPGetFile(%s)', (fileid,))
+    
+    def save(self, myFile):
+        return save_data('SP_DCPUpsertFile',
+            (
+                myFile.fileid,
+                myFile.filename,
+                myFile.fileextension,
+                myFile.filesize,
+                myFile.filetype,
+                myFile.filedescription,
+                myFile.filedata,
+                myFile.accessclass
+            )
+         )[0] # Return fileid
+        
+    def delete(self, myFile):
+        return delete_data('SP_DCPDeleteFile', (myFile.fileid,))
+            
 # Data model managers (interface between DB and objects)
 class SchoolManager(models.Manager):
     def all(self):
@@ -22,7 +49,9 @@ class SchoolManager(models.Manager):
                 mySchool.schoolabbreviation,
                 mySchool.address,
                 mySchool.city,
-                mySchool.department
+                mySchool.department,
+                mySchool.datausepolicyfileid,
+                mySchool.guardianapprovalpolicy
             )
          )[0] # Return schoolid
         
@@ -185,9 +214,11 @@ class School(models.Model):
     schoolid = models.IntegerField(primary_key=True, verbose_name='ID')
     schooldisplayname = models.CharField(max_length=100, verbose_name='Colegio')
     schoolabbreviation = models.CharField(max_length=25, verbose_name='Abreviatura')
-    address = models.CharField(max_length=100, verbose_name='Direcci' + chr(243) + 'n')
+    address = models.CharField(max_length=100, verbose_name='Direcci' + mychr('o') + 'n')
     city = models.CharField(max_length=100, verbose_name='Ciudad')
     department = models.CharField(max_length=100, verbose_name='Departamento')
+    datausepolicyfileid = models.IntegerField(verbose_name='Politica de uso de datos')
+    guardianapprovalpolicy = JSONField(verbose_name='Politica de aprobaci' + mychr('o') + 'n de tutor')
 
     class Meta:
         managed = False
@@ -200,6 +231,29 @@ class School(models.Model):
     
     def delete(self):
         return School.objects.delete(self)
+
+class File(models.Model):
+    
+    fileid = models.IntegerField(primary_key=True, verbose_name='ID')
+    filename = models.CharField(max_length=500, verbose_name='Archivo')
+    fileextension = models.CharField(max_length=50)
+    filesize = models.IntegerField()
+    filetype = models.CharField(max_length=100, verbose_name='Tipo')
+    filedescription = models.CharField(max_length=500, verbose_name='Descripci' + mychr('o') + 'n')
+    filedata = models.BinaryField()
+    accessclass = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        
+    # File Manager instance
+    objects = FileManager()
+    
+    def save(self):
+        return File.objects.save(self)
+    
+    def delete(self):
+        return File.objects.delete(self)
 
 class Class(models.Model):
     
@@ -229,9 +283,9 @@ class Teacher(models.Model):
     firstname = models.CharField(max_length=100, verbose_name='Primer nombre')
     lastname = models.CharField(max_length=100, verbose_name='Apellido(s)')
     defaultsignaturescanfile = models.BinaryField(verbose_name='Firma')
-    phonenumber = models.CharField(max_length=25, verbose_name='Tel' + chr(233) + 'fono')
+    phonenumber = models.CharField(max_length=25, verbose_name='Tel' + mychr('e') + 'fono')
     emailaddress = models.CharField(max_length=250,verbose_name='Correo')
-    reputationvalue = models.IntegerField(verbose_name='Reputaci' + chr(243) + 'n')
+    reputationvalue = models.IntegerField(verbose_name='Reputaci' + mychr('o') + 'n')
     profilepictureid = models.IntegerField()
     
     objects = TeacherManager()
@@ -281,9 +335,9 @@ class Student(models.Model):
     firstname = models.CharField(max_length=100,verbose_name='Primer nombre')
     lastname = models.CharField(max_length=100,verbose_name='Apellido(s)')
     defaultsignaturescanfile = models.BinaryField(verbose_name='Firma')
-    phonenumber = models.CharField(max_length=25,verbose_name='Tel' + chr(233) + 'fono')
+    phonenumber = models.CharField(max_length=25,verbose_name='Tel' + mychr('e') + 'fono')
     emailaddress = models.CharField(max_length=250,verbose_name='Correo')
-    reputationvalue = models.IntegerField(verbose_name='Reputaci' + chr(243) + 'n')
+    reputationvalue = models.IntegerField(verbose_name='Reputaci' + mychr('o') + 'n')
     profilepictureid = models.IntegerField()
 
     # Object manager instance    

@@ -5,6 +5,7 @@ from .models.contract import Contract, Reward
 from users.models import UserReputationEvent, UserBadge
 
 from lib.UsefulFunctions.dateUtils import display_timestamp_range, display_timestamp
+from lib.UsefulFunctions.stringUtils import mychr
 from django.urls import reverse
 
 EMPTY_TEXT = 'No hay registros.'
@@ -31,6 +32,20 @@ def get_table_attrs(textcenterflag = None, nowrapflag = None):
 class SchoolsTable(tables.Table):
 
     objectid = 'schoolid'
+
+    datausepolicyfileid = tables.TemplateColumn(
+        template_name='wakemeup/admin/fields/db_file.html',
+#         extra_context=kwargs,
+        verbose_name='Politica de uso de datos',
+        accessor=A(objectid)
+    )
+
+    guardianapprovalpolicy = tables.TemplateColumn(
+        template_name='wakemeup/admin/fields/guardian_policy.html',
+#         extra_context=kwargs,
+        verbose_name='Politica de aprobaci' + mychr('o') + 'n de tutor',
+        accessor=A(objectid)
+    )
 
     manage_buttons = getManageButtons(accessor=objectid)
     

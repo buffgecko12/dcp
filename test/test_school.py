@@ -1,5 +1,6 @@
 import test_setup
 import unittest
+import json
 
 from wakemeup.models.environment import School
 
@@ -7,7 +8,15 @@ class testSchool(unittest.TestCase):
     
     # Create new school
     def testCreateNewSchool(self):
-        newschool = School(None, 'MySchool', 'MyAbbreviation', '123 Fake Ln', 'San Diego', 'CA')
+        guardianapprovalpolicy = json.dumps(
+            {
+                'guardianapprovalrequiredflag':True,
+                'idnumberrequiredflag':True,
+                'idissuerequiredflag':False,
+            }
+        )
+        
+        newschool = School(None, 'MySchool', 'MyAbbreviation', '123 Fake Ln', 'San Diego', 'CA',None, guardianapprovalpolicy)
         self.assertEqual(newschool.schooldisplayname, 'MySchool')
         self.assertFalse(newschool.schoolid)
     
@@ -23,10 +32,6 @@ class testSchool(unittest.TestCase):
         # Get all schools
         allschools = School.objects.all()
         self.assertTrue(allschools)
-
-        # Update school
-        newschool_get.address = '123 New address'
-        newschool_get.save()
 
         # Delete school
         newschool_get.delete()

@@ -27,6 +27,7 @@ urlpatterns = [
 
     # Misc
     url(r'^admin/img/(?P<objecttype>(teacher|student))/(?P<objectid>\d+)/preview$', views.preview_image, name="preview_image"), # Image preview
+    url(r'^admin/file/(?P<fileid>\d+)$', views.download_file_fromdb, name='download_file_fromdb'), # File download
 
     # Ajax URLs
     url(r'^ajax/load-classes/', views.load_classes, name='ajax_load_classes'),

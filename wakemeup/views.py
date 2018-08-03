@@ -13,13 +13,15 @@ from lib.UsefulFunctions.imgUtils import renderImageFromDb
 from lib.UsefulFunctions.dateUtils import *
 from lib.UsefulFunctions.dataUtils import *
 from lib.UsefulFunctions.stringUtils import *
+from lib.UsefulFunctions.httpUtils import *
+from lib.UsefulFunctions.fileUtils import get_file_name_info
 
 import psycopg2
 import json
 
 from .tables import *
 from .forms import *
-from .models.environment import School, Class, Teacher, Student, TeacherBudget
+from .models.environment import School, Class, Teacher, Student, TeacherBudget, File
 from .models.contract import Contract, ContractParty, ContractGoal, ContractGoalReward, Reward, ContractInfo
 
 from users.models import UserReputationEvent, UserBadge, UserNotification
@@ -71,6 +73,15 @@ view_permissions = {
     'contract': NO_PERM_REQUIRED,
     'myaccount': NO_PERM_REQUIRED,
 }
+
+def download_file_fromdb(request, fileid):
+    myfile = File.objects.get(fileid)
+
+    # Allow access for "public" files (TO-DO: Update to be more inclusive)
+    if(myfile.accessclass == "PB"):
+        return getHttpFileResponse(myfile.filedata, myfile.filename + myfile.fileextension, myfile.filetype)
+    else:
+        return redirect_home()
 
 # Move to util library
 def send_email(subject, body, to_list, sender = 'duitamacolegioproject@gmail.com'):
@@ -738,6 +749,38 @@ def edit_object(request, objecttype, objectid):
             
             # Create new object
             if(objecttype == 'school'):
+
+                # Capture data use policy file info
+                originalpolicyfileid = request.POST.get("datausepolicyfileid") # Read in original fileid
+                
+                mydatausepolicyfileid = originalpolicyfileid
+                mydatausepolicyfile = request.FILES.get('datausepolicyfile')
+
+                # New file was uploaded
+                if(mydatausepolicyfile):
+
+                    # Read in binary data
+                    mydatafile = convert_form_binary_to_db(mydatausepolicyfile)
+                    
+                    # Create new file object
+                    myfile = File(
+                        fileid = None,
+                        filename = get_file_name_info(mydatausepolicyfile.name)['file_name'],
+                        fileextension = get_file_name_info(mydatausepolicyfile.name)['file_extension'],
+                        filesize = mydatausepolicyfile.size,
+                        filetype = mydatausepolicyfile.content_type,
+#                         description = 'File description',
+                        filedata = psycopg2.Binary(mydatafile),
+                        accessclass = 'PB' # File accessible to public
+                    )
+                    
+                    # Save new file and capture fileid
+                    mydatausepolicyfileid = myfile.save()
+                    
+                    # Delete old file (if exists)
+                    if(originalpolicyfileid):
+                        File(fileid=originalpolicyfileid).delete()
+                
                 myobject = objectClass(
                     schoolid = form.cleaned_data.get('schoolid'),
                     schooldisplayname = form.cleaned_data.get('schooldisplayname'),
@@ -745,7 +788,10 @@ def edit_object(request, objecttype, objectid):
                     address = form.cleaned_data.get('address'),
                     city = form.cleaned_data.get('city'),
                     department = form.cleaned_data.get('department'),
+                    datausepolicyfileid = mydatausepolicyfileid,
                 )
+
+
 
             elif(objecttype == 'class'):
                 myobject = objectClass(
@@ -856,7 +902,8 @@ def edit_object(request, objecttype, objectid):
                         'schoolabbreviation': myobject.schoolabbreviation,
                         'address': myobject.address,
                         'city': myobject.city,
-                        'department': myobject.department
+                        'department': myobject.department,
+                        'datausepolicyfileid':myobject.datausepolicyfileid,
                     }
                 )
             elif(objecttype == 'class'):

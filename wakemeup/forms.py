@@ -172,6 +172,9 @@ class SignupForm(UserCreationForm):
 
 class SchoolForm(forms.Form):
 
+    # Store original data use policy fileid
+    datausepolicyfileid = forms.IntegerField(required=False, widget=forms.HiddenInput())
+
     # Define form fields
     schoolid = forms.IntegerField(label='Codigo de colegio', required=False, widget=forms.HiddenInput())
     schooldisplayname = forms.CharField(label='Nombre para mostrar',max_length=100)
@@ -179,6 +182,13 @@ class SchoolForm(forms.Form):
     address = forms.CharField(label='Direcci' + mychr('o') + 'n',max_length=100)
     city = forms.CharField(label='Ciudad',max_length=100)
     department = forms.CharField(label='Departamento',max_length=100)
+    
+    datausepolicyfile = forms.FileField(label='Politica de uso de datos', required=False)
+
+    # Guardian approval policy
+    guardianrequiredflag = forms.BooleanField(required=False)
+    guardianidnumberflag = forms.BooleanField(required=False)
+    guardianidissueflag = forms.BooleanField(required=False)
 
     # Define constructor
     def __init__ (self, *args, **kwargs):
@@ -195,12 +205,14 @@ class SchoolForm(forms.Form):
         self.helper.layout = Layout(
             Fieldset(
                 'Crear/editar colegio',
+                'datausepolicyfileid',
                 'schoolid',
                 'schooldisplayname',
                 'schoolabbreviation',
                 'address',
                 'city',
                 'department',
+                'datausepolicyfile'
             ),
             getAdminFormActions()
         )
