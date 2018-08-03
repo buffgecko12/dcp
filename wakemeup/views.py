@@ -115,12 +115,22 @@ def check_permissions(view):
 
         # Check user permissions
         if myuser.is_authenticated:
-            if (
-                myuser.userrole in view_permissions[viewname][objecttype]['userrole'] or view_permissions[viewname][objecttype]['userrole'][0] == 'ALL' or
-                myuser.usertype in view_permissions[viewname][objecttype]['usertype'] or view_permissions[viewname][objecttype]['usertype'][0] == 'ALL'
-            ):
-                # Valid permission - continue
-                return view(*args, **kwargs)
+
+            # Look up school's data use policy requirements
+            myschoolid = 1 # TO-DO: Fix this to get correct schoolid
+            datausepolicyflag = School.objects.get(schoolid=myschoolid).datausepolicyfileid
+
+            # Check if user has accepted data use policy and acceptance is required
+            if(myuser.datausepolicyacceptedts or not datausepolicyflag):
+                if (
+                    myuser.userrole in view_permissions[viewname][objecttype]['userrole'] or view_permissions[viewname][objecttype]['userrole'][0] == 'ALL' or
+                    myuser.usertype in view_permissions[viewname][objecttype]['usertype'] or view_permissions[viewname][objecttype]['usertype'][0] == 'ALL'
+                ):
+                    # Valid permission - continue
+                    return view(*args, **kwargs)
+            else:
+                # Data use policy has not been accepted yet (and is required)
+                return redirect('wakemeup:useragreement')
         else:
             # TO-DO: Re-direct to login page
             return redirect('login')
@@ -312,6 +322,22 @@ def delete_object(request, objecttype, objectid):
 
 def index(request):
     return render(request, 'wakemeup/index.html')
+
+def useragreement(request):
+    # User has accepted the agreement
+    if(request.method == "POST" and request.POST.get('acceptflag')):
+
+        # Mark user as accepted and send back to homepage
+        get_user_model()(userid=request.user.userid).manage_display_info(actiontype='acceptdatausepolicy')
+        return redirect_home()
+    
+    # User has not accepted the agreement - display agreement form
+    else:
+        myschoolid = 1 # TO-DO: Fix this to get schoolid from each user
+        datausepolicyfileid = School.objects.get(schoolid=myschoolid).datausepolicyfileid 
+    
+        # Display agreement form
+        return render(request, 'wakemeup/admin/useragreement.html', context={'datausepolicyfileid':datausepolicyfileid})
 
 @check_permissions
 def myaccount(request):

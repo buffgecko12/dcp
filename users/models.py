@@ -179,6 +179,7 @@ class MyUser(AbstractBaseUser):
     reputationvalue = models.IntegerField()
     reputationvaluelastseents = models.DateTimeField()
     is_active = models.BooleanField()
+    datausepolicyacceptedts = models.DateTimeField()
 
     # Define data manager
     objects = MyUserManager()

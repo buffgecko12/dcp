@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Politica de uso de datos{% endblock %}
+
+{% block content %}<br>
+	<div class="container-fluid" align="center">
+		<a href="{% url 'wakemeup:download_file_fromdb' fileid=datausepolicyfileid %}" onclick="document.getElementById('id_acceptflag').disabled = false;">Politica de uso de datos</a>
+		<form method="POST">
+			{% csrf_token %}
+			<div class="form-check">
+			  <input class="form-check-input" type="checkbox" name="acceptflag" id="id_acceptflag" onchange="document.getElementById('submit').disabled = !this.checked;" disabled>
+			  <label class="form-check-label" for="id_acceptflag">
+			    Yo acepto los terminos.
+			  </label>
+			</div><br>
+		  <button type="submit" class="btn btn-primary" id="submit" disabled>Submit</button>
+		</form>
+	</div>
+{% endblock %}

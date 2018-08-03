@@ -24,6 +24,7 @@ urlpatterns = [
     # User (TO-DO: Move to root)    
     url(r'^admin/add_user', views.add_user, name="add_user"),
     url(r'^myaccount', views.myaccount, name="myaccount"),
+    url(r'^useragreement', views.useragreement, name="useragreement"),
 
     # Misc
     url(r'^admin/img/(?P<objecttype>(teacher|student))/(?P<objectid>\d+)/preview$', views.preview_image, name="preview_image"), # Image preview
