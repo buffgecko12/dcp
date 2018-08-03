@@ -35,7 +35,7 @@ def load_schools_classes():
         '1101','1102','1103','1104','1105','1106','1107','1108','1109','1110','1111'
      ]
     
-    rr_classinfo = []
+    rr_classinfo = ['601','602','801','1201']
     
     school_list = [
         ('GLV','Guillermo Leon Valencia Colegio (sede integrado)','GLV (Integrado)', 'Calle 15A Nro 7 - 48','Duitama','Boyaca',glv_classinfo),
@@ -87,6 +87,9 @@ def load_users():
         ('Lorena','Rojas',GLV_SCHOOLID,['1002','1008','1009','1010','1011'],),
         ('Doris','Avella',GLV_SCHOOLID,[],),
         ('Patricia','Conde',GLV_SCHOOLID,['911','912'],),
+        
+        ('Elizabeth','Moreno',ITIRR_SCHOOLID,['601','602','801','1201'],),
+        
     ]
 
     for teacher in teacher_list:
@@ -125,7 +128,7 @@ def load_users():
         ('Johan Santiago','Solano',GLV_SCHOOLID,'904',),
         ('Juan Diego','Bautista Corredor',GLV_SCHOOLID,'904',),
         
-        ('Alejandra','Pita',GLV_SCHOOLID,'905'),
+#         ('Alejandra','Pita',GLV_SCHOOLID,'905'),
         ('Claudio','Salamanca',GLV_SCHOOLID,'905'),
         ('Dana','Camargo Castro',GLV_SCHOOLID,'905'),
         ('Juan Sebastian','Corredor',GLV_SCHOOLID,'905'),
@@ -169,6 +172,22 @@ def load_users():
         ('Javier','Martinez Corredor',GLV_SCHOOLID,'1007'),
         ('Jhonatan','Montanez Cespedes',GLV_SCHOOLID,'1007'),
         ('Natalia Andrea','Cuervo Aranguren',GLV_SCHOOLID,'1007'),
+        
+        ('Yury','Galvan',ITIRR_SCHOOLID,'601'),
+        ('Danna Valentina','Pedraza',ITIRR_SCHOOLID,'601'),
+        ('Alejandra','Mora Cuspoca',ITIRR_SCHOOLID,'601'),
+        ('Mary Tatiana','Avendano',ITIRR_SCHOOLID,'601'),
+        
+        ('Brayan Estiven','Parra',ITIRR_SCHOOLID,'602'),
+        ('Brayan','Pardo',ITIRR_SCHOOLID,'602'),
+
+        ('Juan Filipe','Merchan',ITIRR_SCHOOLID,'801'),
+        ('Derly Yurany','Rojas',ITIRR_SCHOOLID,'801'),
+        ('Jaider Alejandro','Lopez',ITIRR_SCHOOLID,'801'),
+        ('Jorge Andres','Nino',ITIRR_SCHOOLID,'801'),
+
+        ('Christopher','Khosravi',ITIRR_SCHOOLID,'1201'),
+        ('Fernando','Becerra',ITIRR_SCHOOLID,'1201'),
         
     ]
 
