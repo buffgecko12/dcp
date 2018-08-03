@@ -124,6 +124,52 @@ def load_users():
         ('Jennifer Carolina','Galvis P',GLV_SCHOOLID,'904',),
         ('Johan Santiago','Solano',GLV_SCHOOLID,'904',),
         ('Juan Diego','Bautista Corredor',GLV_SCHOOLID,'904',),
+        
+        ('Alejandra','Pita',GLV_SCHOOLID,'905'),
+        ('Claudio','Salamanca',GLV_SCHOOLID,'905'),
+        ('Dana','Camargo Castro',GLV_SCHOOLID,'905'),
+        ('Juan Sebastian','Corredor',GLV_SCHOOLID,'905'),
+        ('Katerin Daniela','Cucunuba',GLV_SCHOOLID,'905'),
+        ('Laura Sofia','Sandoval',GLV_SCHOOLID,'905'),
+        ('Natalia Valentina','Rosas Gomez',GLV_SCHOOLID,'905'),
+        ('Nathaly','Salazar',GLV_SCHOOLID,'905'),
+        ('Paula','Ramos',GLV_SCHOOLID,'905'),
+        
+        ('Cindy Valentina','Herrera Valderrama',GLV_SCHOOLID,'906'),
+        ('Julieth Xiomara','Gonzalez',GLV_SCHOOLID,'906'),
+        ('Juree Valentina','Gallo Santos',GLV_SCHOOLID,'906'),
+        ('Maria Fernanda','Duarte',GLV_SCHOOLID,'906'),
+
+        
+        ('Jesus David','Martinez',GLV_SCHOOLID,'901'),
+#        ('Juan Diego','Rodriguez',GLV_SCHOOLID,'901'),
+        ('Juan Felipe','Quatana Vargas',GLV_SCHOOLID,'901'),
+        ('Meslan Santiago','Puesta Cajica',GLV_SCHOOLID,'901'),
+
+        ('Angie Lorena','Marquez Lopez',GLV_SCHOOLID,'902'),
+        ('Angie Natalia','Pinzon Sanabria',GLV_SCHOOLID,'902'),
+        ('Angy Viviana','Moreno Gonzalez',GLV_SCHOOLID,'902'),
+        ('Bresly Soledad','Sonabria',GLV_SCHOOLID,'902'),
+        ('Jennifer Alexandra','Coronado Pinzon',GLV_SCHOOLID,'902'),
+        
+        ('Ana Fernanda','Gomez Camargo',GLV_SCHOOLID,'903'),
+        ('Angela Johana','Acero Camargo',GLV_SCHOOLID,'903'),
+        ('Angela Katherina','Macias',GLV_SCHOOLID,'903'),
+        ('Angela Sofia','Perez',GLV_SCHOOLID,'903'),
+        ('Angie Jolieth','Mayarga Juarez',GLV_SCHOOLID,'903'),
+        
+        ('Yessid','Maldonado',GLV_SCHOOLID,'1006'),
+        ('Jose Alejandro','Pachecho Reyes',GLV_SCHOOLID,'1006'),
+        ('Sergio Alexander','Gonzalez',GLV_SCHOOLID,'1006'),
+        ('Luis Esteban','Benavides',GLV_SCHOOLID,'1006'),
+        ('Valentina','Gomez Blanco',GLV_SCHOOLID,'1006'),
+
+        ('Andres Felipe','Chiuatu Parra',GLV_SCHOOLID,'1007'),
+        ('Dennys Aleyda','Vargas',GLV_SCHOOLID,'1007'),
+        ('Javier','Martinez Corredor',GLV_SCHOOLID,'1007'),
+        ('Jhonatan','Montanez Cespedes',GLV_SCHOOLID,'1007'),
+        ('Natalia Andrea','Cuervo Aranguren',GLV_SCHOOLID,'1007'),
+        
     ]
 
     for student in student_list:
