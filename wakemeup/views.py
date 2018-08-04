@@ -117,11 +117,13 @@ def check_permissions(view):
         if myuser.is_authenticated:
 
             # Look up school's data use policy requirements
-            myschoolid = 1 # TO-DO: Fix this to get correct schoolid
-            datausepolicyflag = School.objects.get(schoolid=myschoolid).datausepolicyfileid
+            if(myuser.schoolid):
+                datausepolicyrequiredflag = School.objects.get(schoolid=myuser.schoolid).datausepolicyfileid
+            else:
+                datausepolicyrequiredflag = True # Translates to value exists --> "policy not accepted"
 
             # Check if user has accepted data use policy and acceptance is required
-            if(myuser.datausepolicyacceptedts or not datausepolicyflag):
+            if(myuser.datausepolicyacceptedts or not datausepolicyrequiredflag or myuser.is_admin()):
                 if (
                     myuser.userrole in view_permissions[viewname][objecttype]['userrole'] or view_permissions[viewname][objecttype]['userrole'][0] == 'ALL' or
                     myuser.usertype in view_permissions[viewname][objecttype]['usertype'] or view_permissions[viewname][objecttype]['usertype'][0] == 'ALL'
@@ -333,8 +335,12 @@ def useragreement(request):
     
     # User has not accepted the agreement - display agreement form
     else:
-        myschoolid = 1 # TO-DO: Fix this to get schoolid from each user
-        datausepolicyfileid = School.objects.get(schoolid=myschoolid).datausepolicyfileid 
+        
+        # Look up school's data use policy requirements
+        if(request.user.schoolid):
+            datausepolicyfileid = School.objects.get(schoolid=request.user.schoolid).datausepolicyfileid 
+        else:
+            datausepolicyfileid = None
     
         # Display agreement form
         return render(request, 'wakemeup/admin/useragreement.html', context={'datausepolicyfileid':datausepolicyfileid})
@@ -355,6 +361,7 @@ def myaccount(request):
             # Create user object
             myuser = get_user_model()(
                 userid = form.cleaned_data.get('userid'),
+                schoolid = form.cleaned_data.get('schoolid'),
                 firstname = form.cleaned_data.get('firstname'),
                 lastname = form.cleaned_data.get('lastname'),
                 phonenumber = form.cleaned_data.get('phonenumber'),
@@ -371,6 +378,7 @@ def myaccount(request):
             form=MyUserForm(request=request,
                 initial={
                     'userid':myuser.userid,
+                    'schoolid':myuser.schoolid,
                     'firstname':myuser.firstname,
                     'lastname':myuser.lastname,
                     'phonenumber':myuser.phonenumber,
@@ -1111,15 +1119,16 @@ def add_user(request):
 
             # Create new user
             newuser = get_user_model().objects.create_user(
-                raw_password, 
-                username,
-                form.cleaned_data.get('usertype'),
-                form.cleaned_data.get('firstname'),
-                form.cleaned_data.get('lastname'),
-                form.cleaned_data.get('defaultsignaturescanfile'),
-                form.cleaned_data.get('phonenumber'),
-                myemailaddress,
-                form.cleaned_data.get('userrole'),
+                password = raw_password, 
+                schoolid = form.cleaned_data.get('schoolid'),
+                username = username,
+                usertype = form.cleaned_data.get('usertype'),
+                firstname = form.cleaned_data.get('firstname'),
+                lastname = form.cleaned_data.get('lastname'),
+                defaultsignaturescanfile = form.cleaned_data.get('defaultsignaturescanfile'),
+                phonenumber = form.cleaned_data.get('phonenumber'),
+                emailaddress = myemailaddress,
+                userrole = form.cleaned_data.get('userrole'),
             )
 
             # If student, save additional data

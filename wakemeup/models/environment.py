@@ -36,7 +36,10 @@ class FileManager(models.Manager):
 # Data model managers (interface between DB and objects)
 class SchoolManager(models.Manager):
     def all(self):
-        return get_data(self, 'SP_DCPGetSchool(%s)', (None,))
+        return self.get_schools(schoolid = None)
+    
+    def get_schools(self, schoolid = None):
+        return get_data(self, 'SP_DCPGetSchool(%s)', (schoolid,))
     
     def get(self, schoolid):
         return get_data_pk(self, 'SP_DCPGetSchool(%s)', (schoolid,))
@@ -58,8 +61,8 @@ class SchoolManager(models.Manager):
     def delete(self, mySchool):
         return delete_data('SP_DCPDeleteSchool', (mySchool.schoolid,))
 
-    def school_choices(self):
-        schools = self.all()
+    def school_choices(self, schoolid = None):
+        schools = self.get_schools(schoolid=schoolid)
         school_choices = [
             (str(myschool.schoolid), str(myschool.schooldisplayname)) for myschool in schools
         ]
@@ -127,7 +130,6 @@ class TeacherManager(models.Manager):
         # Save teacher-specific info
         save_data('SP_DCPUpsertTeacher', (
             myTeacher.teacheruserid,
-            myTeacher.schoolid,
             None, # Max budget not changeable here
             myTeacher.classinfo,
             )
@@ -136,6 +138,7 @@ class TeacherManager(models.Manager):
         # Save general user info
         return save_data('SP_DCPUpsertUser', (
             myTeacher.teacheruserid,
+            myTeacher.schoolid,
             '', # Username # Pass empty string to avoid NOT NULL requirement
             '', # Usertype
             myTeacher.firstname,
@@ -184,6 +187,7 @@ class StudentManager(models.Manager):
          # Save general user info
         return save_data('SP_DCPUpsertUser', (
             myStudent.studentuserid,
+            myStudent.schoolid,
             '', # Username
             '', # Usertype
             myStudent.firstname,

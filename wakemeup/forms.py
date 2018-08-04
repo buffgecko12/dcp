@@ -106,6 +106,7 @@ class SignupForm(UserCreationForm):
     firstname = forms.CharField(label='Primer nombre', max_length=100)
     lastname = forms.CharField(label='Apellido', max_length=100)
     usertype = forms.ChoiceField(label='Tipo de usuario',choices=get_user_model().usertype_choices)
+    schoolid = forms.ChoiceField(label='Colegio', widget=forms.Select, required=False)
     classid = forms.CharField(label='Curso', widget=forms.Select, required=False)
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     userrole = forms.CharField(initial='U', widget=HiddenInput) # Default new users to "User" role
@@ -124,7 +125,12 @@ class SignupForm(UserCreationForm):
             self.fields['teacheruserid'].initial = request.user.userid
             self.fields['usertype'].choices = [("ST","Estudiante")]
             self.fields['classid'].required=True
-
+            myschoolid = request.user.schoolid # Can only add students to their own school
+        else:
+            myschoolid = None
+            
+        self.fields['schoolid'].choices = [("0","-- Escoger colegio --")] + School.objects.school_choices(schoolid=myschoolid)
+            
         # Set helper properties
         self.helper = FormHelper()
         self.helper.form_method = DEFAULT_FORM_METHOD
@@ -135,6 +141,7 @@ class SignupForm(UserCreationForm):
                 'teacheruserid',
                 'username',
                 'usertype',
+                'schoolid',
                 'classid',
                 'firstname',
                 'lastname',
@@ -149,7 +156,7 @@ class SignupForm(UserCreationForm):
     # Specify model and which fields to include in form
     class Meta:
         model = get_user_model()
-        fields = ('teacheruserid','username','usertype','classid','firstname','lastname','emailaddress','password1','password2','userrole')
+        fields = ('teacheruserid','username','usertype','schoolid','classid','firstname','lastname','emailaddress','password1','password2','userrole')
 
     # Make sure email address does not already exist
     def clean_emailaddress(self):
@@ -407,6 +414,7 @@ class MyUserForm(forms.Form):
 
     # Define form fields
     userid = forms.IntegerField(widget=forms.HiddenInput)
+    schoolid = forms.ChoiceField(label='Colegio')
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
@@ -427,12 +435,20 @@ class MyUserForm(forms.Form):
         self.helper = FormHelper()
         setFormHelper(self.helper)
         self.helper.form_tag = False
-        
+
+        # Teachers can only add students
+        if(not request.user.is_admin):
+            myschoolid = request.user.schoolid # Can only add students to their own school
+        else:
+            myschoolid = None
+            
+        self.fields['schoolid'].choices = [("0",'-- Escoger colegio --')] + School.objects.school_choices(schoolid=myschoolid)
         self.fields['profilepictureid'].choices=UserBadge.objects.badge_profile_picture_choices(userid=request.user.userid)
         
         # Set form layout
         self.helper.layout = Layout(
             'userid',
+            'schoolid',
             'firstname',
             'lastname',
             'emailaddress',
@@ -450,7 +466,7 @@ class MyUserForm(forms.Form):
     # Specify model
     class Meta:
         model = get_user_model()
-        fields = ('userid','firstname','lastname','phonenumber','emailaddress','profilepictureid')
+        fields = ('userid','schoolid','firstname','lastname','phonenumber','emailaddress','profilepictureid')
 
 class RewardForm(forms.Form):
 

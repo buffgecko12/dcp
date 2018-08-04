@@ -10,10 +10,11 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 class MyUserManager(BaseUserManager):
 
     # Create new user
-    def create_user(self, password, username = None, usertype = None, firstname = None, lastname = None, defaultsignaturescanfile = None, phonenumber = None, emailaddress = None, userrole = None):
+    def create_user(self, password, schoolid = None, username = None, usertype = None, firstname = None, lastname = None, defaultsignaturescanfile = None, phonenumber = None, emailaddress = None, userrole = None):
  
         user = self.model(
             userid=None,
+            schoolid=schoolid,
             username=username,
             usertype=usertype,
             firstname=firstname,
@@ -48,6 +49,7 @@ class MyUserManager(BaseUserManager):
         return save_data('SP_DCPUpsertUser', 
             (
                 myUser.userid,
+                myUser.schoolid,
                 myUser.username,
                 myUser.usertype,
                 myUser.firstname,
@@ -167,6 +169,7 @@ class MyUser(AbstractBaseUser):
 
     # Define attributes (inherited class includes password + last_login fields)
     userid = models.IntegerField(primary_key=True) # Specify as PK to prevent Django from creating "id" column and for queryset returns (raw)
+    schoolid = models.IntegerField()
     username = models.CharField(max_length=50, unique=True)
     usertype = models.CharField(max_length=2, choices=usertype_choices)
     firstname = models.CharField(max_length=100)

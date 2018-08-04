@@ -11,10 +11,11 @@ MAX_BUDGET = 500000
 def normalize_field(mystring):
     return mystring.replace(" ","").lower()
 
-def create_user(usertype,firstname,lastname,userrole):
+def create_user(usertype, schoolid, firstname,lastname,userrole):
     newuser = get_user_model().objects.create_user(
         password = PASSWORD, 
         usertype = usertype,
+        schoolid = schoolid,
         firstname = firstname, 
         lastname = lastname, 
         username = normalize_field(firstname), 
@@ -67,14 +68,14 @@ def load_schools_classes():
 
 def load_users():
     admin_list = [
-        ('AD', 'Chris','Khosravi','S'),
-        ('AD', 'Assir','Sandoval','A'),
-        ('SF', 'Omaira','Rincon','U'),
-        ('SF', 'Gladys','Piracon','U'),
+        ('AD', None, 'Chris','Khosravi','S'),
+        ('AD', None, 'Assir','Sandoval','A'),
+        ('SF', GLV_SCHOOLID, 'Omaira','Rincon','U'),
+        ('SF', GLV_SCHOOLID, 'Gladys','Piracon','U'),
     ]
 
     for admin in admin_list:
-        create_user(admin[0], admin[1], admin[2], admin[3])
+        create_user(admin[0], admin[1], admin[2], admin[3], admin[4])
 
     teacher_list = [        
         ('Suleima','Ferrer',GLV_SCHOOLID,['904','905','906'],),
@@ -96,7 +97,7 @@ def load_users():
         myclassinfo = {'currentclasses':[]}
         myschoolid = teacher[2]
 
-        myuser = create_user('TR', teacher[0], teacher[1], 'U')
+        myuser = create_user('TR', myschoolid, teacher[0], teacher[1], 'U')
 
         # Convert class name list to classid list
         for myclass in teacher[3]:
@@ -193,12 +194,13 @@ def load_users():
 
     for student in student_list:
 
-        myuser = create_user('ST', student[0], student[1], 'U')
+        myuser = create_user('ST', student[2], student[0], student[1], 'U')
         myclassid = Class.objects.get_classes(schoolid = student[2], classdisplayname = student[3])[0].classid
 
         # Assign student class / info
         mystudent = Student(
             studentuserid = myuser.userid,
+            schoolid = myuser.schoolid,
             classid = myclassid,
             firstname = myuser.firstname,
             lastname = myuser.lastname,
