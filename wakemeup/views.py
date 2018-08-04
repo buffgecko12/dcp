@@ -79,7 +79,7 @@ def download_file_fromdb(request, fileid):
 
     # Allow access for "public" files (TO-DO: Update to be more inclusive)
     if(myfile.accessclass == "PB"):
-        return getHttpFileResponse(myfile.filedata, myfile.filename + myfile.fileextension, myfile.filetype)
+        return getFileResponse(filedata = myfile.filedata, filename = myfile.filename + myfile.fileextension, filesize = myfile.filesize, contenttype = myfile.filetype)
     else:
         return redirect_home()
 
