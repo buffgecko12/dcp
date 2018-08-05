@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
-from crispy_forms.bootstrap import FormActions, TabHolder, Tab, PrependedText, InlineRadios
+from crispy_forms.bootstrap import FormActions, TabHolder, Tab, PrependedText, InlineRadios, InlineCheckboxes
 from django.forms.widgets import HiddenInput
 
 from .models.environment import School, Class, Teacher, TeacherBudget, Student
@@ -197,9 +197,15 @@ class SchoolForm(forms.Form):
     datausepolicyfile = forms.FileField(label='Politica de uso de datos', required=False)
 
     # Guardian approval policy
-    guardianrequiredflag = forms.BooleanField(required=False)
-    guardianidnumberflag = forms.BooleanField(required=False)
-    guardianidissueflag = forms.BooleanField(required=False)
+    guardianapprovalpolicy = forms.MultipleChoiceField(
+        required=False, 
+        label='Politica de aprobaci' + mychr('o') + 'n de tutor',
+        choices = [
+            ("idnumber","Numero de cedula"),
+            ("idissuelocation","Lugar de expedici" + mychr('o') + "n"),
+            ("idissuedate","Fecha de expedici" + mychr('o') + "n")
+        ]
+    )
 
     # Define constructor
     def __init__ (self, *args, **kwargs):
@@ -223,10 +229,14 @@ class SchoolForm(forms.Form):
                 'address',
                 'city',
                 'department',
-                'datausepolicyfile'
+                'datausepolicyfile',
+                InlineCheckboxes('guardianapprovalpolicy'),
             ),
             getAdminFormActions()
         )
+
+    def clean_guardianapprovalpolicy(self):
+        return self.cleaned_data.get('guardianapprovalpolicy')
 
     # Specify model
     class Meta:

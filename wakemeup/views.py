@@ -815,6 +815,9 @@ def edit_object(request, objecttype, objectid):
                     if(originalpolicyfileid):
                         File(fileid=originalpolicyfileid).delete()
                 
+                # Process guardian approval policy
+                guardianapprovalpolicy = json.dumps({'requiredfields':form.cleaned_data.get('guardianapprovalpolicy')})
+                
                 myobject = objectClass(
                     schoolid = form.cleaned_data.get('schoolid'),
                     schooldisplayname = form.cleaned_data.get('schooldisplayname'),
@@ -823,9 +826,8 @@ def edit_object(request, objecttype, objectid):
                     city = form.cleaned_data.get('city'),
                     department = form.cleaned_data.get('department'),
                     datausepolicyfileid = mydatausepolicyfileid,
+                    guardianapprovalpolicy = guardianapprovalpolicy
                 )
-
-
 
             elif(objecttype == 'class'):
                 myobject = objectClass(
@@ -938,6 +940,7 @@ def edit_object(request, objecttype, objectid):
                         'city': myobject.city,
                         'department': myobject.department,
                         'datausepolicyfileid':myobject.datausepolicyfileid,
+                        'guardianapprovalpolicy':myobject.guardianapprovalpolicy.get('requiredfields') if myobject.guardianapprovalpolicy else None
                     }
                 )
             elif(objecttype == 'class'):
