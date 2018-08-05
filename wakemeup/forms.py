@@ -122,10 +122,14 @@ class SignupForm(UserCreationForm):
 
         # Teachers can only add students
         if(request.user.usertype == "TR"):
+            myschoolid = request.user.schoolid # Can only add students to their own school
+            
             self.fields['teacheruserid'].initial = request.user.userid
             self.fields['usertype'].choices = [("ST","Estudiante")]
             self.fields['classid'].required=True
-            myschoolid = request.user.schoolid # Can only add students to their own school
+            
+            self.fields['schoolid'].initial = myschoolid
+            self.fields['schoolid'].disabled = True
         else:
             myschoolid = None
             
@@ -437,8 +441,10 @@ class MyUserForm(forms.Form):
         self.helper.form_tag = False
 
         # Teachers can only add students
-        if(not request.user.is_admin):
+        if(not request.user.is_admin()):
             myschoolid = request.user.schoolid # Can only add students to their own school
+            self.fields['schoolid'].initial = myschoolid
+            self.fields['schoolid'].disabled = True
         else:
             myschoolid = None
             
