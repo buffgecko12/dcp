@@ -172,7 +172,7 @@
 		    $('[name=submit_acceptcontract]').click(function() {
 				var partyuserid = $(this.form).find('input[name=partyuserid]').val()
 				var contractid = $(this.form).find('input[name=contractid]').val()
-				var preferredgoalid = $(this.form).find('input[name=preferredgoalid]').val()
+				var preferredgoalid = $(this.form).find('input[name=preferredgoalid]:checked').val()
 
 				// Populate and show modal
 	            $("#mymodaldiv").html(""); // Clear modal div of any previous contents
