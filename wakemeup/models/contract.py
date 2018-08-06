@@ -141,7 +141,8 @@ class ContractPartyManager(models.Manager):
                 'C', 
                 MyContractParty.preferredgoalid,
                 MyContractParty.partyapprovalsignature, 
-                MyContractParty.partylogonuserid
+                MyContractParty.partylogonuserid,
+                MyContractParty.guardianapprovalinfo,
             )
         )[0]
 
@@ -280,6 +281,7 @@ class ContractParty(models.Model):
     # Get approval attributes
     preferredgoalid = models.IntegerField()
     partyapprovalsignature = models.BinaryField() # signaturescanfile
+    guardianapprovalinfo = JSONField()
     partyapprovalts = models.DateTimeField() # approvalts
     partylogonuserid = models.IntegerField() # logonuserid
     

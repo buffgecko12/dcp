@@ -1,7 +1,8 @@
 {% if record.guardianapprovalpolicy.requiredfields %}
 	<div class="text-nowrap">
 		{% for field in record.guardianapprovalpolicy.requiredfields %}- 
-			{% if field == "idnumber" %}Numero de cedula
+			{% if field == "idfullname" %}Nombre de tutor
+			{% elif field == "idnumber" %}Numero de cedula
 			{% elif field == "idissuelocation" %}Lugar de expedici&#243;n
 			{% elif field == "idissuedate" %}Fecha de expedici&#243;n
 			{% endif %}<br>

@@ -201,6 +201,7 @@ class SchoolForm(forms.Form):
         required=False, 
         label='Politica de aprobaci' + mychr('o') + 'n de tutor',
         choices = [
+            ("idfullname","Nombre de tutor"),
             ("idnumber","Numero de cedula"),
             ("idissuelocation","Lugar de expedici" + mychr('o') + "n"),
             ("idissuedate","Fecha de expedici" + mychr('o') + "n")
@@ -617,32 +618,70 @@ class ContractPartyAcceptForm(forms.Form):
     contractid = forms.IntegerField(widget=forms.HiddenInput)
     partyuserid = forms.IntegerField(widget=forms.HiddenInput)
     preferredgoalid = forms.IntegerField(widget=forms.HiddenInput)
-    partyapprovalsignature = forms.FileField(label='Firma', required=False) # Approval signature scan file
+#     partyapprovalsignature = forms.FileField(label='Firma', required=False) # Approval signature scan file
 
     def __init__ (self, *args, **kwargs):
 
+        request = kwargs.pop('request')
+        contractid = kwargs.pop('contractid')
+
         # Call base class constructor (i.e. Teacher Form)
         super(ContractPartyAcceptForm, self).__init__(*args, **kwargs)
-        
+
         # Set form helper properties
         self.helper = FormHelper()
-        setFormHelper(self.helper)
-        
+        setFormHelper(self.helper, label_class = 'col-sm-5', field_class = 'col-sm-7')
+
         # Set form layout
         self.helper.layout = Layout(
+            HTML('<legend>Acuerdo</legend><hr class="separator">'),
             'contractid',
             'preferredgoalid',
             'partyuserid',
-            'partyapprovalsignature',
-            FormActions(
-                Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='submit_cancel'),
-                Submit('submit_next','Enviar', css_id='submit_next'),
-            )
         )
+        
+        # Get additional fields per school's guardian approval policy
+        myclass = Class.objects.get(classid=Contract.objects.get(contractid=contractid).classid)
 
+        if(myclass):
+            myschool = School.objects.get(schoolid=myclass.schoolid)
+            
+            if(myschool.guardianapprovalpolicy):
+                approvalfields = myschool.guardianapprovalpolicy.get('requiredfields')
+                
+                if(approvalfields):
+                    myfieldset = Fieldset('Aprobaci' + mychr('o') + 'n de tutor')
+                    
+                    # Create fields
+                    for field in approvalfields:
+                        if(field == "idfullname"):
+                            self.fields['idfullname'] = forms.CharField(max_length=250, label='Nombre de tutor', widget=forms.TextInput())
+                        elif(field == "idnumber"):
+                            self.fields['idnumber'] = forms.IntegerField(label='No. de cedula', widget=forms.TextInput())
+                        elif(field == "idissuelocation"):
+                            self.fields['idissuelocation'] = forms.CharField(max_length=250, label='Lugar de expedici' + mychr('o') + 'n')
+                        elif(field == "idissuedate"):
+                            self.fields['idissuedate'] = forms.CharField(
+                                label='Fecha de expedici' + mychr('o') + 'n', 
+                                widget=forms.DateInput(attrs={'class':'dateinputfield','placeholder':'DD/MM/YYYY'})
+                            )
+
+                        # Add field to fieldset
+                        myfieldset.append(field)
+    
+                    # Add fieldset to layout
+                    self.helper.layout.append(myfieldset)
+                    self.helper.layout.append(HTML('<hr class="separator">'))
+
+        # Add admin buttons
+        self.helper.layout.append(
+            HTML('Yo, {{user.firstname }} {{ user.lastname }}, acepto los terminos del contrato como escrito.  Una vez enviada, mi elecci&#243;n no se puede cambiar.<br><br>')
+        )
+        self.helper.layout.append(getAdminFormActions())
+        
     class Meta:
         model = Contract
-        fields = ('contractid','preferredgoalid','partyuserid','partyapprovalsignature')
+        fields = ('contractid','preferredgoalid','partyuserid')
 
 # Main contract goal form
 class ContractGoalsForm(forms.Form):

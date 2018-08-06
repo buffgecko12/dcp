@@ -59,7 +59,7 @@
 			<div class="col"><small><strong>Aceptado</strong></small></div>
 		</div>
 		{% for party in contract.partyuserinfo.currentparties %}
-			<form action="{% url 'wakemeup:contract_accept' %}" method="post" name="partyForm_{{ party.partyuserid }}">{% csrf_token %}
+			<form action="" method="post" name="partyForm_{{ party.partyuserid }}">{% csrf_token %}
 				<div class="row">
 					<div class="col form-group">
 						<small>{{ party.firstname }} {{ party.lastname }}</small>
@@ -85,7 +85,7 @@
 						<small><i>
 							{% if not party.preferredgoalid %}
 								{% if party.partyuserid == request.user.userid or request.user.is_admin %}
-									<input type="submit" class="btn btn-xs btn-primary" name="submit" id="submit_{{party.partyuserid}}" value="Aceptar" disabled/>
+									<input type="button" class="btn btn-xs btn-primary" name="submit_acceptcontract" id="submit_{{party.partyuserid}}" value="Aceptar" disabled/>
 								{% else %}
 								N/A
 								{% endif %}
@@ -126,13 +126,59 @@
 			</div>
 		{% endfor %}
 	</div>
+	
+	<!-- Accept contract modal -->
+	<div class="modal fade" id="acceptContractModal" tabindex="-1" role="dialog">
+	  <div class="modal-dialog modal-dialog-centered" role="document">
+	    <div class="modal-content">
+	      <div class="modal-body">
+			<form method="post" id="acceptContractForm" novalidate name="acceptContractForm"
+ 				data-acceptcontract-url="{% url 'wakemeup:contract_accept' contractid=contract.contractid %}"
+				>
+				<div id="mymodaldiv"></div>
+			</form>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+{% endblock %}
 
+{% block bodyimport %}
+	<!-- Accept Contract Modal -->
+	<script src="{% static 'wakemeup/js/contract/acceptcontractmodal.js' %}"></script>
+	
 	<script>
-		$('input[type=radio][name=preferredgoalid]').change(function() {
-			formname = $(this.form).attr('name')
-			var partyuserid = formname.substring(10); // Extract partyuserid from input field name
-			var submitbutton = document.getElementById("submit_" + partyuserid) // Determine which submit button to reference
-			submitbutton.disabled = false // Enable submit
-		});		
+		
+		// Accept Contract Modal - Hide
+		$('#acceptContractModal').on('hidden.bs.modal', function (e) {
+			document.getElementById("acceptContractForm").reset(); // Reset form fields
+		})	
+	
+		// Accept Contract Modal - Submit
+		$("#acceptContractForm").submit(function(e) {
+			update_acceptcontractform("submit")
+			return false // Ignore default submit behavior
+		});
+		
+		$(document).ready(function(){
+			// Edit Contract - Enable "Accept Contract" button
+			$('input[type=radio][name=preferredgoalid]').change(function() {
+				var partyuserid = $(this.form).find('input[name=partyuserid]').val()
+				var submitbutton = document.getElementById("submit_" + partyuserid) // Determine which submit button to enable
+				submitbutton.disabled = false // Enable submit
+			});
+
+			// Accept Contract Modal - Show
+		    $('[name=submit_acceptcontract]').click(function() {
+				var partyuserid = $(this.form).find('input[name=partyuserid]').val()
+				var contractid = $(this.form).find('input[name=contractid]').val()
+				var preferredgoalid = $(this.form).find('input[name=preferredgoalid]').val()
+
+				// Populate and show modal
+	            $("#mymodaldiv").html(""); // Clear modal div of any previous contents
+				update_acceptcontractform("new", partyuserid, contractid, preferredgoalid) // Update modal with new form
+				$('#acceptContractModal').modal('show') 
+		    });
+		});
 	</script>
 {% endblock %}

@@ -787,7 +787,7 @@ def edit_object(request, objecttype, objectid):
                 # Capture data use policy file info
                 originalpolicyfileid = request.POST.get("datausepolicyfileid") # Read in original fileid
                 
-                mydatausepolicyfileid = originalpolicyfileid
+                mydatausepolicyfileid = originalpolicyfileid or None
                 mydatausepolicyfile = request.FILES.get('datausepolicyfile')
 
                 # New file was uploaded
@@ -1024,29 +1024,37 @@ def contract_detail(request, contractid):
     return redirect_home()
         
 @check_permissions
-def contract_accept(request):
+def contract_accept(request, contractid):
 
     if(request.method == "POST"):
-        form = ContractPartyAcceptForm(request.POST,request.FILES)
+        form = ContractPartyAcceptForm(request.POST,request.FILES, request=request, contractid=contractid)
 
         if(form.is_valid()):
 
-            mydatafile = convert_form_binary_to_db(request.FILES.get('partyapprovalsignature'))
+#             mydatafile = convert_form_binary_to_db(request.FILES.get('partyapprovalsignature'))
             mycontractid = form.cleaned_data.get('contractid')
             mycontract = Contract.objects.get(contractid=mycontractid) # Used to generate e-mails
+            
+            # Process guardian approval info
+            myguardianapprovalinfo = {'requiredfields':[]}
+            
+            for field in ('idfullname','idnumber','idissuedate','idissuelocation'):
+                if(form.cleaned_data.get(field)):
+                    myguardianapprovalinfo['requiredfields'].append({field:form.cleaned_data.get(field)})
             
             # Create new contractparty object
             mycontractparty = ContractParty(
                 contractid = mycontractid,
                 partyuserid = form.cleaned_data.get('partyuserid'),
                 preferredgoalid = form.cleaned_data.get('preferredgoalid'),
-                partyapprovalsignature = psycopg2.Binary(mydatafile),
+#                 partyapprovalsignature = psycopg2.Binary(mydatafile),
                 partylogonuserid = request.user.userid,
+                guardianapprovalinfo = json.dumps(myguardianapprovalinfo)
             )
-            
-            # Accept contract (creates "accept contract" event --> reputation, badge, notification)
-            approveresult = mycontractparty.approve_contract()
 
+            # Accept contract
+            approveresult = mycontractparty.approve_contract()
+            
             # Send e-mails if contract approved by all parties
             if(approveresult):
                 
@@ -1058,9 +1066,16 @@ def contract_accept(request):
                 send_email(subject=EMAIL_SUBJECT, body=EMAIL_BODY, to_list=mycontract.get_emails("teacher"))
             
             # Redirect to contract list
-            return redirect('wakemeup:contract_list')
+            return HttpResponse("Contrato ha sido aceptado.")
     else:
-        return redirect_home()
+        initial = {
+            'contractid': request.GET.get('contractid'),
+            'partyuserid': request.GET.get('partyuserid'),
+            'preferredgoalid': request.GET.get('preferredgoalid')
+        }
+        form = ContractPartyAcceptForm(initial=initial, request=request, contractid=contractid)
+
+    return render(request, 'wakemeup/contract/approve_contract.html', {'form': form})
 
 @check_permissions
 def contract_list(request):
