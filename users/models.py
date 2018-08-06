@@ -87,6 +87,22 @@ class MyUserManager(BaseUserManager):
     def add_notification(self, myUser, notificationid, contractid):
         return save_data('SP_DCPUpsertUserNotification', (myUser.userid, notificationid, contractid))
 
+    def get_profile_picture_choices(self, userid):
+        pictures = get_data(self, 'SP_DCPGetUserProfilePicture(%s)', (userid,))
+
+        # Add default "N/A" option
+        picture_choices = [(0,None)]
+        
+        for mypicture in pictures:
+            picture_choices.append(
+                (
+                    str(mypicture.profilepictureid), 
+                    str(mypicture.profilepicturefilepath + mypicture.profilepicturefilename)
+                )
+            )
+        
+        return picture_choices
+    
 class UserReputationEventManager(models.Manager):
     
     def all(self):
@@ -132,23 +148,6 @@ class UserBadgeManager(models.Manager):
     def get_badges(self, userid = None, badgeid = None ):
         return get_data(self, 'SP_DCPGetUserBadge(%s,%s)', (userid, badgeid,))
  
-    def badge_profile_picture_choices(self, userid):
-       badges = self.get_badges(userid=userid)
-
-       # Add default "N/A" option
-       picture_choices = [(0,None)]
-
-       for mybadge in badges:
-           if(mybadge.profilepictureid):
-               picture_choices.append(
-                   (
-                   str(mybadge.profilepictureid), 
-                   str(mybadge.profilepicturefilepath + mybadge.profilepicturefilename)
-                   )
-               )
-    
-       return(picture_choices)
-    
     def save(self, myUserBadge):
         pass # Handled by user-level method
         

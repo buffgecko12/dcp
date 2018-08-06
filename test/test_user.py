@@ -103,6 +103,10 @@ class testUser(unittest.TestCase):
         self.assertTrue(newuser.is_admin())
         self.assertTrue(newuser.is_superuser())
 
+        # Test default profile picture inserts
+        myprofilepictures = get_user_model().objects.get_profile_picture_choices(newuser.userid)
+        self.assertIsNotNone(myprofilepictures)
+
         # Delete user
         newuser.delete()
 

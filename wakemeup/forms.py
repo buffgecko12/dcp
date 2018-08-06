@@ -460,7 +460,7 @@ class MyUserForm(forms.Form):
             myschoolid = None
             
         self.fields['schoolid'].choices = [("0",'-- Escoger colegio --')] + School.objects.school_choices(schoolid=myschoolid)
-        self.fields['profilepictureid'].choices=UserBadge.objects.badge_profile_picture_choices(userid=request.user.userid)
+        self.fields['profilepictureid'].choices=get_user_model().objects.get_profile_picture_choices(userid=request.user.userid)
         
         # Set form layout
         self.helper.layout = Layout(
@@ -472,7 +472,6 @@ class MyUserForm(forms.Form):
             'phonenumber',
 #             'defaultsignaturescanfile',
             InlineRadios('profilepictureid', template = 'wakemeup/admin/profilepicture.html'),
-#             InlineRadios('profilepictureid', template = 'wakemeup/admin/profilepicture.html'),
             getAdminFormActions()
         )
 
