@@ -230,6 +230,6 @@ class UserBadgesTable(tables.Table):
     class Meta:
         model = UserBadge
         sequence = ('badgeachievedts', 'mybadge', 'badgedisplayname', 'badgedescription')
-        exclude = ('badgeid','userid','badgeshortname', 'badgelevel', 'profilepictureid', 'profilepicturefilepath','profilepicturefilename' )
+        exclude = ('badgeid','userid','badgeshortname', 'badgelevel', 'profilepictureid', 'profilepicturefilepath', 'profilepicturefilename')
         empty_text = EMPTY_TEXT
         row_attrs={"class":"small"}
