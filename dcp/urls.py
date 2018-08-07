@@ -15,8 +15,9 @@ Including another URLconf
 """
 
 from django.conf.urls import url, include
-
 from django.contrib.auth import views as auth_views
+from django.views.generic import RedirectView
+
 from wakemeup.forms import LoginForm
 
 urlpatterns = [
@@ -28,4 +29,5 @@ urlpatterns = [
         )
         , name="login"),
     url(r'^', include('django.contrib.auth.urls')), # Auth views (login, logout, reset password)
+    url(r'^.*$', RedirectView.as_view(pattern_name='wakemeup:index')), # Redirect all other URLs to "Wake Me Up" homepage
 ]
