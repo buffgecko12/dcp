@@ -208,9 +208,15 @@ class testContracts(unittest.TestCase):
         self.assertEqual(mycontractgoal.difficultylevel, "D")
 
         # Create new goal
-        newcontractgoal = ContractGoal(newcontract.contractid, None, 'M', 'Manual goal', None, None, 
-                                       json.dumps({"currentrewards" : [{"rewardid" : newreward.rewardid}]})
-                                   )
+        newcontractgoal = ContractGoal(
+            contractid=newcontract.contractid, 
+            goalid=None, 
+            difficultylevel='M', 
+            goaldescription='Manual goal', 
+            acceptedflag=None,
+            rewardinfo = json.dumps({"currentrewards" : [{"rewardid" : newreward.rewardid}]}),
+            maxnumrewards = 0
+        )
 
         newcontractgoalid = newcontractgoal.save()
         newcontractgoal = ContractGoal.objects.get(contractid = newcontract.contractid, goalid = newcontractgoalid)

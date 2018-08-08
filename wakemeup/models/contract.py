@@ -89,9 +89,9 @@ class ContractGoalManager(models.Manager):
                 myContractGoal.goalid, 
                 myContractGoal.difficultylevel,
                 myContractGoal.goaldescription,
-                myContractGoal.achievedflag,
                 myContractGoal.acceptedflag,
                 myContractGoal.rewardinfo,
+                myContractGoal.maxnumrewards,
             )
         )[0]
 
@@ -235,8 +235,8 @@ class ContractGoal(models.Model):
     difficultylevel = models.CharField(max_length=1)
     goaldescription = models.CharField(max_length=500)
     acceptedflag = models.NullBooleanField()
-    achievedflag = models.NullBooleanField()
     rewardinfo = JSONField()
+    maxnumrewards = models.IntegerField()
 
     class Meta:
         managed = False

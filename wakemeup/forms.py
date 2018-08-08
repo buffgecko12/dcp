@@ -9,7 +9,7 @@ from crispy_forms.bootstrap import FormActions, TabHolder, Tab, PrependedText, I
 from django.forms.widgets import HiddenInput
 
 from .models.environment import School, Class, Teacher, TeacherBudget, Student
-from .models.contract import Contract, ContractGoal, ContractInfo, Reward
+from .models.contract import Contract, ContractInfo, Reward, ContractParty
 
 from django.contrib.postgres.forms import RangeWidget
 
@@ -80,14 +80,14 @@ class LoginForm(AuthenticationForm):
 
         # Set helper properties
         self.helper = FormHelper() 
-        setFormHelper(self.helper)
+        setFormHelper(self.helper, label_class = 'col-sm-4', field_class = 'col-sm-8')
         
         # Set form layout
         self.helper.layout = Layout(
             Fieldset(
                 'Iniciar sesi&#243;n',
-                'username',
-                'password'
+                Field('username',css_class='w-75'),
+                Field('password',css_class='w-75'),
             ),
             FormActions(
                 Submit('login', 'Iniciar', css_class='btn-primary'),
@@ -712,7 +712,7 @@ class ContractGoalsForm(forms.Form):
 
     goaldescription_label = 'Descripci' + mychr('o') + 'n<br><small><i>Una descripci' + mychr('o') + 'n detallada con instrucciones claras para c' + chr(243) + 'mo medir ' + chr(233) + 'xito</i></small>'
     rewardinfo_label = 'Opciones de premio<small><i> <br>Al cumplir con ' + chr(233) + 'xito la meta, cada participante podr' + chr(225) + ' escoger un premio de esta lista</i></small>'
-#     rewardinfo_label = 'Opciones de premio<small><i> <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addRewardModal">A' + chr(241) + 'adir</button><br>Al cumplir con ' + chr(233) + 'xito la meta, cada participante podr' + chr(225) + ' escoger un premio de esta lista</i></small>'
+    maxnumreward_label = 'Max. numero de premios<small><i> <br>0 = sin l' + mychr('i') + 'mite m' + mychr('a') + 'ximo</i></small>'
 
     # Fields used for javascript and form navigation between pages
     contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)    
@@ -722,14 +722,44 @@ class ContractGoalsForm(forms.Form):
     e_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
     e_goaldescription = forms.CharField(max_length=500,label=goaldescription_label, widget=forms.Textarea(attrs={'rows':4}), required=False)
     e_rewardinfo = forms.CharField(label=rewardinfo_label, widget=forms.SelectMultiple, required=False)
+    e_maxnumrewards = forms.IntegerField(label=maxnumreward_label, required=False)
 
     m_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
     m_goaldescription = forms.CharField(max_length=500,label=goaldescription_label, widget=forms.Textarea(attrs={'rows':4}), required=False)
     m_rewardinfo = forms.CharField(label=rewardinfo_label, widget=forms.SelectMultiple, required=False)
+    m_maxnumrewards = forms.IntegerField(label=maxnumreward_label, required=False)
 
     d_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
     d_goaldescription = forms.CharField(max_length=500,label=goaldescription_label, widget=forms.Textarea(attrs={'rows':4}), required=False)
     d_rewardinfo = forms.CharField(label=rewardinfo_label, widget=forms.SelectMultiple, required=False)
+    d_maxnumrewards = forms.IntegerField(label=maxnumreward_label, required=False)
+
+    def clean_e_maxnumrewards(self):
+        mynumrewards = int(self.cleaned_data.get('e_maxnumrewards') or 0)
+        mycontractpartycount = self.cleaned_data.get('numparticipants')
+        
+        if not (mynumrewards > mycontractpartycount):
+            return self.cleaned_data.get('e_maxnumrewards')
+        else:
+            raise forms.ValidationError('El numero de premios (' + str(mynumrewards) + ') no puede superar el numero de participantes (' + str(mycontractpartycount) + ')')
+
+    def clean_m_maxnumrewards(self):
+        mynumrewards = int(self.cleaned_data.get('m_maxnumrewards') or 0)
+        mycontractpartycount = self.cleaned_data.get('numparticipants')
+        
+        if not (mynumrewards > mycontractpartycount):
+            return self.cleaned_data.get('m_maxnumrewards')
+        else:
+            raise forms.ValidationError('El numero de premios (' + str(mynumrewards) + ') no puede superar el numero de participantes (' + str(mycontractpartycount) + ')')
+
+    def clean_d_maxnumrewards(self):
+        mynumrewards = int(self.cleaned_data.get('d_maxnumrewards') or 0)
+        mycontractpartycount = self.cleaned_data.get('numparticipants')
+        
+        if not (mynumrewards > mycontractpartycount):
+            return self.cleaned_data.get('d_maxnumrewards')
+        else:
+            raise forms.ValidationError('El numero de premios (' + str(mynumrewards) + ') no puede superar el numero de participantes (' + str(mycontractpartycount) + ')')
 
     def __init__ (self, *args, **kwargs):
 
@@ -746,7 +776,16 @@ class ContractGoalsForm(forms.Form):
         self.helper.form_tag = False # Disable auto-generation of <form> tags
         self.fields['initialbudget'].initial = TeacherBudget.objects.get(mycontractinfo.teacheruserid).availablebudget
         self.fields['numparticipants'].initial = mycontractinfo.numparticipants # Get number of participants (used to calculate budget)
-        
+
+        # Get and set max number of rewards
+        mycontractpartycount = mycontractinfo.numparticipants
+        maxnumrewardswidget = forms.TextInput(attrs={'min':0,'max': mycontractpartycount,'type': 'number'})
+
+        self.fields['e_maxnumrewards'].widget=maxnumrewardswidget
+        self.fields['m_maxnumrewards'].widget=maxnumrewardswidget
+        self.fields['d_maxnumrewards'].widget=maxnumrewardswidget
+
+            
         # Set form layout
         self.helper.layout = Layout(
             'contractid',
@@ -758,18 +797,21 @@ class ContractGoalsForm(forms.Form):
                     'e_goalid',
                     'e_goaldescription',
                     'e_rewardinfo',
+                    Field('e_maxnumrewards', css_class='w-25'),
                 ),
                 Tab(
                     'Media',
                     'm_goalid',
                     'm_goaldescription',
                     'm_rewardinfo',
+                    Field('m_maxnumrewards', css_class='w-25'),
                 ),
                 Tab(
                     'Dif' + mychr('i') + 'cil',
                     'd_goalid',
                     'd_goaldescription',
                     'd_rewardinfo',
+                    Field('d_maxnumrewards', css_class='w-25'),
                 )
             ),
             FormActions(
