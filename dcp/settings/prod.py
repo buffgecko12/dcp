@@ -2,7 +2,7 @@ from .base import *
 import django_heroku
 
 DEBUG = False
-
+SECURE_SSL_REDIRECT = True
 # Configure Django App for Heroku (DATABASE_URL, ALLOWED_HOSTS, WhiteNoise Logging, Heroku CI)
 django_heroku.settings(locals())
 
