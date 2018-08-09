@@ -729,7 +729,7 @@ class ContractGoalsForm(forms.Form):
 
     goaldescription_label = 'Descripci' + mychr('o') + 'n<br><small><i>Una descripci' + mychr('o') + 'n detallada con instrucciones claras para c' + chr(243) + 'mo medir ' + chr(233) + 'xito</i></small>'
     rewardinfo_label = 'Opciones de premio<small><i> <br>Al cumplir con ' + chr(233) + 'xito la meta, cada participante podr' + chr(225) + ' escoger un premio de esta lista</i></small>'
-    maxnumreward_label = 'Max. numero de premios<small><i> <br>0 = sin l' + mychr('i') + 'mite m' + mychr('a') + 'ximo</i></small>'
+    maxnumreward_label = 'Max. n' + mychr('u') + 'mero de premios<small><i> <br>El m' + mychr('a') + 'ximo n'  + mychr('u') + 'mero de premios disponible para lograr esta meta (0 = sin l' + mychr('i') + 'mite m' + mychr('a') + 'ximo)</i></small>'
 
     # Fields used for javascript and form navigation between pages
     contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)    
