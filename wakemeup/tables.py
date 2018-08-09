@@ -93,8 +93,8 @@ class TeachersTable(tables.Table):
     class Meta:
         model = Teacher
         empty_text = EMPTY_TEXT
-        exclude = ('teacheruserid','reputationvalue','schoolid')
-        sequence = ('firstname','lastname','emailaddress','phonenumber','defaultsignaturescanfile','schooldisplayname','classinfo')
+        exclude = ('teacheruserid','reputationvalue','schoolid','profilepictureid','defaultsignaturescanfile','phonenumber')
+        sequence = ('firstname','lastname','emailaddress','schooldisplayname','classinfo')
 
 class StudentsTable(tables.Table):
 
@@ -123,8 +123,8 @@ class StudentsTable(tables.Table):
 
     class Meta:
         model = Student
-        exclude = ('studentuserid','reputationvalue','schoolid','classid')
-        sequence = ('firstname','lastname','emailaddress','phonenumber','defaultsignaturescanfile','schooldisplayname')
+        exclude = ('studentuserid','reputationvalue','schoolid','classid','profilepictureid','defaultsignaturescanfile','phonenumber')
+        sequence = ('firstname','lastname','emailaddress','schooldisplayname')
         empty_text = EMPTY_TEXT
 
 class RewardsTable(tables.Table):

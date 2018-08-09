@@ -126,6 +126,8 @@ class SignupForm(UserCreationForm):
             
             self.fields['teacheruserid'].initial = request.user.userid
             self.fields['usertype'].choices = [("ST","Estudiante")]
+            self.fields['usertype'].initial = "ST"
+            self.fields['usertype'].disabled = True
             self.fields['classid'].required=True
             
             self.fields['schoolid'].initial = myschoolid
@@ -322,10 +324,10 @@ class TeacherForm(forms.Form):
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
-    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)
+#    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
-    defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
-    profilepictureid = forms.IntegerField(label='Avatar', required=False)
+#     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
+#     profilepictureid = forms.IntegerField(label='Avatar', required=False)
 
     # Make sure email address does not already exist
     def clean_emailaddress(self):
@@ -356,8 +358,8 @@ class TeacherForm(forms.Form):
                 'firstname',
                 'lastname',
                 'emailaddress',
-                'phonenumber',
-                'profilepictureid',
+ #               'phonenumber',
+#                 'profilepictureid',
                 'defaultsignaturescanfile',
             ),
             getAdminFormActions()
@@ -379,7 +381,7 @@ class StudentForm(forms.Form):
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
-    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
+#    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
 #     profilepictureid = forms.IntegerField(label='Avatar', required=False)
@@ -408,8 +410,8 @@ class StudentForm(forms.Form):
                 'firstname',
                 'lastname',
                 'emailaddress',
-                'phonenumber',
-                'profilepictureid',
+#                'phonenumber',
+#                 'profilepictureid',
                 'defaultsignaturescanfile',
             ),
             getAdminFormActions()
@@ -422,18 +424,19 @@ class StudentForm(forms.Form):
     # Specify model
     class Meta:
         model = Student
-        fields = ('studentuserid','schoolid','classid','firstname','lastname','phonenumber','emailaddress', 'profilepictureid')
+        fields = ('studentuserid','schoolid','classid','firstname','lastname','emailaddress')
 
 # TO-DO: Combine this with TeacherForm & StudentForm
 class MyUserForm(forms.Form):
 
     # Define form fields
+    username = forms.CharField(label="Nombre de usuario", max_length=50)
     userid = forms.IntegerField(widget=forms.HiddenInput)
     schoolid = forms.ChoiceField(label='Colegio')
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
-    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
+#    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
 #     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
     profilepictureid = forms.IntegerField(label='Avatar', required=False)
@@ -451,11 +454,24 @@ class MyUserForm(forms.Form):
         setFormHelper(self.helper)
         self.helper.form_tag = False
 
+        # Display username, but don't allow edits
+        self.fields['username'].initial=request.user.username
+        self.fields['username'].disabled=True
+
         # Teachers can only add students
         if(not request.user.is_admin()):
             myschoolid = request.user.schoolid # Can only add students to their own school
             self.fields['schoolid'].initial = myschoolid
             self.fields['schoolid'].disabled = True
+            self.fields['schoolid'].widget=forms.HiddenInput()
+            
+            # Disable additional fields for students
+            if(request.user.usertype == "ST"):
+                self.fields['firstname'].initial = request.user.firstname
+                self.fields['firstname'].disabled = True
+                
+                self.fields['lastname'].initial = request.user.lastname
+                self.fields['lastname'].disabled = True
         else:
             myschoolid = None
             
@@ -465,11 +481,12 @@ class MyUserForm(forms.Form):
         # Set form layout
         self.helper.layout = Layout(
             'userid',
+            'username',
             'schoolid',
             'firstname',
             'lastname',
             'emailaddress',
-            'phonenumber',
+#            'phonenumber',
 #             'defaultsignaturescanfile',
             InlineRadios('profilepictureid', template = 'wakemeup/admin/profilepicture.html'),
             getAdminFormActions()
@@ -482,7 +499,7 @@ class MyUserForm(forms.Form):
     # Specify model
     class Meta:
         model = get_user_model()
-        fields = ('userid','schoolid','firstname','lastname','phonenumber','emailaddress','profilepictureid')
+        fields = ('userid','username','schoolid','firstname','lastname','emailaddress','profilepictureid')
 
 class RewardForm(forms.Form):
 
