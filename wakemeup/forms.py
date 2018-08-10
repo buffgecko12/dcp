@@ -61,9 +61,14 @@ def setFormHelper(
     myFormHelper.label_class = label_class
     myFormHelper.field_class = field_class
     
-def getAdminFormActions():
+def getAdminFormActions(cancel_url = 'wakemeup:index', cancel_context="", cancel_type="link"):
+        
     return FormActions(
-        Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='cancel'), # Don't change the "cancel" id, it's used by javascript (i.e. reward modal)
+        # Cancel button (don't change the "cancel" id; used by javascript)
+        HTML("""<a class="btn btn-secondary" href="{% url '""" + cancel_url + """' """ + cancel_context + """ %}">Cancelar</a> """) if cancel_type == "link" else 
+        Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='cancel'),
+
+        # Submit button
         Submit('submit_next','Enviar', css_id='next'),
     )
 
@@ -235,7 +240,7 @@ class SchoolForm(forms.Form):
                 'datausepolicyfile',
                 InlineCheckboxes('guardianapprovalpolicy'),
             ),
-            getAdminFormActions()
+            getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="school"')
         )
 
     def clean_guardianapprovalpolicy(self):
@@ -295,7 +300,7 @@ class ClassForm(forms.Form):
                 'classdisplayname',
                 'students',
             ),
-            getAdminFormActions()
+            getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="class"')
         )
 
     # Specify model
@@ -362,7 +367,7 @@ class TeacherForm(forms.Form):
 #                 'profilepictureid',
                 'defaultsignaturescanfile',
             ),
-            getAdminFormActions()
+            getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="teacher"')
         )
     
     # Specify model
@@ -414,7 +419,7 @@ class StudentForm(forms.Form):
 #                 'profilepictureid',
                 'defaultsignaturescanfile',
             ),
-            getAdminFormActions()
+            getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="student"')
         )
 
     # Make sure email address does not already exist
@@ -529,7 +534,7 @@ class RewardForm(forms.Form):
                 'rewarddescription',
                 PrependedText('rewardvalue', '$'),
             ),
-            getAdminFormActions()
+            getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="reward"')
         )
 
     # Specify model
@@ -617,7 +622,7 @@ class ContractForm(forms.Form):
                 'revisiondeadlinets',
             ),
             FormActions(
-                Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='submit_cancel'),
+                HTML("""<a class="btn btn-secondary" id="submit_cancel" href="{% url 'wakemeup:index' %}">Cancelar</a> """),
                 Submit('submit_next','Siguiente', css_id='submit_next'),
                 Div(
                     HTML('<span id="id_availablebudget"></span>'), 
@@ -694,7 +699,7 @@ class ContractPartyAcceptForm(forms.Form):
         self.helper.layout.append(
             HTML('Yo, {{user.firstname }} {{ user.lastname }}, acepto los terminos del contrato como escrito.  Una vez enviada, mi elecci&#243;n no se puede cambiar.<br><br>')
         )
-        self.helper.layout.append(getAdminFormActions())
+        self.helper.layout.append(getAdminFormActions(cancel_type="button"))
         
     class Meta:
         model = Contract
@@ -836,7 +841,7 @@ class ContractGoalsForm(forms.Form):
                 )
             ),
             FormActions(
-                Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='submit_cancel'),
+                HTML("""<a class="btn btn-secondary" id="submit_cancel" href="{% url 'wakemeup:index' %}">Cancelar</a> """),
                 Submit('submit_next','Siguiente', css_id='submit_next'),
                 Submit('submit_previous','Previo', css_class='btn btn-info', css_id='submit_previous'),
                 Div(
@@ -865,7 +870,7 @@ class ContractSubmitForm(forms.Form):
         self.helper.layout = Layout(
             'contractid',
             FormActions(
-                Submit('submit_cancel','Cancelar',css_class='btn btn-secondary'),
+                HTML("""<a class="btn btn-secondary" href="{% url 'wakemeup:index' %}">Cancelar</a> """),
                 Submit('submit_next','Enviar'),
                 Submit('submit_previous','Previo',css_class='btn btn-info'),
             )

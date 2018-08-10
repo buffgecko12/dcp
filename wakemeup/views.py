@@ -365,10 +365,6 @@ def useragreement(request):
 def myaccount(request):
     if request.method == "POST":
         
-        # Go to homepage if user clicked "cancel" button        
-        if('submit_cancel' in request.POST):
-            return redirect_home()
-
         # Bind form data
         form = MyUserForm(request.POST, request.FILES, request=request)
 
@@ -427,10 +423,6 @@ def create_contract(request, contractid):
     # SAVE CONTRACT
     if request.method == "POST" and 'submit_other' not in request.POST: # Ignore submits from other forms
 
-        # Go to homepage if user clicked "cancel" button      
-        if('submit_cancel' in request.POST):
-            return redirect_home()
-        
         # Create form instance (bind data to form)
         form = ContractForm(request.POST, request=request, contractid=contractid)
 
@@ -523,10 +515,6 @@ def create_contract_goals(request, contractid):
     # SAVE FORM
     if request.method == "POST":
 
-        # Go to homepage if user clicked "cancel" button        
-        if('submit_cancel' in request.POST):
-            return redirect_home()
-        
         # Create form instance (bind data to form)
         form = ContractGoalsForm(request.POST, contractid=contractid)
 
@@ -641,11 +629,8 @@ def create_contract_submit(request, contractid):
 
     if(request.method == "POST"):
 
-        # Go to homepage if user clicked "cancel" button        
-        if('submit_cancel' in request.POST):
-            return redirect_home()
         # Go to previous page
-        elif('submit_previous' in request.POST):
+        if('submit_previous' in request.POST):
             return redirect('wakemeup:create_contract_goals',contractid = contractid)
         
         form = ContractSubmitForm(request.POST, contractid=contractid)
@@ -789,10 +774,6 @@ def edit_object(request, objecttype, objectid):
     # PROCESS FORM
     if request.method == 'POST' and 'submit_other' not in request.POST: # Ignore submits from other forms
 
-        # Go to main admin page if user clicked "cancel" button        
-        if('submit_cancel' in request.POST):
-            return redirect('wakemeup:admin_list',objecttype = objecttype)
-        
         # Create form instance (bind data to form)
         form = objectForm(request.POST, request.FILES)
 
