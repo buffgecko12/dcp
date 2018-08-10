@@ -1,0 +1,6 @@
+<span class="text-nowrap">
+	<strong>Opciones de premio{% if goal.maxnumrewards %} (max = {{ goal.maxnumrewards }}){% endif %}</strong>
+</span><br>
+<i>{% for reward in goal.rewardinfo.currentrewards %}
+	{{ reward.rewarddisplayname }}{% if not forloop.last %}, {% endif %}
+{% endfor %}</i>

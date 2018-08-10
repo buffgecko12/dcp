@@ -118,10 +118,8 @@
 				<br>
 				<i>{{ goal.goaldescription }}</i><br>
 
-				<strong>Opciones de premio: </strong>
-				<i>{% for reward in goal.rewardinfo.currentrewards %}
-					{{ reward.rewarddisplayname }}{% if not forloop.last %}, {% endif %}
-				{% endfor %}</i>
+				{% include "wakemeup/contract/include/rewardoptions.html" %}
+			
 				<br><br>
 			</div>
 		{% endfor %}
