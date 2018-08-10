@@ -90,7 +90,7 @@
 				
 				<!-- PROFILE -->			
 				<li class="nav-item">
-					<a class="nav-link" href="{% url 'wakemeup:myaccount' %}#profile" title="Perfil">
+					<a class="nav-link" href="{% url 'wakemeup:myaccount' %}#profile" title="{{ user.username }}">
 						{% if userinfo.profilepicturefile %}
 							<img src="{% static 'img/avatar/'|add:userinfo.profilepicturefile %}" alt="Avatar" height="32px" width="32px" style="display:inline-block">
 						{% else %}
