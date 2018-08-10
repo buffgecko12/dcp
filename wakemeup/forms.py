@@ -549,8 +549,8 @@ class ContractForm(forms.Form):
     classid = forms.CharField(label='Curso', widget=forms.Select)
     contracttype = forms.CharField(max_length=1,label='Tipo de contrato',widget=forms.HiddenInput, required=False)
     partyuserinfo = forms.CharField(label='Participantes', widget=forms.SelectMultiple)
-    contractvalidperiod = forms.CharField(label='Plazo', widget=forms.TextInput(attrs={'class':'daterangeinputfieldempty'}))
-    revisiondeadlinets = forms.DateField(label='Fecha tope para revisar', widget=forms.DateInput(attrs={'class':'dateinputfield'}))
+    contractvalidperiod = forms.CharField(label='Plazo', widget=forms.TextInput(attrs={'class':'daterangeinputfieldempty','placeholder':'MM/DD/YYYY - MM/DD/YYYY'}))
+    revisiondeadlinets = forms.DateField(label='Fecha tope para revisar', widget=forms.DateInput(attrs={'class':'dateinputfield','placeholder':'MM/DD/YYYY'}))
     contractstatus = forms.CharField(max_length=1,label='Estatus', widget=forms.HiddenInput, required=False)
 
     # Fields used for javascript and form navigation between pages
