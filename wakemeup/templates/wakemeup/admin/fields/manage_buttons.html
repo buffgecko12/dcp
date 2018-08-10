@@ -1,10 +1,12 @@
 <div class="text-nowrap">
-	<form action="{% url 'wakemeup:edit_object' objecttype=objecttype objectid=value %}" method="post" style="display:inline-block" >
-	    {% csrf_token %}
-		<input class="btn btn-sm btn-primary" name="submit_other" type="submit" value="Editar" />
-	</form>
-	<form action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=value %}" method="post" style="display:inline-block" >
-	    {% csrf_token %}
-		<input class="btn btn-sm btn-warning" name="delete" type="submit" value="Borrar" onclick="return confirm('Estas seguro que desea eliminar este objeto?');"/>
-	</form>
+	{% if not record.rewardid or not record.globalflag or user.is_superuser %}
+		<form action="{% url 'wakemeup:edit_object' objecttype=objecttype objectid=value %}" method="post" style="display:inline-block" >
+		    {% csrf_token %}
+			<input class="btn btn-sm btn-primary" name="submit_other" type="submit" value="Editar" />
+		</form>
+		<form action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=value %}" method="post" style="display:inline-block" >
+		    {% csrf_token %}
+			<input class="btn btn-sm btn-warning" name="delete" type="submit" value="Borrar" onclick="return confirm('Estas seguro que desea eliminar este objeto?');"/>
+		</form>
+	{% endif %}
 </div>

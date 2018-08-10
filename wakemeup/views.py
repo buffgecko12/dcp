@@ -710,7 +710,7 @@ def admin_list(request, objecttype):
             createdbyuserid = None
 
         # Look up rewards
-        objectSet = RewardsTable(Reward.objects.get_rewards(createdbyuserid = createdbyuserid, globalflag = False))
+        objectSet = RewardsTable(Reward.objects.get_rewards(createdbyuserid = createdbyuserid))
 
     else:
         pass

@@ -323,6 +323,7 @@ class Reward(models.Model):
     rewarddescription = models.CharField(max_length=500,verbose_name='Descripci' + chr(243) + 'n')
     rewardvalue = models.IntegerField(verbose_name='Valor')
     createdbyuserid = models.IntegerField()
+    globalflag = models.BooleanField()
     
     class Meta:
         managed = False

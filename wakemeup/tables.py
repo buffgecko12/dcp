@@ -136,6 +136,11 @@ class RewardsTable(tables.Table):
         verbose_name='Valor',
     )
     
+    globalflag = tables.TemplateColumn(
+        template_name='wakemeup/admin/fields/rewardtype.html',
+        verbose_name='Tipo'
+    )
+    
     manage_buttons = getManageButtons(accessor=objectid)
 
     class Meta:
