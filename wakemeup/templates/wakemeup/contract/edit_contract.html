@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
+{% load staticfiles %}
 
 {% block headimport %}
 	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />	
@@ -17,6 +18,7 @@
 			data-teachers-url="{% url 'wakemeup:ajax_load_teachers' %}" 
 			data-classes-url="{% url 'wakemeup:ajax_load_classes' %}" 
 			data-students-url="{% url 'wakemeup:ajax_load_students' %}" 
+			data-contractinfo-url="{% url 'wakemeup:ajax_get_contract_info' %}" 
 		>
 			{% crispy form %}
 		</form>
@@ -26,100 +28,40 @@
 {% block bodyimport %}
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment-with-locales.min.js"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+	<script src="{% static 'wakemeup/js/daterangepicker.js' %}"></script>
+	<script src="{% static 'wakemeup/js/contract/updatebudgetdisplay.js' %}"></script>
 	<script>
-	
-		// Initialize variables
-		var numParticipants = undefined;
-		var currentBudget = parseInt($("#id_initialbudget").val(),10); // Lookup initial values from hidden form fields
-		var maxRewardValue = parseInt($("#id_maxrewardvalue").val(),10);
-		
-		function get_budget_HTML(){
-	
-			var currentBudgetHTML = undefined
-			if(currentBudget < 0) {
-				currentBudgetHTML = '<span class="bg-warning">Presupuesto: $' + String(currentBudget) + '</span>'
-			} else {
-				currentBudgetHTML = 'Presupuesto: $' + currentBudget
-			}
-			
-			return currentBudgetHTML;
-		}
-		
-		$("#id_partyuserinfo").change(function () {
-			var result = get_num_participants();
-	
-			if(numParticipants === undefined || numParticipants != result) {
-				var disabledFlag = undefined;
-				var delta = (numParticipants - result);
-				currentBudget = currentBudget + (delta * maxRewardValue);
-				
-	            $("#id_availablebudget").html(get_budget_HTML());
-				numParticipants = result; // Store new value
-				
-				if(currentBudget < 0) {
-					disabledFlag = true;
-				} else {
-					disabledFlag = false;
+	    var contractId = $("#id_contractid").val();
+
+		function update_budget() {
+			var url = $("#contractForm").attr("data-contractinfo-url");
+		    
+			$.ajax({
+				url: url,
+				data: {
+					'infotype': 'hypotheticalcontractvalue',
+					'contractid': contractId,
+					'numparticipants': get_num_participants()
+				},
+				success: function (data) {
+					totalBudget = data
+					update_budget_display(data)
 				}
-	
-				// Update buttons
-				document.getElementById("submit_cancel").disabled = disabledFlag;
-				document.getElementById("submit_next").disabled = disabledFlag;
-				document.getElementById("submit_previous").disabled = disabledFlag;
-			}		
-		  });
+			})
+		}	
+
+		// BUDGET: Participant drop-down
+		$("#id_partyuserinfo").change(function () {
+			update_budget()
+		});
 		
+		// BUDGET: Get number of participants
 		function get_num_participants() {
 			var numPart = $('#id_partyuserinfo option:selected').length;
 			return numPart;
 		}
 	
-		// http://www.daterangepicker.com/#examples
-		// Date range function
-
-		$(function() {
-  		  moment.locale('es');
-		  $('.daterangeinputfieldempty').daterangepicker({
-			  autoApply: true,
-			  autoUpdateInput: false,
-			  minYear: 2018,
-			  maxYear: parseInt(moment().format('YYYY'),10),
-		      locale: {
-		          "applyLabel": "Aplicar",
-		          "cancelLabel": "Cancelar",
-		    	  }
-		  });
-		
-		  // Set initial values to empty
-		  $('.daterangeinputfieldempty').on('apply.daterangepicker', function(ev, picker) {
-		      $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
-		  });
-		
-		  $('.daterangeinputfieldempty').on('cancel.daterangepicker', function(ev, picker) {
-		      $(this).val('');
-		  });
-		});
-		
-		// Single date function
-		$(function() {
-		  $('.dateinputfield').daterangepicker({
-			autoUpdateInput: false,
-		    singleDatePicker: true,
-		    minYear: 2018,
-		    maxYear: parseInt(moment().format('YYYY'),10)
-		  });
-		
-		  // Set initial values to empty
-		  $('.dateinputfield').on('apply.daterangepicker', function(ev, picker) {
-		      $(this).val(picker.startDate.format('DD/MM/YYYY'));
-		  });
-		
-		  $('.dateinputfield').on('cancel.daterangepicker', function(ev, picker) {
-		      $(this).val('');
-		  });
-		});
-		
-		// Dependent drop-downs (Teacher / Class / Student)
+		// DROP-DOWNS: Dependent drop-downs (Teacher / Class / Student)
 	    $("#id_teacheruserid").change(function () {
 		    update_classes($(this))
 	      });
@@ -128,10 +70,10 @@
 		    update_students($(this))
 	      });
 
+	    // DROP-DOWNS: Update Teachers
 	    function update_teachers() {
 	    	// Get values from the form
 	        var url = $("#contractForm").attr("data-teachers-url");
-	        var contractId = $("#id_contractid").val();
 	        
 	        $.ajax({                       			// initialize AJAX request
 	          url: url,                    			// set the url of the request
@@ -145,11 +87,11 @@
 	        })
 	    };
 
+		// DROP-DOWNS: Update classes
 	    function update_classes() {
 	    	// Get values from the form
 	        var url = $("#contractForm").attr("data-classes-url");
 	        var teacherUserId = $("#id_teacheruserid").val();
-	        var contractId = $("#id_contractid").val();
 
 	        $.ajax({                       		// initialize an AJAX request
 	          url: url,                    		// set the url of the request
@@ -164,11 +106,11 @@
 	        })
 	    };
 
+    	// DROP-DOWNS: Update students
 	    function update_students() {
 	    	// Get values from the form
 	    	var url = $("#contractForm").attr("data-students-url");
 	        var classId = $("#id_classid").val();
-	        var contractId = $("#id_contractid").val();
 	        
 	        $.ajax({                       				// initialize an AJAX request
 	          url: url,                    				// set the url of the request
@@ -178,12 +120,12 @@
 	          },
 	          success: function (data) {   				// "data" is the return of the "get students" view call
 	            $("#id_partyuserinfo").html(data);  	// replace the contents of the "partyuserinfo" field with the data
-	            $("#id_availablebudget").html(get_budget_HTML());
-		        numParticipants = get_num_participants();
+				update_budget();
 	          }
 	        })
 	    };
 
+	    // DROP-DOWNS: Initialize
 		$(document).ready(function(){
 			update_teachers();
 		});

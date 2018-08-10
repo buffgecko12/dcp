@@ -156,6 +156,9 @@ class ContractInfoManager(models.Manager):
     def get_contract_info(self, contractid = None):
         return get_data(self, 'SP_DCPGetContractInfo(%s)', (contractid,))
 
+    def get_contract_value(self, teacheruserid = None, contractid = None, numparticipants = None):
+        return get_data(self, 'SP_DCPGetContractValue(%s,%s,%s)', (teacheruserid, contractid, numparticipants,))
+
 class RewardManager(models.Manager):
     def all(self):
         return self.get_rewards()
@@ -305,7 +308,7 @@ class ContractInfo(models.Model):
     contractid = models.IntegerField(primary_key=True)
     teacheruserid = models.IntegerField()
     numparticipants = models.IntegerField()
-    maxrewardvalue = models.IntegerField()
+    contractvalue = models.IntegerField()
     
     class Meta:
         managed = False

@@ -550,7 +550,7 @@ class ContractForm(forms.Form):
 
     # Fields used for javascript and form navigation between pages
     initialbudget = forms.IntegerField(widget=forms.HiddenInput, required=False)
-    maxrewardvalue = forms.IntegerField(widget=forms.HiddenInput, required=False)
+    initialcontractvalue = forms.IntegerField(widget=forms.HiddenInput, required=False)
 
     def clean_contractvalidperiod(self):
         contractvalidperiod = self.cleaned_data.get("contractvalidperiod")
@@ -579,10 +579,11 @@ class ContractForm(forms.Form):
         if(contractid != "new"):
             mycontractinfo = ContractInfo.objects.get(contractid)
             mybudget = TeacherBudget.objects.get(mycontractinfo.teacheruserid).availablebudget
-            mymaxrewardvalue = mycontractinfo.maxrewardvalue
+            myinitialcontractvalue = mycontractinfo.contractvalue
         else:
-            mymaxrewardvalue = 0
+            mycontractinfo = None
             myteacherbudget = TeacherBudget.objects.get(teacheruserid = request.user.userid)
+            myinitialcontractvalue = 0
 
             # Lookup default budget for teacher
             if(myteacherbudget):
@@ -594,16 +595,16 @@ class ContractForm(forms.Form):
         self.helper = FormHelper()
         setFormHelper(self.helper)
         self.helper.form_tag = False # Disable auto-generation of <form> tags
-        self.fields['initialbudget'].initial = mybudget # TO-DO: Fix this!!
-        self.fields['maxrewardvalue'].initial = mymaxrewardvalue # Get number of participants (used to calculate budget)
+        self.fields['initialbudget'].initial = mybudget
+        self.fields['initialcontractvalue'].initial = myinitialcontractvalue or 0
         
         # Set form layout
         self.helper.layout = Layout(
             'contractid',
             'contractstatus',
             'contracttype',
+            'initialcontractvalue',
             'initialbudget',
-            'maxrewardvalue',
             Fieldset(
                 'Participantes',
                 'teacheruserid',
@@ -729,12 +730,13 @@ class ContractGoalsForm(forms.Form):
 
     goaldescription_label = 'Descripci' + mychr('o') + 'n<br><small><i>Una descripci' + mychr('o') + 'n detallada con instrucciones claras para c' + chr(243) + 'mo medir ' + chr(233) + 'xito</i></small>'
     rewardinfo_label = 'Opciones de premio<small><i> <br>Al cumplir con ' + chr(233) + 'xito la meta, cada participante podr' + chr(225) + ' escoger un premio de esta lista</i></small>'
-    maxnumreward_label = 'Max. n' + mychr('u') + 'mero de premios<small><i> <br>El m' + mychr('a') + 'ximo n'  + mychr('u') + 'mero de premios disponible para lograr esta meta (0 = sin l' + mychr('i') + 'mite m' + mychr('a') + 'ximo)</i></small>'
+    maxnumreward_label = 'Max. n' + mychr('u') + 'mero de premios<small><i> <br>El m' + mychr('a') + 'ximo n'  + mychr('u') + 'mero de premios disponible para lograr esta meta (vac&#237;o = sin l' + mychr('i') + 'mite m' + mychr('a') + 'ximo)</i></small>'
 
     # Fields used for javascript and form navigation between pages
     contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)    
     initialbudget = forms.IntegerField(widget=forms.HiddenInput, required=False)
     numparticipants = forms.IntegerField(widget=forms.HiddenInput, required=False)
+    initialcontractvalue = forms.IntegerField(widget=forms.HiddenInput, required=False)
 
     e_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
     e_goaldescription = forms.CharField(max_length=500,label=goaldescription_label, widget=forms.Textarea(attrs={'rows':4}), required=False)
@@ -793,6 +795,7 @@ class ContractGoalsForm(forms.Form):
         self.helper.form_tag = False # Disable auto-generation of <form> tags
         self.fields['initialbudget'].initial = TeacherBudget.objects.get(mycontractinfo.teacheruserid).availablebudget
         self.fields['numparticipants'].initial = mycontractinfo.numparticipants # Get number of participants (used to calculate budget)
+        self.fields['initialcontractvalue'].initial = mycontractinfo.contractvalue or 0 # Get number of participants (used to calculate budget)
 
         # Get and set max number of rewards
         mycontractpartycount = mycontractinfo.numparticipants
@@ -807,6 +810,7 @@ class ContractGoalsForm(forms.Form):
         self.helper.layout = Layout(
             'contractid',
             'initialbudget',
+            'initialcontractvalue',
             'numparticipants',
             TabHolder(
                 Tab(

@@ -35,6 +35,7 @@
 {% block bodyimport %}
 	<!--  Include budget and modal javascript -->
 	<script src="{% static 'wakemeup/js/contract/contractbudget.js' %}"></script>
+	<script src="{% static 'wakemeup/js/contract/updatebudgetdisplay.js' %}"></script>
 	<script src="{% static 'wakemeup/js/contract/addrewardmodal.js' %}"></script>
 	
 	<script>
@@ -59,12 +60,17 @@
 		$(document).ready(function(){ // Wait until HTML has loaded (doesn't include images)
 			// Initial load / update of drop-down menus
 			update_all_rewards();
+			update_budget_display();
+
+			// Max num rewards listeners
+		    $('#id_e_maxnumrewards,#id_m_maxnumrewards,#id_d_maxnumrewards').on('keyup change', function(e) {
+		    	update_budget(); // Set initial budget
+		    });
 
 			// Reward change listener
 		    $('#id_e_rewardinfo,#id_m_rewardinfo,#id_d_rewardinfo').change(function() {
-		    	// Update max reward value
-		    	update_maxvalue();
-		    	
+		    	update_budget(); // Update budget
+
 				// Open "Add reward" modal if "add" button is clicked
 		        var optionvalue = $(this).val();
 		        if(optionvalue=="-1"){

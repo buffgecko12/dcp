@@ -143,6 +143,22 @@ def check_permissions(view):
     return view_wrapper
 
 # AJAX Request handler
+def get_contract_info(request):
+    contractid = request.GET.get('contractid') # Check if existing contract
+    infotype = request.GET.get('infotype')
+    numparticipants = request.GET.get('numparticipants')
+    returndata = ''
+    
+    if(contractid):
+        if(infotype == "hypotheticalcontractvalue"):
+            returndata = ContractInfo.objects.get_contract_value(contractid=contractid, numparticipants=numparticipants)[0].contractvalue
+        else:
+            mycontractinfo = ContractInfo.objects.get(contractid=contractid)
+            returndata = eval('mycontractinfo.' + infotype)
+    
+    return HttpResponse(returndata)
+
+# AJAX Request handler
 def load_teachers(request):
     contractid = request.GET.get('contractid') # Check if existing contract
 

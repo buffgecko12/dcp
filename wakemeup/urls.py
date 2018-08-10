@@ -38,6 +38,7 @@ urlpatterns = [
     url(r'^ajax/manage-user-display/', views.manage_user_display, name='ajax_manage_user_display'),
 
     url(r'^ajax/addreward/', views.addreward, name='ajax_add_reward'),
+    url(r'^ajax/get-contract-info/', views.get_contract_info, name='ajax_get_contract_info'),
 
     # Default (catch all)    
     url(r'.*', views.index, name = "default"),

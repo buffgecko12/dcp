@@ -3,7 +3,7 @@ import unittest
 
 from django.contrib.auth import get_user_model
 
-from wakemeup.models.contract import Contract, ContractGoal, ContractGoalReward, ContractParty, Reward
+from wakemeup.models.contract import *
 from wakemeup.models.environment import School, Class, Teacher
 
 import json
@@ -139,19 +139,22 @@ class testContracts(unittest.TestCase):
         self.assertNotEqual(newrewardget.rewarddescription,"Goal #102")
 
     def testGetContract(self):
-        newcontractget = Contract.objects.get(newcontract.contractid)
+        mycontract = Contract.objects.get(newcontract.contractid)
 
-        self.assertEqual(newcontractget.studentrequirements,newcontract.studentrequirements)
+        self.assertEqual(mycontract.studentrequirements,newcontract.studentrequirements)
 
         # Check status is "draft")
-        self.assertEqual(newcontractget.contractstatus,'D')
+        self.assertEqual(mycontract.contractstatus,'D')
 
         # Set contract as pending (i.e. awaiting approval)        
-        newcontractget.change_status('P')
-        newcontractget = Contract.objects.get(newcontractget.contractid)
+        mycontract.change_status('P')
+        mycontract = Contract.objects.get(mycontract.contractid)
 
         # Check status is changed to "pending")
-        self.assertEqual(newcontractget.contractstatus,'P')
+        self.assertEqual(mycontract.contractstatus,'P')
+
+        mycontractinfo = ContractInfo.objects.get(contractid=mycontract.contractid)
+        mycontractvalue = ContractInfo.objects.get_contract_value(contractid=mycontract.contractid,numparticipants=2)
 
     # TO-DO: Fix the "approve" part
     def notestReviseContract(self):
@@ -215,7 +218,6 @@ class testContracts(unittest.TestCase):
             goaldescription='Manual goal', 
             acceptedflag=None,
             rewardinfo = json.dumps({"currentrewards" : [{"rewardid" : newreward.rewardid}]}),
-            maxnumrewards = 0
         )
 
         newcontractgoalid = newcontractgoal.save()
