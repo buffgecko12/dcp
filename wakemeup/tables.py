@@ -162,7 +162,7 @@ class ContractsTable(tables.Table):
     manage_buttons = tables.TemplateColumn(
         template_name='wakemeup/admin/fields/contract_buttons.html',
         extra_context=kwargs,
-        verbose_name='',
+        verbose_name='Gestionar',
         accessor=A(objectid)
     )    
 
