@@ -38,7 +38,7 @@ def load_schools_classes():
         '1101','1102','1103','1104','1105','1106','1107','1108','1109','1110','1111'
      ]
     
-    rr_classinfo = ['601','602','801','1201']
+    rr_classinfo = ['601','602','707','708','801','1201']
     
     school_list = [
         ('GLV','Guillermo Leon Valencia Colegio (sede integrado)','GLV (Integrado)', 'Calle 15A Nro 7 - 48','Duitama','Boyaca',glv_classinfo),
@@ -96,6 +96,7 @@ def load_users():
 
         
         ('Elizabeth','Moreno',ITIRR_SCHOOLID,['601','602','801','1201'],),
+        ('David','TennisMachine',ITIRR_SCHOOLID,['707','708'],),
         
     ]
 
@@ -228,6 +229,14 @@ def load_users():
 
         ('Christopher','Khosravi',ITIRR_SCHOOLID,'1201'),
         ('Fernando','Becerra',ITIRR_SCHOOLID,'1201'),
+
+        ('Roger','Federer',ITIRR_SCHOOLID,'707'),
+        ('Novak','Djokovic',ITIRR_SCHOOLID,'707'),
+        ('Rafael','Nadal',ITIRR_SCHOOLID,'707'),
+        ('Stefan','Edberg',ITIRR_SCHOOLID,'707'),
+        ('Carolina','Wozniacki',ITIRR_SCHOOLID,'708'),
+        ('Anna','Kournikova',ITIRR_SCHOOLID,'708'),
+        ('Ana','Ivanovic',ITIRR_SCHOOLID,'708'),
         
     ]
 
