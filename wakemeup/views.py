@@ -84,12 +84,12 @@ def download_file_fromdb(request, fileid):
         return redirect_home()
 
 # Move to util library
-def send_email(subject, body, to_list, sender = 'duitamacolegioproject@gmail.com'):
+def send_email(subject, body, to_list, sender = None):
     try:
         if(to_list):
             send_mail(subject, body, sender, to_list)
-    except:
-        print("ERROR - Could not send e-mail(s)")
+    except Exception as e:
+        print("ERROR - Could not send e-mail(s) - ", e)
 
     return
 
