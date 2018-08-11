@@ -503,7 +503,7 @@ def create_contract(request, contractid):
         mycontract = Contract.objects.get(contractid=contractid)
 
         if(mycontract):
-            # Populate exusting form only for "Draft" contracts and if user is contract's owner or super / admin user
+            # Populate existing form only for "Draft" contracts and if user is contract's owner or super / admin user
             if(mycontract.contractstatus == 'D' and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
                 contractvalidperiod = display_timestamp_range(mycontract.contractvalidperiod)
 
