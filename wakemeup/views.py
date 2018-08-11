@@ -307,6 +307,7 @@ def redirect_home():
 
 @check_permissions
 def delete_object(request, objecttype, objectid):
+    
     if(objecttype == 'contract'):        
         myredirect = redirect('wakemeup:contract_list')
     else:
@@ -315,26 +316,43 @@ def delete_object(request, objecttype, objectid):
     if(request.method == 'POST'):
         # Set default redirect
         
-        if(objecttype == 'school'):
-            myobject = School.objects.get(objectid)
-            
-        elif(objecttype == 'class'):
-            myobject = Class.objects.get(objectid)
-        
-        elif(objecttype == 'teacher'):
-            myobject = Teacher.objects.get(objectid)
-        
-        elif(objecttype == 'student'):
-            myobject = Student.objects.get(objectid)
-        
-        elif(objecttype == 'reward'):
-            myobject = Reward.objects.get(objectid)
-
-        elif(objecttype == 'contract'):
+        if(objecttype == 'contract'):
             myobject = Contract.objects.get(objectid)
 
-        if(myobject):
-            myobject.delete()
+            # Send notification when deleting non-draft contracts
+            if myobject.contractstatus != 'D':
+                sendnotifications = True
+            else:
+                sendnotifications = False
+
+            # Delete contract
+            myobject.delete(sendnotifications=sendnotifications)
+
+            # Send notifications
+            if(sendnotifications):
+                myobject.send_emails(
+                    email_subject = 'Duitama Colegio Project - Contrato (#' + str(myobject.contractid) + ') ha sido eliminado',
+                    email_body = 'Se elimin' + mychr('o') + ' su contrato (#' + str(myobject.contractid) + ')'
+                )
+        else:
+
+            if(objecttype == 'school'):
+                myobject = School.objects.get(objectid)
+                
+            elif(objecttype == 'class'):
+                myobject = Class.objects.get(objectid)
+            
+            elif(objecttype == 'teacher'):
+                myobject = Teacher.objects.get(objectid)
+            
+            elif(objecttype == 'student'):
+                myobject = Student.objects.get(objectid)
+            
+            elif(objecttype == 'reward'):
+                myobject = Reward.objects.get(objectid)
+    
+            if(myobject):
+                myobject.delete()
 
     return myredirect
 
@@ -640,12 +658,12 @@ def create_contract_submit(request, contractid):
             mycontract = Contract.objects.get(contractid=contractid)
             mycontract.change_status('P') # Change contract status to pending
 
-            EMAIL_SUBJECT = 'Duitama Colegio Project - Contrato nuevo (#' + str(contractid) + ')'
-            EMAIL_BODY = 'Se envi' + mychr('o') + ' un contrato nuevo: ' + request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':contractid}))
-
             # Send e-mails
-            send_email(subject=EMAIL_SUBJECT, body=EMAIL_BODY, to_list=mycontract.get_emails("party"))
-            send_email(subject=EMAIL_SUBJECT, body=EMAIL_BODY, to_list=mycontract.get_emails("teacher"))
+            mycontract.send_emails(
+                email_subject = 'Duitama Colegio Project - Contrato nuevo (#' + str(contractid) + ')',
+                email_body = 'Se envi' + mychr('o') + ' un contrato nuevo: ' + \
+                    request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':contractid}))
+            )
 
             # Go back to home page
             return redirect_home()
@@ -1057,13 +1075,13 @@ def contract_accept(request, contractid):
             
             # Send e-mails if contract approved by all parties
             if(approveresult):
-                
+
                 # Send e-mails
-                EMAIL_SUBJECT = 'Duitama Colegio Project - Contrato #' + str(mycontractid) + ' ha sido aprobado'
-                EMAIL_BODY = 'Se aprob' + mychr('o') + ' contrato #' + str(mycontractid) + '\n\n' + request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':mycontractid}))
-    
-                send_email(subject=EMAIL_SUBJECT, body=EMAIL_BODY, to_list=mycontract.get_emails("party"))
-                send_email(subject=EMAIL_SUBJECT, body=EMAIL_BODY, to_list=mycontract.get_emails("teacher"))
+                mycontract.send_emails(
+                    email_subject = 'Duitama Colegio Project - Contrato #' + str(mycontractid) + ' ha sido aprobado',
+                    email_body = 'Se aprob' + mychr('o') + ' contrato #' + str(mycontractid) + '\n\n' + \
+                        request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':mycontractid})),
+                )
             
             # Redirect to contract list
             return HttpResponse("Contrato ha sido aceptado.")

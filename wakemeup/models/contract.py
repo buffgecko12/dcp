@@ -1,5 +1,6 @@
 from django.db import models
 from lib.UsefulFunctions.dbUtils import *
+from lib.UsefulFunctions.emailUtils import send_email
 from django.contrib.postgres.fields import JSONField, DateTimeRangeField # uses tstzrange
 
 from wakemeup.models.environment import Teacher
@@ -54,8 +55,8 @@ class ContractManager(models.Manager):
     def complete(self):
         pass
     
-    def delete(self, myContract):
-        return delete_data('SP_DCPDeleteContract', (myContract.contractid,))
+    def delete(self, myContract, sendnotifications):
+        return delete_data('SP_DCPDeleteContract', (myContract.contractid, sendnotifications, ))
 
     def get_emails(self, myContract, emailtype):
         emails = []
@@ -71,6 +72,10 @@ class ContractManager(models.Manager):
             emails.append(Teacher.objects.get(teacheruserid = myContract.teacheruserid).emailaddress)
 
         return emails
+
+    def send_emails(self, myContract, email_subject, email_body):
+        send_email(subject=email_subject, body=email_body, to_list=myContract.get_emails("party"))
+        send_email(subject=email_subject, body=email_body, to_list=myContract.get_emails("teacher"))
 
 class ContractGoalManager(models.Manager):
     def all(self):
@@ -219,8 +224,8 @@ class Contract(models.Model):
     def revise(self):
         return Contract.objects.revise(self)
     
-    def delete(self):
-        return Contract.objects.delete(self)
+    def delete(self, sendnotifications = True):
+        return Contract.objects.delete(self, sendnotifications)
     
     def complete(self):
         return Contract.objects.complete(self)
@@ -230,6 +235,9 @@ class Contract(models.Model):
 
     def get_emails(self, emailtype):
         return Contract.objects.get_emails(self, emailtype)
+
+    def send_emails(self, email_subject, email_body):
+        return Contract.objects.send_emails(self, email_subject, email_body)
 
 class ContractGoal(models.Model):
     
