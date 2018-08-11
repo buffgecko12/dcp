@@ -6,7 +6,7 @@
 		</form>
 		<form action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=value %}" method="post" style="display:inline-block" >
 		    {% csrf_token %}
-			<input class="btn btn-sm btn-warning" name="delete" type="submit" value="Borrar" onclick="return confirm('Estas seguro que desea eliminar este objeto?');"/>
+			<input class="btn btn-sm btn-warning" name="delete" type="submit" value="Borrar" onclick="return confirm('Esta seguro que desea eliminar este objeto?');"/>
 		</form>
 	{% endif %}
 </div>

@@ -18,12 +18,25 @@
 	</h4>
 	
 	{% render_table contracts %}
-	
+{% endblock %}	
+
+{% block bodyimport %}
 	<script>
-		jQuery(document).ready(function($) {
+		$(document).ready(function() {
 		    $(".clickable-row").click(function() {
 		        window.location = $(this).data("href");
 		    });
 		});	
 	</script>
-{% endblock %}	
+	
+	<script>
+		$(".cancel_confirm").click(function(event) {
+			if(!confirm('Esta seguro que desea eliminar este contrato?')) {
+				event.preventDefault();
+				return false;
+			} else {
+				return true;
+			}
+		});
+	</script>
+{% endblock %}
