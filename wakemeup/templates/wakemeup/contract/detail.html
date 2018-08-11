@@ -132,6 +132,7 @@
 	      <div class="modal-body">
 			<form method="post" id="acceptContractForm" novalidate name="acceptContractForm"
  				data-acceptcontract-url="{% url 'wakemeup:contract_accept' contractid=contract.contractid %}"
+ 				data-redirect-url="{% url 'wakemeup:contract_list' %}"
 				>
 				<div id="mymodaldiv"></div>
 			</form>

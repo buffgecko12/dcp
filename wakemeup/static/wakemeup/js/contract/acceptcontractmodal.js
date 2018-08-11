@@ -1,6 +1,7 @@
 function update_acceptcontractform(type, partyuserid, contractid, preferredgoalid) {
 	var myform =$("#acceptContractForm");
 	var url = $(myform).attr("data-acceptcontract-url");
+	var redirecturl = $(myform).attr("data-redirect-url");
 	
 	if(type == "new") {
 		requesttype = "GET";
@@ -45,7 +46,8 @@ function update_acceptcontractform(type, partyuserid, contractid, preferredgoali
 		            setTimeout(
 	            		function(){
 			            	$('#acceptContractModal').modal('hide'); // Close after a few seconds
-			            	window.location.reload(); // Reload parent page (only after submit)
+			            	location.href=redirecturl
+//			            	window.location.reload(); // Reload parent page (only after submit)
 		            	},
 		            	2500
 	            	)
