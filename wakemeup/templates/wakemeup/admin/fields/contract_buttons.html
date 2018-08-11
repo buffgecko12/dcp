@@ -17,13 +17,13 @@
 	{% endif %}
 	{% if record.contractstatus == "A" %}
 		{% if record.revisioneligibilityflag %}
-			<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
+			<form style="display:inline-block" action="{% url 'wakemeup:index '%}" method="post">
 			    {% csrf_token %}
-				<input class="btn btn-xs btn-success" name="revise" type="submit" value="Modificar"/>
+				<input class="btn btn-xs btn-danger" name="revise" type="submit" value="Modificar"/>
 			</form>
 		{% else %}
-			<i>Ya pas&#243; la fecha tope para<br>modificar el contrato.<br>({{record.revisiondeadlinets|date}})</i>
-		{% endif %}<br><br>
+			<i>Ya pas&#243; la fecha tope para<br>modificar el contrato.<br>({{record.revisiondeadlinets|date}})</i><br><br>
+		{% endif %}
 		<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
 		    {% csrf_token %}
 			<input class="btn btn-xs btn-success" name="finalize" type="submit" value="Finalizar"/>
