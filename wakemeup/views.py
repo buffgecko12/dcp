@@ -83,16 +83,6 @@ def download_file_fromdb(request, fileid):
     else:
         return redirect_home()
 
-# Move to util library
-def send_email(subject, body, to_list, sender = None):
-    try:
-        if(to_list):
-            send_mail(subject, body, sender, to_list)
-    except Exception as e:
-        print("ERROR - Could not send e-mail(s) - ", e)
-
-    return
-
 # Check user authentication / authorization
 def check_permissions(view):
     viewname = view.__name__
@@ -504,7 +494,7 @@ def create_contract(request, contractid):
 
         if(mycontract):
             # Populate existing form only for "Draft" contracts and if user is contract's owner or super / admin user
-            if(mycontract.contractstatus == 'D' and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
+            if(mycontract.contractstatus in ('D','P') and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
                 contractvalidperiod = display_timestamp_range(mycontract.contractvalidperiod)
 
                 form = ContractForm(request=request, contractid=contractid,
