@@ -466,7 +466,7 @@ def create_contract(request, contractid):
             # Determine which parties were deleted
             if(form.cleaned_data.get('contractid')):
                 current_parties = []
-                mycontractparties = ContractParty.objects.get_contract_parties(contractid = contractid)
+                mycontractparties = ContractParty.objects.get_contract_parties(contractid=contractid)
 
                 for mycontractparty in mycontractparties:
                     current_parties.append(mycontractparty.partyuserid)
@@ -583,7 +583,7 @@ def create_contract_goals(request, contractid):
         mygoals = ContractGoal.objects.get_contract_goals(contractid=contractid)
 
         if(mycontract):
-            if(mycontract.contractstatus == 'D' and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
+            if(mycontract.contractstatus in ('D','P') and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
                 for mygoal in mygoals:
                     # Use difficultylevel (i.e. e/m/d) for id tag (assumes MAX one goal per difficultylevel)
                     goaltypeid = mygoal.difficultylevel.lower() + "_"
@@ -605,32 +605,6 @@ def create_contract_goals(request, contractid):
             return redirect_home() 
 
     return render(request, 'wakemeup/contract/edit_contract_goals.html', {'form': form, 'addRewardForm': RewardForm()})
-
-@check_permissions
-def addreward(request):
-
-    if request.method == 'POST':
-
-        # Create form instance (bind data to form)
-        form = RewardForm(request.POST)
-
-        if form.is_valid():
-            myreward = Reward(
-                rewardid = form.cleaned_data.get('rewardid'),
-                rewarddisplayname = form.cleaned_data.get('rewarddisplayname'),
-                rewarddescription = form.cleaned_data.get('rewarddescription'),
-                rewardvalue = form.cleaned_data.get('rewardvalue'),
-                createdbyuserid=request.user.userid
-            )
-
-            # Save object
-            myreward.save()
-
-            return HttpResponse("Premio guardado.")
-    else:
-        form = RewardForm
-
-    return render(request, 'wakemeup/contract/edit_contract_goals_addreward.html', {'form': form})
 
 @check_permissions
 def create_contract_submit(request, contractid):
@@ -661,6 +635,34 @@ def create_contract_submit(request, contractid):
         mycontract = Contract.objects.get(contractid=contractid)
 
         if(mycontract):
+            if(mycontract.contractstatus in ('D','P') and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
+        
+                mycontract.contractvalidperiod_disp = display_timestamp_range(mycontract.contractvalidperiod) # Format for display
+                classinfo = Class.objects.get(classid=mycontract.classid)
+                contractinfo = ContractInfo.objects.get(contractid)
+                teacherbudgetinfo = TeacherBudget.objects.get(teacheruserid=mycontract.teacheruserid)
+                
+                # Prepare context info
+                context = {
+                    'form':ContractSubmitForm(contractid = contractid),
+                    'contract':mycontract,
+                    'classinfo':classinfo,
+                    'contractinfo':contractinfo, #Contains budget info
+                    'teacherbudgetinfo':teacherbudgetinfo
+                } 
+        
+                return render(request, 'wakemeup/contract/edit_contract_submit.html', context)
+
+        # Unauthorized access
+        return redirect_home() 
+
+@check_permissions
+def create_contract_revise(request, contractid):
+
+    if(request.method == "POST"):
+        pass
+    else:
+        if(mycontract):
             if(mycontract.contractstatus == 'D' and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
         
                 mycontract.contractvalidperiod_disp = display_timestamp_range(mycontract.contractvalidperiod) # Format for display
@@ -681,7 +683,33 @@ def create_contract_submit(request, contractid):
 
         # Unauthorized access
         return redirect_home() 
-    
+
+@check_permissions
+def addreward(request):
+
+    if request.method == 'POST':
+
+        # Create form instance (bind data to form)
+        form = RewardForm(request.POST)
+
+        if form.is_valid():
+            myreward = Reward(
+                rewardid = form.cleaned_data.get('rewardid'),
+                rewarddisplayname = form.cleaned_data.get('rewarddisplayname'),
+                rewarddescription = form.cleaned_data.get('rewarddescription'),
+                rewardvalue = form.cleaned_data.get('rewardvalue'),
+                createdbyuserid=request.user.userid
+            )
+
+            # Save object
+            myreward.save()
+
+            return HttpResponse("Premio guardado.")
+    else:
+        form = RewardForm
+
+    return render(request, 'wakemeup/contract/edit_contract_goals_addreward.html', {'form': form})
+
 # Admin
 @check_permissions
 def admin_list(request, objecttype):
