@@ -32,7 +32,7 @@ function update_rewardform(type) {
 	            		function(){
 			            	$('#addRewardModal').modal('hide'); // Close after a few seconds
 		            	}, 
-		            	2500
+		            	2000
 	            	)
 	            }
 	            document.getElementById('cancel').onclick = function() { // Add event listener on new modal form "cancel" field

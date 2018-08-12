@@ -49,7 +49,7 @@ function update_acceptcontractform(type, partyuserid, contractid, preferredgoali
 			            	location.href=redirecturl
 //			            	window.location.reload(); // Reload parent page (only after submit)
 		            	},
-		            	2500
+		            	2000
 	            	)
 	            }
 	            document.getElementById('cancel').onclick = function() { // Add event listener on new modal form "cancel" field
