@@ -29,5 +29,5 @@ urlpatterns = [
         )
         , name="login"),
     url(r'^', include('django.contrib.auth.urls')), # Auth views (login, logout, reset password)
-    url(r'^.*$', RedirectView.as_view(pattern_name='wakemeup:index')), # Redirect all other URLs to "Wake Me Up" homepage
+    url(r'^.*$', RedirectView.as_view(pattern_name='login')), # Redirect all other URLs to "Wake Me Up" homepage
 ]
