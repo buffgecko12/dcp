@@ -756,7 +756,7 @@ def addreward(request):
 
             return HttpResponse("Premio guardado.")
     else:
-        form = RewardForm
+        form = RewardForm(cancel_type="button")
 
     return render(request, 'wakemeup/contract/edit_contract_goals_addreward.html', {'form': form})
 

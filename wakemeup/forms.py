@@ -62,11 +62,10 @@ def setFormHelper(
     myFormHelper.field_class = field_class
     
 def getAdminFormActions(cancel_url = 'wakemeup:index', cancel_context="", cancel_type="link"):
-        
     return FormActions(
         # Cancel button (don't change the "cancel" id; used by javascript)
-        HTML("""<a class="btn btn-secondary" href="{% url '""" + cancel_url + """' """ + cancel_context + """ %}">Cancelar</a> """) if cancel_type == "link" else 
-        Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='cancel'),
+        Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='cancel') if cancel_type == "button" else
+        HTML("""<a class="btn btn-secondary" href="{% url '""" + cancel_url + """' """ + cancel_context + """ %}">Cancelar</a> """),
 
         # Submit button
         Submit('submit_next','Enviar', css_id='next'),
@@ -517,6 +516,8 @@ class RewardForm(forms.Form):
 
     def __init__ (self, *args, **kwargs):
 
+        cancel_type = kwargs.pop('cancel_type', None)
+
         # Call base class constructor (i.e. Teacher Form)
         super(RewardForm, self).__init__(*args, **kwargs)
         
@@ -534,7 +535,7 @@ class RewardForm(forms.Form):
                 'rewarddescription',
                 PrependedText('rewardvalue', '$'),
             ),
-            getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="reward"')
+            getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="reward"', cancel_type=cancel_type)
         )
 
     # Specify model
