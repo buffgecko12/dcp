@@ -162,7 +162,7 @@ class ContractsTable(tables.Table):
     manage_buttons = tables.TemplateColumn(
         template_name='wakemeup/admin/fields/contract_buttons.html',
         extra_context=kwargs,
-        verbose_name='Gestionar',
+        verbose_name='Gesti' + mychr('o') + 'n',
         accessor=A(objectid)
     )    
 
@@ -176,7 +176,7 @@ class ContractsTable(tables.Table):
         return display_timestamp(value)
 
     def render_contractstatus(self, value):
-        status_dict = {'P':'Pendiente','D':'Borrador','A':'Activo','C':'Completo'}
+        status_dict = {'P':'Pendiente','D':'Borrador','A':'Activo','C':'Completo','R':'Activo'}
         return status_dict[value]
 
     def get_rowlink(record):

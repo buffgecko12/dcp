@@ -14,6 +14,7 @@ urlpatterns = [
     url(r'^contract/(?P<contractid>(\d+|new))$', views.create_contract, name="create_contract"),
     url(r'^contract/(?P<contractid>(\d+))/goals$', views.create_contract_goals, name="create_contract_goals"),
     url(r'^contract/(?P<contractid>(\d+))/submit$', views.create_contract_submit, name="create_contract_submit"),
+    url(r'^contract/(?P<contractid>(\d+))/revise$', views.create_contract_revise, name="create_contract_revise"),
 
     # Admin
     url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward))(/)?$', views.admin_list, name="admin_list"), # Object list

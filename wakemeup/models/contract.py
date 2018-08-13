@@ -11,10 +11,10 @@ class ContractManager(models.Manager):
         return self.get_contracts(self)
     
     def get(self, contractid):
-        return get_data_pk(self, 'SP_DCPGetContract(%s,%s,%s,%s)', (contractid, None, None, None))
+        return get_data_pk(self, 'SP_DCPGetContract(%s,%s,%s,%s,%s)', (contractid, None, None, None, None))
     
-    def get_contracts(self, contractid = None, partyuserid = None, teacheruserid = None, excludedraftsflag = None):
-        return get_data(self, 'SP_DCPGetContract(%s,%s,%s,%s)', (contractid, partyuserid, teacheruserid, excludedraftsflag)) # Add more fields as needed
+    def get_contracts(self, contractid = None, partyuserid = None, teacheruserid = None, excludedraftsflag = None, excluderevisionsflag = True):
+        return get_data(self, 'SP_DCPGetContract(%s,%s,%s,%s,%s)', (contractid, partyuserid, teacheruserid, excludedraftsflag, excluderevisionsflag)) # Add more fields as needed
     
     def save(self, myContract):
         return save_data('SP_DCPUpsertContract', 
@@ -26,7 +26,6 @@ class ContractManager(models.Manager):
                 myContract.contractvalidperiod, 
                 myContract.guardianapprovalflag, 
                 myContract.revisiondeadlinets, 
-                myContract.revisiondescription, 
                 myContract.studentleaderrequirements, 
                 myContract.teacherrequirements, 
                 myContract.studentrequirements, 
@@ -36,13 +35,14 @@ class ContractManager(models.Manager):
             )
         )[0]
 
-    def revise(self, myContract):
+    def revise(self, myContract, actiontype, revisiondescription):
         return save_data('SP_DCPReviseContract', 
             (
                 myContract.contractid, 
-                myContract.revisiondescription
+                actiontype,
+                revisiondescription
             )
-        )
+        )[0]
 
     def change_status(self, myContract, contractstatus):
         return save_data('SP_DCPChangeContractStatus', 
@@ -221,8 +221,8 @@ class Contract(models.Model):
     def save(self):
         return Contract.objects.save(self)
     
-    def revise(self):
-        return Contract.objects.revise(self)
+    def revise(self, actiontype, revisiondescription = None):
+        return Contract.objects.revise(self, actiontype, revisiondescription)
     
     def delete(self, sendnotifications = True):
         return Contract.objects.delete(self, sendnotifications)

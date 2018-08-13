@@ -743,6 +743,10 @@ class ContractGoalsForm(forms.Form):
     numparticipants = forms.IntegerField(widget=forms.HiddenInput, required=False)
     initialcontractvalue = forms.IntegerField(widget=forms.HiddenInput, required=False)
 
+    e_acceptedflag = forms.BooleanField(widget=forms.HiddenInput, required=False)
+    m_acceptedflag = forms.BooleanField(widget=forms.HiddenInput, required=False)
+    d_acceptedflag = forms.BooleanField(widget=forms.HiddenInput, required=False)
+
     e_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
     e_goaldescription = forms.CharField(max_length=500,label=goaldescription_label, widget=forms.Textarea(attrs={'rows':4}), required=False)
     e_rewardinfo = forms.CharField(label=rewardinfo_label, widget=forms.SelectMultiple, required=False)
@@ -820,6 +824,7 @@ class ContractGoalsForm(forms.Form):
             TabHolder(
                 Tab(
                     'F' + mychr('a') + 'cil',
+                    'e_acceptedflag',
                     'e_goalid',
                     'e_goaldescription',
                     'e_rewardinfo',
@@ -827,6 +832,7 @@ class ContractGoalsForm(forms.Form):
                 ),
                 Tab(
                     'Media',
+                    'm_acceptedflag',
                     'm_goalid',
                     'm_goaldescription',
                     'm_rewardinfo',
@@ -834,6 +840,7 @@ class ContractGoalsForm(forms.Form):
                 ),
                 Tab(
                     'Dif' + mychr('i') + 'cil',
+                    'd_acceptedflag',
                     'd_goalid',
                     'd_goaldescription',
                     'd_rewardinfo',

@@ -13,6 +13,8 @@ from psycopg2.extras import DateTimeTZRange
 
 class testContracts(unittest.TestCase):
 
+    global refresh_contract
+    
     # Create main test environment
     @classmethod
     def setUpClass(self):
@@ -129,6 +131,9 @@ class testContracts(unittest.TestCase):
         # Set contract status as "draft"
         newcontract.change_status('D')
         
+    def refresh_contract(self):
+        return Contract.objects.get(contractid=self.contractid)
+        
     def testCreateContract(self):
         pass
 
@@ -157,24 +162,83 @@ class testContracts(unittest.TestCase):
         mycontractvalue = ContractInfo.objects.get_contract_value(contractid=mycontract.contractid,numparticipants=2)
 
     # TO-DO: Fix the "approve" part
-    def notestReviseContract(self):
+    def testReviseContract(self):
 
-        newcontract.revisiondescription = 'My revision description mang!'
-        newcontract.revise()
+        mycontract = Contract.objects.get(newcontract.contractid)
+        mycontractgoal = ContractGoal.objects.get(contractid=mycontract.contractid,goalid=1)
 
         # Check revision approval TS is not set
-        newcontractget = Contract.objects.get(newcontract.contractid)
-        self.assertIsNone(newcontractget.revisionapprovalts)
+        mycontract = Contract.objects.get(mycontract.contractid)
+        self.assertIsNone(mycontract.revisionapprovalts)
 
-        # Approve revision (1/2 required users)
-        newcontract.approve(1,'R',None,datetime.now(),1)
-        newcontractget = Contract.objects.get(newcontract.contractid)
-        self.assertIsNone(newcontractget.revisionapprovalts)
+        # Revise contract (user clicks "revise" button)
+        tempcontractid = mycontract.revise(actiontype='revise')
 
-        # Approve revision (2/2 required users)
-        newcontract.approve(2,'R',None,datetime.now(),1)
-        newcontractget = Contract.objects.get(newcontract.contractid)
-        self.assertIsNotNone(newcontractget.revisionapprovalts)
+        # Check that new temp contract was generated
+        tempcontract = Contract.objects.get(contractid=tempcontractid)
+        tempcontractgoal = ContractGoal.objects.get(contractid=tempcontractid,goalid=1)
+
+        self.assertIsNotNone(tempcontractid)
+        self.assertIsNotNone(tempcontract)
+
+        # Make sure values on original contract are set properly
+        mycontract = refresh_contract(mycontract)
+        self.assertEqual(mycontract.tempcontractid, tempcontractid)
+        self.assertEqual(mycontract.contractstatus,'R')
+        self.assertEqual(mycontractgoal.goaldescription, tempcontractgoal.goaldescription)
+        self.assertNotEqual(mycontractgoal.goaldescription,'yum yum')
+       
+        # Change some values on temp contract
+        tempcontractgoal.goaldescription = 'yum yum'
+        tempcontractgoal.save()
+        
+        # Submit revision
+        mycontract.revise(actiontype='submit', revisiondescription='Some notes')
+        mycontract = refresh_contract(mycontract)
+        tempcontract = refresh_contract(tempcontract)
+        
+        # Verify temp contract was deleted
+        self.assertIsNone(tempcontract)
+
+        # Verify new values were applied to original contract
+        mycontractgoal = ContractGoal.objects.get(contractid=mycontract.contractid,goalid=1)
+        self.assertEqual(mycontractgoal.goaldescription,'yum yum')
+
+        # Verify revision info was set properly
+        self.assertIsNone(mycontract.tempcontractid)
+        self.assertIsNotNone(mycontract.revisionapprovalts)
+        self.assertEqual(mycontract.revisiondescription, 'Some notes')
+        self.assertEqual(mycontract.contractstatus,'A')
+
+        # Revise contract again
+        tempcontractid = mycontract.revise(actiontype='revise')
+
+        # Verify contact status set
+        mycontract = refresh_contract(mycontract)
+        self.assertEqual(mycontract.contractstatus,'R')
+        
+        tempcontractgoal = ContractGoal.objects.get(contractid=tempcontractid,goalid=1)
+        tempcontractgoal.goaldescription = 'something new'
+        tempcontractgoal.save()
+        tempcontract = Contract.objects.get(contractid=tempcontractid)
+        
+        self.assertNotEqual(tempcontractgoal.goaldescription,mycontractgoal.goaldescription)
+        
+        # Cancel revision
+        mycontract.revise(actiontype='cancel')
+        
+        # Verify no changes made
+        mycontract = refresh_contract(mycontract)
+        mycontractgoal_after = ContractGoal.objects.get(contractid=mycontractgoal.contractid, goalid=mycontractgoal.goalid)
+        self.assertEqual(mycontractgoal.goaldescription,mycontractgoal_after.goaldescription)
+
+        # Verify original contract revision fields reset
+        self.assertIsNone(mycontract.tempcontractid)
+        self.assertEqual(mycontract.contractstatus,'A')
+
+        # Verify temp contract was deleted
+        tempcontract = refresh_contract(tempcontract)
+        self.assertIsNone(tempcontract)
 
     def testContractGoals(self):
         

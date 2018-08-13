@@ -15,14 +15,19 @@
 		</form>
 		<br><br>
 	{% endif %}
-	{% if record.contractstatus == "A" %}
+	{% if record.contractstatus in "A,R" %}
 		{% if record.revisioneligibilityflag %}
-			<form style="display:inline-block" action="{% url 'wakemeup:index '%}" method="post">
+			<form style="display:inline-block" action="{% url 'wakemeup:create_contract_revise' contractid=value %}" method="post">
 			    {% csrf_token %}
 				<input class="btn btn-xs btn-danger" name="revise" type="submit" value="Modificar"/>
 			</form>
 		{% else %}
-			<i>Ya pas&#243; la fecha tope para<br>modificar el contrato.<br>({{record.revisiondeadlinets|date}})</i><br><br>
+			{% if record.revisionapprovalts %}
+				Ya se modific&#243; el contrato<br>({{ record.revisionapprovalts|date }})
+			{% else %}
+				<i>Ya pas&#243; la fecha tope para<br>modificar el contrato<br>({{record.revisiondeadlinets|date}})</i>
+			{% endif %}
+			<br><br>
 		{% endif %}
 		<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
 		    {% csrf_token %}
