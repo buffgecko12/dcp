@@ -6,9 +6,10 @@
 
 {% block content %}
 	<div class="container-fluid">
-		<h1 class="display-4">
-			Metas
-		</h1>
+
+		<span class="h1 align-middle display-4">Metas</span>&nbsp;
+		{% if revisionflag %}<span class="badge badge-danger align-middle">Modificaci&#243;n</span>{% endif %}
+	
 		<form method="post" id="goalsForm" novalidate 
 			data-rewards-url="{% url 'wakemeup:ajax_load_rewards' %}" 
 		>

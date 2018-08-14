@@ -447,15 +447,15 @@ def create_contract(request, contractid):
     contractid_effective = get_effective_contractid(contractid)
 
     if(contractid != contractid_effective):
-        revisionFlag = True
+        revisionflag = True
     else:
-        revisionFlag = False
+        revisionflag = False
     
     # SAVE CONTRACT
     if request.method == "POST" and 'submit_other' not in request.POST: # Ignore submits from other forms
 
         # Create form instance (bind data to form)
-        form = ContractForm(request.POST, request=request, contractid=contractid_effective)
+        form = ContractForm(request.POST, request=request, contractid=contractid_effective, revisionflag = revisionflag)
 
         if(form.is_valid()):
 
@@ -509,11 +509,11 @@ def create_contract(request, contractid):
                 mycontract.change_status('D')
 
             # Return to main page
-            return redirect('wakemeup:create_contract_goals', contractid = contractid if revisionFlag else mycontract.contractid)
+            return redirect('wakemeup:create_contract_goals', contractid = contractid if revisionflag else mycontract.contractid)
               
     # NEW CONTRACT
     elif(contractid == 'new'):
-        form = ContractForm(request=request, contractid=contractid,initial={'contractstatus':'D'})
+        form = ContractForm(request=request, contractid=contractid,initial={'contractstatus':'D'}, revisionflag=revisionflag)
         
     # EDIT EXISTING CONTRACT
     else:
@@ -525,7 +525,7 @@ def create_contract(request, contractid):
             if(mycontract.contractstatus in ('D','P') and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
                 contractvalidperiod = display_timestamp_range(mycontract.contractvalidperiod)
 
-                form = ContractForm(request=request, contractid=contractid_effective,
+                form = ContractForm(request=request, contractid=contractid_effective, revisionflag=revisionflag,
                     initial = {
                         'contractid': mycontract.contractid,
                         'teacheruserid': mycontract.teacheruserid,
@@ -544,7 +544,7 @@ def create_contract(request, contractid):
         else:
             return redirect_home()
         
-    return render(request, 'wakemeup/contract/edit_contract.html', {'form': form})
+    return render(request, 'wakemeup/contract/edit_contract.html', {'form': form,'revisionflag':revisionflag})
 
 @check_permissions
 def create_contract_goals(request, contractid):
@@ -553,15 +553,15 @@ def create_contract_goals(request, contractid):
     contractid_effective = get_effective_contractid(contractid)
 
     if(contractid != contractid_effective):
-        revisionFlag = True
+        revisionflag = True
     else:
-        revisionFlag = False
+        revisionflag = False
     
     # SAVE GOALS
     if request.method == "POST":
 
         # Create form instance (bind data to form)
-        form = ContractGoalsForm(request.POST, contractid=contractid_effective)
+        form = ContractGoalsForm(request.POST, contractid=contractid_effective, revisionflag=revisionflag)
 
         if(form.is_valid()):
 
@@ -631,7 +631,7 @@ def create_contract_goals(request, contractid):
                         }
                     )
         
-                form = ContractGoalsForm(contractid=contractid_effective, initial = initial_data)
+                form = ContractGoalsForm(contractid=contractid_effective, initial = initial_data, revisionflag=revisionflag)
             else:
                 # Unauthorized access
                 return redirect_home() 
@@ -639,7 +639,7 @@ def create_contract_goals(request, contractid):
             # Unauthorized access
             return redirect_home() 
 
-    return render(request, 'wakemeup/contract/edit_contract_goals.html', {'form': form, 'addRewardForm': RewardForm()})
+    return render(request, 'wakemeup/contract/edit_contract_goals.html', {'form': form, 'revisionflag':revisionflag})
 
 @check_permissions
 def create_contract_submit(request, contractid):
@@ -648,28 +648,33 @@ def create_contract_submit(request, contractid):
     contractid_effective = get_effective_contractid(contractid)
 
     if(contractid != contractid_effective):
-        revisionFlag = True
+        revisionflag = True
     else:
-        revisionFlag = False
+        revisionflag = False
 
     # SUBMIT
     if(request.method == "POST"):
 
-        # Go to previous page
-        if('submit_previous' in request.POST):
-            return redirect('wakemeup:create_contract_goals',contractid=contractid)
+        # Lookup original contract info
+        mycontract_orig = Contract.objects.get(contractid=contractid)
+
+        # Discard revision
+        if('submit_discard' in request.POST):
+            mycontract_orig.revise(actiontype='cancel')
+
+            # Return to contract list            
+            return redirect('wakemeup:contract_list')
         
-        form = ContractSubmitForm(request.POST, contractid=contractid_effective)
+        form = ContractSubmitForm(request.POST, contractid=contractid_effective, revisionflag=revisionflag)
         
         if(form.is_valid()):
 
             # Lookup contract info
             mycontract = Contract.objects.get(contractid=contractid_effective)
-            mycontract_orig = Contract.objects.get(contractid=contractid)
 
             # Submit Contract: REVISION
             if(mycontract_orig.tempcontractid):
-                mycontract_orig.revise('submit','Some revision description') # TO-DO: Add form field for revision description
+                mycontract_orig.revise(actiontype='submit',revisiondescription=form.cleaned_data.get('revisiondescription'))
             else:
                 # Set contract status to pending
                 mycontract.change_status('P') 
@@ -707,11 +712,12 @@ def create_contract_submit(request, contractid):
                 
                 # Prepare context info
                 context = {
-                    'form':ContractSubmitForm(contractid = contractid_effective),
+                    'form':ContractSubmitForm(contractid = contractid, revisionflag=revisionflag),
                     'contract':mycontract,
                     'classinfo':classinfo,
                     'contractinfo':contractinfo, #Contains budget info
-                    'teacherbudgetinfo':teacherbudgetinfo
+                    'teacherbudgetinfo':teacherbudgetinfo,
+                    'revisionflag':revisionflag,
                 } 
         
                 return render(request, 'wakemeup/contract/edit_contract_submit.html', context)
@@ -1098,7 +1104,6 @@ def contract_detail(request, contractid):
             
             # Prepare context info
             context = {
-                'form':ContractSubmitForm(contractid = contractid),
                 'contract':mycontract,
                 'classinfo':classinfo,
                 'contractinfo':contractinfo, #Contains budget info

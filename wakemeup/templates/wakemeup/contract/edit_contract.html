@@ -10,9 +10,8 @@
 
 {% block content %}
 	<div class="container-fluid">
-		<h1 class="display-4">
-			General
-		</h1>
+		<span class="h1 align-middle display-4">General</span>&nbsp;
+		{% if revisionflag %}<span class="badge badge-danger align-middle">Modificaci&#243;n</span>{% endif %}
 		<br>
 		<form method="post" id="contractForm" novalidate 
 			data-teachers-url="{% url 'wakemeup:ajax_load_teachers' %}" 

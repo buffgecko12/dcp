@@ -11,8 +11,6 @@ from django.forms.widgets import HiddenInput
 from .models.environment import School, Class, Teacher, TeacherBudget, Student
 from .models.contract import Contract, ContractInfo, Reward, ContractParty
 
-from django.contrib.postgres.forms import RangeWidget
-
 import datetime
 
 from users.models import UserBadge
@@ -578,6 +576,7 @@ class ContractForm(forms.Form):
         # Extract request argument
         request = kwargs.pop("request")
         contractid = kwargs.pop("contractid")
+        revisionflag = kwargs.pop("revisionflag", None)
 
         # Call base class constructor (i.e. Teacher Form)
         super(ContractForm, self).__init__(*args, **kwargs)
@@ -603,6 +602,13 @@ class ContractForm(forms.Form):
         self.helper.form_tag = False # Disable auto-generation of <form> tags
         self.fields['initialbudget'].initial = mybudget
         self.fields['initialcontractvalue'].initial = myinitialcontractvalue or 0
+        
+        # Disable fields when in revision mode
+        if(revisionflag):
+            self.fields['revisiondeadlinets'].widget.attrs['readonly'] = True
+            self.fields['classid'].widget.attrs['readonly'] = True
+            self.fields['teacheruserid'].widget.attrs['readonly'] = True
+            self.fields['revisiondeadlinets'].widget.attrs['class'] = '' # Reset CSS class so datepicker doesn't open
         
         # Set form layout
         self.helper.layout = Layout(
@@ -770,7 +776,7 @@ class ContractGoalsForm(forms.Form):
         if not (mynumrewards > mycontractpartycount):
             return self.cleaned_data.get('e_maxnumrewards')
         else:
-            raise forms.ValidationError('El numero de premios (' + str(mynumrewards) + ') no puede superar el numero de participantes (' + str(mycontractpartycount) + ')')
+            raise forms.ValidationError('El n' + mychr('u') + 'mero de premios (' + str(mynumrewards) + ') no puede superar el n' + mychr('u') + 'mero de participantes (' + str(mycontractpartycount) + ')')
 
     def clean_m_maxnumrewards(self):
         mynumrewards = int(self.cleaned_data.get('m_maxnumrewards') or 0)
@@ -779,7 +785,7 @@ class ContractGoalsForm(forms.Form):
         if not (mynumrewards > mycontractpartycount):
             return self.cleaned_data.get('m_maxnumrewards')
         else:
-            raise forms.ValidationError('El numero de premios (' + str(mynumrewards) + ') no puede superar el numero de participantes (' + str(mycontractpartycount) + ')')
+            raise forms.ValidationError('El n' + mychr('u') + 'mero de premios (' + str(mynumrewards) + ') no puede superar el n' + mychr('u') + 'mero de participantes (' + str(mycontractpartycount) + ')')
 
     def clean_d_maxnumrewards(self):
         mynumrewards = int(self.cleaned_data.get('d_maxnumrewards') or 0)
@@ -788,12 +794,13 @@ class ContractGoalsForm(forms.Form):
         if not (mynumrewards > mycontractpartycount):
             return self.cleaned_data.get('d_maxnumrewards')
         else:
-            raise forms.ValidationError('El numero de premios (' + str(mynumrewards) + ') no puede superar el numero de participantes (' + str(mycontractpartycount) + ')')
+            raise forms.ValidationError('El n' + mychr('u') + 'mero de premios (' + str(mynumrewards) + ') no puede superar el n' + mychr('u') + 'mero de participantes (' + str(mycontractpartycount) + ')')
 
     def __init__ (self, *args, **kwargs):
 
         # Extract contractid
         contractid = kwargs.pop("contractid")
+        revisionflag = kwargs.pop("revisionflag", None)
         
         # Call base class constructor (i.e. Teacher Form)
         super(ContractGoalsForm, self).__init__(*args, **kwargs)
@@ -866,20 +873,43 @@ class ContractSubmitForm(forms.Form):
     def __init__(self, *args, **kwargs):
         
         contractid = kwargs.pop("contractid")
+        revisionflag = kwargs.pop("revisionflag", None)
         
         #Call base class constructor
         super(ContractSubmitForm, self).__init__(*args, **kwargs)
-        
+
         # Set form helper properties
         self.helper = FormHelper()
         setFormHelper(self.helper)
-        
+
         # Set form layout
         self.helper.layout = Layout(
             'contractid',
-            FormActions(
+        )
+
+        # Add revision field (if required)
+        if(revisionflag):
+            self.fields['revisiondescription'] = forms.CharField(
+                label='<i>Descripci' + mychr('o') + 'n de los cambios al contrato original</i>', 
+                max_length=500, 
+                widget=forms.Textarea(attrs={"rows":"5","cols":"20"}),
+                required=False
+            )
+            
+            self.helper.layout.append('revisiondescription')
+
+        myformactions = FormActions(
                 HTML("""<a class="btn btn-secondary" href="{% url 'wakemeup:index' %}">Cancelar</a> """),
                 Submit('submit_next','Enviar'),
-                Submit('submit_previous','Previo',css_class='btn btn-info'),
+#                 Submit('submit_previous','Previo',css_class='btn btn-info'),
+                HTML("""<a class="btn btn-info" href="{% url '""" + 'wakemeup:create_contract_goals' + """' """ + 'contractid=' + str(contractid) + """ %}">Previo</a> """),
             )
-        )
+
+        # Add discard button for revisions
+        if(revisionflag):
+            myformactions.append(
+                Submit('submit_discard','Descartar', css_class='btn btn-danger')
+            )
+
+        # Add form action buttons
+        self.helper.layout.append(myformactions)
