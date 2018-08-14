@@ -39,7 +39,6 @@
 	<script src="{% static 'wakemeup/js/contract/addrewardmodal.js' %}"></script>
 	
 	<script>
-	
 		// Show modal: get new form
 		$("#addRewardModal").on('show.bs.modal', function(e) {
 			update_rewardform("new")
@@ -73,7 +72,7 @@
 
 				// Open "Add reward" modal if "add" button is clicked
 		        var optionvalue = $(this).val();
-		        if(optionvalue=="-1"){
+		        if(optionvalue.includes("-1")){
 		        	$('#addRewardModal').modal("show");
 		        }
 		    });
