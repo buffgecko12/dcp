@@ -79,13 +79,13 @@ class ContractManager(models.Manager):
 
 class ContractGoalManager(models.Manager):
     def all(self):
-        return self.get_contract_goals(None, None, None)
+        return self.get_contract_goals()
     
     def get(self, contractid, goalid = None):
         return get_data_pk(self, 'SP_DCPGetContractGoal(%s,%s,%s)', (contractid, goalid, None))
     
-    def get_contract_goals(self, contractid = None, goalid = None, difficultylevel = None):
-        return get_data(self, 'SP_DCPGetContractGoal(%s,%s,%s)', (contractid, goalid, difficultylevel))
+    def get_contract_goals(self, contractid = None, goalid = None, difficultylevel = None, acceptedflag = None):
+        return get_data(self, 'SP_DCPGetContractGoal(%s,%s,%s,%s)', (contractid, goalid, difficultylevel, acceptedflag))
     
     def save(self, myContractGoal):
         return save_data('SP_DCPUpsertContractGoal', 
