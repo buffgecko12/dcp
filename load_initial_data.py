@@ -318,7 +318,7 @@ def load_rewards():
         ('Pizza', 'Pizza y gaseosa.', 5000),
         ('Hamburguesa', 'Hamburguesa y gaseoas.', 5000),
         ('Guatika', 'Tiquete a Guatika.', 25000),
-        ('B' + mychr('a') + 'lon de f' + mychr('u') + 'tbol', '', 15000)
+        ('B' + mychr('a') + 'lon de f' + mychr('u') + 'tbol', 'B' + mychr('a') + 'lon de f' + mychr('u') + 'tbol', 15000)
     ]
 
     for reward in reward_list:
