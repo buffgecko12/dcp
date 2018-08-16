@@ -46,13 +46,17 @@ $("#NotificationInboxIcon").on("click", function() {
 		data : {'actiontype':'loadnotifications'},
 		success: function(data) {
 			$("#NotificationInboxItems").html(data);
+			setTimeout(
+				function() {
+					clearNotifications();
+				},
+				2000
+			)
 		}
 	})
 });
 
-// NOTIFICATIONS - Hide dropdown
-$("#NotificationInboxDropdown").on("hide.bs.dropdown", function(){
-
+function clearNotifications() {
 	// Clear notifications
 	$.ajax({
 		url : manageUrl,
@@ -60,5 +64,11 @@ $("#NotificationInboxDropdown").on("hide.bs.dropdown", function(){
 		success: function(data) {
 			$("#NotificationInboxIcon").attr('style','fill:grey;cursor:pointer;'); // Change inbox icon to grey
 		}
-	})
-  });
+	})	
+}
+
+/*
+// NOTIFICATIONS - Hide dropdown
+$("#NotificationInboxDropdown").on("hide.bs.dropdown", function(){
+	clearNotifications();
+*/
