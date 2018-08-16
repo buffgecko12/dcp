@@ -273,6 +273,8 @@ class ClassForm(forms.Form):
         required=False
     )
 
+    gradelevel = forms.IntegerField(label='Grado', max_value=12, min_value=1)
+
     # Define constructor
     def __init__ (self, *args, **kwargs):
 
@@ -294,7 +296,8 @@ class ClassForm(forms.Form):
                 'Crear/editar curso',
                 'classid',
                 'schoolid',
-                'classdisplayname',
+                Field('classdisplayname', css_class='w-50'),
+                Field('gradelevel', css_class='w-50'),
                 'students',
             ),
             getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="class"')

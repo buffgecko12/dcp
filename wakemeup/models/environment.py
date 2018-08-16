@@ -83,7 +83,8 @@ class ClassManager(models.Manager):
         return save_data('SP_DCPUpsertClass', (
             myClass.classid,
             myClass.schoolid,
-            myClass.classdisplayname
+            myClass.classdisplayname,
+            myClass.gradelevel
             )
         )[0] # Return classid
     
@@ -265,6 +266,7 @@ class Class(models.Model):
     schoolid = models.IntegerField(verbose_name='School ID')
     schooldisplayname = models.CharField(max_length=100, verbose_name='Colegio') # Derived field
     classdisplayname = models.CharField(max_length=100, verbose_name='Curso')
+    gradelevel = models.IntegerField(verbose_name='Grado')
 
     class Meta:
         managed = False

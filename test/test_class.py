@@ -11,8 +11,8 @@ class testClass(unittest.TestCase):
         newschoolid = newschool.save()
         
         # Create new class object
-        newclass = Class(classid = None, schoolid = newschoolid, classdisplayname = 'New class 1')
-        newclass2 = Class(classid = None, schoolid = newschoolid, classdisplayname = 'New class 2')
+        newclass = Class(classid = None, schoolid = newschoolid, classdisplayname = 'New class 1', gradelevel=8)
+        newclass2 = Class(classid = None, schoolid = newschoolid, classdisplayname = 'New class 2', gradelevel=9)
 
         self.assertEqual(newclass.classdisplayname, 'New class 1')
     

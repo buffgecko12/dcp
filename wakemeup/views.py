@@ -943,6 +943,7 @@ def edit_object(request, objecttype, objectid):
                     classid = form.cleaned_data.get('classid'),
                     schoolid = form.cleaned_data.get('schoolid'),
                     classdisplayname = form.cleaned_data.get('classdisplayname'),
+                    gradelevel = form.cleaned_data.get('gradelevel'),
                 )
                 
                 students = form.cleaned_data.get('students')
@@ -1058,6 +1059,7 @@ def edit_object(request, objecttype, objectid):
                         'classid': myobject.classid,
                         'schoolid': myobject.schoolid,
                         'classdisplayname': myobject.classdisplayname,
+                        'gradelevel': myobject.gradelevel,
                     }
                 )
             
