@@ -27,15 +27,7 @@
 			<div class="col col-sm-9">{{ contract.revisiondeadlinets|date:'d/m/Y' }}</div>
 		</div>
 		<br>
-		<legend><u>Participantes</u></legend>
-		{% for party in contract.partyuserinfo.currentparties %}
-
-		<div class="row">
-			<div class="col col-sm-3">{{ party.firstname }} {{ party.lastname }}</div>
-		</div>
-		{% endfor %}
-		<br>
-
+		
 		<legend><u>Metas</u></legend>
 		{% for goal in contract.goalinfo.currentgoals %}
 			<strong>Opci&#243;n 
@@ -49,6 +41,15 @@
 
 			<br><br>
 		{% endfor %}
+
+		<legend><u>Participantes</u></legend>
+		{% for party in contract.partyuserinfo.currentparties %}
+
+		<div class="row">
+			<div class="col col-sm-3">{{ party.firstname }} {{ party.lastname }}</div>
+		</div>
+		{% endfor %}
+		<br>
 
 		<legend><u>Presupuesto</u></legend>
 		<div class="row">
