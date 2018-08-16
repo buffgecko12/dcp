@@ -34,12 +34,19 @@ def load_schools_classes():
     glv_classinfo = [
         '701','702','703','704','705','706',
         '801','802','809','810','811','812',
-        '901', '902', '903', '904', '905', '906', '907', '908', '909', '910', '911', '912', \
-        '1001','1002','1003','1004','1005','1006','1007','1008','1009','1010','1011', \
+        '901', '902', '903', '904', '905', '906', '907', '908', '909', '910', '911', '912',
+        '1001','1002','1003','1004','1005','1006','1007','1008','1009','1010','1011',
         '1101','1102','1103','1104','1105','1106','1107','1108','1109','1110','1111'
      ]
     
-    rr_classinfo = ['601','602','707','708','801','1201']
+    rr_classinfo = [
+        '601','602','603','604','605',
+        '701','702','703','704','705',
+        '801','802','803','804',
+        '901','902','903','904',
+        '1001','1002','1003','1004','1005',
+        '1201'
+    ]
     
     school_list = [
         ('GLV','Guillermo Leon Valencia Colegio (sede integrado)','GLV (Integrado)', 'Calle 15A Nro 7 - 48','Duitama','Boyaca',glv_classinfo),
@@ -97,20 +104,27 @@ def load_users():
         ('Suleima','Ferrer',GLV_SCHOOLID,['904'],),
         ('Alba Nelly','Salamanca',GLV_SCHOOLID,['901'],),
         ('Diana','Vera',GLV_SCHOOLID,['1102'],),
-        ('Diego','Cruz',GLV_SCHOOLID,['701'],),
+        ('Diego Fernando','Cruz',GLV_SCHOOLID,['701'],),
         ('Clara','Sanchez',GLV_SCHOOLID,['907'],),
         ('Adriana','Saenz',GLV_SCHOOLID,['1003'],),
         ('Liliana','Lizarazo',GLV_SCHOOLID,['1001'],),
         ('Lorena','Rojas',GLV_SCHOOLID,['1002'],),
         ('Doris','Avella',GLV_SCHOOLID,['706'],),
         ('Patricia','Conde',GLV_SCHOOLID,['911'],),
+        ('Zulma','Barreto',GLV_SCHOOLID,['812'],),
+        ('Tatiana','Chinome',GLV_SCHOOLID,['810'],),
+
 
         ('Omaira','Rincon',GLV_SCHOOLID,['809'],),
         ('Gladys','Piracon',GLV_SCHOOLID,['811'],),
+        ('David','TennisMachine',ITIRR_SCHOOLID,['1201'],),
 
         
-        ('Elizabeth','Moreno',ITIRR_SCHOOLID,['601','602','801','1201'],),
-        ('David','TennisMachine',ITIRR_SCHOOLID,['707','708'],),
+        
+        ('Elizabeth','Moreno Garc' + mychr('i') + 'a',ITIRR_SCHOOLID,['601','602','603','604','605','801','802'],),
+        ('Sandra Patricia','Agudelo Acero',ITIRR_SCHOOLID,['701','702','703','704','705','803','804',],),
+        ('Diego','Mari' + mychr('n') + 'o Mart' + mychr('i') + 'nez',ITIRR_SCHOOLID,['1001','1002'],),
+        ('Jaime William','Corredor',ITIRR_SCHOOLID,['901','902','903','904','1003','1004','1005'],),
         
         
     ]
@@ -278,19 +292,22 @@ def load_users():
         ('Manuel Fernando','Vargas',GLV_SCHOOLID,'706'),
         ('Yimi Alexander','Pamplona',GLV_SCHOOLID,'706'),
         
-
-
-        ('Christopher','Khosravi',ITIRR_SCHOOLID,'1201'),
-        ('Fernando','Becerra',ITIRR_SCHOOLID,'1201'),
-
-        ('Roger','Federer',ITIRR_SCHOOLID,'707'),
-        ('Novak','Djokovic',ITIRR_SCHOOLID,'707'),
-        ('Rafael','Nadal',ITIRR_SCHOOLID,'707'),
-        ('Stefan','Edberg',ITIRR_SCHOOLID,'707'),
-        ('Carolina','Wozniacki',ITIRR_SCHOOLID,'708'),
-        ('Anna','Kournikova',ITIRR_SCHOOLID,'708'),
-        ('Ana','Ivanovic',ITIRR_SCHOOLID,'708'),
+        # Tatiana - 810
+        ('Milton','Camacho',GLV_SCHOOLID,'810'),
+        ('Angel David','Quinones',GLV_SCHOOLID,'810'),
+        ('Jose Miguel','Vargas',GLV_SCHOOLID,'810'),
+        ('Juan Jose','Pamplona',GLV_SCHOOLID,'810'),
         
+        # Zulma - 812
+        ('Edgar','Camacho',GLV_SCHOOLID,'812'),
+        ('Samuel','Quinones',GLV_SCHOOLID,'812'),
+        ('Carlos','Vargas',GLV_SCHOOLID,'812'),
+        ('Juan Miguel','Pamplona',GLV_SCHOOLID,'812'),
+
+        ('Roger','Federer',ITIRR_SCHOOLID,'1201'),
+        ('Novak','Djokovic',ITIRR_SCHOOLID,'1201'),
+        ('Rafael','Nadal',ITIRR_SCHOOLID,'1201'),
+        ('Stefan','Edberg',ITIRR_SCHOOLID,'1201'),        
     ]
 
     for student in student_list:
