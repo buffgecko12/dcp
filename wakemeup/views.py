@@ -461,6 +461,7 @@ def create_contract(request, contractid):
 
             mycontract = Contract(
                 contractid = form.cleaned_data.get('contractid'),
+                contractname = form.cleaned_data.get('contractname'),
                 teacheruserid = form.cleaned_data.get('teacheruserid'),
                 classid = form.cleaned_data.get('classid'),
                 contracttype = form.cleaned_data.get('contracttype'),
@@ -528,6 +529,7 @@ def create_contract(request, contractid):
                 form = ContractForm(request=request, contractid=contractid_effective, revisionflag=revisionflag,
                     initial = {
                         'contractid': mycontract.contractid,
+                        'contractname': mycontract.contractname,
                         'teacheruserid': mycontract.teacheruserid,
                         'classid': mycontract.classid,
                         'contracttype': mycontract.contracttype,

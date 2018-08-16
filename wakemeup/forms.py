@@ -547,6 +547,7 @@ class RewardForm(forms.Form):
 class ContractForm(forms.Form):
 
     contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)
+    contractname = forms.CharField(label='Nombre de contrato',max_length=100)
     teacheruserid = forms.CharField(label='Docente', widget=forms.Select)
     classid = forms.CharField(label='Curso', widget=forms.Select)
     contracttype = forms.CharField(max_length=1,label='Tipo de contrato',widget=forms.HiddenInput, required=False)
@@ -616,6 +617,7 @@ class ContractForm(forms.Form):
         # Set form layout
         self.helper.layout = Layout(
             'contractid',
+            'contractname',
             'contractstatus',
             'contracttype',
             'initialcontractvalue',
@@ -643,7 +645,7 @@ class ContractForm(forms.Form):
 
     class Meta:
         model = Contract
-        fields = ('contractid','teacheruserid','classid','partyuserinfo','contractvalidperiod','revisiondeadlinets','contractstatus','contracttype')
+        fields = ('contractid','contractname','teacheruserid','classid','partyuserinfo','contractvalidperiod','revisiondeadlinets','contractstatus','contracttype')
 
 class ContractPartyAcceptForm(forms.Form):
 

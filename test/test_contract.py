@@ -104,6 +104,7 @@ class testContracts(unittest.TestCase):
         # Create new contract
         newcontract = Contract(
             None, # contractid
+            'My new contract', # contractname
             newclass.classid, 
             None, # classdisplayname
             'G', # contracttype
