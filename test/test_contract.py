@@ -172,7 +172,7 @@ class testContracts(unittest.TestCase):
         self.assertIsNone(mycontract.revisionapprovalts)
 
         # Revise contract (user clicks "revise" button)
-        tempcontractid = mycontract.revise(actiontype='revise')
+        tempcontractid = mycontract.revise(actiontype='revise')['tempcontractid']
 
         # Check that new temp contract was generated
         tempcontract = Contract.objects.get(contractid=tempcontractid)
@@ -211,7 +211,7 @@ class testContracts(unittest.TestCase):
         self.assertEqual(mycontract.contractstatus,'A')
 
         # Revise contract again
-        tempcontractid = mycontract.revise(actiontype='revise')
+        tempcontractid = mycontract.revise(actiontype='revise')['tempcontractid']
 
         # Verify contact status set
         mycontract = refresh_contract(mycontract)

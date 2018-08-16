@@ -1,38 +1,44 @@
 <div class="text-nowrap">
 {% if request.user.is_admin or record.teacheruserid == request.user.userid %}
-	{% if record.contractstatus == "D" or record.contractstatus == "P" %}
-		{% if record.contractstatus == "D" or record.partyapprovalcount == 0 %}
-			<form style="display:inline-block" action="{% url 'wakemeup:create_contract' contractid=value %}" method="post">
+	{% if not record.revisionapprovalts %}
+		{% if record.contractstatus == "D" or record.contractstatus == "P" %}
+			{% if record.contractstatus == "D" or record.partyapprovalcount == 0 %}
+				<form style="display:inline-block" action="{% url 'wakemeup:create_contract' contractid=value %}" method="post">
+				    {% csrf_token %}
+					<input class="btn btn-xs btn-primary" name="submit_other" type="submit" value="Editar"/>
+				</form>
+			{% else %}
+				<i>No se puede editar ya que<br>ya se aprob&#243; por {{ record.partyapprovalcount }} persona{{record.partyapprovalcount|pluralize:",s"}}</i><br><br>
+			{% endif %}
+			<form style="display:inline-block" action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=value %}" method="post">
 			    {% csrf_token %}
-				<input class="btn btn-xs btn-primary" name="submit_other" type="submit" value="Editar"/>
+				<input class="btn btn-xs btn-warning cancel_confirm" name="delete" type="submit" value="Borrar"/>
 			</form>
-		{% else %}
-			<i>No se puede editar ya que<br>ya se aprob&#243; por {{ record.partyapprovalcount }} persona{{record.partyapprovalcount|pluralize:",s"}}</i><br><br>
 		{% endif %}
-		<form style="display:inline-block" action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=value %}" method="post">
-		    {% csrf_token %}
-			<input class="btn btn-xs btn-warning cancel_confirm" name="delete" type="submit" value="Borrar"/>
-		</form>
-		<br><br>
 	{% endif %}
-	{% if record.contractstatus in "A,R" %}
+	{% if record.contractstatus in "A,R,P" %}
 		{% if record.revisioneligibilityflag %}
-			<form style="display:inline-block" action="{% url 'wakemeup:create_contract_revise' contractid=value %}" method="post">
+			{% if record.contractstatus != "P" %}
+				<form style="display:inline-block" action="{% url 'wakemeup:create_contract_revise' contractid=value %}" method="post">
+				    {% csrf_token %}
+					<input class="btn btn-xs btn-danger modify_confirm" name="revise" type="submit" value="Modificar"/>
+				</form>
+			{% endif %}
+		{% endif %}
+		{% if record.contractstatus != "P" %}
+			<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
 			    {% csrf_token %}
-				<input class="btn btn-xs btn-danger" name="revise" type="submit" value="Modificar"/>
+				<input class="btn btn-xs btn-success" name="finalize" type="submit" value="Finalizar"/>
 			</form>
-		{% else %}
+		{% endif %}
+		{% if not record.revisioneligibilityflag %}
+			<br><br>
 			{% if record.revisionapprovalts %}
 				Ya se modific&#243; el contrato<br>({{ record.revisionapprovalts|date }})
 			{% else %}
 				<i>Ya pas&#243; la fecha tope para<br>modificar el contrato<br>({{record.revisiondeadlinets|date}})</i>
 			{% endif %}
-			<br><br>
-		{% endif %}
-		<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
-		    {% csrf_token %}
-			<input class="btn btn-xs btn-success" name="finalize" type="submit" value="Finalizar"/>
-		</form>
+		{% endif %}		
 	{% endif %}
 {% endif %}
 </div>

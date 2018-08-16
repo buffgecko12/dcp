@@ -35,15 +35,16 @@ class ContractManager(models.Manager):
             )
         )[0]
 
-    def revise(self, myContract, actiontype, revisiondescription):
+    def revise(self, myContract, actiontype, revisiondescription, revisionrevoteflag):
         return save_data('SP_DCPReviseContract', 
             (
                 myContract.contractid, 
                 actiontype,
-                revisiondescription
+                revisiondescription,
+                revisionrevoteflag
             )
         )[0]
-
+        
     def change_status(self, myContract, contractstatus):
         return save_data('SP_DCPChangeContractStatus', 
             (
@@ -58,31 +59,46 @@ class ContractManager(models.Manager):
     def delete(self, myContract, sendnotifications):
         return delete_data('SP_DCPDeleteContract', (myContract.contractid, sendnotifications, ))
 
-    def get_emails(self, myContract, emailtype):
+    def get_emails(self, myContract, emailtype, useridlist):
         emails = []
 
         # Get contract party e-mails
         if(emailtype == "party"):
-            
-            for contractparty in myContract.partyuserinfo['currentparties']:
-                emails.append(contractparty['emailaddress'])
-        
+
+            # Include all contract parties
+            if(not useridlist):
+                for contractparty in myContract.partyuserinfo['currentparties']:
+                    emails.append(contractparty['emailaddress'])
+                    
+            # Include specific contract parties
+            else:
+                for contractparty in myContract.partyuserinfo['currentparties']:
+                    if(int(contractparty['partyuserid']) in useridlist):
+                        emails.append(contractparty['emailaddress'])
+                
         # Get teacher e-mail
         elif(emailtype == "teacher"):
             emails.append(Teacher.objects.get(teacheruserid = myContract.teacheruserid).emailaddress)
 
         return emails
 
-    def send_emails(self, myContract, email_subject, email_body):
-        send_email(subject=email_subject, body=email_body, to_list=myContract.get_emails("party"))
-        send_email(subject=email_subject, body=email_body, to_list=myContract.get_emails("teacher"))
+    def send_emails(self, myContract, email_subject, email_body, useridlist):
+
+        # Only send e-mails to specified users
+        if(useridlist):
+            send_email(subject=email_subject, body=email_body, to_list=myContract.get_emails(emailtype="party", useridlist=useridlist))
+
+        # Send e-mails to all contract parties
+        else:
+            send_email(subject=email_subject, body=email_body, to_list=myContract.get_emails(emailtype="party"))
+            send_email(subject=email_subject, body=email_body, to_list=myContract.get_emails(emailtype="teacher"))
 
 class ContractGoalManager(models.Manager):
     def all(self):
         return self.get_contract_goals()
     
     def get(self, contractid, goalid = None):
-        return get_data_pk(self, 'SP_DCPGetContractGoal(%s,%s,%s)', (contractid, goalid, None))
+        return get_data_pk(self, 'SP_DCPGetContractGoal(%s,%s,%s,%s)', (contractid, goalid, None, None))
     
     def get_contract_goals(self, contractid = None, goalid = None, difficultylevel = None, acceptedflag = None):
         return get_data(self, 'SP_DCPGetContractGoal(%s,%s,%s,%s)', (contractid, goalid, difficultylevel, acceptedflag))
@@ -221,8 +237,8 @@ class Contract(models.Model):
     def save(self):
         return Contract.objects.save(self)
     
-    def revise(self, actiontype, revisiondescription = None):
-        return Contract.objects.revise(self, actiontype, revisiondescription)
+    def revise(self, actiontype, revisiondescription = None, revisionrevoteflag = None):
+        return Contract.objects.revise(self, actiontype, revisiondescription, revisionrevoteflag)
     
     def delete(self, sendnotifications = True):
         return Contract.objects.delete(self, sendnotifications)
@@ -233,11 +249,11 @@ class Contract(models.Model):
     def change_status(self, contractstatus):
         return Contract.objects.change_status(self, contractstatus)
 
-    def get_emails(self, emailtype):
-        return Contract.objects.get_emails(self, emailtype)
+    def get_emails(self, emailtype, useridlist = None):
+        return Contract.objects.get_emails(self, emailtype, useridlist)
 
-    def send_emails(self, email_subject, email_body):
-        return Contract.objects.send_emails(self, email_subject, email_body)
+    def send_emails(self, email_subject, email_body, useridlist = None):
+        return Contract.objects.send_emails(self, email_subject, email_body, useridlist)
 
 class ContractGoal(models.Model):
     

@@ -674,7 +674,24 @@ def create_contract_submit(request, contractid):
 
             # Submit Contract: REVISION
             if(mycontract_orig.tempcontractid):
-                mycontract_orig.revise(actiontype='submit',revisiondescription=form.cleaned_data.get('revisiondescription'))
+                revise_results = mycontract_orig.revise(
+                    actiontype='submit',
+                    revisiondescription=form.cleaned_data.get('revisiondescription'),
+                    revisionrevoteflag=form.cleaned_data.get('revisionrevoteflag'),
+                )
+
+                # Get any newly added parties
+                mynewparties = revise_results.get('newparties')
+
+                # Send e-mails to users in "new parties" list (if any)
+                if(mynewparties):
+                    mycontract.send_emails(
+                        email_subject = 'Duitama Colegio Project - Contrato nuevo (#' + str(contractid) + ')',
+                        email_body = 'Se envi' + mychr('o') + ' un contrato nuevo: ' + \
+                            request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':contractid})),
+                        useridlist = mynewparties
+                    )
+
             else:
                 # Set contract status to pending
                 mycontract.change_status('P') 

@@ -887,29 +887,30 @@ class ContractSubmitForm(forms.Form):
             'contractid',
         )
 
+        # Give the form an id
+        self.helper.attrs={'id':'contract_submit_form'}
+
         # Add revision field (if required)
         if(revisionflag):
             self.fields['revisiondescription'] = forms.CharField(
-                label='<i>Descripci' + mychr('o') + 'n de los cambios al contrato original</i>', 
+                label='<i>Descripci' + mychr('o') + 'n de los cambios al contrato original</i>' + \
+                      '<div align="left"><input type="submit" name="submit_discard" value="Descartar cambios" class="btn btn-warning btn-xs discard_confirm"/></div>' if revisionflag else '', 
                 max_length=500, 
                 widget=forms.Textarea(attrs={"rows":"5","cols":"20"}),
                 required=False
             )
+            self.fields['revisionrevoteflag'] = forms.BooleanField(
+                label='&#191;Nueva votaci&#243;n por parte de los integrantes?',
+                required=False
+            )
             
-            self.helper.layout.append('revisiondescription')
-
-        myformactions = FormActions(
-                HTML("""<a class="btn btn-secondary" href="{% url 'wakemeup:index' %}">Cancelar</a> """),
-                Submit('submit_next','Enviar'),
-#                 Submit('submit_previous','Previo',css_class='btn btn-info'),
-                HTML("""<a class="btn btn-info" href="{% url '""" + 'wakemeup:create_contract_goals' + """' """ + 'contractid=' + str(contractid) + """ %}">Previo</a> """),
-            )
-
-        # Add discard button for revisions
-        if(revisionflag):
-            myformactions.append(
-                Submit('submit_discard','Descartar', css_class='btn btn-danger')
-            )
+            self.helper.layout.extend(['revisiondescription','revisionrevoteflag'])
 
         # Add form action buttons
-        self.helper.layout.append(myformactions)
+        self.helper.layout.append(
+            FormActions(
+                HTML("""<a class="btn btn-secondary" href="{% url 'wakemeup:index' %}">Cancelar</a> """),
+                Submit('submit_next','Enviar', css_class="modify_confirm" if revisionflag else "send_confirm", css_id="submit_next"),
+                HTML("""<a class="btn btn-info " href="{% url '""" + 'wakemeup:create_contract_goals' + """' """ + 'contractid=' + str(contractid) + """ %}">Previo</a> """),
+            )
+        )

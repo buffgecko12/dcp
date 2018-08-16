@@ -66,3 +66,65 @@
 		{% crispy form %}
 	</div>
 {% endblock %}
+
+{% block bodyimport %}
+	<script>
+		// Helper function to check for empty input
+		function is_empty(myval) {
+			var myval = myval.replace(/ /g,'')
+			return (myval.length == 0)
+		}
+	
+		// CONFIRM: Cancel
+		$(".discard_confirm").click(function(event) {
+			if(!confirm('\u00BFEst\u00E1 seguro que desee descartar los cambios a este contrato?')) {
+				event.preventDefault();
+				return false;
+			} else {
+				return true;
+			}
+		});
+
+		// CONFIRM: Modify
+		$(".modify_confirm").click(function(event) {
+			var revisionrevoteflag = document.getElementById('id_revisionrevoteflag').checked
+			bootbox_confirm('contract_submit_form',
+				'Se puede modificar este contrato s&#243;lo una vez.&nbsp;&nbsp;' + 
+				'Al enviar sus cambios, no se puede volver a modificar el contrato.<br><br>' + 
+				(revisionrevoteflag ? 
+						'<b>Importante</b><br><i>Eligi&#243 una nueva votaci&#243n por parte de los integrantes.' + 
+						'&nbsp;&nbsp;Tendr&#225n que escoger sus preferencias de meta de nuevo.</i><br><br>' 
+						: ''
+				) + 
+				'&#191;Desee continuar?'
+			)
+		});
+	
+		// CONFIRM: Send
+		$(".send_confirm").click(function(event) {
+			bootbox_confirm('contract_submit_form',
+				'Al enviar este contrato, se notificar&#225;n a los integrantes.&nbsp;&nbsp;' + 
+				'Una vez aceptado por un integrante, no podr&#225; editar el contrato.' + 
+				'<br><br>&#191;Desee continuar?'
+			)
+		});
+
+		// Disable submit until revision description is entered
+		$(document).ready(function(){
+			var revisiondescriptionfield = document.getElementById('id_revisiondescription')
+			var submitbutton = document.getElementById("submit_next");
+				
+			if(revisiondescriptionfield) {
+				submitbutton.disabled = true;
+				
+				$(revisiondescriptionfield).keyup(function() {
+					if(is_empty($(this).val())) {
+						submitbutton.disabled = true;
+					} else {
+						submitbutton.disabled = false;
+					}
+				})
+			}
+		});
+	</script>
+{% endblock %}

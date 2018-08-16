@@ -38,6 +38,30 @@
 		</div>
 		{% endif %}<br>
 		
+		<legend><u>Metas</u></legend>
+		{% for goal in contract.goalinfo.currentgoals %}
+			<div {% if goal.acceptedflag %} class="bg-light" {% elif contract.contractstatus == "A" %} class="text-muted"{% endif %}>
+				<strong>
+					Opci&#243;n 
+					{% if goal.difficultylevel == "E" %} Fac&#237;l
+					{% elif goal.difficultylevel == "M" %} Media
+					{% elif goal.difficultylevel == "D" %} Dif&#237;cil
+					{% endif %}
+				</strong>
+				
+				{% if goal.acceptedflag %} 
+					<img src="{% static 'img/web_check.png' %}" />
+				{% endif %}
+				
+				<br>
+				<i>{{ goal.goaldescription }}</i><br>
+
+				{% include "wakemeup/contract/include/rewardoptions.html" %}
+			
+				<br>
+			</div>
+		{% endfor %}<br>
+		
 		<legend><u>Participantes</u></legend>
 		<div class="row">
 			<div class="col text-center"><strong>Preferencias de meta</strong></div>
@@ -100,29 +124,17 @@
 			</form>
 		{% endfor %}<br>
 		
-		<legend><u>Metas</u></legend>
-		{% for goal in contract.goalinfo.currentgoals %}
-			<div {% if goal.acceptedflag %} class="bg-light" {% elif contract.contractstatus == "A" %} class="text-muted"{% endif %}>
-				<strong>
-					Opci&#243;n 
-					{% if goal.difficultylevel == "E" %} Fac&#237;l
-					{% elif goal.difficultylevel == "M" %} Media
-					{% elif goal.difficultylevel == "D" %} Dif&#237;cil
-					{% endif %}
-				</strong>
-				
-				{% if goal.acceptedflag %} 
-					<img src="{% static 'img/web_check.png' %}" />
-				{% endif %}
-				
-				<br>
-				<i>{{ goal.goaldescription }}</i><br>
-
-				{% include "wakemeup/contract/include/rewardoptions.html" %}
-			
-				<br><br>
+		{% if contract.revisionapprovalts %}
+			<legend><u>Modificaciones</u></legend>
+			<div class="row">
+				<div class="col col-sm-3">Fecha</div>
+				<div class="col col-sm-9">{{ contract.revisionapprovalts|date}}</div>
 			</div>
-		{% endfor %}
+			<div class="row">
+				<div class="col col-sm-3">Descripci&#243;n</div>
+				<div class="col col-sm-9">{{ contract.revisiondescription }}</div>
+			</div>
+		{% endif %}
 	</div>
 	
 	<!-- Accept contract modal -->
