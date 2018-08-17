@@ -880,6 +880,9 @@ class ContractSubmitForm(forms.Form):
         contractid = kwargs.pop("contractid")
         revisionflag = kwargs.pop("revisionflag", None)
         
+        # Lookup contract info
+        mycontract = Contract.objects.get(contractid=contractid)
+        
         #Call base class constructor
         super(ContractSubmitForm, self).__init__(*args, **kwargs)
 
@@ -915,7 +918,12 @@ class ContractSubmitForm(forms.Form):
         self.helper.layout.append(
             FormActions(
                 HTML("""<a class="btn btn-secondary" href="{% url 'wakemeup:index' %}">Cancelar</a> """),
-                Submit('submit_next','Enviar', css_class="modify_confirm" if revisionflag else "send_confirm", css_id="submit_next"),
+                Submit(
+                    'submit_next',
+                    'Modificar' if revisionflag else 'Actualizar' if mycontract.contractstatus == "P" else 'Enviar',
+                    css_class="modify_confirm" if revisionflag else "" if mycontract.contractstatus == "P" else "send_confirm", 
+                    css_id="submit_next"
+                ),
                 HTML("""<a class="btn btn-info " href="{% url '""" + 'wakemeup:create_contract_goals' + """' """ + 'contractid=' + str(contractid) + """ %}">Previo</a> """),
             )
         )

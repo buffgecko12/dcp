@@ -685,6 +685,8 @@ def create_contract_submit(request, contractid):
                 # Get any newly added parties
                 mynewparties = revise_results.get('newparties')
 
+                # TO-DO: Send e-mails to original users
+
                 # Send e-mails to users in "new parties" list (if any)
                 if(mynewparties):
                     mycontract.send_emails(
@@ -707,12 +709,12 @@ def create_contract_submit(request, contractid):
                             request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':contractid}))
                     )
                     
-                # Submit Contract: MODIFICATION
+                # Submit Contract: UPDATE
                 elif(mycontract_orig.contractstatus == 'P'):
                     # Send e-mails
                     mycontract.send_emails(
-                        email_subject = 'Duitama Colegio Project - Contrato (#' + str(contractid) + ') ha sido modificado',
-                        email_body = 'Su contrato (#' + str(contractid) + ') ha sido modificado: ' + \
+                        email_subject = 'Duitama Colegio Project - Contrato (#' + str(contractid) + ') ha sido actualizado',
+                        email_body = 'Su contrato (#' + str(contractid) + ') ha sido actualizado: ' + \
                             request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':contractid}))
                     )
 
