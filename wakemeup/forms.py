@@ -18,8 +18,8 @@ from users.models import UserBadge
 from lib.UsefulFunctions.stringUtils import *
 
 DEFAULT_FORM_CLASS = 'form-horizontal'
-DEFAULT_LABEL_CLASS = 'col-sm-3'
-DEFAULT_FIELD_CLASS = 'col-sm-9'
+DEFAULT_LABEL_CLASS = 'col-sm-4'
+DEFAULT_FIELD_CLASS = 'col-sm-8'
 DEFAULT_FORM_METHOD = 'POST'
 
 def validate_emailaddress(userid, emailaddress):
@@ -82,7 +82,7 @@ class LoginForm(AuthenticationForm):
 
         # Set helper properties
         self.helper = FormHelper() 
-        setFormHelper(self.helper, label_class = 'col-sm-4', field_class = 'col-sm-8')
+        setFormHelper(self.helper)
         
         # Set form layout
         self.helper.layout = Layout(
@@ -547,33 +547,42 @@ class RewardForm(forms.Form):
 class ContractForm(forms.Form):
 
     contractid = forms.IntegerField(widget=forms.HiddenInput, required=False)
-    contractname = forms.CharField(label='Nombre de contrato',max_length=100)
+    contractname = forms.CharField(label='Actividad',max_length=100)
     teacheruserid = forms.CharField(label='Docente', widget=forms.Select)
     classid = forms.CharField(label='Curso', widget=forms.Select)
     contracttype = forms.CharField(max_length=1,label='Tipo de contrato',widget=forms.HiddenInput, required=False)
     partyuserinfo = forms.CharField(label='Participantes', widget=forms.SelectMultiple)
-    contractvalidperiod = forms.CharField(label='Plazo', widget=forms.TextInput(attrs={'class':'daterangeinputfieldempty','placeholder':'MM/DD/YYYY - MM/DD/YYYY'}))
-    revisiondeadlinets = forms.DateField(label='Fecha tope para revisar', widget=forms.DateInput(attrs={'class':'dateinputfield','placeholder':'MM/DD/YYYY'}))
+    contractvalidstartdate = forms.DateField(label='Desde',widget=forms.DateInput(attrs={'class':'dateinputfield','placeholder':'MM/DD/YYYY'}))
+    contractvalidenddate = forms.DateField(label='Hasta',widget=forms.DateInput(attrs={'class':'dateinputfield','placeholder':'MM/DD/YYYY'}))
+    revisiondeadlinets = forms.DateField(label='', widget=forms.DateInput(attrs={'placeholder':'MM/DD/YYYY'}))
     contractstatus = forms.CharField(max_length=1,label='Estatus', widget=forms.HiddenInput, required=False)
 
     # Fields used for javascript and form navigation between pages
     initialbudget = forms.IntegerField(widget=forms.HiddenInput, required=False)
     initialcontractvalue = forms.IntegerField(widget=forms.HiddenInput, required=False)
 
-    def clean_contractvalidperiod(self):
-        contractvalidperiod = self.cleaned_data.get("contractvalidperiod")
-        contractvalidperiod_array = contractvalidperiod.split(" - ")
-        
-        try:
-            startdate = datetime.datetime.strptime(contractvalidperiod_array[0],'%d/%m/%Y')
-            enddate = datetime.datetime.strptime(contractvalidperiod_array[1],'%d/%m/%Y')
-        except ValueError:
-            raise forms.ValidationError("Formato invalido.  Por favor utilizar este formato: DD/MM/YYYY - DD/MM/YYYY")
+    def clean(self):
+        mycontractvalidstartdate = self.cleaned_data.get('contractvalidstartdate')
+        mycontractvalidenddate = self.cleaned_data.get('contractvalidenddate')
+        myrevisiondeadlinets = self.cleaned_data.get('revisiondeadlinets')
+
+        # Only proceed if valid data provided
+        if(mycontractvalidstartdate and mycontractvalidenddate and myrevisiondeadlinets):
+            if(not mycontractvalidstartdate <= mycontractvalidenddate):
+                msg = "La fecha de fin debe ser despu" + mychr('e') + "s de la fecha de inicio"
+                self.add_error('contractvalidstartdate', msg)
     
-        if(startdate > enddate):
-            raise forms.ValidationError("La fecha de inico debe ser antes de la fecha de termino.")
+            if(not mycontractvalidstartdate <= myrevisiondeadlinets <= mycontractvalidenddate):
+                msg = "La fecha tope para revisar debe ser entre del plazo del contrato"
+                self.add_error('revisiondeadlinets', msg)
     
-        return contractvalidperiod_array
+            # Calculate 70% date of contract period
+            contract_length = mycontractvalidenddate - mycontractvalidstartdate
+            contract_middate = mycontractvalidstartdate + (contract_length * .70)
+            
+            if(not myrevisiondeadlinets <= contract_middate):
+                msg = "La fecha tope para revisar debe ser " + str(contract_middate) + " o antes"
+                self.add_error('revisiondeadlinets',msg)
 
     def __init__ (self, *args, **kwargs):
 
@@ -602,7 +611,7 @@ class ContractForm(forms.Form):
 
         # Set form helper properties
         self.helper = FormHelper()
-        setFormHelper(self.helper)
+        setFormHelper(self.helper, label_class = 'col-sm-3', field_class = 'col-sm-9')
         self.helper.form_tag = False # Disable auto-generation of <form> tags
         self.fields['initialbudget'].initial = mybudget
         self.fields['initialcontractvalue'].initial = myinitialcontractvalue or 0
@@ -610,8 +619,10 @@ class ContractForm(forms.Form):
         # Disable fields when in revision mode
         if(revisionflag):
             self.fields['revisiondeadlinets'].widget.attrs['readonly'] = True
+            self.fields['contractvalidstartdate'].widget.attrs['readonly'] = True
             self.fields['classid'].widget.attrs['readonly'] = True
             self.fields['teacheruserid'].widget.attrs['readonly'] = True
+            self.fields['contractvalidstartdate'].widget.attrs['class'] = '' # Reset CSS class so datepicker doesn't open
             self.fields['revisiondeadlinets'].widget.attrs['class'] = '' # Reset CSS class so datepicker doesn't open
         
         # Set form layout
@@ -625,13 +636,22 @@ class ContractForm(forms.Form):
             Fieldset(
                 'Participantes',
                 'teacheruserid',
-                'classid',
+                Field('classid',css_class='w-50'),
                 'partyuserinfo',
             ),
             Fieldset(
                 'Fechas',
-                'contractvalidperiod',
-                'revisiondeadlinets',
+                Div(
+                    Div(HTML('Plazo'), css_class='col-sm-3'),
+                    Div('contractvalidstartdate', css_class='col'),
+                    Div('contractvalidenddate', css_class='col'),
+                    css_class='row',
+                ),
+                Div(
+                    Div(HTML('Fecha tope para revisar*<br><div id="revisiondeadlinets_info"></div>'), css_class='col-sm-3'),
+                    Div('revisiondeadlinets', css_class='col-sm-6'),
+                    css_class='row',
+                )
             ),
             FormActions(
                 HTML("""<a class="btn btn-secondary" id="submit_cancel" href="{% url 'wakemeup:index' %}">Cancelar</a> """),
@@ -645,7 +665,7 @@ class ContractForm(forms.Form):
 
     class Meta:
         model = Contract
-        fields = ('contractid','contractname','teacheruserid','classid','partyuserinfo','contractvalidperiod','revisiondeadlinets','contractstatus','contracttype')
+        fields = ('contractid','contractname','teacheruserid','classid','partyuserinfo','contractvalidstartdate','contractvalidenddate','revisiondeadlinets','contractstatus','contracttype')
 
 class ContractPartyAcceptForm(forms.Form):
 
@@ -697,7 +717,7 @@ class ContractPartyAcceptForm(forms.Form):
                         elif(field == "idissuedate"):
                             self.fields['idissuedate'] = forms.CharField(
                                 label='Fecha de expedici' + mychr('o') + 'n', 
-                                widget=forms.DateInput(attrs={'class':'dateinputfield','placeholder':'DD/MM/YYYY'})
+                                widget=forms.DateInput(attrs={'placeholder':'DD/MM/YYYY'})
                             )
 
                         # Add field to fieldset

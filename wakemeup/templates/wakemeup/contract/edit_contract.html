@@ -27,11 +27,141 @@
 {% block bodyimport %}
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment-with-locales.min.js"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-	<script src="{% static 'wakemeup/js/daterangepicker.js' %}"></script>
 	<script src="{% static 'wakemeup/js/contract/updatebudgetdisplay.js' %}"></script>
 	<script>
-	    var contractId = $("#id_contractid").val();
 
+		var contractId = $("#id_contractid").val();
+		var dateFormat = "DD/MM/YYYY";
+    
+		// Check if this is a revision
+		var revisionflag = false
+		
+		if('{{revisionflag}}' == 'True') {
+			revisionflag = true
+		}
+
+		// HELPER FUNCTION: Date difference
+	    function dateDiff(startdate, enddate) {
+	    	var mydiff = enddate.diff(startdate, 'days')
+	    	
+	    	return isNaN(mydiff) ? undefined : mydiff
+	    }
+
+		// DATEPICKER: Pop-up for date fields
+		$(function() {
+		  moment.locale('es');
+		  $('.dateinputfield').daterangepicker({
+			autoUpdateInput: false,
+		    singleDatePicker: true,
+			  minDate: '01/08/2018',
+			  maxDate: '01/12/2018',
+		    drops: 'up',
+		    opens: 'center'
+		  });
+		
+		  // DATEPICKER: Apply handler
+		  $('.dateinputfield').on('apply.daterangepicker', function(ev, picker) {
+		      $(this).val(picker.startDate.format('DD/MM/YYYY'));
+		      update_revisiondeadline_info();
+		  });
+		});    	
+    	
+		// VALIDATION: Verify all form fields are filled
+		function validateForm() {
+			var isValid = true;
+			$('#id_contractname, #id_teacheruserid, #id_classid, #id_partyuserinfo, #id_contractvalidstartdate, #id_contractvalidenddate, #id_revisiondeadlinets').each(function() {
+				if ( $(this).val() == '' )
+				isValid = false;
+			});
+			return isValid;
+		}		
+		
+    	// VALIDATION: Submit button handler
+    	$("#submit_next").click(function(event){
+    		if(!validateForm()) {
+    			alert('Por favor rellene todos los campos obligatorios.')
+        		event.preventDefault();
+    		}
+    	})
+
+		// REVISION DEADLINE: Update max revision deadline display
+	    function update_revisiondeadline_info() {
+			// Don't update info for "Revision" view
+			if(!revisionflag) {
+				var revisiondeadlinets = $("#id_revisiondeadlinets")
+				var contractvalidstartdate = $("#id_contractvalidstartdate")
+				var contractvalidenddate = $("#id_contractvalidenddate")
+				
+				var revisionresetflag = true
+				
+				// Convert dates to "moment" objects
+				var startdate = moment(contractvalidstartdate.val(), dateFormat)
+				var enddate = moment(contractvalidenddate.val(), dateFormat)
+	
+				var displaymsg = ""
+				
+				// Calculate max revision deadline
+				var datediff = dateDiff(startdate, enddate)
+				
+				// Determine max revision date (if two valid dates have been provided)
+				if(datediff >= 0) {
+					var minstartdate = startdate.format(dateFormat)
+					
+					var maxdatediff = Math.floor(datediff * .70)
+					var maxrevisiondeadlinets = startdate.add(maxdatediff, 'day')
+					
+					// Set new display message
+			        displaymsg = '<small><i><strong>No m&#225;s tardar ' + maxrevisiondeadlinets.format(dateFormat) + '<strong></i></small>';
+	
+			        // Update revision deadline datepicker calendar
+					revisiondeadlinets.daterangepicker({
+						autoUpdateInput: false,
+					    singleDatePicker: true,
+						  minDate: minstartdate,
+						  maxDate: maxrevisiondeadlinets.format(dateFormat),
+					    drops: 'up',
+					    opens: 'center'
+					})
+					
+					// Re-create apply handler
+					$('#id_revisiondeadlinets').on('apply.daterangepicker', function(ev, picker) {
+					    $(this).val(picker.startDate.format('DD/MM/YYYY'));
+					});
+	
+			        // Enable revisiondeadlinets field
+			        revisionresetflag = false
+			        
+			        // Check to make sure any previous revisiondeadlinets value is still valid with new timeframe
+			        if(revisiondeadlinets.val()) {
+			        	var datediff = dateDiff(moment(revisiondeadlinets.val(),dateFormat), maxrevisiondeadlinets)
+	
+			        	if(dateDiff && datediff < 0) {
+			        		revisionresetflag = true
+			        	}
+			        }
+				}
+	
+				// Toggle revisiondeadlinets field
+				if(revisionresetflag) {
+					revisiondeadlinets.val('')
+				}
+				
+				//Update display and submit button
+				$("#revisiondeadlinets_info").html(displaymsg);
+			}
+	    }
+	    
+	    // REVISION DEADLINE: Start/End date listeners
+	    $("#id_contractvalidstartdate,#id_contractvalidenddate").on('keyup change', function(e) {
+	    	update_revisiondeadline_info()
+	    })
+	    
+		// REWARDS: Max num rewards listeners
+	    $('#id_e_maxnumrewards,#id_m_maxnumrewards,#id_d_maxnumrewards').on('keyup change', function(e) {
+	    	update_budget(); // Set initial budget
+	    });	    
+	    
+    	// BUDGET: Update function
 		function update_budget() {
 			var url = $("#contractForm").attr("data-contractinfo-url");
 		    
@@ -124,9 +254,10 @@
 	        })
 	    };
 
-	    // DROP-DOWNS: Initialize
+	    // DOCUMENT READY: Initialize
 		$(document).ready(function(){
 			update_teachers();
+	    	update_revisiondeadline_info()
 		});
 	</script>
 {% endblock %}

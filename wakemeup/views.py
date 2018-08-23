@@ -465,7 +465,7 @@ def create_contract(request, contractid):
                 teacheruserid = form.cleaned_data.get('teacheruserid'),
                 classid = form.cleaned_data.get('classid'),
                 contracttype = form.cleaned_data.get('contracttype'),
-                contractvalidperiod = format_timestamp_range_db(form.cleaned_data.get('contractvalidperiod'),'%d/%m/%Y'),
+                contractvalidperiod = format_timestamp_range_db(form.cleaned_data.get('contractvalidstartdate'),form.cleaned_data.get('contractvalidenddate')),
                 revisiondeadlinets = form.cleaned_data.get('revisiondeadlinets'),
                 contractstatus = form.cleaned_data.get('contractstatus'),
                 guardianapprovalflag = False,
@@ -524,7 +524,6 @@ def create_contract(request, contractid):
         if(mycontract):
             # Populate existing form only for "Draft" contracts and if user is contract's owner or super / admin user
             if(mycontract.contractstatus in ('D','P') and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
-                contractvalidperiod = display_timestamp_range(mycontract.contractvalidperiod)
 
                 form = ContractForm(request=request, contractid=contractid_effective, revisionflag=revisionflag,
                     initial = {
@@ -533,7 +532,8 @@ def create_contract(request, contractid):
                         'teacheruserid': mycontract.teacheruserid,
                         'classid': mycontract.classid,
                         'contracttype': mycontract.contracttype,
-                        'contractvalidperiod': contractvalidperiod,
+                        'contractvalidstartdate': mycontract.contractvalidperiod.lower,
+                        'contractvalidenddate': mycontract.contractvalidperiod.upper,
                         'revisiondeadlinets': mycontract.revisiondeadlinets,
                         'contractstatus': mycontract.contractstatus,
                     }

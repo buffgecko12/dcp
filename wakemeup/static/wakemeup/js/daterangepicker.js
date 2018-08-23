@@ -22,23 +22,3 @@ $(function() {
       $(this).val('');
   });
 });
-
-// DATEPICKER: Single date function
-$(function() {
-  $('.dateinputfield').daterangepicker({
-	autoUpdateInput: false,
-    singleDatePicker: true,
-    minYear: 2018,
-    maxYear: parseInt(moment().format('YYYY'),10)
-  });
-
-  // Set initial values to empty
-  $('.dateinputfield').on('apply.daterangepicker', function(ev, picker) {
-      $(this).val(picker.startDate.format('DD/MM/YYYY'));
-  });
-
-  $('.dateinputfield').on('cancel.daterangepicker', function(ev, picker) {
-      $(this).val('');
-  });
-});
-
