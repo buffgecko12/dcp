@@ -3,6 +3,7 @@
 from django.db import models
 from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
+from lib.UsefulFunctions.emailUtils import send_email
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
@@ -102,6 +103,12 @@ class MyUserManager(BaseUserManager):
             )
         
         return picture_choices
+    
+    def send_email(self, myUser, email_subject, email_body):
+        
+        # Send e-mail (if address exists)
+        if(myUser.emailaddress):
+            send_email(subject=email_subject, body=email_body, to_list=[myUser.emailaddress,])
     
 class UserReputationEventManager(models.Manager):
     
@@ -220,6 +227,9 @@ class MyUser(AbstractBaseUser):
     # TO-DO: possibly remove
     def add_notification(self, notificationid, contractid = None):
         return MyUser.objects.add_notification(self, notificationid, contractid)
+        
+    def send_email(self, email_subject = None, email_body = None):
+        return MyUser.objects.send_email(self, email_subject, email_body)
         
     def is_admin(self):
         if(self.userrole == 'A' or self.userrole == 'S'):

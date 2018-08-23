@@ -1242,7 +1242,12 @@ def add_user(request):
 
             # Store variables to reuse
             username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
+
+            # Generate password (if not provided)
+            if(not form.cleaned_data.get('password1')):
+                raw_password = get_user_model().objects.make_random_password()
+            else:
+                raw_password = form.cleaned_data.get('password1')
 
             # Check if username is an e-mail address
             try:
@@ -1271,15 +1276,34 @@ def add_user(request):
                 userrole = form.cleaned_data.get('userrole'),
             )
 
+            # Send confirmation / review e-mail (only if e-mail provided)
+            newuser.send_email(
+                email_subject = "Duitama Colegio Project - Nueva cuenta de usuario",
+                email_body = 'Se ha creado una nueva cuenta de usuario.  Se puede iniciar una nueva sesi' + mychr('o') + 'n aqu' + mychr('i') + ': ' + \
+                             request.build_absolute_uri(reverse('login')) + '\n\n' + 
+                             'Nombre de usuario: ' + newuser.username + '\n' + \
+                             'Contrase' + mychr('n') + 'a: ' + raw_password + '\n' + \
+                             'Nombre(s): ' + newuser.firstname + '\n' + \
+                             'Apellido(s): ' + newuser.lastname + '\n' + \
+                             'Correo: ' + newuser.emailaddress + '\n\n' + \
+                             'Para cambiar su contrase' + mychr('n') + 'a, iniciar una sesi' + mychr('o') + 'n y haga click en "Mi Cuenta --> Cuenta"' + '\n\n' + \
+                             'Saludos, ' + '\n\n' + \
+                             'Duitama Colegio Project'
+            )
+
             # If student, save additional data
             if(form.cleaned_data.get('usertype') == "ST"):
                 mystudent = Student(studentuserid=newuser.userid,classid=form.cleaned_data.get("classid"))
                 mystudent.save()
 
             # Go back to index page
-            return redirect_home()
+            return render(request, 'wakemeup/admin/add_user_confirmation.html', {'userinfo':newuser, 'raw_password':raw_password})
     else:
         # Return empty form
         form = SignupForm(request=request)
         
     return render(request, 'wakemeup/admin/add_user.html', {'form': form})
+
+def reset_password(email, from_email, template='registration/password_reset_email.html'):
+    form = PasswordResetForm({'email':email})
+    return form.save(from_email=from_email, email_template_name=template)

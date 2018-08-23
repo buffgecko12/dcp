@@ -30,8 +30,8 @@ def validate_emailaddress(userid, emailaddress):
     except get_user_model().DoesNotExist:
         useremail = None
 
-    # Ignore validation if e-mail address is unchanged or current user does not have e-mail specified (i.e. new user)
-    if(useremail == emailaddress or not useremail):
+    # Ignore validation if e-mail address is unchanged or current user does not have e-mail specified
+    if(userid and (useremail == emailaddress or not useremail)):
        return emailaddress
     else:
 
@@ -105,8 +105,8 @@ class SignupForm(UserCreationForm):
 
     # Define form fields
     username = forms.CharField(label='Nombre de usuario (o correo)', max_length=50)
-    firstname = forms.CharField(label='Primer nombre', max_length=100)
-    lastname = forms.CharField(label='Apellido', max_length=100)
+    firstname = forms.CharField(label='Nombre(s)', max_length=100)
+    lastname = forms.CharField(label='Apellido(s)', max_length=100)
     usertype = forms.ChoiceField(label='Tipo de usuario',choices=get_user_model().usertype_choices)
     schoolid = forms.ChoiceField(label='Colegio', widget=forms.Select, required=False)
     classid = forms.CharField(label='Curso', widget=forms.Select, required=False)
@@ -127,25 +127,26 @@ class SignupForm(UserCreationForm):
             myschoolid = request.user.schoolid # Can only add students to their own school
             
             self.fields['teacheruserid'].initial = request.user.userid
-            self.fields['usertype'].choices = [("ST","Estudiante")]
-            self.fields['usertype'].initial = "ST"
-            self.fields['usertype'].disabled = True
+            self.fields['usertype'] = forms.CharField(max_length=2,widget=HiddenInput,initial='ST')
+            self.fields['schoolid'] = forms.IntegerField(widget=HiddenInput,initial=myschoolid)
             self.fields['classid'].required=True
-            
-            self.fields['schoolid'].initial = myschoolid
-            self.fields['schoolid'].disabled = True
         else:
             myschoolid = None
+            
+        # Set password fields as optional
+        self.fields['password1'].required=False
+        self.fields['password2'].required=False
             
         self.fields['schoolid'].choices = [("0","-- Escoger colegio --")] + School.objects.school_choices(schoolid=myschoolid)
             
         # Set helper properties
         self.helper = FormHelper()
-        self.helper.form_method = DEFAULT_FORM_METHOD
+        setFormHelper(self.helper)
 
+        # Set form layout
         self.helper.layout = Layout(
             Fieldset(
-                'Crear/editar usuario',
+                'Crear Usuario',
                 'teacheruserid',
                 'username',
                 'usertype',

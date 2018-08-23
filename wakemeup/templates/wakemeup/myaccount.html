@@ -20,6 +20,9 @@
 		  <li class="nav-item">
 		    <a class="nav-link" data-toggle="tab" href="#badges">Medallas</a>
 		  </li>
+		  <li class="nav-item">
+		    <a class="nav-link" data-toggle="tab" href="#account">Cuenta</a>
+		  </li>
 		</ul>
 		
 		<!-- Tab panes -->
@@ -36,6 +39,9 @@
 		  </div>
 		  <div class="tab-pane fade" id="badges">
 			{% render_table badges %}
+		  </div>
+		  <div class="tab-pane fade" id="account">
+			<a href="{% url 'password_reset' %}">Restablecer contrase&#241;a</a>
 		  </div>
 		</div>
     </div>
