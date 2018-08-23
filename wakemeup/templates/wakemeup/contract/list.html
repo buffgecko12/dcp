@@ -6,7 +6,7 @@
 {% block title %}Contratos{% endblock %}
 
 {% block content %}
-	<h4>
+	<legend>
 		{{ "contrato" | title }}s
 		{% if request.user.is_admin or request.user.usertype == "TR" %}
 		<div class="float-right">
@@ -15,7 +15,7 @@
 			</a>
 		</div>
 		{% endif %}
-	</h4>
+	</legend>
 	
 	{% render_table contracts %}
 {% endblock %}	
