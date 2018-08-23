@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Crear usuario - Resumen{% endblock %}
+
+{% block content %}
+	<div class="container-fluid">
+		<legend>Crear Usuario - Revisar</legend>
+		<div class="row">
+			<div class="col col-sm-4"><strong>Nombre de usuario</strong></div>
+			<div class="col col-sm-8">{{ userinfo.username }}</div>
+		</div>
+		<div class="row">
+			<div class="col col-sm-4"><strong>Contrase&#241;a</strong></div>
+			<div class="col col-sm-8">{{ raw_password }}</div>
+		</div>
+		<div class="row">
+			<div class="col col-sm-4"><strong>Nombre(s)</strong></div>
+			<div class="col col-sm-8">{{ userinfo.firstname }}</div>
+		</div>
+		<div class="row">
+			<div class="col col-sm-4"><strong>Apellido(s)</strong></div>
+			<div class="col col-sm-8">{{ userinfo.lastname }}</div>
+		</div>
+		<div class="row">
+			<div class="col col-sm-4"><strong>Correo</strong></div>
+			<div class="col col-sm-8">{{ userinfo.emailaddress }}</div>
+		</div><br>
+		<i>
+		{% if userinfo.emailaddress %}
+		Se envi&#243; un correo a <strong>{{ userinfo.emailaddress }}</strong> con los datos.
+		{% else %}
+		Ya que no se provey&#243; un correo, por favor guarde los datos.
+		{% endif %}
+		</i>
+		<br><br>
+   		<a href="{% url 'wakemeup:add_user' %}" class="btn btn-primary">Crear otra</a>
+   		<a href="{% url 'wakemeup:index' %}" class="btn btn-primary">Inicio</a>
+	</div>
+{% endblock %}

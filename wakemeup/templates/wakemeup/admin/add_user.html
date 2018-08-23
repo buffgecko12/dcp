@@ -17,22 +17,62 @@
 
 {% block bodyimport %}
 <script>
+
+	// VALIDATION: Check e-mail and password fields
+	function validate_form() {
+		var warningmsg = ''
+		
+		var username = $("#id_username").val()
+		var emailaddress = $("#id_emailaddress").val()
+		var password = $("#id_password1").val()
+		
+		if(!password) {
+			warningmsg += "No se especific&#243; una contrase&#241;a.  Se generar&#225; una contrase&#241;a aleatoria.<br><br>"
+		}
+
+		if(!emailaddress && !validateEmail(username)) {
+			warningmsg += "No se especific&#243; un correo.  Por favor guarde los datos de usuario en la siguiente pagina para entregar al usuario.<br><br>"
+		}
+		
+		if(warningmsg != '') {
+			warningmsg = "<strong>Aviso</strong><br>" + warningmsg
+		}
+		
+		return warningmsg
+	};
+
+	function validateEmail(email) 
+	{
+	    var re = /\S+@\S+\.\S+/;
+	    return re.test(email);
+	}
+	
+	// VALIDATION: Submit button listener
+	$("#next").click(function(event) {
+		validationresults = validate_form()
+		if(validationresults != '') {
+			bootbox_confirm('myform', validationresults)
+		}
+	})
+
+	// DROP-DOWNS: Update classes
 	function update_classes() {
 		// Get values from the form
 	    var url = $("#myform").attr("data-classes-url");
 	    var teacherUserId = $("#id_teacheruserid").val();
 
-	    $.ajax({                       		// initialize an AJAX request
-	      url: url,                    		// set the url of the request
+	    $.ajax({
+	      url: url,
 	      data: {
-	        'teacheruserid': teacherUserId, // add the teacheruserid to the GET parameters
+	        'teacheruserid': teacherUserId,
 	      },
-	      success: function (data) {   		// "data" is the return of the "get classes" view call
-	        $("#id_classid").html(data);	// replace the contents of the "classid" field with the class list
+	      success: function (data) {
+	        $("#id_classid").html(data);
 	      }
 	    })
 	};
 	
+	// DOCUMENT READY: Initialize
 	$(document).ready(function(){
 		update_classes();
 	});
