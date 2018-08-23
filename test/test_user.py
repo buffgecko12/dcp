@@ -107,6 +107,9 @@ class testUser(unittest.TestCase):
         myprofilepictures = get_user_model().objects.get_profile_picture_choices(newuser.userid)
         self.assertIsNotNone(myprofilepictures)
 
+        # Test e-mail
+        newuser.send_email(email_subject='test',email_body='test body')
+
         # Delete user
         newuser.delete()
 
