@@ -168,7 +168,6 @@ class ContractsTable(tables.Table):
 
     def render_contractvalidperiod(self, value):
         return display_timestamp(value.lower) + "-\n" + display_timestamp(value.upper)
-#         return display_timestamp_range(value)
     
     def render_teacheruserid(self, record):
         return record.teacherfirstname + ' ' + record.teacherlastname
