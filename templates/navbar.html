@@ -17,10 +17,6 @@
 	<!--  COLLAPSIBLE ITEMS -->		
 	<div class="collapse navbar-collapse" id="collapsibleNavbar">
 		<ul class="nav navbar-nav mr-auto">
-			<!-- ABOUT -->
-			<li class="nav-item dropdown">
-				<a class="nav-link" href="{% url 'wakemeup:about' %}">Acerca de</a>
-			</li>
 			{% if user.is_authenticated %}
 			
 				<!-- CONTRACTS -->
@@ -52,6 +48,11 @@
 					</li>
 				{% endif %}
 			{% endif %}
+			
+			<!-- ABOUT -->
+			<li class="nav-item dropdown">
+				<a class="nav-link" href="{% url 'wakemeup:about' %}">Acerca de</a>
+			</li>
 		</ul>
 		<ul class="nav navbar-nav">
 			{% if user.is_authenticated %}
