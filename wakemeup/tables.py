@@ -167,7 +167,8 @@ class ContractsTable(tables.Table):
     )    
 
     def render_contractvalidperiod(self, value):
-        return display_timestamp_range(value)
+        return display_timestamp(value.lower) + "-\n" + display_timestamp(value.upper)
+#         return display_timestamp_range(value)
     
     def render_teacheruserid(self, record):
         return record.teacherfirstname + ' ' + record.teacherlastname
@@ -191,8 +192,13 @@ class ContractsTable(tables.Table):
     
     class Meta:
         model = Contract
-        exclude = ('contracttype','classid','guardianapprovalflag','contractapprovalts','revisiondescription','revisionapprovalts','revisiondeadlinets','studentleaderrequirements','teacherrequirements','studentrequirements','contractscanfile','teacherfirstname','teacherlastname')
+        exclude = ('contracttype','classid','guardianapprovalflag','contractapprovalts','revisiondescription','revisionapprovalts','studentleaderrequirements','teacherrequirements','studentrequirements','contractscanfile','teacherfirstname','teacherlastname')
         empty_text = EMPTY_TEXT
+        
+        attrs = {
+            'class':'table',
+            'th':{'style':'white-space:nowrap'}
+        }
         
         row_attrs = {
             'class': "clickable-row mouseicon small",
