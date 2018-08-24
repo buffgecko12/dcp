@@ -72,6 +72,7 @@ view_permissions = {
     },
     'contract': NO_PERM_REQUIRED,
     'myaccount': NO_PERM_REQUIRED,
+    'useragreement':NO_PERM_REQUIRED,
 }
 
 def download_file_fromdb(request, fileid):
@@ -363,6 +364,10 @@ def delete_object(request, objecttype, objectid):
 def index(request):
     return render(request, 'wakemeup/index.html')
 
+def about(request):
+    return render(request, 'wakemeup/about.html')
+
+@check_permissions
 def useragreement(request):
     # User has accepted the agreement
     if(request.method == "POST" and request.POST.get('acceptflag')):

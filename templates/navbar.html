@@ -3,20 +3,24 @@
 
 <nav class="navbar navbar-expand-sm bg-light navbar-light sticky-top">
 
-	<!-- Logo -->
+	<!-- LOGO -->
 	<a class="navbar-brand" href="{% url 'wakemeup:index' %}" title="Inicio">
 		<i class="fas fa-home faicon" style="color:grey"></i>
 <!-- 		<img src="{% static 'img/logo.png' %}" height="27" style="display:inline-block"/> -->
 	</a>
 	
-	<!-- Navbar toggler icon -->
+	<!-- NAVBAR TOGGLE ICON -->
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
 		<span class="navbar-toggler-icon"></span>
 	</button>
 
-	<!--  Collapsible items -->		
+	<!--  COLLAPSIBLE ITEMS -->		
 	<div class="collapse navbar-collapse" id="collapsibleNavbar">
 		<ul class="nav navbar-nav mr-auto">
+			<!-- ABOUT -->
+			<li class="nav-item dropdown">
+				<a class="nav-link" href="{% url 'wakemeup:about' %}">Acerca de</a>
+			</li>
 			{% if user.is_authenticated %}
 			
 				<!-- CONTRACTS -->
