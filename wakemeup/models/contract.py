@@ -209,7 +209,7 @@ class RewardManager(models.Manager):
 class Contract(models.Model):
     
     contractid = models.IntegerField(primary_key=True, verbose_name="ID")
-    contractname = models.CharField(max_length=100, verbose_name="Nombre")
+    contractname = models.CharField(max_length=100, verbose_name="Actividad")
     classid = models.IntegerField()
     classdisplayname = models.CharField(max_length=100, verbose_name='Curso')
     contracttype = models.CharField(max_length=1)
