@@ -156,7 +156,11 @@ class ContractsTable(tables.Table):
 
     kwargs={
         'objecttype':'contract', 
-        'objectid': A(objectid)
+        'objectid': A(objectid),
+        'displayinfo': {
+            'buttonsize':'btn-xs', # Contract button size
+            'displaytextflag': True # Target page
+        }
     }
 
     manage_buttons = tables.TemplateColumn(

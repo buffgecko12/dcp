@@ -3,40 +3,44 @@
 	{% if not record.revisionapprovalts %}
 		{% if record.contractstatus == "D" or record.contractstatus == "P" %}
 			{% if record.contractstatus == "D" or record.partyapprovalcount == 0 %}
-				<form style="display:inline-block" action="{% url 'wakemeup:create_contract' contractid=value %}" method="post">
+				<form style="display:inline-block" action="{% url 'wakemeup:create_contract' contractid=record.contractid %}" method="post">
 				    {% csrf_token %}
-					<input class="btn btn-xs btn-primary" name="submit_other" type="submit" value="Editar"/>
+					<input class="btn {{ displayinfo.buttonsize }} btn-primary" name="submit_other" type="submit" value="Editar"/>
 				</form>
 			{% else %}
-				<i>No se puede editar ya que<br>ya se aprob&#243; por {{ record.partyapprovalcount }} persona{{record.partyapprovalcount|pluralize:",s"}}</i><br><br>
+				{% if displayinfo.displaytextflag %}
+					<i>No se puede editar ya que<br>ya se aprob&#243; por {{ record.partyapprovalcount }} persona{{record.partyapprovalcount|pluralize:",s"}}</i><br><br>
+				{% endif %}
 			{% endif %}
-			<form style="display:inline-block" action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=value %}" method="post">
+			<form style="display:inline-block" action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=record.contractid %}" method="post">
 			    {% csrf_token %}
-				<input class="btn btn-xs btn-warning cancel_confirm" name="delete" type="submit" value="Borrar"/>
+				<input class="btn {{ displayinfo.buttonsize }} btn-warning cancel_confirm" name="delete" type="submit" value="Borrar"/>
 			</form>
 		{% endif %}
 	{% endif %}
 	{% if record.contractstatus in "A,R,P" %}
 		{% if record.revisioneligibilityflag %}
 			{% if record.contractstatus != "P" %}
-				<form style="display:inline-block" action="{% url 'wakemeup:create_contract_revise' contractid=value %}" method="post">
+				<form style="display:inline-block" action="{% url 'wakemeup:create_contract_revise' contractid=record.contractid %}" method="post">
 				    {% csrf_token %}
-					<input class="btn btn-xs btn-danger modify_confirm" name="revise" type="submit" value="Modificar"/>
+					<input class="btn {{ displayinfo.buttonsize }} btn-danger modify_confirm" name="revise" type="submit" value="Modificar"/>
 				</form>
 			{% endif %}
 		{% endif %}
 		{% if record.contractstatus != "P" %}
 			<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
 			    {% csrf_token %}
-				<input class="btn btn-xs btn-success" name="finalize" type="submit" value="Finalizar"/>
+				<input class="btn {{ displayinfo.buttonsize }} btn-success" name="finalize" type="submit" value="Finalizar"/>
 			</form>
 		{% endif %}
 		{% if not record.revisioneligibilityflag %}
-			<br><br>
-			{% if record.revisionapprovalts %}
-				Ya se modific&#243; el contrato<br>({{ record.revisionapprovalts|date }})
-			{% else %}
-				<i>Ya pas&#243; la fecha tope para<br>modificar el contrato<br>({{record.revisiondeadlinets|date}})</i>
+			{% if displayinfo.displaytextflag %}
+				<br><br>
+				{% if record.revisionapprovalts %}
+					Ya se modific&#243; el contrato<br>({{ record.revisionapprovalts|date }})
+				{% else %}
+					<i>Ya pas&#243; la fecha tope para<br>modificar el contrato<br>({{record.revisiondeadlinets|date}})</i>
+				{% endif %}
 			{% endif %}
 		{% endif %}		
 	{% endif %}

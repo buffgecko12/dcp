@@ -1140,9 +1140,14 @@ def contract_detail(request, contractid):
             
             # Prepare context info
             context = {
-                'contract':mycontract,
+                'record':mycontract,
+                'objecttype':'contract', # Used for contract button links
                 'classinfo':classinfo,
                 'contractinfo':contractinfo, #Contains budget info
+                'displayinfo': {
+                    'buttonsize':'', # Contract button size
+                    'displaytextflag':False # Hide info text
+                }
             } 
         
             return render(request, 'wakemeup/contract/detail.html', context)

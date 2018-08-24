@@ -13,15 +13,15 @@
 		<h1 class="display-4">
 			Revisar
 		</h1>
-	
+
 		<legend><u>General</u></legend>
 		<div class="row">
 			<div class="col col-sm-3">ID</div>
-			<div class="col col-sm-9">{{ contract.contractid }}</div>
+			<div class="col col-sm-9">{{ record.contractid }}</div>
 		</div>
 		<div class="row">
 			<div class="col col-sm-3">Actividad</div>
-			<div class="col col-sm-9">{{ contract.contractname }}</div>
+			<div class="col col-sm-9">{{ record.contractname }}</div>
 		</div>
 		<div class="row">
 			<div class="col col-sm-3">Curso</div>
@@ -29,13 +29,13 @@
 		</div>
 		<div class="row">
 			<div class="col col-sm-3">Plazo</div>
-			<div class="col col-sm-9">{{ contract.contractvalidperiod_disp }}</div>
+			<div class="col col-sm-9">{{ record.contractvalidperiod_disp }}</div>
 		</div>
 		<div class="row">
 			<div class="col col-sm-3">Fecha tope para revisar</div>
-			<div class="col col-sm-9">{{ contract.revisiondeadlinets|date:'d/m/Y' }}</div>
+			<div class="col col-sm-9">{{ record.revisiondeadlinets|date:'d/m/Y' }}</div>
 		</div>
-		{% if request.user.is_admin or request.user.userid == contract.teacheruserid %}
+		{% if request.user.is_admin or request.user.userid == record.teacheruserid %}
 		<div class="row">
 			<div class="col col-sm-3">Costo</div>
 			<div class="col col-sm-9">${{ contractinfo.contractvalue|intcomma}}</div>
@@ -43,8 +43,8 @@
 		{% endif %}<br>
 		
 		<legend><u>Metas</u></legend>
-		{% for goal in contract.goalinfo.currentgoals %}
-			<div {% if goal.acceptedflag %} class="bg-light" {% elif contract.contractstatus == "A" %} class="text-muted"{% endif %}>
+		{% for goal in record.goalinfo.currentgoals %}
+			<div {% if goal.acceptedflag %} class="bg-light" {% elif record.contractstatus == "A" %} class="text-muted"{% endif %}>
 				<strong>
 					Opci&#243;n 
 					{% if goal.difficultylevel == "E" %} Fac&#237;l
@@ -72,7 +72,7 @@
 		</div>
 		<div class="row">
 			<div class="col"></div>
-			{% for goal in contract.goalinfo.currentgoals %}
+			{% for goal in record.goalinfo.currentgoals %}
 				<div class="col col-2 text-center">
 					<small>
 						<strong>
@@ -86,13 +86,13 @@
 			{% endfor %}
 			<div class="col"><small><strong>Aceptado</strong></small></div>
 		</div>
-		{% for party in contract.partyuserinfo.currentparties %}
+		{% for party in record.partyuserinfo.currentparties %}
 			<form action="" method="post" name="partyForm_{{ party.partyuserid }}">{% csrf_token %}
 				<div class="row">
 					<div class="col form-group">
 						<small>{{ party.firstname }} {{ party.lastname }}</small>
 					</div>
-						{% for goal in contract.goalinfo.currentgoals %}
+						{% for goal in record.goalinfo.currentgoals %}
 							<div class="col col-2 text-center ">
 								{% if party.preferredgoalid %}
 									{% if party.preferredgoalid == goal.goalid %}
@@ -123,31 +123,34 @@
 						</i></small>
 					</div>
 				</div>
-				<input type="hidden" name="contractid" value="{{ contract.contractid }}" />
+				<input type="hidden" name="contractid" value="{{ record.contractid }}" />
 				<input type="hidden" name="partyuserid" value="{{ party.partyuserid }}" />
 			</form>
 		{% endfor %}<br>
 		
-		{% if contract.revisionapprovalts %}
+		{% if record.revisionapprovalts %}
 			<legend><u>Modificaciones</u></legend>
 			<div class="row">
 				<div class="col col-sm-3">Fecha</div>
-				<div class="col col-sm-9">{{ contract.revisionapprovalts|date}}</div>
+				<div class="col col-sm-9">{{ record.revisionapprovalts|date}}</div>
 			</div>
 			<div class="row">
 				<div class="col col-sm-3">Descripci&#243;n</div>
-				<div class="col col-sm-9">{{ contract.revisiondescription }}</div>
+				<div class="col col-sm-9">{{ record.revisiondescription }}</div>
 			</div>
 		{% endif %}
+
+		<!-- MANAGE CONTRACT BUTTONS -->
+		<div class="d-flex justify-content-center">{% include 'wakemeup/admin/fields/contract_buttons.html' %}</div><br>
 	</div>
-	
+
 	<!-- Accept contract modal -->
 	<div class="modal fade" id="acceptContractModal" tabindex="-1" role="dialog">
 	  <div class="modal-dialog modal-dialog-centered" role="document">
 	    <div class="modal-content">
 	      <div class="modal-body">
 			<form method="post" id="acceptContractForm" novalidate name="acceptContractForm"
- 				data-acceptcontract-url="{% url 'wakemeup:contract_accept' contractid=contract.contractid %}"
+ 				data-acceptcontract-url="{% url 'wakemeup:contract_accept' contractid=record.contractid %}"
  				data-redirect-url="{% url 'wakemeup:contract_list' %}"
 				>
 				<div id="mymodaldiv"></div>
@@ -161,6 +164,7 @@
 {% block bodyimport %}
 	<!-- Accept Contract Modal -->
 	<script src="{% static 'wakemeup/js/contract/acceptcontractmodal.js' %}"></script>
+	<script src="{% static 'wakemeup/js/contract/contractmanagebuttons.js' %}"></script>
 	
 	<script>
 		
