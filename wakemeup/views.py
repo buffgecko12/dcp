@@ -1136,7 +1136,7 @@ def contract_detail(request, contractid):
         if(mycontract.contractstatus != 'D'):
             mycontract.contractvalidperiod_disp = display_timestamp_range(mycontract.contractvalidperiod) # Format for display
             classinfo = Class.objects.get(classid=mycontract.classid)
-            contractinfo = ContractInfo.objects.get(contractid)
+            contractinfo = ContractInfo.objects.get(contractid=contractid, allowrevisioncontractflag=True)
             
             # Prepare context info
             context = {

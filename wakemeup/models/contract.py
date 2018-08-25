@@ -172,14 +172,14 @@ class ContractInfoManager(models.Manager):
     def all(self):
         return self.get_contract_info(None)
     
-    def get(self, contractid):
-        return get_data_pk(self, 'SP_DCPGetContractInfo(%s)', (contractid,))
+    def get(self, contractid, allowrevisioncontractflag = None):
+        return get_data_pk(self, 'SP_DCPGetContractInfo(%s,%s)', (contractid, allowrevisioncontractflag))
     
-    def get_contract_info(self, contractid = None):
-        return get_data(self, 'SP_DCPGetContractInfo(%s)', (contractid,))
+    def get_contract_info(self, contractid = None, allowrevisioncontractflag = None):
+        return get_data(self, 'SP_DCPGetContractInfo(%s,%s)', (contractid, allowrevisioncontractflag))
 
-    def get_contract_value(self, teacheruserid = None, contractid = None, numparticipants = None):
-        return get_data(self, 'SP_DCPGetContractValue(%s,%s,%s)', (teacheruserid, contractid, numparticipants,))
+    def get_contract_value(self, teacheruserid = None, contractid = None, numparticipants = None, allowcontractrevisionflag = False):
+        return get_data(self, 'SP_DCPGetContractValue(%s,%s,%s,%s)', (teacheruserid, contractid, numparticipants, allowcontractrevisionflag, ))
 
 class RewardManager(models.Manager):
     def all(self):
