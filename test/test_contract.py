@@ -377,16 +377,16 @@ class testContracts(unittest.TestCase):
         self.assertFalse(getbackupleader)
 
         # Set party attributes
-        getparty.partylogonuserid = 1
+        getparty.partylogonuserid = 2
         getparty.partyapprovalsignature = signaturefile
         getparty.partyapprovalts = datetime.utcnow()
 
         # Setup remaining parties
         getparty3 = ContractParty.objects.get(newcontract.contractid,partyuserid=3)
-        getparty3.partylogonuserid = 1
+        getparty3.partylogonuserid = 2
 
         getparty4 = ContractParty.objects.get(newcontract.contractid,partyuserid=4)
-        getparty4.partylogonuserid = 1
+        getparty4.partylogonuserid = 2
 
         # Approve contract (2 out of required 3 users)
         getparty.approve_contract() # Userid = 2
