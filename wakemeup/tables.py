@@ -2,7 +2,7 @@ import django_tables2 as tables
 from django_tables2.utils import A # alias for accessor
 from .models.environment import School, Class, Teacher, Student
 from .models.contract import Contract, Reward
-from users.models import UserReputationEvent, UserBadge
+from users.models import UserReputationEvent, UserBadge, UserGroup
 
 from lib.UsefulFunctions.dateUtils import display_timestamp_range, display_timestamp
 from lib.UsefulFunctions.stringUtils import mychr
@@ -247,3 +247,28 @@ class UserBadgesTable(tables.Table):
         exclude = ('badgeid','userid','badgeshortname', 'badgelevel', 'profilepictureid', 'profilepicturefilepath', 'profilepicturefilename')
         empty_text = EMPTY_TEXT
         row_attrs={"class":"small"}
+
+class UserGroupsTable(tables.Table):
+
+    objectid = 'groupuserid'
+
+    groupname = tables.Column(verbose_name='Nombre')
+    usernamelist = tables.TemplateColumn(
+        template_name='wakemeup/admin/fields/user_groups.html',
+        verbose_name='Integrantes'
+    )    
+
+    manage_buttons = tables.TemplateColumn(
+        template_name='wakemeup/admin/fields/usergroup_buttons.html',
+        verbose_name='',
+        accessor=A(objectid)
+    )
+
+    class Meta:
+        model = UserGroup
+        empty_text = EMPTY_TEXT
+        fields = ('groupname','usernamelist')
+        row_attrs = {
+            'class': "small",
+        }
+

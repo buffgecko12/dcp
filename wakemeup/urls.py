@@ -20,7 +20,7 @@ urlpatterns = [
     url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward))(/)?$', views.admin_list, name="admin_list"), # Object list
     url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward))/(?P<objectid>\d+)$', views.edit_object, name="edit_object"), # Edit object
     url(r'^admin/(?P<objecttype>(school|class|reward))/(?P<objectid>new)$', views.edit_object, name="edit_object"), # New object
-    url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward|contract))/(?P<objectid>\d+)/delete$', views.delete_object, name="delete_object"), # Delete object    
+    url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward|contract|usergroup))/(?P<objectid>\d+)/delete$', views.delete_object, name="delete_object"), # Delete object    
 
     # User (TO-DO: Move to root)    
     url(r'^admin/add_user', views.add_user, name="add_user"),
@@ -41,6 +41,8 @@ urlpatterns = [
 
     url(r'^ajax/addreward/', views.addreward, name='ajax_add_reward'),
     url(r'^ajax/get-contract-info/', views.get_contract_info, name='ajax_get_contract_info'),
+
+    url(r'^admin/class/(?P<classid>\d+)/usergroup/$', views.edit_usergroup, name="ajax_edit_usergroup"), # Edit user group
 
     # Default (catch all)    
     url(r'.*', views.index, name = "default"),

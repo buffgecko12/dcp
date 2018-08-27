@@ -41,7 +41,7 @@ NO_PERM_REQUIRED = {'all': {'userrole':PERM_ALL, 'usertype':PERM_ALL}}
 view_permissions = {
     'admin_list': {
         'school':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
-        'class':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
+        'class':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
         'teacher':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
         'student':{'userrole':PERM_ADMIN, 'usertype':PERM_STUDENT},
         'reward':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
@@ -51,12 +51,13 @@ view_permissions = {
         'class': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
         'teacher': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
         'student': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
-        'reward': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER}, # TO-DO: Update so user can only delete own objects
-        'contract': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER}, # TO-DO: Update so user can only delete own objects
+        'reward': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
+        'contract': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
+        'usergroup': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
     },
     'edit_object': {
         'school':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
-        'class':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
+        'class':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
         'teacher':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
         'student':{'userrole':PERM_ADMIN, 'usertype':PERM_STUDENT},
         'reward':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
@@ -65,6 +66,9 @@ view_permissions = {
         'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
     },
     'addreward': {
+        'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
+    },
+    'edit_usergroup': {
         'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
     },
     'add_user': {
@@ -210,46 +214,83 @@ def load_classes(request):
     return render(request, 'wakemeup/admin/js/class_dropdown_list_options.html', {'classes': classes, 'classid': classid})
 
 def load_students(request):
-    
+
+    # Contract
     contractid = request.GET.get('contractid')
     classid = request.GET.get('classid')
+    
+    # User groups
+    groupuserid = request.GET.get('groupuserid')
+    useridlist = request.GET.get('useridlist')
+    leaderuserid = request.GET.get('leaderuserid')
 
     if(classid):
         students = Student.objects.getclass(classid=classid) # Lookup students for given class
     else:
         students = []
 
+    selected_user_list = []
+    student_list = []
+    
+     # CONTRACTS
     if(contractid):
+        mycontractparties = ContractParty.objects.get_contract_parties(contractid=contractid)
 
-         # Generate list of students associated with this contract
-        contract_party_list = []
-        contract_parties = ContractParty.objects.get_contract_parties(contractid=contractid)
+        for mycontractparty in mycontractparties:
+            selected_user_list.append(mycontractparty.partyuserid)
 
-        for mycontractparty in contract_parties:
-            contract_party_list.append(mycontractparty.partyuserid)
+    # USER GROUPS
+    elif(classid): 
         
-        # Generate new student list (with appended contract user info)
-        student_list = []
+        # EXISTING GROUP
+        if(groupuserid):
 
-        for mystudent in students:
-            # Set flag to determine whether student is part of contract
-            if(mystudent.studentuserid in contract_party_list):
-                selected = True
+            # LEADER: Mark selected
+            if(useridlist):
+                selected_user_list = [int(leaderuserid) if leaderuserid else UserGroup.objects.get(groupuserid = groupuserid).leaderuserid,]
+
+            # STUDENTS: Mark selected
             else:
-                selected = False
+                selected_user_list = UserGroup.objects.get(groupuserid = groupuserid).useridlist
+            
+        # LEADER: No users selected --> No leader available
+        if(useridlist == ""):
+            students = []
+        
+        # LEADER: Only return users in useridlist
+        if(useridlist):
+            students_revised = []
+            
+            myuseridlist = convert_array_string_to_int(useridlist)
+            
+            # Recreate student list
+            for mystudent in students:
+                if(mystudent.studentuserid in myuseridlist):
+                    students_revised.append(mystudent)
+            
+            students = students_revised
 
-            # Add updated student info to new student list
-            student_list.append(
-                {
-                    'studentuserid':mystudent.studentuserid, 
-                    'firstname':mystudent.firstname, 
-                    'lastname':mystudent.lastname, 
-                    'selected': selected
-                }
-            )
+    # Generate final student list (with appended user info)
+    for mystudent in students:
 
-        students = student_list
+        # Set flag to determine whether student is part of contract
+        if(mystudent.studentuserid in selected_user_list):
+            selected = True
+        else:
+            selected = False
 
+        # Add updated student info to new student list
+        student_list.append(
+            {
+                'studentuserid':mystudent.studentuserid, 
+                'firstname':mystudent.firstname, 
+                'lastname':mystudent.lastname, 
+                'selected': selected
+            }
+        )
+
+    students = student_list
+    
     return render(request, 'wakemeup/admin/js/student_dropdown_list_options.html', {'students': students})
 
 def load_rewards(request):
@@ -315,6 +356,10 @@ def delete_object(request, objecttype, objectid):
     
     if(objecttype == 'contract'):        
         myredirect = redirect('wakemeup:contract_list')
+    elif(objecttype == 'usergroup'):
+        # Redirect to class associated with user group after delete
+        myusergroup = UserGroup.objects.get(groupuserid = objectid)
+        myredirect = redirect('wakemeup:edit_object', objecttype = 'class', objectid=myusergroup.classid)
     else:
         myredirect = redirect('wakemeup:admin_list', objecttype = objecttype)
         
@@ -347,6 +392,22 @@ def delete_object(request, objecttype, objectid):
             elif(objecttype == 'class'):
                 myobject = Class.objects.get(objectid)
             
+            elif(objecttype == 'usergroup'):
+
+                # Delete if admin                
+                if(request.user.is_admin()):
+                    myobject = UserGroup.objects.get(objectid)
+
+                # Verify user access
+                elif(request.user.usertype == "TR"):
+                    usergroup = UserGroup.objects.get(groupuserid = objectid)
+                    myteacher = Teacher.objects.get(teacheruserid = request.user.userid)
+
+                    # Allow delete if user group belongs to one of current user's classes
+                    if(usergroup and myteacher):
+                        if(myteacher.get_teacher_classes(classid = usergroup.classid)):
+                            myobject = UserGroup.objects.get(objectid)
+                    
             elif(objecttype == 'teacher'):
                 myobject = Teacher.objects.get(objectid)
             
@@ -484,7 +545,7 @@ def create_contract(request, contractid):
 
             # Convert string array to int
             partyuserinfo = form.cleaned_data.get('partyuserinfo')
-            partyuserinfo = convert_array_string_to_int(partyuserinfo)
+            partyuserinfo = convert_array_string_to_int_old(partyuserinfo)
 
             # Add contract parties to dictionary
             for myparty in partyuserinfo:
@@ -583,7 +644,7 @@ def create_contract_goals(request, contractid):
                 
                 # Only save goal if rewards and description have been specified
                 if (myrewardinfo and mygoaldescription):
-                    rewardinfo = convert_array_string_to_int(myrewardinfo)
+                    rewardinfo = convert_array_string_to_int_old(myrewardinfo)
                     rewardinfo_dict = {'currentrewards': []}
     
                     for myreward in rewardinfo:
@@ -800,9 +861,62 @@ def addreward(request):
 
     return render(request, 'wakemeup/contract/edit_contract_goals_addreward.html', {'form': form})
 
+@check_permissions
+def edit_usergroup(request, classid):
+    if request.method == 'POST':
+
+        # Create form instance (bind data to form)
+        form = UserGroupForm(request.POST,classid=classid)
+
+        if form.is_valid():
+            myusergroup = UserGroup(
+                groupuserid = form.cleaned_data.get('groupuserid'),
+                groupname = form.cleaned_data.get('groupname'),
+                classid = form.cleaned_data.get('classid'),
+                leaderuserid = form.cleaned_data.get('leaderuserid'),
+                useridlist = convert_array_string_to_int(form.cleaned_data.get('useridlist'))
+            )
+
+            # Save user group
+            myusergroup.save()
+
+            # Return success response
+            return HttpResponse("Grupo actualizado.")
+    else:
+        # Retrieve parameters
+        groupuserid = request.GET.get('groupuserid')
+        classid = request.GET.get('classid')
+
+        # Initialize form
+        form=UserGroupForm(
+            cancel_type="button",
+            classid=classid,
+            initial={}
+        )
+        
+        myusergroup = UserGroup.objects.get(groupuserid=groupuserid)
+
+        # Add initial data (if existing object)        
+        if(myusergroup):
+            form.initial.update({
+                'groupuserid' : myusergroup.groupuserid,
+                'classid' : myusergroup.classid,
+                'groupname' : myusergroup.groupname,
+                'leaderuserid' : myusergroup.leaderuserid,
+                'useridlist' : myusergroup.useridlist,
+            })
+
+    return render(request, 'wakemeup/admin/edit_usergroup.html', {'form': form})
+
 # Admin
 @check_permissions
 def admin_list(request, objecttype):
+
+    # Get teacheruserid (if teacher is logged on)
+    if request.user.usertype == 'TR':
+        teacheruserid = request.user.userid
+    else:
+        teacheruserid = None
 
     # Initialize empty object set    
     objectSet = []
@@ -812,16 +926,9 @@ def admin_list(request, objecttype):
         objectSet = SchoolsTable(School.objects.all())
 
     elif objecttype == 'class':
-        objectSet = ClassesTable(Class.objects.all())
+        objectSet = ClassesTable(Class.objects.get_classes(teacheruserid = teacheruserid))
 
     elif objecttype == 'teacher':
-    
-        # Only list info for logged on teacher
-        if request.user.usertype == 'TR':
-            teacheruserid = request.user.userid
-        else:
-            teacheruserid = None
-            
         objectSet = TeachersTable(Teacher.objects.get_teachers(teacheruserid = teacheruserid))
 
     elif objecttype == 'student':
@@ -847,12 +954,43 @@ def admin_list(request, objecttype):
 
 @check_permissions
 def edit_object(request, objecttype, objectid):
+    form_template = 'wakemeup/admin/edit_form.html'
+    contextkwargs = {}
 
     # Retrieve objects
     if objecttype == 'school':
         objectForm = SchoolForm
     elif objecttype == 'class':
         objectForm = ClassForm
+
+        myteacherclass = None
+
+        # Make sure teacher has access to class
+        myteacher = Teacher.objects.get(teacheruserid = request.user.userid)
+        
+        if(myteacher):
+            myteacherclass = myteacher.get_teacher_classes(classid=objectid)
+        
+        # Teachers can only view their own information
+        if not (
+            (request.user.usertype == 'TR' and myteacherclass) or
+            request.user.is_admin()
+        ):
+            return redirect_home()
+
+        if(objectid != "new"):
+            usergroupstable = UserGroupsTable(UserGroup.objects.get_user_groups(classid = objectid))
+            RequestConfig(request).configure(usergroupstable)
+        else:
+            usergroupstable = None
+
+        contextkwargs.update({
+            'studentgroups':usergroupstable, 
+            'classid':objectid
+        })
+
+
+        
     elif objecttype == 'teacher':
         objectForm = TeacherForm
 
@@ -901,7 +1039,7 @@ def edit_object(request, objecttype, objectid):
     if request.method == 'POST' and 'submit_other' not in request.POST: # Ignore submits from other forms
 
         # Create form instance (bind data to form)
-        form = objectForm(request.POST, request.FILES)
+        form = objectForm(request.POST, request.FILES, request=request)
 
         if form.is_valid():
             
@@ -963,18 +1101,6 @@ def edit_object(request, objecttype, objectid):
                     gradelevel = form.cleaned_data.get('gradelevel'),
                 )
                 
-                students = form.cleaned_data.get('students')
-
-                # Assign students to class
-                if(students):
-                    # Save class before adding students to it
-                    if(myobject.classid is None):
-                        myobject.classid = myobject.save()
-                    
-                    for mystudent in students:
-                        newstudent = Student(studentuserid=mystudent,classid=myobject.classid)
-                        newstudent.save()
-            
             elif(objecttype == 'teacher'):
 
                 # Get signature scan file
@@ -1048,10 +1174,16 @@ def edit_object(request, objecttype, objectid):
 
     # CREATE FORM (NEW OBJECT)
     elif(objectid == 'new'):
-        form = objectForm()
+        kwargs = {}
+        
+        if(objecttype == 'class'):
+            kwargs = {'request':request}
+
+        form = objectForm(**kwargs)
 
     # CREATE FORM (EXISTING OBJECT)
     else:
+        
         # Lookup object
         myobject = objectClass.objects.get(objectid)
         
@@ -1071,15 +1203,18 @@ def edit_object(request, objecttype, objectid):
                     }
                 )
             elif(objecttype == 'class'):
+                form_template = 'wakemeup/admin/edit_class.html'
+                
                 form = objectForm(
                     initial = {
                         'classid': myobject.classid,
                         'schoolid': myobject.schoolid,
                         'classdisplayname': myobject.classdisplayname,
                         'gradelevel': myobject.gradelevel,
-                    }
+                    },
+                    request=request
                 )
-            
+                
             elif(objecttype == 'teacher'):
                 form = objectForm(
                     initial = {
@@ -1124,7 +1259,7 @@ def edit_object(request, objecttype, objectid):
         else:
             return redirect_home()
         
-    return render(request, 'wakemeup/admin/edit_form.html', {'form': form})
+    return render(request, form_template, {'form': form, 'objecttype':objecttype, **contextkwargs})
 
 @check_permissions
 def contract_detail(request, contractid):

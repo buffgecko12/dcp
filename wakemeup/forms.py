@@ -13,7 +13,7 @@ from .models.contract import Contract, ContractInfo, Reward, ContractParty
 
 import datetime
 
-from users.models import UserBadge
+from users.models import UserBadge, UserGroup
 
 from lib.UsefulFunctions.stringUtils import *
 
@@ -216,6 +216,9 @@ class SchoolForm(forms.Form):
     # Define constructor
     def __init__ (self, *args, **kwargs):
 
+        # Extract request info
+        request = kwargs.pop("request",None)
+        
         # Call base class constructor (i.e. School Form)
         super(SchoolForm, self).__init__(*args, **kwargs)
         
@@ -263,34 +266,36 @@ class ClassForm(forms.Form):
     )
 
     classdisplayname = forms.CharField(
-        label='Nombre para mostrar',
+        label='Nombre',
         max_length=100
     )
     
-    # Add multiple select field for list of students in class
-    students = forms.MultipleChoiceField(
-        label='Estudiantes no asignados',
-        widget=forms.CheckboxSelectMultiple,
-        required=False
-    )
-
     gradelevel = forms.IntegerField(label='Grado', max_value=12, min_value=1)
 
     # Define constructor
     def __init__ (self, *args, **kwargs):
+
+        # Extract request info
+        request = kwargs.pop("request",None)
 
         # Call base class constructor (i.e. School Form)
         super(ClassForm, self).__init__(*args, **kwargs)
         
         # Get dynamic fields
         self.fields['schoolid'].choices = School.objects.school_choices()
-        self.fields['students'].choices = Student.objects.student_choices(classid=0)
         
         # Set form helper properties
         self.helper = FormHelper()
         setFormHelper(self.helper)
         self.helper.form_tag = False
-        
+
+        # Hide fields (if teacher)
+        if(request.user.usertype == "TR"):
+            myschoolid = Teacher.objects.get(teacheruserid = request.user.userid).schoolid
+            self.fields['schoolid'] = forms.IntegerField(widget=forms.HiddenInput, initial=myschoolid)
+            self.fields['gradelevel'].widget.attrs['readonly'] = True
+            self.fields['classdisplayname'].widget.attrs['readonly'] = True
+                    
         # Set form layout
         self.helper.layout = Layout(
             Fieldset(
@@ -299,15 +304,17 @@ class ClassForm(forms.Form):
                 'schoolid',
                 Field('classdisplayname', css_class='w-50'),
                 Field('gradelevel', css_class='w-50'),
-                'students',
             ),
-            getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="class"')
+            Fieldset(
+                """Grupos de estudiante {% load staticfiles %}<span id="add_usergroup"><img src="{% static 'img/add-button.png' %}" style="cursor:pointer"></span>""",
+                HTML("""{% if classid != "new" %} {% load django_tables2 %}{% render_table studentgroups %} {% endif %}"""),
+            ),
+            getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="class"') if not request.user.usertype == "TR" else None
         )
 
     # Specify model
     class Meta:
         model = Class
-        exclude = ('schooldisplayname')
 
 class TeacherForm(forms.Form):
 
@@ -342,6 +349,9 @@ class TeacherForm(forms.Form):
     # Define constructor
     def __init__ (self, *args, **kwargs):
 
+        # Extract request info
+        request = kwargs.pop("request",None)
+        
         # Call base class constructor (i.e. Teacher Form)
         super(TeacherForm, self).__init__(*args, **kwargs)
         
@@ -393,6 +403,9 @@ class StudentForm(forms.Form):
 #     profilepictureid = forms.IntegerField(label='Avatar', required=False)
 
     def __init__ (self, *args, **kwargs):
+
+        # Extract request info
+        request = kwargs.pop("request",None)
 
         # Call base class constructor (i.e. Teacher Form)
         super(StudentForm, self).__init__(*args, **kwargs)
@@ -518,7 +531,9 @@ class RewardForm(forms.Form):
 
     def __init__ (self, *args, **kwargs):
 
+        # Extract extra info
         cancel_type = kwargs.pop('cancel_type', None)
+        request = kwargs.pop("request",None)
 
         # Call base class constructor (i.e. Teacher Form)
         super(RewardForm, self).__init__(*args, **kwargs)
@@ -948,3 +963,45 @@ class ContractSubmitForm(forms.Form):
                 HTML("""<a class="btn btn-info " href="{% url '""" + 'wakemeup:create_contract_goals' + """' """ + 'contractid=' + str(contractid) + """ %}">Previo</a> """),
             )
         )
+        
+class UserGroupForm(forms.Form):
+
+    # Define form fields
+    groupuserid = forms.IntegerField(widget=forms.HiddenInput,required=False)
+    classid = forms.IntegerField(widget=forms.HiddenInput)
+
+    groupname = forms.CharField(max_length=100,label='Nombre')
+    useridlist = forms.CharField(label="Integrantes", widget=forms.SelectMultiple)
+    leaderuserid = forms.IntegerField(label='L' + mychr('i') + 'der', widget=forms.Select)
+
+    def __init__ (self, *args, **kwargs):
+
+        # Extract extra info
+        cancel_type = kwargs.pop('cancel_type', None)
+        request = kwargs.pop("request",None)
+        classid = kwargs.pop("classid",None)
+
+        # Call base class constructor (i.e. Teacher Form)
+        super(UserGroupForm, self).__init__(*args, **kwargs)
+        
+        # Set form helper properties
+        self.helper = FormHelper()
+        setFormHelper(self.helper)
+        
+        # Set form layout
+        self.helper.layout = Layout(
+            Fieldset(
+                'Editar grupo',
+                'groupuserid',
+                'classid',
+                'groupname',
+                'useridlist',
+                'leaderuserid',
+            ),
+            getAdminFormActions(cancel_type=cancel_type)
+        )
+
+    # Specify model
+    class Meta:
+        model = UserGroup
+        fields = ('groupuserid','classid','groupname','leaderuserid','useridlist')

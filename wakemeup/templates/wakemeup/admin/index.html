@@ -13,11 +13,13 @@
 		{% elif objecttype == "reward" %}Premios
 		{% endif %}
 		{% if objecttype not in 'teacher student' %}
-		<div class="float-right">
-			<a href="{% url 'wakemeup:edit_object' objecttype=objecttype objectid='new' %}">
-				<img src="{% static 'img/add-button.png' %}">
-			</a>
-		</div>
+			{% if objecttype == "class" and request.user.usertype != "TR" %}
+				<div class="float-right">
+					<a href="{% url 'wakemeup:edit_object' objecttype=objecttype objectid='new' %}">
+						<img src="{% static 'img/add-button.png' %}">
+					</a>
+				</div>
+			{% endif %}
 		{% endif %}
 	</legend>
 	

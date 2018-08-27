@@ -206,13 +206,13 @@ class StudentManager(models.Manager):
     def delete(self, myStudent):
         return get_user_model()(userid=myStudent.studentuserid).deactivate()
     
-    def student_choices(self, classid):
-        students = Student.objects.getclass(classid = classid) # Look up unassigned students
-        student_choices = [
-            (str(mystudent.studentuserid), (mystudent.firstname + ' ' + mystudent.lastname)) for mystudent in students
-        ]
-        
-        return (student_choices)
+#     def student_choices(self, classid):
+#         students = Student.objects.getclass(classid = classid) # Look up unassigned students
+#         student_choices = [
+#             (str(mystudent.studentuserid), (mystudent.firstname + ' ' + mystudent.lastname)) for mystudent in students
+#         ]
+#         
+#         return (student_choices)
         
 class School(models.Model):
     

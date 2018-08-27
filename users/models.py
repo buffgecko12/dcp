@@ -7,6 +7,9 @@ from lib.UsefulFunctions.emailUtils import send_email
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
+from django.contrib.postgres.fields import ArrayField
+
+
 # Don't override default methods (get, all, save, delete) to avoid clashing with Django authentication
 class MyUserManager(BaseUserManager):
 
@@ -110,6 +113,32 @@ class MyUserManager(BaseUserManager):
         if(myUser.emailaddress):
             send_email(subject=email_subject, body=email_body, to_list=[myUser.emailaddress,])
     
+class UserGroupManager(models.Manager):
+    
+    def all(self):
+        return self.get_user_groups(None,)
+    
+    def get(self, groupuserid):
+        return get_data_pk(self, 'SP_DCPGetUserGroup(%s,%s,%s)', (groupuserid, None, None))
+    
+    def get_user_groups(self, groupuserid = None, classid = None, studentuserid = None):
+        return get_data(self, 'SP_DCPGetUserGroup(%s,%s,%s)', (groupuserid, classid, studentuserid))
+    
+    def save(self, myUserGroup):
+        return save_data('SP_DCPUpsertUserGroup', 
+             (
+                myUserGroup.groupuserid, 
+                myUserGroup.groupname,
+                myUserGroup.classid,
+                myUserGroup.leaderuserid,
+                myUserGroup.useridlist
+            )
+        )
+        pass # Handled by user-level method
+
+    def delete(self, myUserGroup):
+        return delete_data('SP_DCPDeleteUserGroup', (myUserGroup.groupuserid,))
+
 class UserReputationEventManager(models.Manager):
     
     def all(self):
@@ -242,6 +271,25 @@ class MyUser(AbstractBaseUser):
             return True
         else:
             return False
+
+class UserGroup(models.Model):
+    
+    groupuserid = models.IntegerField(primary_key=True)
+    groupname = models.CharField(max_length=100)
+    classid = models.IntegerField()
+    leaderuserid = models.IntegerField()
+    useridlist = ArrayField(models.IntegerField())
+    
+    class Meta:
+        managed = False
+        
+    objects = UserGroupManager()
+    
+    def save(self):
+        return UserGroup.objects.save(self)
+    
+    def delete(self):
+        return UserGroup.objects.delete(self)
 
 class UserReputationEvent(models.Model):
     

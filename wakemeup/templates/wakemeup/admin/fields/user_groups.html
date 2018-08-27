@@ -1,0 +1,9 @@
+{% load staticfiles %}
+{% for user in record.usernamelist %}
+	<span class="text-nowrap
+	{% if record.leaderuserid == user.userid %} font-weight-bold font-italic {% endif %}
+	">
+		{{ user.fullname }}
+		<br>
+	</span>
+{% endfor %}

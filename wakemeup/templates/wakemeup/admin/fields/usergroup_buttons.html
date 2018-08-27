@@ -1,0 +1,12 @@
+<div class="text-nowrap">
+	<form action="" method="post" name="userGroupForm_{{ value }}" style="display:inline-block">{% csrf_token %}
+		<input type="button" class="btn btn-xs btn-primary" name="submit_usergroup" id="submit_{{ value }}" value="Editar"/>
+		<input type="hidden" name="groupuserid" value="{{ value }}" />
+		<input type="hidden" name="classid" value="{{ record.classid }}" />
+	</form>
+	<form action="{% url 'wakemeup:delete_object' objecttype='usergroup' objectid=value %}" method="post" style="display:inline-block" >
+	    {% csrf_token %}
+		<input class="btn btn-xs btn-warning" name="delete" type="submit" value="Borrar" onclick="return confirm('\u00BFEst\u00E1 seguro que desee eliminar este objeto?');"/>
+	</form>
+</div>
+

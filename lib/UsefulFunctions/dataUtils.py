@@ -1,10 +1,24 @@
 import ast
 
-def convert_array_string_to_int(stringarray):
+def convert_array_string_to_int_old(stringarray):
     try:
         return ast.literal_eval(stringarray)
     except:
         return stringarray # Return original array
+
+def convert_array_string_to_int(stringarray):
+    new_array = []
+ 
+    # Clean up string   
+    stringarray_new = stringarray.replace("'","").replace("]","").replace("[","").split(",")
+
+    for item in stringarray_new:
+        try:
+            new_array.append(int(item))
+        except:
+            pass
+        
+    return new_array
     
 def convert_string_array(mystring):
     result = []

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+{% block title %}Admin{% endblock %}
+
+{% block content %}
+	<div class="container-fluid">
+		<br>
+		<form method="POST" enctype="multipart/form-data" novalidate>
+		    {% csrf_token %}
+			{% crispy form %}
+		</form>
+	</div>
+	
+	<div class="modal fade" id="editUserGroupModal" tabindex="-1" role="dialog">
+	  <div class="modal-dialog modal-dialog-centered" role="document">
+	    <div class="modal-content">
+	      <div class="modal-body">
+			<form method="post" id="editUserGroupForm" novalidate name="editUserGroupForm"
+				data-editusergroup-url="{% url 'wakemeup:ajax_edit_usergroup' classid=classid %}" 
+ 				data-redirect-url="{% url 'wakemeup:edit_object' objecttype='class' objectid=classid %}"
+				data-students-url="{% url 'wakemeup:ajax_load_students' %}" 
+				>
+				<div id="mymodaldiv"></div>
+			<input type="hidden" id="classid" value="{{ classid }}" />
+			</form>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+{% endblock %}
+
+{% block bodyimport %}
+	<script src="{% static 'wakemeup/js/editusergroup.js' %}"></script>
+	
+	<script>
+
+		// MODAL - HIDE
+		$('#editUserGroupModal').on('hidden.bs.modal', function (e) {
+			document.getElementById("editUserGroupForm").reset();
+		})	
+	
+		// MODAL - SUBMIT FORM
+		$("#editUserGroupForm").submit(function(e) {
+			update_usergroupform()
+			return false // Ignore default submit behavior
+		});
+
+		$(document).ready(function(){
+			// SHOW MODAL - EDIT
+		    $('[name=submit_usergroup]').click(function() {
+				var groupuserid = $(this.form).find('input[name=groupuserid]').val()
+				var classid = $(this.form).find('input[name=classid]').val()
+				
+				// Populate and show modal
+	            $("#mymodaldiv").html(""); // Clear modal div of any previous contents
+				update_usergroupform("new", groupuserid, classid) // Update modal with new form
+	        	$('#editUserGroupModal').modal("show");
+		    });
+
+			// SHOW MODAL - ADD NEW
+		    $('#add_usergroup').click(function() {
+				var classid = $("#classid").val();
+
+				// Populate and show modal
+	            $("#mymodaldiv").html(""); // Clear modal div of any previous contents
+				update_usergroupform("new", classid) // Update modal with new form
+	        	$('#editUserGroupModal').modal("show");
+		    });
+		});
+	</script>
+{% endblock %}
