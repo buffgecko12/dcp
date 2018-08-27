@@ -1,5 +1,5 @@
 {% if students %}
-{% for student in students%}
+{% for student in students %}
 <option value="{{ student.studentuserid }}" {% if student.selected %}selected="selected"{% endif %}>{{ student.firstname }} {{ student.lastname }} </option>
 {% endfor %}
 {% else %}
