@@ -30,7 +30,7 @@
 		{% if record.contractstatus != "P" %}
 			<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
 			    {% csrf_token %}
-				<input class="btn {{ displayinfo.buttonsize }} btn-success" name="finalize" type="submit" value="Finalizar"/>
+				<input class="btn {{ displayinfo.buttonsize }} btn-success" name="finalize" type="submit" value="Finalizar" disabled/>
 			</form>
 		{% endif %}
 		{% if not record.revisioneligibilityflag %}
