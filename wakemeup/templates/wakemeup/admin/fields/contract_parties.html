@@ -2,7 +2,12 @@
 
 	{% for party in record.partyuserinfo.currentparties %}
 		<span class="text-nowrap">
-			{{ party.firstname }}
+			{% if party.groupinfo %}
+				{{ party.groupinfo.groupname }} <strong>({{ party.groupinfo.leaderfirstname }})</strong>
+			{% else %}
+				{{ party.firstname }}
+			{% endif %}
+			
 			{% if party.partyapprovalts %}
 				<img src="{% static 'img/web_check15.png' %}" /> 
 			{% endif %}

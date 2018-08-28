@@ -90,7 +90,13 @@
 			<form action="" method="post" name="partyForm_{{ party.partyuserid }}">{% csrf_token %}
 				<div class="row">
 					<div class="col form-group">
-						<small>{{ party.firstname }} {{ party.lastname }}</small>
+						<small>
+							{% if party.groupinfo %}
+								{{ party.groupinfo.groupname }} <strong>({{ party.groupinfo.leaderfirstname }})</strong>
+							{% else %}
+								{{ party.firstname }} {{ party.lastname }}
+							{% endif %}
+						</small>
 					</div>
 						{% for goal in record.goalinfo.currentgoals %}
 							<div class="col col-2 text-center ">
@@ -101,7 +107,7 @@
 										  <span class="checkmark"></span>
 										</label>
 									{% endif %}
-								{% elif party.partyuserid == request.user.userid or request.user.is_superuser %}
+								{% elif request.user.userid == party.partyuserid or request.user.userid == party.groupinfo.leaderuserid or request.user.is_superuser %}
 									<label class="buttoncontainer">
 									  <input type="radio" name="preferredgoalid" value="{{ goal.goalid }}">
 									  <span class="checkmark"></span>
@@ -112,7 +118,7 @@
 					<div class="col ">
 						<small><i>
 							{% if not party.preferredgoalid %}
-								{% if party.partyuserid == request.user.userid or request.user.is_admin %}
+								{% if request.user.userid == party.partyuserid or request.user.userid == party.groupinfo.leaderuserid or request.user.is_admin %}
 									<input type="button" class="btn btn-xs btn-primary" name="submit_acceptcontract" id="submit_{{party.partyuserid}}" value="Aceptar" disabled/>
 								{% else %}
 								N/A

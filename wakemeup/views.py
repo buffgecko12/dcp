@@ -224,8 +224,30 @@ def load_students(request):
     useridlist = request.GET.get('useridlist')
     leaderuserid = request.GET.get('leaderuserid')
 
+    # Generate list of available participants
     if(classid):
-        students = Student.objects.getclass(classid=classid) # Lookup students for given class
+        students = []
+
+        # CONTRACTS: Add any user groups associated with class
+        if(not contractid is None):
+
+            # Get user groups associated with class
+            classusergroups = UserGroup.objects.get_user_groups(classid=classid)
+            
+            # Convert user groups to "students"
+            for usergroup in classusergroups:
+                usergroup_student = Student(
+                    studentuserid = usergroup.groupuserid,
+                    classid = usergroup.classid,
+                    firstname = usergroup.groupname
+                )
+                
+                # Add user group to student list
+                students.append(usergroup_student)
+        
+        # Add students for given class
+        for mystudent in Student.objects.getclass(classid=classid):
+            students.append(mystudent)
     else:
         students = []
 
@@ -273,7 +295,7 @@ def load_students(request):
     # Generate final student list (with appended user info)
     for mystudent in students:
 
-        # Set flag to determine whether student is part of contract
+        # Set flag to determine whether student is "selected"
         if(mystudent.studentuserid in selected_user_list):
             selected = True
         else:
@@ -889,7 +911,6 @@ def edit_usergroup(request, classid):
 
         # Initialize form
         form=UserGroupForm(
-            cancel_type="button",
             classid=classid,
             initial={}
         )

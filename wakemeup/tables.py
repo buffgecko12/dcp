@@ -253,7 +253,7 @@ class UserGroupsTable(tables.Table):
     objectid = 'groupuserid'
 
     groupname = tables.Column(verbose_name='Nombre')
-    usernamelist = tables.TemplateColumn(
+    groupuserinfo = tables.TemplateColumn(
         template_name='wakemeup/admin/fields/user_groups.html',
         verbose_name='Integrantes'
     )    
@@ -267,7 +267,7 @@ class UserGroupsTable(tables.Table):
     class Meta:
         model = UserGroup
         empty_text = EMPTY_TEXT
-        fields = ('groupname','usernamelist')
+        fields = ('groupname','groupuserinfo')
         row_attrs = {
             'class': "small",
         }

@@ -1,5 +1,5 @@
 {% load staticfiles %}
-{% for user in record.usernamelist %}
+{% for user in record.groupuserinfo %}
 	<span class="text-nowrap
 	{% if record.leaderuserid == user.userid %} font-weight-bold font-italic {% endif %}
 	">

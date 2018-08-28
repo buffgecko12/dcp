@@ -50,7 +50,13 @@
 		{% for party in contract.partyuserinfo.currentparties %}
 
 		<div class="row">
-			<div class="col col-sm-3">{{ party.firstname }} {{ party.lastname }}</div>
+			<div class="col col-sm-3">
+				{% if party.groupinfo %}
+					{{ party.groupinfo.groupname }} <strong>({{ party.groupinfo.leaderfirstname }})</strong>
+				{% else %}
+					{{ party.firstname }} {{ party.lastname }}
+				{% endif %}
+			</div>
 		</div>
 		{% endfor %}
 		<br>

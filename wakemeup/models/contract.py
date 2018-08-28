@@ -66,16 +66,20 @@ class ContractManager(models.Manager):
         # Get contract party e-mails
         if(emailtype == "party"):
 
-            # Include all contract parties
-            if(not useridlist):
-                for contractparty in myContract.partyuserinfo['currentparties']:
-                    emails.append(contractparty['emailaddress'])
-                    
-            # Include specific contract parties
-            else:
-                for contractparty in myContract.partyuserinfo['currentparties']:
-                    if(int(contractparty['partyuserid']) in useridlist):
+            # Loop through contract parties
+            for contractparty in myContract.partyuserinfo['currentparties']:
+                if(
+                    not useridlist or # all users
+                    (int(contractparty['partyuserid']) in useridlist) # Only specified users
+                ):
+                    # Add e-mail address - individual user
+                    if(not contractparty['groupuserinfo']):
                         emails.append(contractparty['emailaddress'])
+                        
+                    # Add e-mail addresses - group users
+                    else:
+                        for mygroupuser in contractparty['groupuserinfo']:
+                            emails.append(mygroupuser['emailaddress'])
                 
         # Get teacher e-mail
         elif(emailtype == "teacher"):
@@ -306,6 +310,7 @@ class ContractParty(models.Model):
     contractrole = models.CharField(max_length=2)
     firstname = models.CharField(max_length=100, verbose_name='Primer nombre')
     lastname = models.CharField(max_length=100, verbose_name='Apellido(s)')
+    groupinfo = JSONField()
     
     # Get approval attributes
     preferredgoalid = models.IntegerField()
