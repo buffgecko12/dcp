@@ -1319,6 +1319,9 @@ def contract_accept(request, contractid):
 
     if(request.method == "POST"):
         form = ContractPartyAcceptForm(request.POST,request.FILES, request=request, contractid=contractid)
+        
+        # Determine where the button was clicked from
+        post_source = request.POST.get('post_source')
 
         if(form.is_valid()):
 
@@ -1356,8 +1359,13 @@ def contract_accept(request, contractid):
                         request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':mycontractid})),
                 )
             
-            # Redirect to contract list
-            return HttpResponse("Contrato ha sido aceptado.")
+            # APPROVE CONTRACT (teacher) - Redirect to contract list
+            if(post_source):
+                return redirect('wakemeup:contract_list')
+            
+            # ACCEPT CONTRACT (student) - Return message
+            else:
+                return HttpResponse("Contrato ha sido aceptado.")
     else:
         initial = {
             'contractid': request.GET.get('contractid'),

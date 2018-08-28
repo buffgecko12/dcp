@@ -108,23 +108,25 @@
 										</label>
 									{% endif %}
 								{% elif request.user.userid == party.partyuserid or request.user.userid == party.groupinfo.leaderuserid or request.user.is_superuser %}
-									<label class="buttoncontainer">
-									  <input type="radio" name="preferredgoalid" value="{{ goal.goalid }}">
-									  <span class="checkmark"></span>
-									</label>
+									{% if not record.contractapprovalts %}
+										<label class="buttoncontainer">
+										  <input type="radio" name="preferredgoalid" value="{{ goal.goalid }}">
+										  <span class="checkmark"></span>
+										</label>
+									{% endif %}
 								{% endif %}
 							</div>
 						{% endfor %}
 					<div class="col ">
 						<small><i>
-							{% if not party.preferredgoalid %}
+							{% if not party.preferredgoalid and not record.contractapprovalts %}
 								{% if request.user.userid == party.partyuserid or request.user.userid == party.groupinfo.leaderuserid or request.user.is_admin %}
 									<input type="button" class="btn btn-xs btn-primary" name="submit_acceptcontract" id="submit_{{party.partyuserid}}" value="Aceptar" disabled/>
 								{% else %}
 								N/A
 								{% endif %}
 							{% else %}
-								{{ party.partyapprovalts }}
+								{{ party.partyapprovalts|default_if_none:"N/A" }}
 							{% endif %}
 						</i></small>
 					</div>

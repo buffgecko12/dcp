@@ -17,3 +17,13 @@ $(".cancel_confirm").click(function(event) {
 		return true;
 	}
 });
+
+//Cancel button confirm
+$(".approve_confirm").click(function(event) {
+	if(!confirm('Al aprobar, el contrato se convertir\u00E1 en activo y los integrantes pendientes no lo podr\u00E1n aceptar.\n\n\u00BFEst\u00E1 seguro que desee aprobar este contrato?')) {
+		event.preventDefault();
+		return false;
+	} else {
+		return true;
+	}
+});

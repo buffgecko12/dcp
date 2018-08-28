@@ -11,6 +11,15 @@
 				{% if displayinfo.displaytextflag %}
 					<i>No se puede editar ya que<br>ya se aprob&#243; por {{ record.partyapprovalcount }} persona{{record.partyapprovalcount|pluralize:",s"}}</i><br><br>
 				{% endif %}
+				
+				<form style="display:inline-block" action="{% url 'wakemeup:contract_accept' contractid=record.contractid %}" method="post">
+				    {% csrf_token %}
+				    <input type="hidden" name="contractid" value="{{ record.contractid }}" />
+				    <input type="hidden" name="partyuserid" value="{{ record.teacheruserid }}" />
+				    <input type="hidden" name="preferredgoalid" value="0" />
+				    <input type="hidden" name="post_source" value="manage_buttons" />
+					<input class="btn {{ displayinfo.buttonsize }} btn-primary approve_confirm" name="submit_other" type="submit" value="Aprobar"/>
+				</form>
 			{% endif %}
 			<form style="display:inline-block" action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=record.contractid %}" method="post">
 			    {% csrf_token %}
