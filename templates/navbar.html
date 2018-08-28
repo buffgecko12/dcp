@@ -97,21 +97,20 @@
 					>
 					</div>
 				</li>		
-				
-				<!-- PROFILE -->			
-				<li class="nav-item">
-					<a class="nav-link" href="{% url 'wakemeup:myaccount' %}#profile" title="{{ user.username }}">
+
+				<!-- PROFILE -->
+				<li class="nav-item dropdown">
+					<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown" title="{{ user.username }}">
 						{% if userinfo.profilepicturefile %}
 							<img src="{% static 'img/avatar/'|add:userinfo.profilepicturefile %}" alt="Avatar" height="32px" width="32px" style="display:inline-block">
 						{% else %}
 	 						<i class="fas fa-user faicon"></i>
 						{% endif %}
-					</a>
-				</li>
-				
-				<!-- LOGOUT -->
-				<li class="nav-item">
-					<a class="nav-link" href="{% url 'logout' %}">Cerrar sesi&#243;n</a>
+					</a>	
+					<div class="dropdown-menu dropdown-menu-right">
+						<a class="dropdown-item" href="{% url 'wakemeup:myaccount' %}#profile">Perfil</a>
+						<a class="dropdown-item" href="{% url 'logout' %}">Cerrar sesi&#243;n</a>
+					</div>
 				</li>
 			{% else %}
 			
