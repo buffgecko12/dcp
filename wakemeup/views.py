@@ -663,6 +663,7 @@ def create_contract_goals(request, contractid):
                 mygoalid = form.cleaned_data.get(goaltypeid + 'goalid')
                 mymaxnumrewards = form.cleaned_data.get(goaltypeid + 'maxnumrewards')
                 myacceptedflag = form.cleaned_data.get(goaltypeid + 'acceptedflag')
+                myrewardselectedby = form.cleaned_data.get(goaltypeid + 'rewardselectedby')
                 
                 # Only save goal if rewards and description have been specified
                 if (myrewardinfo and mygoaldescription):
@@ -681,7 +682,8 @@ def create_contract_goals(request, contractid):
                         goaldescription = mygoaldescription,
                         acceptedflag = myacceptedflag,
                         rewardinfo = rewardinfo_dict,
-                        maxnumrewards = mymaxnumrewards
+                        maxnumrewards = mymaxnumrewards,
+                        rewardselectedby = myrewardselectedby
                     )
         
                     # Save contract goal
@@ -718,6 +720,7 @@ def create_contract_goals(request, contractid):
                         goaltypeid + 'rewardinfo':"",
                         goaltypeid + 'maxnumrewards':mygoal.maxnumrewards,
                         goaltypeid + 'acceptedflag':mygoal.acceptedflag,
+                        goaltypeid + 'rewardselectedby':mygoal.rewardselectedby,
                         }
                     )
         

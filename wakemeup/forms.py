@@ -782,7 +782,7 @@ class ContractGoalsForm(forms.Form):
             raise forms.ValidationError("Por favor especificar al menos una meta.")
 
     goaldescription_label = 'Descripci' + mychr('o') + 'n<br><small><i>Una descripci' + mychr('o') + 'n detallada con instrucciones claras para c' + chr(243) + 'mo medir ' + chr(233) + 'xito</i></small>'
-    rewardinfo_label = 'Opciones de premio<small><i> <br>Al cumplir con ' + chr(233) + 'xito la meta, cada participante podr' + chr(225) + ' escoger un premio de esta lista</i></small>'
+    rewardinfo_label = 'Opciones de premio<small><i> <br>Al cumplir con ' + chr(233) + 'xito la meta, cada participante recibir' + chr(225) + ' un premio de esta lista</i></small>'
     maxnumreward_label = 'Max. n' + mychr('u') + 'mero de premios<small><i> <br><b>Opcional:</b> El m' + mychr('a') + 'ximo n'  + mychr('u') + 'mero de premios disponible para lograr esta meta (vac&#237;o = sin l' + mychr('i') + 'mite m' + mychr('a') + 'ximo)</i></small>'
 
     # Fields used for javascript and form navigation between pages
@@ -791,24 +791,33 @@ class ContractGoalsForm(forms.Form):
     numparticipants = forms.IntegerField(widget=forms.HiddenInput, required=False)
     initialcontractvalue = forms.IntegerField(widget=forms.HiddenInput, required=False)
 
-    e_acceptedflag = forms.BooleanField(widget=forms.HiddenInput, required=False)
-    m_acceptedflag = forms.BooleanField(widget=forms.HiddenInput, required=False)
-    d_acceptedflag = forms.BooleanField(widget=forms.HiddenInput, required=False)
+    rewardselectedby_choices = (("ST","Estudiante"),("TR","Docente"))
+    rewardselectedby_field = forms.ChoiceField(
+        choices=rewardselectedby_choices,
+        label="Premios seleccionados por<small><i> <br>Al cumplir con " + mychr('e') + "xito la meta, quien escoger" + mychr('a') + " el premio</i></small>", 
+        required=False
+    )
 
     e_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
     e_goaldescription = forms.CharField(max_length=500,label=goaldescription_label, widget=forms.Textarea(attrs={'rows':4}), required=False)
     e_rewardinfo = forms.CharField(label=rewardinfo_label, widget=forms.SelectMultiple, required=False)
     e_maxnumrewards = forms.IntegerField(label=maxnumreward_label, required=False)
+    e_acceptedflag = forms.BooleanField(widget=forms.HiddenInput, required=False)
+    e_rewardselectedby = rewardselectedby_field
 
     m_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
     m_goaldescription = forms.CharField(max_length=500,label=goaldescription_label, widget=forms.Textarea(attrs={'rows':4}), required=False)
     m_rewardinfo = forms.CharField(label=rewardinfo_label, widget=forms.SelectMultiple, required=False)
     m_maxnumrewards = forms.IntegerField(label=maxnumreward_label, required=False)
+    m_acceptedflag = forms.BooleanField(widget=forms.HiddenInput, required=False)
+    m_rewardselectedby = rewardselectedby_field
 
     d_goalid = forms.IntegerField(widget=forms.HiddenInput, required=False)
     d_goaldescription = forms.CharField(max_length=500,label=goaldescription_label, widget=forms.Textarea(attrs={'rows':4}), required=False)
     d_rewardinfo = forms.CharField(label=rewardinfo_label, widget=forms.SelectMultiple, required=False)
     d_maxnumrewards = forms.IntegerField(label=maxnumreward_label, required=False)
+    d_acceptedflag = forms.BooleanField(widget=forms.HiddenInput, required=False)
+    d_rewardselectedby = rewardselectedby_field
 
     def clean_e_maxnumrewards(self):
         mynumrewards = int(self.cleaned_data.get('e_maxnumrewards') or 0)
@@ -877,6 +886,7 @@ class ContractGoalsForm(forms.Form):
                     'e_goalid',
                     'e_goaldescription',
                     'e_rewardinfo',
+                    Field('e_rewardselectedby', css_class='w-50'), 
                     Field('e_maxnumrewards', css_class='w-25'),
                 ),
                 Tab(
@@ -885,6 +895,7 @@ class ContractGoalsForm(forms.Form):
                     'm_goalid',
                     'm_goaldescription',
                     'm_rewardinfo',
+                    Field('m_rewardselectedby', css_class='w-50'), 
                     Field('m_maxnumrewards', css_class='w-25'),
                 ),
                 Tab(
@@ -893,6 +904,7 @@ class ContractGoalsForm(forms.Form):
                     'd_goalid',
                     'd_goaldescription',
                     'd_rewardinfo',
+                    Field('d_rewardselectedby', css_class='w-50'), 
                     Field('d_maxnumrewards', css_class='w-25'),
                 )
             ),

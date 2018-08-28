@@ -118,6 +118,7 @@ class ContractGoalManager(models.Manager):
                 myContractGoal.acceptedflag,
                 myContractGoal.rewardinfo,
                 myContractGoal.maxnumrewards,
+                myContractGoal.rewardselectedby
             )
         )[0]
 
@@ -270,6 +271,7 @@ class ContractGoal(models.Model):
     acceptedflag = models.NullBooleanField()
     rewardinfo = JSONField()
     maxnumrewards = models.IntegerField()
+    rewardselectedby = models.CharField(max_length=2)
 
     class Meta:
         managed = False
