@@ -50,7 +50,7 @@ $("#NotificationInboxIcon").on("click", function() {
 				function() {
 					clearNotifications();
 				},
-				2000
+				1000
 			)
 		}
 	})
