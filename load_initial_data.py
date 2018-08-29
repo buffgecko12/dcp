@@ -331,7 +331,7 @@ def load_users():
 
 def load_rewards():
     reward_list = [
-        ('Tiquetes al cine', 'Tiquetes al cine en Innovo.', 6000),
+        ('Tiquete al cine', 'Tiquete al cine en Innovo.', 6000),
         ('Pizza', 'Pizza y gaseosa.', 5000),
         ('Hamburguesa', 'Hamburguesa y gaseoas.', 5000),
         ('Guatika', 'Tiquete a Guatika.', 25000),
