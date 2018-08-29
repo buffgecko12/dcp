@@ -989,7 +989,7 @@ class UserGroupForm(forms.Form):
     def __init__ (self, *args, **kwargs):
 
         # Extract extra info
-        cancel_type = kwargs.pop('cancel_type', None)
+        cancel_type = kwargs.pop('cancel_type', 'button')
         request = kwargs.pop("request",None)
         classid = kwargs.pop("classid",None)
 
