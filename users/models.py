@@ -7,8 +7,7 @@ from lib.UsefulFunctions.emailUtils import send_email
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-from django.contrib.postgres.fields import ArrayField
-
+from django.contrib.postgres.fields import ArrayField, JSONField
 
 # Don't override default methods (get, all, save, delete) to avoid clashing with Django authentication
 class MyUserManager(BaseUserManager):
@@ -279,6 +278,7 @@ class UserGroup(models.Model):
     classid = models.IntegerField()
     leaderuserid = models.IntegerField()
     useridlist = ArrayField(models.IntegerField())
+    groupuserinfo = JSONField()
     
     class Meta:
         managed = False
