@@ -632,6 +632,10 @@ class ContractForm(forms.Form):
         self.fields['initialbudget'].initial = mybudget
         self.fields['initialcontractvalue'].initial = myinitialcontractvalue or 0
         
+        # If user is teacher, hide teacher field
+        if(request.user.usertype == "TR"):
+            self.fields['teacheruserid'] = forms.IntegerField(widget=forms.HiddenInput, initial=request.user.userid)
+            
         # Disable fields when in revision mode
         if(revisionflag):
             self.fields['revisiondeadlinets'].widget.attrs['readonly'] = True
