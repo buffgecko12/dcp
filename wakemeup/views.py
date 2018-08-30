@@ -513,8 +513,8 @@ def myaccount(request):
             form=MyUserForm(request=request)
 
     # Get user objects
-    myreputationevents = UserReputationEventsTable(UserReputationEvent.objects.get_events(userid=request.user.userid))
-    mybadges = UserBadgesTable(UserBadge.objects.get_badges(userid=request.user.userid))
+    myreputationevents = UserReputationEventsTable(UserReputationEvent.objects.get_events(userid=request.user.userid), orderable=False)
+    mybadges = UserBadgesTable(UserBadge.objects.get_badges(userid=request.user.userid), orderable=False)
 
     # Config object for tables
     RequestConfig(request).configure(myreputationevents)
