@@ -163,6 +163,12 @@ class ContractsTable(tables.Table):
         }
     }
 
+    contractstatus = tables.TemplateColumn(
+        template_name='wakemeup/contract/include/contractstatus.html',
+        verbose_name='Estatus',
+        accessor=A(objectid)
+    )    
+
     manage_buttons = tables.TemplateColumn(
         template_name='wakemeup/admin/fields/contract_buttons.html',
         extra_context=kwargs,
@@ -178,10 +184,6 @@ class ContractsTable(tables.Table):
 
     def render_revisiondeadlinets(self, value):
         return display_timestamp(value)
-
-    def render_contractstatus(self, value):
-        status_dict = {'P':'Pendiente','D':'Borrador','A':'Activo','C':'Completo','R':'Activo'}
-        return status_dict[value]
 
     def get_rowlink(record):
         if(record.contractstatus == "D"):

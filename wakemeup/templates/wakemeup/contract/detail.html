@@ -40,6 +40,12 @@
 			<div class="col col-sm-3">Costo</div>
 			<div class="col col-sm-9">${{ contractinfo.contractvalue|intcomma}}</div>
 		</div>
+		<div class="row">
+			<div class="col col-sm-3">Estatus</div>
+			<div class="col col-sm-9">
+				{% include "wakemeup/contract/include/contractstatus.html" %}
+			</div>
+		</div>
 		{% endif %}<br>
 		
 		<legend><u>Metas</u></legend>
@@ -63,8 +69,8 @@
 				{% include "wakemeup/contract/include/rewardoptions.html" %}
 			
 				<br>
-			</div>
-		{% endfor %}<br>
+			</div><br>
+		{% endfor %}
 		
 		<legend><u>Participantes</u></legend>
 		<div class="row">

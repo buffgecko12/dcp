@@ -833,7 +833,7 @@ def create_contract_submit(request, contractid):
                 # Prepare context info
                 context = {
                     'form':ContractSubmitForm(contractid = contractid, revisionflag=revisionflag),
-                    'contract':mycontract,
+                    'record':mycontract,
                     'classinfo':classinfo,
                     'contractinfo':contractinfo, #Contains budget info
                     'teacherbudgetinfo':teacherbudgetinfo,

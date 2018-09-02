@@ -1,0 +1,5 @@
+{% if record.contractstatus == "P" %}Pendiente
+{% elif record.contractstatus == "D" %}Borrador
+{% elif record.contractstatus in "A,R" %}Activo
+{% elif record.contractstatus == "C" %}Completo
+{% endif %}

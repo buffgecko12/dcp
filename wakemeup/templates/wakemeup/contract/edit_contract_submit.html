@@ -12,11 +12,11 @@
 		<legend><u>General</u></legend>
 		<div class="row">
 			<div class="col col-sm-3">ID</div>
-			<div class="col col-sm-9">{{ contract.contractid }}</div>
+			<div class="col col-sm-9">{{ record.contractid }}</div>
 		</div>
 		<div class="row">
 			<div class="col col-sm-3">Actividad</div>
-			<div class="col col-sm-9">{{ contract.contractname }}</div>
+			<div class="col col-sm-9">{{ record.contractname }}</div>
 		</div>
 		<div class="row">
 			<div class="col col-sm-3">Curso</div>
@@ -24,16 +24,22 @@
 		</div>
 		<div class="row">
 			<div class="col col-sm-3">Plazo</div>
-			<div class="col col-sm-9">{{ contract.contractvalidperiod_disp }}</div>
+			<div class="col col-sm-9">{{ record.contractvalidperiod_disp }}</div>
 		</div>
 		<div class="row">
 			<div class="col col-sm-3">Fecha tope para revisar</div>
-			<div class="col col-sm-9">{{ contract.revisiondeadlinets|date:'d/m/Y' }}</div>
+			<div class="col col-sm-9">{{ record.revisiondeadlinets|date:'d/m/Y' }}</div>
+		</div>
+		<div class="row">
+			<div class="col col-sm-3">Estatus</div>
+			<div class="col col-sm-9">
+				{% include "wakemeup/contract/include/contractstatus.html" %}
+			</div>
 		</div>
 		<br>
 		
 		<legend><u>Metas</u></legend>
-		{% for goal in contract.goalinfo.currentgoals %}
+		{% for goal in record.goalinfo.currentgoals %}
 			<strong>Opci&#243;n 
 			{% if goal.difficultylevel == "E" %} Fac&#237;l
 			{% elif goal.difficultylevel == "M" %} Media
@@ -47,7 +53,7 @@
 		{% endfor %}
 
 		<legend><u>Participantes</u></legend>
-		{% for party in contract.partyuserinfo.currentparties %}
+		{% for party in record.partyuserinfo.currentparties %}
 
 		<div class="row">
 			<div class="col col-sm-3">
