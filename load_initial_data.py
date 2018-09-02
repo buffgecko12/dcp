@@ -20,7 +20,8 @@ def create_user(usertype, schoolid, firstname,lastname,userrole):
         firstname = firstname, 
         lastname = lastname, 
         username = normalize_field(firstname), 
-        emailaddress = normalize_field(firstname) + '@' + normalize_field(lastname) + '.com', 
+        emailaddress = None,
+#         emailaddress = normalize_field(firstname) + '@' + normalize_field(lastname) + '.com', 
         userrole = userrole
     )
     
