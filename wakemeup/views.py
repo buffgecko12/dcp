@@ -1465,7 +1465,7 @@ def add_user(request):
                              'Correo: ' + newuser.emailaddress + '\n\n' + \
                              'Algunas notas:\n\n' + \
                              '- el nombre de usuario y la contrase' + mychr('n') + 'a son sensibles a min' + mychr('u') + 'sculos/may' + mychr('u') + 'sculos\n' + \
-                             '- para cambiar su contrase' + mychr('n') + 'a, iniciar una sesi' + mychr('o') + 'n y hacer click en "Mi Cuenta --> Herramientas"' + '\n' + \
+                             '- para cambiar su contrase' + mychr('n') + 'a, inicie una sesi' + mychr('o') + 'n y haga clic en "Mi Cuenta --> Herramientas"' + '\n' + \
                              '- esta aplicaci' + mychr('o') + 'n se ve mejor usando la ' + mychr('u') + 'ltima versi' + mychr('o') + 'n de Google Chrome con JavaScript activado\n\n' + \
                              'Bienvenidos!' + '\n\n' + \
                              'Duitama Colegio Project'
