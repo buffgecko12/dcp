@@ -185,17 +185,11 @@
 	
 	<script>
 		
-		// Accept Contract Modal - Hide
+		// MODAL - Hide
 		$('#acceptContractModal').on('hidden.bs.modal', function (e) {
 			document.getElementById("acceptContractForm").reset(); // Reset form fields
 		})	
 	
-		// Accept Contract Modal - Submit
-		$("#acceptContractForm").submit(function(e) {
-			update_acceptcontractform("submit")
-			return false // Ignore default submit behavior
-		});
-		
 		$(document).ready(function(){
 			// Edit Contract - Enable "Accept Contract" button
 			$('input[type=radio][name=preferredgoalid]').change(function() {
@@ -204,7 +198,7 @@
 				submitbutton.disabled = false // Enable submit
 			});
 
-			// Accept Contract Modal - Show
+			// MODAL - Show
 		    $('[name=submit_acceptcontract]').click(function() {
 				var partyuserid = $(this.form).find('input[name=partyuserid]').val()
 				var contractid = $(this.form).find('input[name=contractid]').val()

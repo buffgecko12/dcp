@@ -1365,7 +1365,7 @@ def contract_accept(request, contractid):
             
             # ACCEPT CONTRACT (student) - Return message
             else:
-                return HttpResponse("Contrato ha sido aceptado.")
+                return HttpResponse("success")
     else:
         initial = {
             'contractid': request.GET.get('contractid'),
