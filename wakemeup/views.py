@@ -765,8 +765,10 @@ def create_contract_submit(request, contractid):
             # Lookup contract info
             mycontract = Contract.objects.get(contractid=contractid_effective)
 
-            # SUBMIT REVISION
+            # REVISION
             if(mycontract_orig.tempcontractid):
+
+                # SUBMIT REVISION
                 revise_results = mycontract_orig.revise(
                     actiontype='submit',
                     revisiondescription=form.cleaned_data.get('revisiondescription'),
@@ -795,6 +797,7 @@ def create_contract_submit(request, contractid):
                         useridlist = mynewparties
                     )
 
+            # NON-REVISION
             else:
                 # Set contract status to pending
                 mycontract.change_status('P') 
