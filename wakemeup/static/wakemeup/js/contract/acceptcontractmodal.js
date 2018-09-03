@@ -62,6 +62,7 @@ function update_acceptcontractform(type, partyuserid, contractid, preferredgoali
 			            setTimeout(
 		            		function(){
 				            	$('#acceptContractModal').modal('hide'); // Close after a few seconds
+				            	location.href=redirecturl
 			            	},
 			            	2500
 		            	)
