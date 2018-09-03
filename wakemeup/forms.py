@@ -979,14 +979,14 @@ class ContractSubmitForm(forms.Form):
         # Add form action buttons
         self.helper.layout.append(
             FormActions(
-                HTML("""<a class="btn btn-secondary" href="{% url 'wakemeup:index' %}">Cancelar</a> """),
+                HTML("""<a class="btn btn-secondary" href="{% url 'wakemeup:index' %}" id="submit_cancel">Cancelar</a> """),
                 Submit(
                     'submit_next',
                     'Modificar' if revisionflag else 'Actualizar' if mycontract.contractstatus == "P" else 'Enviar',
                     css_class="modify_confirm" if revisionflag else "" if mycontract.contractstatus == "P" else "send_confirm", 
                     css_id="submit_next"
                 ),
-                HTML("""<a class="btn btn-info " href="{% url '""" + 'wakemeup:create_contract_goals' + """' """ + 'contractid=' + str(contractid) + """ %}">Previo</a> """),
+                HTML("""<a class="btn btn-info " href="{% url '""" + 'wakemeup:create_contract_goals' + """' """ + 'contractid=' + str(contractid) + """ %}" id="submit_previous">Previo</a> """),
             )
         )
         
