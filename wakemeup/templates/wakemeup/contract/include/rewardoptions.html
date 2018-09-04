@@ -1,15 +1,19 @@
 <span class="text-nowrap">
-	<strong>Opciones de premio{% if goal.maxnumrewards %} (max = {{ goal.maxnumrewards }}){% endif %}</strong>
+	<strong>Opciones de premio</strong>
 </span><br>
 <i>
-{% for reward in goal.rewardinfo.currentrewards %}
-	{{ reward.rewarddisplayname }}{% if not forloop.last %}, {% endif %}
-{% endfor %}
-{% if goal.rewardselectedby == "TR" %}<br>
-<span class="text-danger">
-	<small><strong>* seleccionados por docente</strong></small>
-</span><br>
-{% endif %}
-</i>
+	{% for reward in goal.rewardinfo.currentrewards %}
+		{{ reward.rewarddisplayname }}{% if not forloop.last %}, {% endif %}
+	{% endfor %}
 	
-
+	<span class="text-danger">
+		<small><strong>
+			{% if goal.rewardselectedby == "TR" %}
+				<br>* premios seleccionados por docente
+			{% endif %}
+			{% if goal.maxnumrewards %} 
+				<br>* max numero de ganadores = {{ goal.maxnumrewards }}
+			{% endif %}
+		</strong></small>	
+	</span>
+</i>

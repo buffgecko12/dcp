@@ -801,7 +801,7 @@ class ContractGoalsForm(forms.Form):
         vars()[goaltype + '_goaldescription'] = forms.CharField(
             max_length=500,
             label='Descripci' + mychr('o') + 'n<br>' + \
-                  '<small><i>Una descripci' + mychr('o') + 'n detallada con instrucciones claras para c' + chr(243) + 'mo medir ' + chr(233) + 'xito</i></small>',
+                  '<small><i>Una descripci' + mychr('o') + 'n detallada con instrucciones claras para c' + chr(243) + 'mo medir el ' + chr(233) + 'xito</i></small>',
             widget=forms.Textarea(attrs={'rows':4}),
             required=False
         )
@@ -816,8 +816,12 @@ class ContractGoalsForm(forms.Form):
         
         # maxnumrewards
         vars()[goaltype + '_maxnumrewards'] = forms.IntegerField(
-            label='Max. n' + mychr('u') + 'mero de premios<small><i> <br>' + \
-                  '<b>Opcional:</b> El m' + mychr('a') + 'ximo n'  + mychr('u') + 'mero de premios disponible para lograr esta meta (vac&#237;o = sin l' + mychr('i') + 'mite m' + mychr('a') + 'ximo)</i></small>', 
+            label=
+                'Max. n' + mychr('u') + 'mero de ganadores <strong>(opcional)</strong><br>' + 
+                '<small><i> ' + 
+                    'Por ejemplo, para premiar s' + mychr('o') + 'lo los dos primeros puestos, ingresa <b>2</b>&nbsp;' + 
+                    '(vac&#237;o = sin l' + mychr('i') + 'mite m' + mychr('a') + 'ximo)' + 
+                '</i></small>', 
             required=False
         )
         
@@ -827,7 +831,11 @@ class ContractGoalsForm(forms.Form):
         # rewardselectedby
         vars()[goaltype + '_rewardselectedby'] = forms.ChoiceField(
             choices=(("ST","Estudiante"),("TR","Docente")),
-            label="Premios seleccionados por<small><i> <br>Al cumplir con " + mychr('e') + "xito la meta, quien escoger" + mychr('a') + " el premio</i></small>", 
+            label=
+                "Premios seleccionados por <strong>(opcional)</strong><br>" + 
+                "<small><i>" + 
+                    "Por ejemplo, para dar diferentes premios para 1er / 2do puesto, seleccione <b>docente</b>" +
+                "</i></small>", 
             required=False,
             widget=forms.RadioSelect,
             initial="ST"
@@ -840,7 +848,7 @@ class ContractGoalsForm(forms.Form):
         if not (mynumrewards > mycontractpartycount):
             return self.cleaned_data.get('e_maxnumrewards')
         else:
-            raise forms.ValidationError('El n' + mychr('u') + 'mero de premios (' + str(mynumrewards) + ') no puede superar el n' + mychr('u') + 'mero de participantes (' + str(mycontractpartycount) + ')')
+            raise forms.ValidationError('El n' + mychr('u') + 'mero de ganadores (' + str(mynumrewards) + ') no puede superar el n' + mychr('u') + 'mero de participantes (' + str(mycontractpartycount) + ')')
 
     def clean_m_maxnumrewards(self):
         mynumrewards = int(self.cleaned_data.get('m_maxnumrewards') or 0)
@@ -849,7 +857,7 @@ class ContractGoalsForm(forms.Form):
         if not (mynumrewards > mycontractpartycount):
             return self.cleaned_data.get('m_maxnumrewards')
         else:
-            raise forms.ValidationError('El n' + mychr('u') + 'mero de premios (' + str(mynumrewards) + ') no puede superar el n' + mychr('u') + 'mero de participantes (' + str(mycontractpartycount) + ')')
+            raise forms.ValidationError('El n' + mychr('u') + 'mero de ganadores (' + str(mynumrewards) + ') no puede superar el n' + mychr('u') + 'mero de participantes (' + str(mycontractpartycount) + ')')
 
     def clean_d_maxnumrewards(self):
         mynumrewards = int(self.cleaned_data.get('d_maxnumrewards') or 0)
@@ -858,7 +866,7 @@ class ContractGoalsForm(forms.Form):
         if not (mynumrewards > mycontractpartycount):
             return self.cleaned_data.get('d_maxnumrewards')
         else:
-            raise forms.ValidationError('El n' + mychr('u') + 'mero de premios (' + str(mynumrewards) + ') no puede superar el n' + mychr('u') + 'mero de participantes (' + str(mycontractpartycount) + ')')
+            raise forms.ValidationError('El n' + mychr('u') + 'mero de ganadores (' + str(mynumrewards) + ') no puede superar el n' + mychr('u') + 'mero de participantes (' + str(mycontractpartycount) + ')')
 
     def __init__ (self, *args, **kwargs):
 
@@ -900,8 +908,8 @@ class ContractGoalsForm(forms.Form):
                     'e_goalid',
                     'e_goaldescription',
                     'e_rewardinfo',
-                    InlineRadios('e_rewardselectedby'), 
                     Field('e_maxnumrewards', css_class='w-25'),
+                    InlineRadios('e_rewardselectedby'), 
                 ),
                 Tab(
                     'Media',
@@ -909,8 +917,8 @@ class ContractGoalsForm(forms.Form):
                     'm_goalid',
                     'm_goaldescription',
                     'm_rewardinfo',
-                    InlineRadios('m_rewardselectedby'), 
                     Field('m_maxnumrewards', css_class='w-25'),
+                    InlineRadios('m_rewardselectedby'), 
                 ),
                 Tab(
                     'Dif' + mychr('i') + 'cil',
@@ -918,8 +926,8 @@ class ContractGoalsForm(forms.Form):
                     'd_goalid',
                     'd_goaldescription',
                     'd_rewardinfo',
-                    InlineRadios('d_rewardselectedby'), 
                     Field('d_maxnumrewards', css_class='w-25'),
+                    InlineRadios('d_rewardselectedby'), 
                 )
             ),
             FormActions(
