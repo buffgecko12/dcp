@@ -1476,7 +1476,11 @@ def add_user(request):
 
             # If student, save additional data
             if(form.cleaned_data.get('usertype') == "ST"):
-                mystudent = Student(studentuserid=newuser.userid,classid=form.cleaned_data.get("classid"))
+                mystudent = Student(
+                    studentuserid=newuser.userid,
+                    classid=form.cleaned_data.get("classid"),
+                    emailaddress=newuser.emailaddress  # Include email address because it is NULL-able/overwritable
+                )
                 mystudent.save()
 
             # Go back to index page
