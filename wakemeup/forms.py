@@ -31,7 +31,7 @@ def validate_emailaddress(userid, emailaddress):
         useremail = None
 
     # Ignore validation if e-mail address is unchanged or current user does not have e-mail specified
-    if(userid and (useremail == emailaddress or not useremail)):
+    if(userid and (useremail == emailaddress)):
        return emailaddress
     else:
 
