@@ -1358,7 +1358,7 @@ def contract_accept(request, contractid):
                 # Send e-mails
                 mycontract.send_emails(
                     email_subject = 'Duitama Colegio Project - Contrato #' + str(mycontractid) + ' ha sido aprobado',
-                    email_body = 'Se aprob' + mychr('o') + ' contrato #' + str(mycontractid) + '\n\n' + \
+                    email_body = 'Se aprob' + mychr('o') + ' su contrato (#' + str(mycontractid) + '): ' + \
                         request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':mycontractid})),
                 )
             
