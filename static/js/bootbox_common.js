@@ -25,13 +25,24 @@ function bootbox_confirm(formid, message, submitdelay = 0) {
 				setTimeout( function() {
 					try {
 						document.getElementById('submit_next').disabled = true
+						document.getElementById('submit_next').value = 'Enviando...'
 						document.getElementById('submit_cancel').className += " " + "disabled"
 						document.getElementById('submit_previous').className += " " + "disabled"  // Leave this last, since it's not always present
 					}
 					catch {}
 					
-					// Update submit button text
-					document.getElementById('submit_next').value = 'Enviando...'
+					try {
+						$('#next').prop("disabled",true)
+						$('#next').val('Enviando...')
+
+						var disablelinks = document.getElementsByClassName("disable-link");
+						var i;
+						for (i = 0; i < disablelinks.length; i++) {
+							disablelinks[i].className += " " + "disabled"
+						}						
+					}
+					catch{}
+					
 				}
 				,0)
 			}

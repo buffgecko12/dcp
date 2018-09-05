@@ -63,7 +63,7 @@ def getAdminFormActions(cancel_url = 'wakemeup:index', cancel_context="", cancel
     return FormActions(
         # Cancel button (don't change the "cancel" id; used by javascript)
         Submit('submit_cancel','Cancelar', css_class='btn btn-secondary', css_id='cancel') if cancel_type == "button" else
-        HTML("""<a class="btn btn-secondary" href="{% url '""" + cancel_url + """' """ + cancel_context + """ %}">Cancelar</a> """),
+        HTML("""<a class="btn btn-secondary disable-link" href="{% url '""" + cancel_url + """' """ + cancel_context + """ %}">Cancelar</a> """),
 
         # Submit button
         Submit('submit_next','Enviar', css_id='next'),
@@ -142,6 +142,7 @@ class SignupForm(UserCreationForm):
         # Set helper properties
         self.helper = FormHelper()
         setFormHelper(self.helper)
+        self.helper.form_tag = False
 
         # Set form layout
         self.helper.layout = Layout(
