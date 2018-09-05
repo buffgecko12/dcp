@@ -87,6 +87,25 @@ class ContractManager(models.Manager):
 
         return emails
 
+    def get_users(self, myContract, usertype):
+        users = []
+
+        # Loop through contract parties
+        for contractparty in myContract.partyuserinfo['currentparties']:
+            
+            # Add e-mail address - individual user
+            if(not contractparty['groupuserinfo']):
+                users.append(contractparty['partyuserid'])
+                
+            # Add e-mail addresses - group users
+            else:
+                for mygroupuser in contractparty['groupuserinfo']:
+                    users.append(mygroupuser['partyuserid_group'])
+                
+        users.append(myContract.teacheruserid)
+
+        return users
+
     def send_emails(self, myContract, email_subject, email_body, useridlist):
 
         # Only send e-mails to specified users
@@ -258,6 +277,9 @@ class Contract(models.Model):
 
     def get_emails(self, emailtype, useridlist = None):
         return Contract.objects.get_emails(self, emailtype, useridlist)
+
+    def get_users(self, usertype = "all"):
+        return Contract.objects.get_users(self, usertype)
 
     def send_emails(self, email_subject, email_body, useridlist = None):
         return Contract.objects.send_emails(self, email_subject, email_body, useridlist)

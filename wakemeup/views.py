@@ -1294,8 +1294,8 @@ def contract_detail(request, contractid):
 
     # Make sure contract exists
     if(mycontract):
-        # Check contract is not a draft
-        if(mycontract.contractstatus != 'D'):
+        # Check contract is not a draft and user has access
+        if(mycontract.contractstatus != 'D' and (request.user.userid in (mycontract.get_users()) or request.user.userrole in PERM_ADMIN)):
             mycontract.contractvalidperiod_disp = display_timestamp_range(mycontract.contractvalidperiod) # Format for display
             classinfo = Class.objects.get(classid=mycontract.classid)
             contractinfo = ContractInfo.objects.get(contractid=contractid, allowrevisioncontractflag=True)

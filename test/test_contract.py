@@ -1,6 +1,8 @@
 import test_setup
 import unittest
 
+import test_user
+
 from django.contrib.auth import get_user_model
 
 from wakemeup.models.contract import *
@@ -10,6 +12,8 @@ import json
 from datetime import datetime, timedelta
 
 from psycopg2.extras import DateTimeTZRange
+
+from users.models import UserGroup
 
 class testContracts(unittest.TestCase):
 
@@ -25,6 +29,7 @@ class testContracts(unittest.TestCase):
         global signaturefile
 
         global newreward
+        global create_usergroup
 
         # Prepare signature file        
         signaturefile = test_setup.readfile('test/img/sampleimg.jpg')
@@ -72,6 +77,7 @@ class testContracts(unittest.TestCase):
     # Re-create environment for each test case        
     def setUp(self):
         global newcontract
+        global myusergroup
 
         # Contract goal info
         goalinfo = json.dumps(
@@ -89,6 +95,8 @@ class testContracts(unittest.TestCase):
             }
         )
 
+        myusergroup = self.create_usergroup()
+
         # Contract party info
         partyinfo = json.dumps(
             {
@@ -96,7 +104,8 @@ class testContracts(unittest.TestCase):
                     {"partyuserid": 1,"contractrole": "MR"},
                     {"partyuserid": 2,"contractrole": "PL"},
                     {"partyuserid": 3,"contractrole": "BL"},
-                    {"partyuserid": 4,"contractrole": "PT"}
+                    {"partyuserid": 4,"contractrole": "PT"},
+                    {"partyuserid": myusergroup.groupuserid,"contractrole": "PT"},
                 ]
             }
         )
@@ -132,6 +141,30 @@ class testContracts(unittest.TestCase):
         # Set contract status as "draft"
         newcontract.change_status('D')
         
+    def create_usergroup(self):
+        USERNAME = test_user.USERNAME
+        PASSWORD = test_user.PASSWORD
+        EMAILADDRESS = test_user.EMAILADDRESS
+        test_user.clean_user(USERNAME)
+        test_user.clean_user(USERNAME + "1")
+
+        # Create new users
+        newuser = test_user.create_user(password=PASSWORD,usertype='ST',firstname='Test',lastname='Orama',username=USERNAME,emailaddress=EMAILADDRESS,userrole='U')
+        newuser2 = test_user.create_user(password=PASSWORD,usertype='ST',firstname='Test1',lastname='Orama1',username=USERNAME + "1",emailaddress=EMAILADDRESS + "1",userrole='U')
+
+        # Create and save user group
+        newusergroup = UserGroup(
+            groupuserid=None, 
+            groupname = 'New group', 
+            classid=None, 
+            leaderuserid = newuser.userid, 
+            useridlist = [newuser.userid, newuser2.userid]
+        )
+
+        newusergroup.groupuserid = newusergroup.save()
+
+        return UserGroup.objects.get(groupuserid=newusergroup.groupuserid)
+
     def refresh_contract(self):
         return Contract.objects.get(contractid=self.contractid)
         
@@ -340,7 +373,7 @@ class testContracts(unittest.TestCase):
 #         getnewreward = ContractGoalReward.objects.get(contractid = newcontract.contractid, goalid = 1, rewardid = 2)
 #         self.assertEqual(getnewreward.rewarddescription,"Some NEW MEDIUM reward")
 
-    def testContractParties(self):        
+    def testContractParties(self):    
         # Get all parties
         allparties = ContractParty.objects.all()
         self.assertIsNotNone(allparties)
@@ -388,16 +421,30 @@ class testContracts(unittest.TestCase):
         getparty4 = ContractParty.objects.get(newcontract.contractid,partyuserid=4)
         getparty4.partylogonuserid = 2
 
-        # Approve contract (2 out of required 3 users)
+        getparty5 = ContractParty.objects.get(newcontract.contractid,partyuserid=myusergroup.groupuserid)
+        getparty5.partylogonuserid = 2
+
+        # Approve contract (3 out of required 4 users)
         getparty.approve_contract() # Userid = 2
         getparty3.approve_contract()
+        getparty4.approve_contract()
         
-        # Check contract has not been approved yet (2 out of required 3 have approved)
+        # Check contract has not been approved yet (3 out of required 4 have approved)
         newcontractget = Contract.objects.get(newcontract.contractid)
         self.assertIsNone(newcontractget.contractapprovalts)
 
-        # Submit final approval (3 out of 3)
-        getparty4.approve_contract()
+        # Submit final approval (4 out of 4)
+        getparty5.approve_contract()
+
+        # Get users
+        contractusers = newcontractget.get_users()
+        self.assertIsNotNone(contractusers)
+
+        # Check that expected users are all included in contract users
+        mypartygroup = getparty5.groupinfo['useridlist']
+        self.assertTrue(set(mypartygroup) <= set(contractusers)) # user group users
+        self.assertTrue(newcontractget.teacheruserid in contractusers) # teacher
+        self.assertTrue(set([2,3,4]) <= set(contractusers)) # regular users 
 
         # Check contract is approved
         newcontractget = Contract.objects.get(newcontract.contractid)
