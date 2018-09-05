@@ -35,6 +35,12 @@
 			<div class="col col-sm-3">Fecha tope para revisar</div>
 			<div class="col col-sm-9">{{ record.revisiondeadlinets|date:'d/m/Y' }}</div>
 		</div>
+		{% if record.contractapprovalts %}
+			<div class="row">
+				<div class="col col-sm-3">Fecha de aprobaci&#243;n</div>
+				<div class="col col-sm-9">{{ record.contractapprovalts|date:'d/m/Y' }}</div>
+			</div>
+		{% endif %}
 		{% if request.user.is_admin or request.user.userid == record.teacheruserid %}
 		<div class="row">
 			<div class="col col-sm-3">Costo</div>
