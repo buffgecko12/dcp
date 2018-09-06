@@ -476,7 +476,7 @@ class MyUserForm(forms.Form):
 
         # Display username, but don't allow edits
         self.fields['username'].initial=request.user.username
-        self.fields['username'].disabled=True
+        self.fields['username'].widget.attrs['readonly'] = True
 
         # Teachers can only add students
         if(not request.user.is_admin()):
