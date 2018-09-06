@@ -450,7 +450,6 @@ def index(request):
 def about(request):
     return render(request, 'wakemeup/about.html')
 
-@check_permissions
 def useragreement(request):
     # User has accepted the agreement
     if(request.method == "POST" and request.POST.get('acceptflag')):
