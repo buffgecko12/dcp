@@ -7,7 +7,7 @@
 			value="{{ teacher.teacheruserid }}"
 			{% if teacher.teacheruserid == teacheruserid %} selected="selected"{% endif %} 
 		>
-			{{ teacher.firstname }} {{ teacher.lastname }}
+			{{ teacher.firstname|title }} {{ teacher.lastname|title }}
 		</option>
 	{% endfor %}
 {% else %}

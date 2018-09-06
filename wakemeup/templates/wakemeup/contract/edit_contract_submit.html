@@ -58,9 +58,9 @@
 		<div class="row">
 			<div class="col col-sm-3">
 				{% if party.groupinfo %}
-					{{ party.groupinfo.groupname }} <strong>({{ party.groupinfo.leaderfirstname }})</strong>
+					{{ party.groupinfo.groupname }} <strong>({{ party.groupinfo.leaderfirstname|title }})</strong>
 				{% else %}
-					{{ party.firstname }} {{ party.lastname }}
+					{{ party.firstname|title }} {{ party.lastname|title }}
 				{% endif %}
 			</div>
 		</div>

@@ -3,9 +3,9 @@
 	{% for party in record.partyuserinfo.currentparties %}
 		<span class="text-nowrap">
 			{% if party.groupinfo %}
-				{{ party.groupinfo.groupname }} <strong>({{ party.groupinfo.leaderfirstname }})</strong>
+				{{ party.groupinfo.groupname }} <strong>({{ party.groupinfo.leaderfirstname|title }})</strong>
 			{% else %}
-				{{ party.firstname }}
+				{{ party.firstname|title }}
 			{% endif %}
 			
 			{% if party.partyapprovalts %}
