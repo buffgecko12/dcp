@@ -1421,12 +1421,13 @@ def add_user(request):
 
             # Store variables to reuse
             username = form.cleaned_data.get('username')
+            mypassword = form.cleaned_data.get('password1')
 
             # Generate password (if not provided)
-            if(not form.cleaned_data.get('password1')):
+            if(not mypassword):
                 raw_password = get_user_model().objects.make_random_password()
             else:
-                raw_password = form.cleaned_data.get('password1')
+                raw_password = mypassword
 
             # Check if username is an e-mail address
             try:
@@ -1440,6 +1441,12 @@ def add_user(request):
                 myemailaddress = username
             else:
                 myemailaddress = form.cleaned_data.get('emailaddress')
+
+            # Format password output string to display on confirmation screen
+            if(not myemailaddress or not mypassword):
+                conf_password_display = raw_password
+            else:
+                conf_password_display = None
 
             # Create new user
             newuser = get_user_model().objects.create_user(
@@ -1483,7 +1490,7 @@ def add_user(request):
                 mystudent.save()
 
             # Go back to index page
-            return render(request, 'wakemeup/admin/add_user_confirmation.html', {'userinfo':newuser, 'raw_password':raw_password})
+            return render(request, 'wakemeup/admin/add_user_confirmation.html', {'userinfo':newuser, 'conf_password_display':conf_password_display})
     else:
         # Return empty form
         form = SignupForm(request=request)

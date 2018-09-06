@@ -12,7 +12,13 @@
 		</div>
 		<div class="row">
 			<div class="col col-sm-4"><strong>Contrase&#241;a</strong></div>
-			<div class="col col-sm-8">{{ raw_password }}</div>
+			<div class="col col-sm-8">
+				{% if conf_password_display %}
+					{{ conf_password_display }}
+				{% else %}
+					******
+				{% endif %}
+			</div>
 		</div>
 		<div class="row">
 			<div class="col col-sm-4"><strong>Nombre(s)</strong></div>
