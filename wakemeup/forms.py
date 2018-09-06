@@ -26,12 +26,16 @@ def validate_emailaddress(userid, emailaddress):
     
     # Try to lookup user with matching email address
     try:
-        useremail = get_user_model().objects.get(userid=userid).emailaddress
+        myuser = get_user_model().objects.get(userid=userid)
+        useremail = myuser.emailaddress
+        username = myuser.username
+        
     except get_user_model().DoesNotExist:
         useremail = None
+        username = None
 
-    # Ignore validation if e-mail address is unchanged or current user does not have e-mail specified
-    if(userid and (useremail == emailaddress)):
+    # Ignore validation if e-mail address is unchanged or the same as the username
+    if(userid and (useremail == emailaddress or username == emailaddress)):
        return emailaddress
     else:
 
