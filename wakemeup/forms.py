@@ -721,9 +721,11 @@ class ContractPartyAcceptForm(forms.Form):
         if(myclass):
             myschool = School.objects.get(schoolid=myclass.schoolid)
             
-            if(myschool.guardianapprovalpolicy):
+            # Check for additional guardian approval fields (students only)
+            if(myschool.guardianapprovalpolicy and request.user.usertype == "ST"):
                 approvalfields = myschool.guardianapprovalpolicy.get('requiredfields')
                 
+                # Append any required fields
                 if(approvalfields):
                     myfieldset = Fieldset('Aprobaci' + mychr('o') + 'n de tutor')
                     
