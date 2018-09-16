@@ -9,6 +9,8 @@ from django.core.mail import send_mail
 
 from django_tables2 import RequestConfig
 
+from django.forms.models import formset_factory
+
 from lib.UsefulFunctions.imgUtils import renderImageFromDb
 from lib.UsefulFunctions.dateUtils import *
 from lib.UsefulFunctions.dataUtils import *
@@ -22,7 +24,7 @@ import json
 from .tables import *
 from .forms import *
 from .models.environment import School, Class, Teacher, Student, TeacherBudget, File
-from .models.contract import Contract, ContractParty, ContractGoal, ContractGoalReward, Reward, ContractInfo
+from .models.contract import Contract, ContractParty, ContractPartyGoalEvaluation, ContractGoal, ContractGoalReward, Reward, ContractInfo
 
 from users.models import UserReputationEvent, UserBadge, UserNotification
 
@@ -63,6 +65,12 @@ view_permissions = {
         'reward':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
     },
     'create_contract': {
+        'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
+    },
+    'manage_contract': {
+        'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
+    },
+    'evaluate_contract': {
         'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
     },
     'addreward': {
@@ -528,6 +536,164 @@ def myaccount(request):
     return render(request, 'wakemeup/myaccount.html', context)
 
 @check_permissions
+def evaluate_contract(request, contractid):
+
+    # Lookup contract info
+    mycontract = Contract.objects.get(contractid=contractid)
+    
+    if(mycontract):
+        
+        # Check if contract has been evaluated already
+        evaluatedflag = True if mycontract.contractevaluationts else False
+    
+        # Initialize forms/formsets
+        form = EvaluateContractForm(contract=mycontract)
+        
+        ContractPartyGoalEvaluationFormSet = formset_factory(form=ContractPartyGoalEvaluationForm, extra=0)
+        ContractPartyGoalRewardFormSet = formset_factory(form=ContractPartyGoalRewardForm, extra=0)
+        
+        # SAVE
+        if request.method == "POST" and 'submit_other' not in request.POST:
+            
+            submitflag = True if('submit_evaluate' in request.POST) else False
+    
+            # REWARDS
+            if(evaluatedflag):
+                
+                # Create form instance (bind data to form)
+                rewardformset = ContractPartyGoalRewardFormSet(request.POST)
+        
+                if(rewardformset.is_valid()):
+        
+                    reward_data = []
+                    
+                    # Loop through formset
+                    for myform in rewardformset:
+        
+                        reward_data.append({
+                            'contractid': myform.cleaned_data.get('contractid'),
+                            'partyuserid': myform.cleaned_data.get('partyuserid'),
+                            'goalid': myform.cleaned_data.get('goalid'),
+                            'rewardid': myform.cleaned_data.get('rewardid'),
+                            'rewarddeliveredflag': myform.cleaned_data.get('rewarddeliveredflag'),
+                            'actualrewardvalue': myform.cleaned_data.get('actualrewardvalue'),
+                        })
+        
+                    # Save formset data
+                    mycontract.evaluate(actiontype='save', actioncategory='rewards', rewardinfo=json.dumps(reward_data), submitflag=submitflag)
+                    
+                # Take user to next screen
+                if(submitflag):
+                    # SUBMIT - Go back to contract list
+                    return redirect('wakemeup:contract_list')
+                else:
+                    # SAVE - Refresh page
+                    return redirect('wakemeup:evaluate_contract', contractid=contractid)
+            
+            # EVALUATION
+            else:
+                # Create form instance (bind data to form)
+                evaluationformset = ContractPartyGoalEvaluationFormSet(request.POST)
+        
+                if(evaluationformset.is_valid()):
+        
+                    evaluation_data = []
+                    
+                    # Loop through formset
+                    for myform in evaluationformset:
+        
+                        evaluation_data.append({
+                            'contractid': myform.cleaned_data.get('contractid'),
+                            'partyuserid': myform.cleaned_data.get('partyuserid'),
+                            'goalid': myform.cleaned_data.get('goalid'),
+                            'achievedflag': myform.cleaned_data.get('achievedflag'),
+                            'experiencerating': myform.cleaned_data.get('experiencerating'),
+                            'highperformerflag': myform.cleaned_data.get('highperformerflag'),
+                            'topperformerflag': myform.cleaned_data.get('topperformerflag'),
+                            'feedbackmsg': myform.cleaned_data.get('feedbackmsg'),
+                        })
+        
+                    # Save formset data
+                    mycontract.evaluate(actiontype='save', actioncategory='evaluation', evaluationinfo=json.dumps(evaluation_data), submitflag=submitflag)
+        
+                    # Refresh page
+                    return redirect('wakemeup:evaluate_contract', contractid=contractid)
+            
+        # DISPLAY
+        else:
+            # Check contract is in "evaluation" mode and user has proper permissions
+            if(mycontract.contractstatus == 'E' and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
+    
+                # EVALUATION
+                # Get parties that accepted the contract
+                goalparties = ContractPartyGoalEvaluation.objects.get_contract_party_evaluations(contractid=contractid)
+    
+                # Build formset's initial data
+                goalparty_data = []
+                
+                for goalparty in goalparties:
+                    goalparty_data.append(
+                        {
+                            'partyuserfullname':goalparty.partyuserfullname,
+                            'contractid':goalparty.contractid,
+                            'partyuserid':goalparty.partyuserid,
+                            'goalid': goalparty.goalid,
+                            'achievedflag': goalparty.achievedflag,
+                            'experiencerating': goalparty.experiencerating,
+                            'highperformerflag': goalparty.highperformerflag,
+                            'topperformerflag': goalparty.topperformerflag,
+                            'feedbackmsg': goalparty.feedbackmsg
+                        }
+                    )
+                    
+                # Populate evaluation formset with initial data
+                evaluationformset = ContractPartyGoalEvaluationFormSet(initial=goalparty_data)
+
+                # Initialize reward formset
+                rewardsformset = None
+                
+                # REWARDS
+                if(evaluatedflag):
+                    
+                    # Get parties that earned rewards
+                    rewardparties = ContractPartyGoalEvaluation.objects.get_contract_party_evaluations(contractid=contractid, achievedflag = True)
+    
+                    # Build formset's initial data
+                    rewardparty_data = []
+                    
+                    for rewardparty in rewardparties:
+                        rewardparty_data.append(
+                            {
+                                'partyuserfullname':rewardparty.partyuserfullname,
+                                'contractid':rewardparty.contractid,
+                                'partyuserid':rewardparty.partyuserid,
+                                'goalid': rewardparty.goalid,
+                                'rewardid': rewardparty.rewardid,
+                                'rewarddeliveredflag': rewardparty.rewarddeliveredflag,
+                                'actualrewardvalue': rewardparty.actualrewardvalue,
+                                'rewardoptions': rewardparty.rewardoptions,
+                            }
+                        )
+                    
+                    rewardsformset = ContractPartyGoalRewardFormSet(initial=rewardparty_data)
+            else:
+                # Unauthorized access
+                return redirect_home() 
+    
+        context = {
+            'form': form, 
+            'evaluationformset': evaluationformset, 
+            'rewardsformset': rewardsformset, 
+            'contract': mycontract
+        }
+        
+        return render(request, 'wakemeup/contract/evaluate_contract.html', context)
+    
+    # Handle off-case for invalid object id
+    else:
+        return redirect_home()
+
+@check_permissions
 def create_contract(request, contractid):
 
     # Get correct contractid to use (in case of revision)
@@ -848,16 +1014,31 @@ def create_contract_submit(request, contractid):
         return redirect_home() 
 
 @check_permissions
-def create_contract_revise(request, contractid):
+def manage_contract(request, contractid):
 
     if(request.method == "POST"):
         mycontract = Contract.objects.get(contractid=contractid)
-        
-        # Start revision process for active contracts
-        if(mycontract and mycontract.contractstatus == 'A'):
-            mycontract.revise(actiontype='revise')
-        
-        return redirect('wakemeup:create_contract', contractid=contractid)
+        actiontype = request.POST.get('actiontype')
+
+        if(mycontract):
+            
+            # REVISE CONTRACT
+            if(actiontype == "revise"):
+                
+                # Put contract in revision mode
+                if(mycontract.contractstatus == 'A'):
+                    mycontract.revise(actiontype='revise')
+                
+                # Redirect to edit contract page
+                return redirect('wakemeup:create_contract', contractid=contractid)
+
+            # EVALUATE CONTRACT
+            elif(actiontype == "evaluate"):
+                if(mycontract.contractstatus == 'A'):
+                    mycontract.evaluate(actiontype='evaluate')
+                    
+                # Redirect to evaluate page
+                return redirect('wakemeup:evaluate_contract', contractid=contractid)
 
     # Unauthorized access
     return redirect_home() 

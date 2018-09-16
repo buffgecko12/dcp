@@ -197,7 +197,7 @@ class ContractsTable(tables.Table):
     
     class Meta:
         model = Contract
-        exclude = ('contracttype','classid','guardianapprovalflag','contractapprovalts','revisiondescription','revisionapprovalts','studentleaderrequirements','teacherrequirements','studentrequirements','contractscanfile','teacherfirstname','teacherlastname')
+        fields = ('contractid','contractname','classdisplayname','teacheruserid','contractvalidperiod','revisiondeadlinets','contractstatus','goalinfo','partyuserinfo','manage_buttons')
         empty_text = EMPTY_TEXT
         
         attrs = {

@@ -54,6 +54,18 @@ class ContractManager(models.Manager):
             )
         )
     
+    def evaluate(self, myContract, actiontype, actioncategory, submitflag, evaluationinfo, rewardinfo):
+        return save_data('SP_DCPEvaluateContract', 
+            (
+                myContract.contractid, 
+                actiontype,
+                actioncategory,
+                submitflag,
+                evaluationinfo,
+                rewardinfo
+            )
+        )[0]
+        
     def complete(self):
         pass
     
@@ -151,8 +163,18 @@ class ContractGoalRewardManager(models.Manager):
     def get(self, contractid, goalid, rewardid):
         return get_data_pk(self, 'SP_DCPGetContractGoalReward(%s,%s,%s)', (contractid, goalid, rewardid))
     
-    def get_contract_rewards(self, contractid = None, goalid= None, rewardid = None):
+    def get_contract_rewards(self, contractid = None, goalid = None, rewardid = None):
         return get_data(self, 'SP_DCPGetContractGoalReward(%s,%s,%s)', (contractid, goalid, rewardid))
+
+    def get_contract_reward_options(self, contractid = None, goalid = None):
+        rewardoptions_list = []
+        rewardoptions = self.get_contract_rewards(contractid=contractid, goalid=goalid)
+        
+        # Loop through rewards and create options list
+        for reward in rewardoptions:
+            rewardoptions_list.append((reward.rewardid, reward.rewarddisplayname))
+    
+        return rewardoptions_list
     
     def save(self, myContractGoalReward):
         return save_data('SP_DCPUpsertContractGoalReward', 
@@ -191,6 +213,16 @@ class ContractPartyManager(models.Manager):
                 MyContractParty.guardianapprovalinfo,
             )
         )[0]
+
+class ContractPartyGoalEvaluationManager(models.Manager):
+    def all(self):
+        return self.get_contract_party_evaluations(None, None, None, None)
+    
+    def get(self, contractid, partyuserid, goalid):
+        return get_data_pk(self, 'SP_DCPGetContractPartyGoalEvaluation(%s,%s,%s,%s)', (contractid, partyuserid, goalid, None))
+    
+    def get_contract_party_evaluations(self, contractid = None, partyuserid = None, goalid = None, achievedflag = None):
+        return get_data(self, 'SP_DCPGetContractPartyGoalEvaluation(%s,%s,%s,%s)', (contractid, partyuserid, goalid, achievedflag))
 
 class ContractInfoManager(models.Manager):
     def all(self):
@@ -250,6 +282,8 @@ class Contract(models.Model):
     studentrequirements = models.CharField(max_length=500)
     contractscanfile = models.BinaryField()
     contractapprovalts = models.DateTimeField(verbose_name='Fecha de aprobaci' + chr(243) + 'n')
+    contractevaluationts = models.DateTimeField(verbose_name='Fecha de evaluaci' + chr(243) + 'n')
+    contractfinalizationts = models.DateTimeField(verbose_name='Fecha de finalizaci' + chr(243) + 'n')
     contractstatus = models.CharField(max_length=1,verbose_name='Estatus')
     goalinfo = JSONField()
     partyuserinfo = JSONField()
@@ -274,6 +308,9 @@ class Contract(models.Model):
     
     def change_status(self, contractstatus):
         return Contract.objects.change_status(self, contractstatus)
+
+    def evaluate(self, actiontype, actioncategory = None, submitflag = False, evaluationinfo = None, rewardinfo = None):
+        return Contract.objects.evaluate(self, actiontype, actioncategory, submitflag, evaluationinfo, rewardinfo)
 
     def get_emails(self, emailtype, useridlist = None):
         return Contract.objects.get_emails(self, emailtype, useridlist)
@@ -358,6 +395,38 @@ class ContractParty(models.Model):
     def approve_contract(self):
         return ContractParty.objects.approve_contract(self)
 
+class ContractPartyGoalEvaluation(models.Model):
+
+    # Party attributes    
+    contractid = models.IntegerField(primary_key=True)
+    partyuserid = models.IntegerField()
+    goalid = models.IntegerField()
+    
+    # Evaluation attributes
+    achievedflag = models.BooleanField()
+    experiencerating = models.SmallIntegerField()
+    highperformerflag = models.BooleanField()
+    topperformerflag = models.BooleanField()
+    feedbackmsg = models.CharField(max_length=500)
+    
+    partyuserfullname = models.CharField(max_length=500)
+    rewardoptions = JSONField()
+
+    class Meta:
+        managed = False
+        
+    objects = ContractPartyGoalEvaluationManager()
+    
+class ContractPartyGoalReward(ContractPartyGoalEvaluation):
+
+    # Reward attributes    
+    rewardid = models.IntegerField()
+    rewarddeliveredflag = models.BooleanField()
+    actualrewardvalue = models.IntegerField()
+    
+    class Meta:
+        managed = False
+        
 class ContractInfo(models.Model):
 
     contractid = models.IntegerField(primary_key=True)

@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load staticfiles %}
+
+{% block title %}Evaluar contrato{% endblock %}
+
+{% block headimport %}
+
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="{% static 'wakemeup/css/starrating.css' %}">
+
+	<style>
+		/* Condense table rows */
+		.table-condensed>tbody>tr>th, 
+		.table-condensed>tbody>tr>td,
+		.table-condensed>thead>tr>th, 
+		.table-condensed>thead>tr>td
+		{
+			padding: 2px;
+		}	
+	
+		/* Centered checkboxes */
+		input[type="checkbox"] {
+		  width: 18px;
+		  height: 18px;
+		  padding: 0;
+		  margin: 0;
+		  vertical-align: bottom;
+		  position: relative;
+		  top: 5px;
+		  *overflow: hidden;
+		}
+
+		/* Text boxes*/
+		input[type="text"] {
+		  width: 200px;
+		  height: 30px;
+		  padding: 5px;
+		  vertical-align: bottom;
+		  position: relative;
+		  top: 5px;
+		}
+		
+		/* Number inputs*/
+		input[type="number"] {
+		  width: 6em;
+		  padding: 5px;
+		  position: relative;
+		}
+		
+		select {
+		    max-width: 13em;
+		    min-width: 13em;
+		}		
+	</style>
+{% endblock %}
+
+{% block content %}
+	<div class="container-fluid">
+		<span class="h1 align-middle display-4">Evaluar</span>
+		<br>
+		<form method="post" id="evaluateContractForm">
+		    {{ evaluationformset.management_form }}
+
+			<!-- Evaluation info -->
+			<legend>Metas</legend>
+	        {% crispy evaluationformset evaluationformset.form.helper %}
+
+			<!-- Reward info -->
+			{% if rewardsformset %}
+			    {{ evaluationformset.management_form }}
+	
+		        <legend>Incentivos</legend>
+		        {% if rewardsformset.forms %}
+		        {% crispy rewardsformset rewardsformset.form.helper %}
+		        {% else %}
+		        No se logr&#243; la meta.
+		        {% endif %}
+	        {% endif %}
+
+			<!-- Form buttons -->
+	        {% crispy form %}
+	    </form>
+	</div>
+{% endblock %}
+
+{% block bodyimport %}
+	<script>
+		//  Check if contract has been evaluated or not
+		var evaluatedflag = $("#id_evaluatedflag").val().toLowerCase() == "true" ? true : false
+		var maxnumrewards = $("#id_maxnumrewards").val()
+
+		// Define form field patterns
+		var formpattern = /^form-(\d)+-/
+		var achievedflagfieldpattern = 'achievedflag'
+		var highperformerflagfieldpattern = 'highperformerflag'
+		var topperformerflagfieldpattern = 'topperformerflag'
+		var achievedflagfieldpattern = 'achievedflag'
+		var rewardidfieldpattern = 'rewardid'
+		var rewarddeliveredflagfieldpattern = 'rewarddeliveredflag'
+		var actualrewardvaluefieldpattern = 'actualrewardvalue'
+
+		// Click listener - SUBMIT
+	    $("input[type=submit]").click(function() {
+	    	var myval = $(this).val()
+			var displaymsg = ""
+
+    		// EVALUATE
+			if(myval == "Evaluar") {
+				
+				// Check number of users selected
+				var numuserschecked = $('input[name$=' + achievedflagfieldpattern + ']:checkbox:checked').length
+				
+				if(numuserschecked == 0) {
+					displaymsg = "AVISO: No se marc\u00F3 ning\u00FAn integrante como <<logrado>>\n\n"
+				}
+				
+				displaymsg = displaymsg + 'Al hacer clic, se finalizar\u00E1 la evaluaci\u00F3n y no se podr\u00E1 modificarla.  \u00BFDesee continuar?'
+						
+		    	// Confirm dialog
+				if(!confirm(displaymsg)) {
+					return false; // Return if "cancel"
+				}
+			}
+	    	// FINALIZE
+			else if (myval == "Finalizar") {
+				
+				var numselectedrewards = 0
+				var numdeliveredrewards = $('input[name$=' + rewarddeliveredflagfieldpattern + ']:checkbox:checked').length // Count number of rewards marked as "delivered"
+
+				// Count number of selected rewards
+				$("select[name$=" + rewardidfieldpattern + "]").each(function() {
+					if($(this).val() != 0) {
+						numselectedrewards +=1
+					}
+				})
+
+				// Check if user selected any rewards
+				if(numselectedrewards == 0) {
+					displaymsg = "AVISO: No se seleccion\u00F3 incentivos para todos los integrantes\n\n"
+				}
+				// Check if user designated all rewards as "delivered"
+				else if (numdeliveredrewards < numselectedrewards) {
+					displaymsg = displaymsg + 'AVISO: No se marc\u00F3 todos los incentivos como <<entregado>>\n\n'
+				}
+
+				displaymsg = displaymsg + 'Al hacer clic, se finalizar\u00E1 el contrato y no se podr\u00E1 realizar cambios adicionales.\n\n\u00BFDesee continuar?'
+						
+		    	// Confirm dialog
+				if(!confirm(displaymsg)) {
+					return false; // Return if "cancel"
+				}
+			}
+	    	
+			// Disable buttons (only if "submit")
+			setTimeout( function() 
+				{
+					$("input[type='submit']").prop('disabled',true)
+					$("#submit_cancel").addClass("disabled")
+			}
+				,0
+			)
+			
+			return true;
+	    })
+		
+		// Change listener - HIGH PERFORMER FLAG
+		$("input[name$='" + achievedflagfieldpattern + "']").change(function() {
+			var achievedflagfield = get_fieldid(this.name,achievedflagfieldpattern)
+			var numchecked = get_checkboxcount(achievedflagfieldpattern)
+			
+			if(maxnumrewards) {
+				if(numchecked > maxnumrewards ) {
+					alert('Se puede elegir un m\u00E1ximo de ' + maxnumrewards + ' integrantes.')
+					this.checked = false
+				}
+			}
+		});
+
+		// Change listener - ACHIEVED FLAG
+		$("input[name$='" + highperformerflagfieldpattern + "']").change(function() {
+			var topperformerflagfield = get_fieldid(this.name,topperformerflagfieldpattern)
+			var numchecked = get_checkboxcount(highperformerflagfieldpattern)
+
+			// Max of 3 high performers allowed
+			if(numchecked > 3 ) {
+				alert('Se puede elegir un m\u00E1ximo de tres integrantes.')
+				this.checked = false
+			}
+
+			// Un-check top performer if selected
+			if(this.checked) {
+				$("#" + topperformerflagfield).prop('checked',false)
+			}
+		});
+
+		// Change listener - TOP PERFORMER FLAG
+		$("input[name$='" + topperformerflagfieldpattern + "']").change(function() {
+			var highperformerflagfield = get_fieldid(this.name,highperformerflagfieldpattern)
+			var numchecked = get_checkboxcount(topperformerflagfieldpattern)
+
+			if(this.checked == true) {
+				// Uncheck all top performer checkboxes
+				$("input[name$='" + topperformerflagfieldpattern + "']:checked").prop('checked',false)
+				
+				// Check current one
+				this.checked = true
+				
+				// Uncheck high performer field
+				$("#" + highperformerflagfield).prop('checked',false)
+			}
+		});
+
+		// Change listener - REWARD
+		$("select[name$='" + rewardidfieldpattern + "']").change(function() {
+
+			if($(this).val() == 0) {
+				enableflag = false
+			} else {
+				enableflag = true
+			}
+
+			// Toggle fields
+			toggle_reward_fields(this.name, enableflag)
+		});
+
+		// Function - Toggle reward fields
+		function toggle_reward_fields(fieldname, enableflag) {
+			var rewarddeliveredflagfield = get_fieldid(fieldname, rewarddeliveredflagfieldpattern)
+			var actualrewardvaluefield = get_fieldid(fieldname, actualrewardvaluefieldpattern)
+
+			if(enableflag) {
+				// Enable fields
+				$("#" + rewarddeliveredflagfield).prop('disabled', false)
+				$("#" + actualrewardvaluefield).prop('disabled', false)
+
+			} else {
+			
+				// Reset and disable fields
+				$("#" + rewarddeliveredflagfield).prop('disabled', true)
+				$("#" + rewarddeliveredflagfield).prop('checked', false)
+				
+				$("#" + actualrewardvaluefield).prop('disabled', true)
+				$("#" + actualrewardvaluefield).val("")
+			}
+		}
+		
+		// Function - Get adjacent fields by id
+		function get_fieldid(fieldname, fieldpattern) {
+			return 'id_form-' + fieldname.match(formpattern)[1] + '-' + fieldpattern
+		}
+		
+		// Function - Get checked checkbox count
+		function get_checkboxcount(fieldname) {
+			var count = $("input[name$='" + fieldname + "']:checked").length;
+			return count
+		};
+
+		$(document).ready(function() {
+			if(evaluatedflag) {
+				// Disable all form fields (except for hidden and submit buttons)
+				$("#evaluateContractForm :input[name$='achievedflag'],[name$='experiencerating'],[name$='highperformerflag'],[name$='topperformerflag'],[name$='feedbackmsg']").prop("disabled", true);
+				
+				// Loop through reward info and toggle as needed
+				$("select[name$=" + rewardidfieldpattern + "]").each(function() {
+					var myval = $(this).val()
+					if(myval == 0) {
+						toggle_reward_fields(this.name,false)
+					}
+				})
+			}
+		})
+	</script>
+{% endblock %}

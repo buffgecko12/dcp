@@ -11,10 +11,13 @@ urlpatterns = [
     url(r'^contract/$', views.contract_list, name="contract_list"),
     url(r'^contract/(?P<contractid>(\d+))/detail$', views.contract_detail, name="contract_detail"),
     url(r'^contract/(?P<contractid>(\d+))/accept$', views.contract_accept, name="contract_accept"),
+    url(r'^contract/(?P<contractid>(\d+))/evaluate$', views.evaluate_contract, name="evaluate_contract"),
+
+    # Contract - create
     url(r'^contract/(?P<contractid>(\d+|new))$', views.create_contract, name="create_contract"),
     url(r'^contract/(?P<contractid>(\d+))/goals$', views.create_contract_goals, name="create_contract_goals"),
     url(r'^contract/(?P<contractid>(\d+))/submit$', views.create_contract_submit, name="create_contract_submit"),
-    url(r'^contract/(?P<contractid>(\d+))/revise$', views.create_contract_revise, name="create_contract_revise"),
+    url(r'^contract/(?P<contractid>(\d+))/revise$', views.manage_contract, name="manage_contract"),
 
     # Admin
     url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward))(/)?$', views.admin_list, name="admin_list"), # Object list
@@ -32,7 +35,7 @@ urlpatterns = [
     url(r'^admin/file/(?P<fileid>\d+)$', views.download_file_fromdb, name='download_file_fromdb'), # File download
     url(r'^about$', views.about, name='about'),
 
-    # Ajax URLs
+    # Ajax
     url(r'^ajax/load-classes/', views.load_classes, name='ajax_load_classes'),
     url(r'^ajax/load-students/', views.load_students, name='ajax_load_students'),
     url(r'^ajax/load-teachers/', views.load_teachers, name='ajax_load_teachers'),
@@ -46,5 +49,4 @@ urlpatterns = [
 
     # Default (catch all)    
     url(r'.*', views.index, name = "default"),
-
 ]

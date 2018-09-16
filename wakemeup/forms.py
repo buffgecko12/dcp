@@ -9,7 +9,7 @@ from crispy_forms.bootstrap import FormActions, TabHolder, Tab, PrependedText, I
 from django.forms.widgets import HiddenInput
 
 from .models.environment import School, Class, Teacher, TeacherBudget, Student
-from .models.contract import Contract, ContractInfo, Reward, ContractParty
+from .models.contract import *
 
 import datetime
 
@@ -21,6 +21,10 @@ DEFAULT_FORM_CLASS = 'form-horizontal'
 DEFAULT_LABEL_CLASS = 'col-sm-4'
 DEFAULT_FIELD_CLASS = 'col-sm-8'
 DEFAULT_FORM_METHOD = 'POST'
+
+class ChoiceFieldNoValidation(forms.ChoiceField):
+    def validate(self, value):
+        pass
 
 def validate_emailaddress(userid, emailaddress):
     
@@ -597,9 +601,9 @@ class ContractForm(forms.Form):
                 msg = "La fecha tope para revisar debe ser entre del plazo del contrato"
                 self.add_error('revisiondeadlinets', msg)
     
-            # Calculate 75% date of contract period
+            # Calculate contract revision cutoff
             contract_length = mycontractvalidenddate - mycontractvalidstartdate
-            contractrevision_cutoff = mycontractvalidstartdate + (contract_length * .75)
+            contractrevision_cutoff = mycontractvalidstartdate + (contract_length * .85)
             
             if(not myrevisiondeadlinets <= contractrevision_cutoff):
                 msg = "La fecha tope para revisar debe ser " + str(contractrevision_cutoff) + " o antes"
@@ -758,7 +762,12 @@ class ContractPartyAcceptForm(forms.Form):
         self.helper.layout.append(
             HTML('Yo, {{user.firstname }} {{ user.lastname }}, acepto los terminos del contrato como escrito.  Una vez enviada, mi elecci&#243;n no se puede cambiar.<br><br>')
         )
-        self.helper.layout.append(getAdminFormActions(cancel_type="button"))
+        self.helper.layout.append(
+            Div(
+                getAdminFormActions(cancel_type="button"),
+                css_class='text-center'
+            )
+        )
         
     class Meta:
         model = Contract
@@ -1004,6 +1013,111 @@ class ContractSubmitForm(forms.Form):
                 HTML("""<a class="btn btn-info " href="{% url '""" + 'wakemeup:create_contract_goals' + """' """ + 'contractid=' + str(contractid) + """ %}" id="submit_previous">Previo</a> """),
             )
         )
+
+class EvaluateContractForm(forms.Form):
+
+    evaluatedflag = forms.BooleanField(widget=forms.HiddenInput)
+    maxnumrewards = forms.IntegerField(widget=forms.HiddenInput)
+    
+    def __init__ (self, *args, **kwargs):
+
+        contract = kwargs.pop("contract")
+        acceptedgoal = ContractGoal.objects.get_contract_goals(contractid=contract.contractid, acceptedflag=True)
+        
+        if(acceptedgoal):
+            maxnumrewards = acceptedgoal[0].maxnumrewards
+        else:
+            maxnumrewards = None
+            
+        evaluatedflag = True if contract.contractevaluationts else False
+        
+        super(EvaluateContractForm, self).__init__(*args, **kwargs)
+
+        # Set hidden fields
+        self.fields['evaluatedflag'].initial = evaluatedflag
+        self.fields['maxnumrewards'].initial = maxnumrewards
+        
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        
+        self.helper.layout = Layout(
+            'evaluatedflag',
+            'maxnumrewards',
+            Div(
+                HTML("""<a class="btn btn-secondary" href="{% url 'wakemeup:contract_list' %}" name="submit_cancel" id="submit_cancel">Cancelar</a> """),
+                Submit('submit_save', 'Guardar', css_id='submit_save', css_name='submit_save', css_class='btn btn-primary'),
+                Submit('submit_evaluate', 'Evaluar' if not evaluatedflag else 'Finalizar', css_id='submit_evaluate', css_name='submit_evaluate', css_class='btn btn-success'),
+                css_class='text-center'
+            )
+        )
+
+class ContractPartyGoalEvaluationForm(forms.Form):
+
+    contractid = forms.IntegerField(widget=forms.HiddenInput)
+    partyuserid = forms.IntegerField(widget=forms.HiddenInput)
+    goalid = forms.IntegerField(widget=forms.HiddenInput)
+
+    partyuserfullname = forms.CharField(label="Nombre",max_length=500,required=False)
+    achievedflag = forms.BooleanField(label="Logrado",required=False)
+    experiencerating = forms.IntegerField(label='Experiencia',required=False)
+    highperformerflag = forms.BooleanField(label='Alto desempe' + mychr('n') + 'o',required=False)
+    topperformerflag = forms.BooleanField(label='Mejor desempe' + mychr('n') + 'o',required=False)
+#     feedbackmsg = forms.CharField(max_length=500, label="Feedback",required=False)
+
+    def __init__ (self, *args, **kwargs):
+
+        # Call base class constructor (i.e. Teacher Form)
+        super(ContractPartyGoalEvaluationForm, self).__init__(*args, **kwargs)
+
+        # Set form helper properties
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.form_class = 'form-inline'
+        self.helper.template = 'wakemeup/contract/evaluate_contract_inline_formset.html'
+
+    class Meta:
+        model = ContractPartyGoalEvaluation
+        
+class ContractPartyGoalRewardForm(forms.Form):
+
+    contractid = forms.IntegerField(widget=forms.HiddenInput)
+    partyuserid = forms.IntegerField(widget=forms.HiddenInput)
+    goalid = forms.IntegerField(widget=forms.HiddenInput)
+
+    partyuserfullname = forms.CharField(label="Nombre",max_length=500,required=False)
+    rewardid = ChoiceFieldNoValidation(label="Incentivo", required=False)
+    rewarddeliveredflag = forms.BooleanField(label='Entregado', required=False)
+    actualrewardvalue = forms.IntegerField(label="Costo real", required=False, widget=forms.NumberInput())
+
+    def __init__ (self, *args, **kwargs):
+
+        initialdata = kwargs.get("initial",{})
+        rewardoptions = [("0","-- Escoger incentivo --")]
+        rewardid = initialdata.get('rewardid')
+        
+        ContractGoalReward.objects.get_contract_reward_options(contractid=3, goalid=1)
+
+        # Call base class constructor (i.e. Teacher Form)
+        super(ContractPartyGoalRewardForm, self).__init__(*args, **kwargs)
+
+        if(initialdata):
+            for rewardoption in initialdata.get('rewardoptions'):
+                rewardoptions.append((rewardoption['rewardid'], rewardoption['rewarddisplayname']))
+                
+            if(rewardid):
+                self.fields['rewardid'].initial = rewardid
+
+        # Populate reward drop-down
+        self.fields['rewardid'].choices = rewardoptions
+
+        # Set form helper properties
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.form_class = 'form-inline'
+        self.helper.template = 'wakemeup/contract/evaluate_contract_inline_formset.html'
+
+    class Meta:
+        model = ContractPartyGoalReward
         
 class UserGroupForm(forms.Form):
 

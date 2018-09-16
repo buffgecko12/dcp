@@ -56,7 +56,7 @@
 		
 		<legend><u>Metas</u></legend>
 		{% for goal in record.goalinfo.currentgoals %}
-			<div {% if goal.acceptedflag %} class="bg-light" {% elif record.contractstatus == "A" %} class="text-muted"{% endif %}>
+			<div {% if goal.acceptedflag %} class="bg-light" {% elif record.contractstatus not in "D,P" %} class="text-muted"{% endif %}>
 				<strong>
 					Opci&#243;n 
 					{% if goal.difficultylevel == "E" %} Fac&#237;l
@@ -78,7 +78,7 @@
 			</div><br>
 		{% endfor %}
 		
-		<legend><u>Participantes</u></legend>
+		<legend><u><a id="participants">Participantes</a></u></legend>
 		<div class="row">
 			<div class="col text-center"><strong>Preferencias de meta</strong></div>
 		</div>
@@ -164,7 +164,9 @@
 		{% endif %}
 
 		<!-- MANAGE CONTRACT BUTTONS -->
-		<div class="d-flex justify-content-center">{% include 'wakemeup/admin/fields/contract_buttons.html' %}</div><br>
+		{% if request.user.is_admin or request.user.usertype == "TR" and request.user.userid == record.teacheruserid %}
+			<div class="d-flex justify-content-center">{% include 'wakemeup/admin/fields/contract_buttons.html' %}</div><br>
+		{% endif %}
 	</div>
 
 	<!-- Accept contract modal -->

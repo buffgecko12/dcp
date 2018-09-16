@@ -1,8 +1,10 @@
 <div class="text-nowrap">
-{% if request.user.is_admin or record.teacheruserid == request.user.userid %}
+<!-- Teacher/admin buttons -->
+{% if request.user.is_admin or request.user.usertype == "TR" and request.user.userid == record.teacheruserid %}
 	{% if not record.revisionapprovalts %}
 		{% if record.contractstatus == "D" or record.contractstatus == "P" %}
 			{% if record.contractstatus == "D" or record.partyapprovalcount == 0 %}
+				<!--  EDIT -->
 				<form style="display:inline-block" action="{% url 'wakemeup:create_contract' contractid=record.contractid %}" method="post">
 				    {% csrf_token %}
 					<input class="btn {{ displayinfo.buttonsize }} btn-primary" name="submit_other" type="submit" value="Editar"/>
@@ -11,7 +13,7 @@
 				{% if displayinfo.displaytextflag %}
 					<i>No se puede editar ya que<br>ya se aprob&#243; por {{ record.partyapprovalcount }} persona{{record.partyapprovalcount|pluralize:",s"}}</i><br><br>
 				{% endif %}
-				
+				<!--  APPROVE -->
 				<form style="display:inline-block" action="{% url 'wakemeup:contract_accept' contractid=record.contractid %}" method="post">
 				    {% csrf_token %}
 				    <input type="hidden" name="contractid" value="{{ record.contractid }}" />
@@ -21,37 +23,61 @@
 					<input class="btn {{ displayinfo.buttonsize }} btn-info approve_confirm" name="submit_other" type="submit" value="Aprobar"/>
 				</form>
 			{% endif %}
+			<!-- DELETE -->
 			<form style="display:inline-block" action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=record.contractid %}" method="post">
 			    {% csrf_token %}
 				<input class="btn {{ displayinfo.buttonsize }} btn-warning cancel_confirm" name="delete" type="submit" value="Borrar"/>
 			</form>
 		{% endif %}
 	{% endif %}
-	{% if record.contractstatus in "A,R,P" %}
+	{% if record.contractstatus in "A,R,P,E" %}
 		{% if record.revisioneligibilityflag %}
-			{% if record.contractstatus != "P" %}
-				<form style="display:inline-block" action="{% url 'wakemeup:create_contract_revise' contractid=record.contractid %}" method="post">
+			{% if record.contractstatus in "A,R" %}
+				<!-- MODIFY -->
+				<form style="display:inline-block" action="{% url 'wakemeup:manage_contract' contractid=record.contractid %}" method="post">
 				    {% csrf_token %}
 					<input class="btn {{ displayinfo.buttonsize }} btn-danger modify_confirm" name="revise" type="submit" value="Modificar"/>
+				    <input type="hidden" name="actiontype" value="revise" />
 				</form>
 			{% endif %}
 		{% endif %}
-		{% if record.contractstatus != "P" %}
-			<form style="display:inline-block" action="{% url 'wakemeup:index' %}" method="post">
+		{% if record.contractstatus in "A,E" %}
+			<!-- EVALUATE / FINALIZE -->
+			<form style="display:inline-block" action="{% url 'wakemeup:manage_contract' contractid=record.contractid %}" method="post">
 			    {% csrf_token %}
-				<input class="btn {{ displayinfo.buttonsize }} btn-success" name="finalize" type="submit" value="Evaluar" disabled/>
+				<input class="btn {{ displayinfo.buttonsize }} btn-success" name="submit_other" type="submit" value="{% if record.contractevaluationts %}Finalizar{% else %}Evaluar{% endif %}"/>
+			    <input type="hidden" name="actiontype" value="evaluate" />
 			</form>
 		{% endif %}
 		{% if not record.revisioneligibilityflag %}
 			{% if displayinfo.displaytextflag %}
 				<br><br>
 				{% if record.revisionapprovalts %}
-					Ya se modific&#243; el contrato<br>({{ record.revisionapprovalts|date }})
+					<i>Ya se modific&#243; el contrato<br>({{ record.revisionapprovalts|date }})</i>
 				{% else %}
 					<i>Ya pas&#243; la fecha tope para<br>modificar el contrato<br>({{record.revisiondeadlinets|date}})</i>
 				{% endif %}
 			{% endif %}
 		{% endif %}		
 	{% endif %}
+	{% if record.contractfinalizationts and displayinfo.displaytextflag%}
+		<i>Ya se finaliz&#243; el contrato<br>({{ record.contractfinalizationts|date }})</i>
+	{% endif %}
+	
+<!-- Student buttons -->	
+{% elif request.user.usertype == "ST" %}
+	{% for party in record.partyuserinfo.currentparties %}
+		{% if party.partyuserid == request.user.userid %}
+			<!-- VOTE -->
+			{% if party.partyapprovalts %}
+				<i>Ya ha votado<br>({{ party.partyapprovalts }})</i>
+			{% elif record.contractstatus == "P" %}
+				<a class="btn {{ displayinfo.buttonsize }} btn-primary" href="{% url 'wakemeup:contract_detail' contractid=record.contractid %}#participants" >Votar</a>
+			{% endif %}<br><br>
+			<!-- FEEDBACK -->
+			{% if record.contractstatus in "E,F" %}
+			{% endif %}
+		{% endif %}
+	{% endfor %}
 {% endif %}
 </div>
