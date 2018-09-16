@@ -60,19 +60,19 @@
 			{% endif %}
 		{% endif %}		
 	{% endif %}
-	{% if record.contractfinalizationts and displayinfo.displaytextflag%}
+	{% if record.contractfinalizationts and displayinfo.displaytextflag %}
 		<i>Ya se finaliz&#243; el contrato<br>({{ record.contractfinalizationts|date }})</i>
 	{% endif %}
 	
 <!-- Student buttons -->	
 {% elif request.user.usertype == "ST" %}
 	{% for party in record.partyuserinfo.currentparties %}
-		{% if party.partyuserid == request.user.userid %}
+		{% if request.user.userid == party.partyuserid or request.user.userid == party.groupinfo.leaderuserid %}
 			<!-- VOTE -->
 			{% if party.partyapprovalts %}
 				<i>Ya ha votado<br>({{ party.partyapprovalts }})</i>
 			{% elif record.contractstatus == "P" %}
-				<a class="btn {{ displayinfo.buttonsize }} btn-primary" href="{% url 'wakemeup:contract_detail' contractid=record.contractid %}#participants" >Votar</a>
+				<a class="btn {{ displayinfo.buttonsize }} btn-primary" href="{% url 'wakemeup:contract_detail' contractid=record.contractid %}#participants" >Aceptar</a>
 			{% endif %}<br><br>
 			<!-- FEEDBACK -->
 			{% if record.contractstatus in "E,F" %}
