@@ -49,7 +49,7 @@
 			    <input type="hidden" name="actiontype" value="evaluate" />
 			</form>
 		{% endif %}
-		{% if not record.revisioneligibilityflag %}
+		{% if not record.revisioneligibilityflag and record.contractstatus in "A,R" %}
 			{% if displayinfo.displaytextflag %}
 				<br><br>
 				{% if record.revisionapprovalts %}
