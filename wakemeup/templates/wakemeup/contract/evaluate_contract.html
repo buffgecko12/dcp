@@ -57,14 +57,40 @@
 
 {% block content %}
 	<div class="container-fluid">
-		<span class="h1 align-middle display-4">Evaluar</span>
-		<br>
+		<h1 class="display-4">
+			Evaluar
+		</h1>
+	
 		<form method="post" id="evaluateContractForm">
 		    {{ evaluationformset.management_form }}
-
-			<!-- Evaluation info -->
-			<legend>Metas</legend>
+		    
+			<legend>General</legend>
+			<div class="row">
+				<div class="col col-sm-3">Actividad</div>
+				<div class="col col-sm-9">{{ contract.contractname }}</div>
+			</div>
+			<div class="row">
+				<div class="col col-sm-3">Curso</div>
+				<div class="col col-sm-9">{{ contract.classdisplayname }}</div>
+			</div>
+			<div class="row">
+				<div class="col col-sm-3">Plazo</div>
+				<div class="col col-sm-9">{{ contract.contractvalidperiod_disp }}</div>
+			</div>
+			<div class="row">
+				<div class="col col-sm-3">Meta</div>
+				<div class="col col-sm-9">{{ goalinfo.goaldescription }}</div>
+			</div><br>
+			
+			<legend>Evaluaci&#243;n</legend>
 	        {% crispy evaluationformset evaluationformset.form.helper %}
+			<div>
+				<small><small><i>
+					** <strong>mejor desempe&#241;o:</strong> se puede asignar a un s&#243;lo integrante<br>
+					** <strong>alto desempe&#241;o:</strong> se puede asignar a un m&#225;ximo de 3 integrantes<br>
+					** <strong>experiencia:</strong> la calificaci&#243;n de 1 estrella resultar&#225; en un feedback negativo<br>
+				</i></small></small>
+			</div><br>
 
 			<!-- Reward info -->
 			{% if rewardsformset %}

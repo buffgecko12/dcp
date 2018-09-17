@@ -543,6 +543,8 @@ def evaluate_contract(request, contractid):
     
     if(mycontract):
         
+        mycontract.contractvalidperiod_disp = display_timestamp_range(mycontract.contractvalidperiod) # Format for display
+
         # Check if contract has been evaluated already
         evaluatedflag = True if mycontract.contractevaluationts else False
     
@@ -551,6 +553,8 @@ def evaluate_contract(request, contractid):
         
         ContractPartyGoalEvaluationFormSet = formset_factory(form=ContractPartyGoalEvaluationForm, extra=0)
         ContractPartyGoalRewardFormSet = formset_factory(form=ContractPartyGoalRewardForm, extra=0)
+        
+        goalinfo = None
         
         # SAVE
         if request.method == "POST" and 'submit_other' not in request.POST:
@@ -624,9 +628,12 @@ def evaluate_contract(request, contractid):
             # Check contract is in "evaluation" mode and user has proper permissions
             if(mycontract.contractstatus == 'E' and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
     
+                # Get accepted goal
+                goalinfo = ContractGoal.objects.get_contract_goals(contractid=contractid,acceptedflag=True)[0]
+
                 # EVALUATION
-                # Get parties that accepted the contract
-                goalparties = ContractPartyGoalEvaluation.objects.get_contract_party_evaluations(contractid=contractid)
+                # Get parties that accepted the contract goal (assumes only one accepted goal per contract)
+                goalparties = ContractPartyGoalEvaluation.objects.get_contract_party_evaluations(contractid=contractid,goalid=goalinfo.goalid)
     
                 # Build formset's initial data
                 goalparty_data = []
@@ -684,7 +691,8 @@ def evaluate_contract(request, contractid):
             'form': form, 
             'evaluationformset': evaluationformset, 
             'rewardsformset': rewardsformset, 
-            'contract': mycontract
+            'contract': mycontract,
+            'goalinfo': goalinfo
         }
         
         return render(request, 'wakemeup/contract/evaluate_contract.html', context)
