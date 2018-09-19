@@ -1,0 +1,8 @@
+{% if not hidenotacceptedflag or party.achievedflag %}
+	<i class="fas fa-check-circle" style="color:{% if party.achievedflag %}gold{% else %}#9ACD32{% endif %};font-size:1.25em"></i>
+{% endif %}
+{% if party.topperformerflag %}
+	<i class="fas fa-trophy" style="color:gold;font-size:1.25em"></i>
+{% elif party.highperformerflag %}
+	<i class="fas fa-star" style="color:gold;font-size:1.25em"></i>
+{% endif %}

@@ -85,16 +85,20 @@
 		<div class="row">
 			<div class="col text-center"><strong>Preferencias de meta</strong></div>
 		</div>
+		{% if not record.contractapprovalts %}
 		<div class="row">
 			<div class="col text-center text-danger"><small><i>Seleccione una meta y haga clic en "Aceptar"</i></small></div>
 		</div>
+		{% endif %}
+		<!-- Table header -->
 		<div class="row">
 			<div class="col"></div>
+			<!-- Loop through goal options -->
 			{% for goal in record.goalinfo.currentgoals %}
 				<div class="col col-2 text-center">
 					<small>
 						<strong>
-							{% if goal.difficultylevel == "E" %} Fac&#237;l
+							{% if goal.difficultylevel == "E" %} F&#225;cil
 							{% elif goal.difficultylevel == "M" %} Media
 							{% elif goal.difficultylevel == "D" %} Dif&#237;cil
 							{% endif %}
@@ -102,12 +106,22 @@
 					</small>
 				</div>
 			{% endfor %}
-			<div class="col"><small><strong>Aceptado</strong></small></div>
+			<div class="col">
+				<small><strong>
+					{% if not record.contractapprovalts %}
+						Aceptado
+					{% else %}
+						Resultados
+					{% endif %}
+				</strong></small>
+			</div>
 		</div>
+		<!-- Loop through parties -->
 		{% for party in record.partyuserinfo.currentparties %}
 			<form action="" method="post" name="partyForm_{{ party.partyuserid }}">{% csrf_token %}
 				<div class="row">
-					<div class="col form-group">
+					<!-- Party name -->
+					<div class="col form-group" style="line-height:15px">
 						<small>
 							{% if party.groupinfo %}
 								{{ party.groupinfo.groupname }} <strong>({{ party.groupinfo.leaderfirstname|title }})</strong>
@@ -116,16 +130,28 @@
 							{% endif %}
 						</small>
 					</div>
+						<!-- Loop through goal options -->
 						{% for goal in record.goalinfo.currentgoals %}
-							<div class="col col-2 text-center ">
+							<div class="col col-2 text-center">
+								<!-- ALREADY VOTED -->
 								{% if party.preferredgoalid %}
 									{% if party.preferredgoalid == goal.goalid %}
-										<label class="buttoncontainer">
-										  <input type="radio" name="preferredgoalid" checked disabled>
-										  <span class="checkmark"></span>
-										</label>
+										<!-- NOT APPROVED -->
+										{% if not record.contractapprovalts %}
+											<label class="buttoncontainer">
+												<input type="radio" name="preferredgoalid" checked disabled>
+												<span class="checkmark"></span>
+											</label>
+										<!-- APPROVED -->
+										{% else %}
+											<span style="vertical-align:middle" class="text-nowrap">
+												<i class="fas fa-check-circle" style="color:#9ACD32;font-size:1.25em"></i>
+											</span>
+										{% endif %}
 									{% endif %}
+								<!-- NOT VOTED YET -->
 								{% elif request.user.userid == party.partyuserid or request.user.userid == party.groupinfo.leaderuserid or request.user.is_superuser %}
+									<!-- NOT APPROVED - Show radio button -->
 									{% if not record.contractapprovalts %}
 										<label class="buttoncontainer">
 										  <input type="radio" name="preferredgoalid" value="{{ goal.goalid }}">
@@ -135,24 +161,47 @@
 								{% endif %}
 							</div>
 						{% endfor %}
-					<div class="col ">
-						<small><i>
-							{% if not party.preferredgoalid and not record.contractapprovalts %}
-								{% if request.user.userid == party.partyuserid or request.user.userid == party.groupinfo.leaderuserid or request.user.is_admin %}
-									<input type="button" class="btn btn-xs btn-primary" name="submit_acceptcontract" id="submit_{{party.partyuserid}}" value="Aceptar" disabled/>
+					<div class="col">
+						<!-- NOT APPROVED - ACCEPT BUTTON -->
+						{% if not record.contractapprovalts %}
+							<small><i>
+								{% if not party.preferredgoalid and not record.contractapprovalts %}
+									{% if request.user.userid == party.partyuserid or request.user.userid == party.groupinfo.leaderuserid or request.user.is_admin %}
+										<input type="button" class="btn btn-xs btn-primary" name="submit_acceptcontract" id="submit_{{party.partyuserid}}" value="Aceptar" disabled/>
+									{% else %}
+									N/A
+									{% endif %}
 								{% else %}
-								N/A
+									{{ party.partyapprovalts|default_if_none:"N/A" }}
 								{% endif %}
-							{% else %}
-								{{ party.partyapprovalts|default_if_none:"N/A" }}
-							{% endif %}
-						</i></small>
+							</i></small>
+						<!-- APPROVED - RESULTS -->
+						{% else %}
+							{% with hidenotacceptedflag=True %}
+							<span style="vertical-align:middle" class="text-nowrap">
+								{% include "wakemeup/contract/include/goalevaluation.html" %}
+							</span>
+							{% endwith %}
+						{% endif %}
 					</div>
 				</div>
 				<input type="hidden" name="contractid" value="{{ record.contractid }}" />
 				<input type="hidden" name="partyuserid" value="{{ party.partyuserid }}" />
 			</form>
-		{% endfor %}<br>
+		{% endfor %}
+
+		<!-- Legend for evaluation icons -->		
+		{% if record.contractapprovalts %}
+			<div style="line-height:15px">
+				<small><small><i>
+					<i class="fas fa-check-circle" style="color:#9ACD32"></i> = aceptado&nbsp;&nbsp; 
+					<i class="fas fa-check-circle" style="color:gold"></i> = logrado<br>
+					<i class="fas fa-star" style="color:gold"></i> = alto desempe&#241;o&nbsp;&nbsp; 
+					<i class="fas fa-trophy" style="color:gold"></i> = mejor desempe&#241;o<br>
+				</small></small>
+			</div>
+		{% endif %}
+		<br>
 		
 		{% if record.revisionapprovalts %}
 			<legend><u>Modificaciones</u></legend>

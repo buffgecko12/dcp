@@ -10,15 +10,10 @@
 				{% endif %}
 				
 			</span>
-			<span style="vertical-align:middle">
 			{% if party.partyapprovalts %}
-				<i class="fas fa-check-circle" style="color:{% if party.achievedflag %}gold{% else %}#9ACD32{% endif %};font-size:1.25em"></i>
-				{% if party.topperformerflag %}
-					<i class="fas fa-trophy" style="color:gold;font-size:1.25em"></i>
-				{% elif party.highperformerflag %}
-					<i class="fas fa-star" style="color:gold;font-size:1.25em"></i>
-				{% endif %}
-			</span>
+				<span style="vertical-align:middle">
+					{% include "wakemeup/contract/include/goalevaluation.html" %}
+				</span>
 			{% endif %}
 			<br>
 		</div>
