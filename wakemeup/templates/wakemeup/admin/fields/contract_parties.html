@@ -1,16 +1,25 @@
 {% load staticfiles %}
 
 	{% for party in record.partyuserinfo.currentparties %}
-		<span class="text-nowrap">
-			{% if party.groupinfo %}
-				{{ party.groupinfo.groupname }} <strong>({{ party.groupinfo.leaderfirstname|title }})</strong>
-			{% else %}
-				{{ party.firstname|title }}
-			{% endif %}
-			
+		<div class="text-nowrap">
+			<span>
+				{% if party.groupinfo %}
+					{{ party.groupinfo.groupname }} <strong>({{ party.groupinfo.leaderfirstname|title }})</strong>
+				{% else %}
+					{{ party.firstname|title }}
+				{% endif %}
+				
+			</span>
+			<span style="vertical-align:middle">
 			{% if party.partyapprovalts %}
-				<img src="{% static 'img/web_check15.png' %}" /> 
+				<i class="fas fa-check-circle" style="color:{% if party.achievedflag %}gold{% else %}#9ACD32{% endif %};font-size:1.25em"></i>
+				{% if party.topperformerflag %}
+					<i class="fas fa-trophy" style="color:gold;font-size:1.25em"></i>
+				{% elif party.highperformerflag %}
+					<i class="fas fa-star" style="color:gold;font-size:1.25em"></i>
+				{% endif %}
+			</span>
 			{% endif %}
 			<br>
-		</span>
+		</div>
 	{% endfor %}
