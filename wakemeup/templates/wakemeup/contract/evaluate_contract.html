@@ -80,7 +80,14 @@
 			<div class="row">
 				<div class="col col-sm-3">Meta</div>
 				<div class="col col-sm-9">{{ goalinfo.goaldescription }}</div>
-			</div><br>
+			</div>
+			{% if goalinfo.maxnumrewards %}
+			<div class="row">
+				<div class="col col-sm-3">Max. n&#250;mero de ganadores</div>
+				<div class="col col-sm-9">{{ goalinfo.maxnumrewards}}</div>
+			</div>
+			{% endif %}
+			<br>
 			
 			<legend>Evaluaci&#243;n</legend>
 	        {% crispy evaluationformset evaluationformset.form.helper %}
