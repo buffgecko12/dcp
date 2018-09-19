@@ -108,7 +108,7 @@
 			{% endfor %}
 			<div class="col">
 				<small><strong>
-					{% if not record.contractapprovalts %}
+					{% if not record.contractevaluationts %}
 						Aceptado
 					{% else %}
 						Resultados
@@ -162,26 +162,28 @@
 							</div>
 						{% endfor %}
 					<div class="col">
-						<!-- NOT APPROVED - ACCEPT BUTTON -->
-						{% if not record.contractapprovalts %}
+						<!-- EVALUATED - Show results -->
+						{% if record.contractevaluationts %}
+							{% with hidenotacceptedflag=True %}
+							<span style="vertical-align:middle" class="text-nowrap">
+								{% include "wakemeup/contract/include/goalevaluation.html" %}
+							</span>
+							{% endwith %}
+						<!-- NOT EVALUATED -->
+						{% else %}
 							<small><i>
+								<!-- NOT APPROVED - GOAL NOT SELECTED -->
 								{% if not party.preferredgoalid and not record.contractapprovalts %}
 									{% if request.user.userid == party.partyuserid or request.user.userid == party.groupinfo.leaderuserid or request.user.is_admin %}
 										<input type="button" class="btn btn-xs btn-primary" name="submit_acceptcontract" id="submit_{{party.partyuserid}}" value="Aceptar" disabled/>
 									{% else %}
 									N/A
 									{% endif %}
+								<!-- NOT APPROVED - GOAL SELECTED -->
 								{% else %}
 									{{ party.partyapprovalts|default_if_none:"N/A" }}
 								{% endif %}
 							</i></small>
-						<!-- APPROVED - RESULTS -->
-						{% else %}
-							{% with hidenotacceptedflag=True %}
-							<span style="vertical-align:middle" class="text-nowrap">
-								{% include "wakemeup/contract/include/goalevaluation.html" %}
-							</span>
-							{% endwith %}
 						{% endif %}
 					</div>
 				</div>
@@ -191,7 +193,7 @@
 		{% endfor %}
 
 		<!-- Legend for evaluation icons -->		
-		{% if record.contractapprovalts %}
+		{% if record.contractevaluationts %}
 			<div style="line-height:15px">
 				<small><small><i>
 					<i class="fas fa-check-circle" style="color:#9ACD32"></i> = aceptado&nbsp;&nbsp; 
