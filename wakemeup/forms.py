@@ -315,7 +315,7 @@ class ClassForm(forms.Form):
                 Field('gradelevel', css_class='w-50'),
             ),
             Fieldset(
-                """Grupos de estudiante {% load staticfiles %}<span id="add_usergroup"><img src="{% static 'img/add-button.png' %}" style="cursor:pointer"></span>""",
+                """Grupos de estudiante <span id="add_usergroup"><a href="#"><i class="fas fa-plus-circle" style="font-size:1.125em;vertical-align:middle"></i></a></span>""",
                 HTML("""{% if classid != "new" %} {% load django_tables2 %}{% render_table studentgroups %} {% endif %}"""),
             ),
             getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="class"') if not request.user.usertype == "TR" else None

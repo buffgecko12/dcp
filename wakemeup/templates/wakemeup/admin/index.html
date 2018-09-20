@@ -16,7 +16,7 @@
 			{% if objecttype == "class" and request.user.usertype != "TR" or objecttype == "reward" %}
 				<div class="float-right">
 					<a href="{% url 'wakemeup:edit_object' objecttype=objecttype objectid='new' %}">
-						<img src="{% static 'img/add-button.png' %}">
+						<i class="fas fa-plus-circle" style="font-size:1.125em;vertical-align:middle"></i>
 					</a>
 				</div>
 			{% endif %}

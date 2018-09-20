@@ -7,11 +7,11 @@
 
 {% block content %}
 	<legend>
-		{{ "contrato" | title }}s
+		Contratos
 		{% if request.user.is_admin or request.user.usertype == "TR" %}
 		<div class="float-right">
 			<a href="{% url 'wakemeup:create_contract' contractid='new' %}">
-				<img src="{% static 'img/add-button.png' %}">
+				<i class="fas fa-plus-circle" style="font-size:1.125em;vertical-align:middle"></i>
 			</a>
 		</div>
 		{% endif %}
