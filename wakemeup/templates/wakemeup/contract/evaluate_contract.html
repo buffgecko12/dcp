@@ -122,6 +122,7 @@
 		//  Check if contract has been evaluated or not
 		var evaluatedflag = $("#id_evaluatedflag").val().toLowerCase() == "true" ? true : false
 		var maxnumrewards = $("#id_maxnumrewards").val()
+		var numparties = $("input[name$=partyuserid]").length
 
 		// Define form field patterns
 		var formpattern = /^form-(\d)+-/
@@ -197,7 +198,7 @@
 			return true;
 	    })
 		
-		// Change listener - HIGH PERFORMER FLAG
+		// Change listener - ACHIEVED FLAG
 		$("input[name$='" + achievedflagfieldpattern + "']").change(function() {
 			var achievedflagfield = get_fieldid(this.name,achievedflagfieldpattern)
 			var numchecked = get_checkboxcount(achievedflagfieldpattern)
@@ -210,7 +211,7 @@
 			}
 		});
 
-		// Change listener - ACHIEVED FLAG
+		// Change listener - HIGH PERFORMER FLAG
 		$("input[name$='" + highperformerflagfieldpattern + "']").change(function() {
 			var topperformerflagfield = get_fieldid(this.name,topperformerflagfieldpattern)
 			var numchecked = get_checkboxcount(highperformerflagfieldpattern)
@@ -290,6 +291,10 @@
 		};
 
 		$(document).ready(function() {
+			// Disable top performer field if there's only one party
+			if(!(numparties > 1)) {
+				$("input[name$=" + topperformerflagfieldpattern + "]").prop('disabled',true)
+			}
 			if(evaluatedflag) {
 				// Disable all form fields (except for hidden and submit buttons)
 				$("#evaluateContractForm :input[name$='achievedflag'],[name$='experiencerating'],[name$='highperformerflag'],[name$='topperformerflag'],[name$='feedbackmsg']").prop("disabled", true);
