@@ -536,7 +536,7 @@ class RewardForm(forms.Form):
 
     rewarddisplayname = forms.CharField(max_length=100,label='Premio')
     rewarddescription = forms.CharField(max_length=500,label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}))
-    rewardvalue = forms.IntegerField(label='Valor')
+    rewardvalue = forms.IntegerField(label='Valor',localize=True)
 
     def __init__ (self, *args, **kwargs):
 
