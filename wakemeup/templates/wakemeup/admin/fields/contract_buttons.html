@@ -66,9 +66,7 @@
 	{% endif %}
 	
 	<!-- Student buttons -->	
-{% elif request.user.usertype == "ST" %}
-	{% for party in record.partyuserinfo.currentparties %}
-		{% if request.user.userid == party.partyuserid or request.user.userid == party.groupinfo.leaderuserid %}
+	{% if request.user.usertype == "ST" %}
 		<!-- VOTE -->
 		{% if record.contractstatus in "P,A" %}
 			<!-- Restrict to party user or group leader -->
