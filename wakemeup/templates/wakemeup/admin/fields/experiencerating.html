@@ -1,0 +1,23 @@
+<label for="id_highperformers" class="col-form-label col-sm-5">
+    Experiencia con el/la docente
+</label>
+<div class="controls col-sm-7">
+	<fieldset class="rating">
+		{% with '5 4 3 2 1' as my_array %}
+			{% for myrating in my_array.split %}
+				<input 
+					type="radio" 
+					id="id_form-{{forloop.parentloop.parentloop.counter0}}-star{{myrating}}" 
+					name="form-{{forloop.parentloop.parentloop.counter0}}-experiencerating" 
+					value="{{myrating}}" 
+					{% if field.value == myrating|add:"0" %}checked{% endif %}
+				/>
+				<label 
+					class = "full" 
+					for="id_form-{{forloop.parentloop.parentloop.counter0}}-star{{myrating}}" 
+					title="{{myrating}} estrellas">
+				</label>
+			{% endfor %}
+		{% endwith %}
+	</fieldset>
+</div>

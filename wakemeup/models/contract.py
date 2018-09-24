@@ -190,13 +190,13 @@ class ContractGoalRewardManager(models.Manager):
 
 class ContractPartyManager(models.Manager):
     def all(self):
-        return self.get_contract_parties(None, None, None)
+        return self.get_contract_parties(None, None, None, None)
     
     def get(self, contractid, partyuserid):
-        return get_data_pk(self, 'SP_DCPGetContractParty(%s,%s,%s)', (contractid, partyuserid, None))
+        return get_data_pk(self, 'SP_DCPGetContractParty(%s,%s,%s,%s)', (contractid, partyuserid, None, None))
     
-    def get_contract_parties(self, contractid = None, partyuserid = None, contractrole = None):
-        return get_data(self, 'SP_DCPGetContractParty(%s,%s,%s)', (contractid, partyuserid, contractrole))
+    def get_contract_parties(self, contractid = None, partyuserid = None, contractrole = None, acceptedflag = None):
+        return get_data(self, 'SP_DCPGetContractParty(%s,%s,%s,%s)', (contractid, partyuserid, contractrole, acceptedflag))
     
     def modify_contract_parties(self, contractid, partyuserinfo):
         return save_data('SP_DCPModifyContractParties', (contractid, partyuserinfo))
@@ -213,6 +213,28 @@ class ContractPartyManager(models.Manager):
                 MyContractParty.guardianapprovalinfo,
             )
         )[0]
+
+    def evaluate_contract(self, MyContractParty, evaluationinfo, feedback):
+        return save_data('SP_DCPEvaluateContractParty', 
+            (
+                MyContractParty.contractid, 
+                MyContractParty.partyuserid, 
+                evaluationinfo,
+                feedback
+            )
+        )
+
+    def get_contract_party_options(self, contractid = None, acceptedflag = None, userexcludelist = []):
+        contractpartyoptions_list = []
+        contractpartyoptions = self.get_contract_parties(contractid=contractid,acceptedflag=acceptedflag)
+        
+        # Loop through rewards and create options list
+        for contractparty in contractpartyoptions:
+            # Exclude certain users (if specified)
+            if(contractparty.partyuserid not in userexcludelist):
+                contractpartyoptions_list.append((contractparty.partyuserid, (contractparty.firstname or '') + ' ' + (contractparty.lastname or '')))
+
+        return contractpartyoptions_list
 
 class ContractPartyGoalEvaluationManager(models.Manager):
     def all(self):
@@ -394,6 +416,9 @@ class ContractParty(models.Model):
     
     def approve_contract(self):
         return ContractParty.objects.approve_contract(self)
+
+    def evaluate_contract(self, evaluationinfo, feedback):
+        return ContractParty.objects.evaluate_contract(self, evaluationinfo, feedback)
 
 class ContractPartyGoalEvaluation(models.Model):
 

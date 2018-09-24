@@ -1,0 +1,42 @@
+{% load crispy_forms_tags %}
+{% block content %}
+	<div class="container-fluid">
+		<legend>Evaluaci&#243;n</legend>
+        <small><i>Su evaluaci&#243;n ser&#225; an&#243;nima</i></small>
+		<hr class="separator">
+		<div class="row">
+			<div class="col">
+				<strong>{{ contract.contractname }}</strong>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col">
+				<small><i>{{ goalinfo.goaldescription }}</i></small>
+			</div>
+		</div>
+		<br>
+		{% crispy form %}
+	</div>
+{% endblock %}
+
+{% block bodyimport %}
+	<script>
+		var numparties = $(highperformersfield + " option").length // Number of parties
+		var highperformersfield = "select[name='highperformers']"
+		var highperformers_lastvalid = null // Track last valid drop-down selection
+	
+		// Change listener - HIGH PERFORMERS dropdown
+		$(highperformersfield).change(function() {
+			var numchecked = $(highperformersfield + " option:selected").length;
+
+			// Max of 3 high performers allowed
+			if(numchecked > 3 ) {
+				$(this).val(highperformers_lastvalid);
+				alert('Se puede elegir un m\u00E1ximo de tres integrantes.')
+				
+			} else {
+				highperformers_lastvalid = $(this).val();				
+			}
+		});
+	</script>
+{% endblock %}

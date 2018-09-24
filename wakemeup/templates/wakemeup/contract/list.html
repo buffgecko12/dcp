@@ -5,6 +5,11 @@
 <!-- Set page title -->
 {% block title %}Contratos{% endblock %}
 
+{% block headimport %}
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="{% static 'wakemeup/css/starrating.css' %}">
+{% endblock %}
+
 {% block content %}
 	<legend>
 		Contratos
@@ -18,11 +23,40 @@
 	</legend>
 	
 	{% render_table contracts %}
+
+	<!-- Evaluate contract party modal -->
+	<div class="modal fade" id="evaluateContractPartyModal" tabindex="-1" role="dialog">
+	  <div class="modal-dialog modal-dialog-centered" role="document">
+	    <div class="modal-content">
+	      <div class="modal-body">
+			<form method="post" id="evaluateContractPartyForm" name="evaluateContractPartyForm" novalidate 
+ 				data-evaluatecontractparty-url="{% url 'wakemeup:ajax_evaluate_contract_party' %}"
+				>
+				<div id="mymodaldiv"></div>
+			</form>
+	      </div>
+	    </div>
+	  </div>
+	</div>
 {% endblock %}	
 
 {% block bodyimport %}
 	<script src="{% static 'wakemeup/js/contract/contractmanagebuttons.js' %}"></script>
+	<script src="{% static 'wakemeup/js/contract/evaluatecontractpartymodal.js' %}"></script>
 	<script>
+
+		// MODAL - Show
+	    $('[name=submit_partyevaluation]').click(function() {
+			var contractid = $(this.form).find('input[name=contractid]').val()
+			var partyuserid = $(this.form).find('input[name=partyuserid]').val()
+	
+			// Populate and show modal
+	        $("#mymodaldiv").html(""); // Clear modal div of any previous contents
+			update_evaluatecontractpartyform("new", contractid, partyuserid) // Update modal with new form
+			$('#evaluateContractPartyModal').modal('show')
+			return false
+	    });
+	
 		// Clickable rows
 		$(document).ready(function() {
 		    $(".clickable-row").click(function() {

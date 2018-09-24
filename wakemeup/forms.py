@@ -1051,6 +1051,52 @@ class EvaluateContractForm(forms.Form):
             )
         )
 
+class EvaluateContractPartyForm(forms.Form):
+
+    contractid = forms.IntegerField(widget=forms.HiddenInput)
+    partyuserid = forms.IntegerField(widget=forms.HiddenInput)
+
+    highperformers = forms.CharField(label='Alto desempe' + mychr('n') + 'o' + '<br><small><i>Max. de 3 integrantes</i></small>',required=False)
+    topperformer_group = forms.IntegerField(label='Mejor desempe' + mychr('n') + 'o',required=False)
+    experiencerating_teacher = forms.IntegerField(label='Experiencia', required=False)
+
+    def __init__ (self, *args, **kwargs):
+
+        request = kwargs.pop('request')
+        contractid = kwargs.pop('contractid')
+
+        # Call base class constructor (i.e. Teacher Form)
+        super(EvaluateContractPartyForm, self).__init__(*args, **kwargs)
+
+        # Set form helper properties
+        self.helper = FormHelper()
+        setFormHelper(self.helper, label_class = 'col-sm-5', field_class = 'col-sm-7')
+
+        # Prepare contract party options
+        self.fields['highperformers'].widget = forms.SelectMultiple(
+            choices=ContractParty.objects.get_contract_party_options(
+                contractid=contractid, 
+                acceptedflag=True, 
+                userexcludelist=[request.user.userid,]), 
+            attrs={'size':4}
+        )
+
+        # Set form layout
+        self.helper.layout = Layout(
+            'contractid',
+            'partyuserid',
+            'highperformers',
+            Div(
+                Field('experiencerating_teacher', template = 'wakemeup/admin/fields/experiencerating.html', css_class='col-sm-7'),
+                css_class="form-group row"
+            ),
+#             'topperformer_group',
+        )
+        
+        self.helper.layout.append(
+            getAdminFormActions(cancel_type="button"),
+        )
+
 class ContractPartyGoalEvaluationForm(forms.Form):
 
     contractid = forms.IntegerField(widget=forms.HiddenInput)

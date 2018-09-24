@@ -40,8 +40,9 @@ urlpatterns = [
     url(r'^ajax/load-students/', views.load_students, name='ajax_load_students'),
     url(r'^ajax/load-teachers/', views.load_teachers, name='ajax_load_teachers'),
     url(r'^ajax/load-rewards/', views.load_rewards, name='ajax_load_rewards'),
+    
     url(r'^ajax/manage-user-display/', views.manage_user_display, name='ajax_manage_user_display'),
-
+    url(r'^ajax/evaluate-contract-party/', views.evaluate_contract_party, name="ajax_evaluate_contract_party"),
     url(r'^ajax/addreward/', views.addreward, name='ajax_add_reward'),
     url(r'^ajax/get-contract-info/', views.get_contract_info, name='ajax_get_contract_info'),
 

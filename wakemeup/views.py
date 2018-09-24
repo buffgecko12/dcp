@@ -701,6 +701,54 @@ def evaluate_contract(request, contractid):
     else:
         return redirect_home()
 
+def evaluate_contract_party(request):
+
+    mycontract = None
+    goalinfo = None
+    
+    if(request.method == "POST"):
+
+        # Get contractid
+        contractid = request.POST.get('contractid')
+
+        # Bind data to form
+        form = EvaluateContractPartyForm(request.POST, request=request, contractid=contractid)
+    
+        if(form.is_valid()):
+            
+            # TO-DO: Figure out why this isn't working with cleaned_data
+            highperformers = request.POST.getlist('highperformers[]')
+            
+            mycontractparty = ContractParty(
+                contractid = form.cleaned_data.get('contractid'),
+                partyuserid = form.cleaned_data.get('partyuserid')
+            )
+
+            # Assemble evaluation info into JSON            
+            evaluationinfo = json.dumps({
+                'teacherrating':form.cleaned_data.get('experiencerating_teacher'),
+                'highperformers':highperformers,
+            })
+
+            # Save info
+            mycontractparty.evaluate_contract(evaluationinfo, form.cleaned_data.get('feedback'))
+            
+            # Return response
+            return HttpResponse('success')
+    else:
+
+        # Read in GET parameters        
+        contractid = request.GET.get('contractid')
+        partyuserid = request.GET.get('partyuserid')
+
+        # Get contract/goal info
+        mycontract = Contract.objects.get(contractid=contractid)
+        goalinfo = ContractGoal.objects.get_contract_goals(contractid=contractid,acceptedflag=True)[0] # Accepted goal (assumes only one)
+        
+        form = EvaluateContractPartyForm(request=request, contractid=contractid, initial = {'contractid':contractid,'partyuserid':partyuserid})
+
+    return render(request, 'wakemeup/contract/evaluate_contract_party.html', {'form': form, 'contract':mycontract,'goalinfo':goalinfo})
+
 @check_permissions
 def create_contract(request, contractid):
 
