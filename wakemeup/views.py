@@ -168,7 +168,10 @@ def get_contract_info(request):
     
     if(contractid):
         if(infotype == "hypotheticalcontractvalue"):
-            returndata = ContractInfo.objects.get_contract_value(contractid=contractid, numparticipants=numparticipants)[0].contractvalue
+            try:
+                returndata = ContractInfo.objects.get_contract_value(contractid=contractid, numparticipants=numparticipants)[0].contractvalue
+            except:
+                returndata = 0
         else:
             mycontractinfo = ContractInfo.objects.get(contractid=contractid)
             returndata = eval('mycontractinfo.' + infotype)
