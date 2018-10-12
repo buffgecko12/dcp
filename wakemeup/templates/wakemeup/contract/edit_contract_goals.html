@@ -38,8 +38,16 @@
 	<script src="{% static 'wakemeup/js/contract/contractbudget.js' %}"></script>
 	<script src="{% static 'wakemeup/js/contract/updatebudgetdisplay.js' %}"></script>
 	<script src="{% static 'wakemeup/js/contract/addrewardmodal.js' %}"></script>
+	<script src="{% static 'wakemeup/js/togglebutton.js' %}"></script>
 	
 	<script>
+		// Create button info
+		var adminbuttoninfo = [
+			{'name':'submit_next','type':'button','displayvalue_initial':'Siguiente','displayvalue_submit':'Enviando...'},
+			{'name':'submit_previous','type':'button','displayvalue_initial':'Previo'},
+			{'name':'submit_cancel','type':'link'}
+		]
+	
 		// Show modal: get new form
 		$("#addRewardModal").on('show.bs.modal', function(e) {
 			update_rewardform("new")
@@ -57,6 +65,16 @@
 			return false // Ignore default submit behavior
 		});
 
+    	// SUBMIT: Disable buttons
+    	$("#submit_next").click(function(event){
+    		
+    		// Disable buttons
+    		toggleButtonTimeout(adminbuttoninfo, 'disable')
+    		
+    		// Re-enable buttons (if taking too long)
+    		toggleButtonTimeout(adminbuttoninfo, 'enable')
+    	})
+		
 		$(document).ready(function(){ // Wait until HTML has loaded (doesn't include images)
 			// Initial load / update of drop-down menus
 			update_all_rewards();

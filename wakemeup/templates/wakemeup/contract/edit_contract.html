@@ -28,6 +28,7 @@
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment-with-locales.min.js"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 	<script src="{% static 'wakemeup/js/contract/updatebudgetdisplay.js' %}"></script>
+	<script src="{% static 'wakemeup/js/togglebutton.js' %}"></script>
 	<script>
 
 		var contractId = $("#id_contractid").val();
@@ -40,6 +41,12 @@
 			revisionflag = true
 		}
 
+		// Create button info
+		var adminbuttoninfo = [
+			{'name':'submit_next','type':'button','displayvalue_initial':'Siguiente','displayvalue_submit':'Enviando...'},
+			{'name':'submit_cancel','type':'link'}
+		]
+		
 		// HELPER FUNCTION: Date difference
 	    function dateDiff(startdate, enddate) {
 	    	var mydiff = enddate.diff(startdate, 'days')
@@ -75,13 +82,35 @@
 			});
 			return isValid;
 		}		
-		
+	    	
     	// VALIDATION: Submit button handler
     	$("#submit_next").click(function(event){
+    		
+    		// Prevent form submission
+    		event.preventDefault();
+    		
+    		// Validate form
     		if(!validateForm()) {
     			alert('Por favor rellene todos los campos obligatorios.')
-        		event.preventDefault();
+    			return false
     		}
+    		
+    		// Re-enable (potentially) disabled fields
+    		$("#id_partyuserinfo").prop('disabled',false)
+    		
+    		// Disable buttons
+    		toggleButtonTimeout(adminbuttoninfo, 'disable')
+
+    		// Submit form
+    		$("#contractForm").submit();
+    		
+    		// Re-disable (potentially) disabled fields after submit
+    		if(revisionflag) {
+        		$("#id_partyuserinfo").prop('disabled',true)
+    		}
+
+    		// Re-enable buttons (if taking too long)
+    		toggleButtonTimeout(adminbuttoninfo, 'enable')
     	})
 
 		// REVISION DEADLINE: Update max revision deadline display
@@ -254,10 +283,22 @@
 	        })
 	    };
 
+	    // PARTY USERS: Edit button listener
+	    $("#enable_partyuserinfoedit").on('click', function(event) {
+	    	// Ignore default action
+	    	event.preventDefault()
+	    	$("#id_partyuserinfo").prop('disabled',false)
+	    })
+	    
 	    // DOCUMENT READY: Initialize
 		$(document).ready(function(){
 			update_teachers();
 	    	update_revisiondeadline_info()
+	    	
+	    	// Disabled participants field by default
+	    	if(revisionflag) {
+	    		$("#id_partyuserinfo").prop('disabled',true)
+	    	}
 		});
 	</script>
 {% endblock %}

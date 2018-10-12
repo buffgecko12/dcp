@@ -653,6 +653,14 @@ class ContractForm(forms.Form):
             self.fields['teacheruserid'].widget.attrs['readonly'] = True
             self.fields['contractvalidstartdate'].widget.attrs['class'] = '' # Reset CSS class so datepicker doesn't open
             self.fields['revisiondeadlinets'].widget.attrs['class'] = '' # Reset CSS class so datepicker doesn't open
+
+            self.fields['partyuserinfo'] = forms.CharField(
+                label='Participantes*<br><div align="left"><button id="enable_partyuserinfoedit" class="btn btn-warning btn-xs"/>Editar</button></div>', 
+                widget=forms.SelectMultiple,
+                required=False
+            )
+
+
         
         # Set form layout
         self.helper.layout = Layout(
