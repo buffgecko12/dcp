@@ -52,7 +52,7 @@ class SchoolsTable(tables.Table):
     class Meta:
         model = School
         empty_text = EMPTY_TEXT
-        exclude = ('schoolid')
+        exclude = ('schoolid',)
         
 class ClassesTable(tables.Table):
 
