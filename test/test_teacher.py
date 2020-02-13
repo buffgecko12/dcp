@@ -1,103 +1,53 @@
-import test_setup
 import unittest
+from test_setup import *
 
 from django.contrib.auth import get_user_model
-from wakemeup.models.environment import Teacher, Class, School
+from wakemeup.models.school import TeacherClass
 
-import json
+class testTeacherProgram(unittest.TestCase):
+    pass
 
-class testTeacher(unittest.TestCase):
+class testTeacherClass(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.myschool = create_school()
+        cls.myclass1 = create_class(schoolid=cls.myschool.schoolid)
+        cls.myclass2 = create_class(schoolid=cls.myschool.schoolid, schoolyear=2011)
+        cls.myteacher1 = create_user(usertype='TR')
+        cls.myteacher2 = create_user(usertype='TR')
     
     def setUp(self):
-        global newuser
-        global newclass
-        global newclass2
-        global newschool
-
-        # Create new school
-        newschool = School(None, 'My school','My abbreviation', '123 Fake Ln.','San Diego','CA')
-        newschool.schoolid = newschool.save()
-
-        # Create/save new class object
-        newclass = Class(None, newschool.schoolid, 'My Class 1')
-        newclass.classid = newclass.save()
-
-        newclass2 = Class(None, newschool.schoolid, 'My Class 2')
-        newclass2.classid = newclass2.save()
-
-        try:
-            check_existinguser = get_user_model().objects.get(username='teacher1')
-            check_existinguser.delete()
-        except:
-            pass
+        self.myteacherclass1 = create_teacher_class(self.myteacher1.userid, self.myclass1.classid)
+        self.myteacherclass2 = create_teacher_class(self.myteacher1.userid, self.myclass2.classid)
         
-        # Create new user
-        newuser = get_user_model().objects.create_user(
-            password = 'adminadmin', usertype = 'TR', firstname = 'Teacher', 
-            lastname = 'Isgood', username = 'teacher1', emailaddress = 'teacher@bufu.com', userrole = 'U',
-            defaultsignaturescanfile = test_setup.readfile('test/img/samplesig1.png')
-
-        )
-
-    # Create new teacher
-    def testTeacher(self):
-
-        # Define class info        
-        classinfo = json.dumps(
-            { # classes info JSON
-                "currentclasses" : [
-                    {"classid" : newclass.classid},
-                    {"classid" : newclass2.classid}
-                ]
-            }
-        )
+        TeacherClass(teacheruserid=self.myteacher2.userid,classid=None).save(classidlist=[self.myclass1.classid, self.myclass2.classid])
         
-        # Remove "newclass"
-        newclassinfo = json.dumps(
-                { # New classes info JSON
-                "currentclasses" : [
-                    {"classid" : newclass2.classid}
-                ],
-                "deletedclasses" : [newclass.classid]
-            }
-        )
+    def testCreateTeacherClass(self):
+        self.assertTrue(self.myteacherclass1.teacheruserid)
 
-        # Check new user was created properly
-        self.assertEqual(newuser.firstname, 'Teacher')
+    def testGetTeacherClass(self):
+        self.assertTrue(TeacherClass.objects.get(self.myteacher1.userid,self.myclass1.classid))
+        self.assertTrue(TeacherClass.objects.all())
+        self.assertTrue(TeacherClass.objects.get_teacher_classes(teacheruserid=self.myteacher1.userid))
+        self.assertFalse(TeacherClass.objects.get(self.myteacher1.userid,-1))
 
-        # Verify newly created user created as a teacher
-        newteacher = Teacher.objects.get(newuser.userid)
-        self.assertTrue(newteacher)
+    def testUpsertTeacherClassBatch(self):
+        self.assertTrue(TeacherClass.objects.get(self.myteacher2.userid,self.myclass1.classid))
 
-        # Set teacher's initial class info
-        newteacher.classinfo = classinfo
-        newteacher.schoolid = newschool.schoolid
-        myfirstname = newteacher.firstname
-        newteacher.firstname = '' # Firstname should not be overwritten with NULL
-        newteacher.save()
+    def testDeleteTeacherClass(self):
+        self.myteacherclass1.delete()
+        self.assertFalse(refresh(self.myteacherclass1))
 
-        # Re-retrieve object and check that firstname was not changed
-        newteacher = Teacher.objects.get(newuser.userid)
-        self.assertEqual(myfirstname,newteacher.firstname)
-
-        # Update more info
-        newteacher.classinfo = newclassinfo
-        mylastname = newteacher.lastname
-        newteacher.lastname = 'New lastname'
-        newteacher.save()
-
-        # Re-retrieve object and check that firstname was not changed
-        newteacher = Teacher.objects.get(newuser.userid)
-        self.assertNotEqual(mylastname,newteacher.lastname)
+    def tearDown(self):        
+        self.myteacherclass1.delete()
+        self.myteacherclass2.delete()
         
-        # Check helper methods
-        allteachers = Teacher.objects.all()
-        self.assertTrue(allteachers)
-
-        allclasses = newteacher.get_teacher_classes()
-        self.assertTrue(allclasses)
- 
-        newuser.delete()
-
+    @classmethod
+    def tearDownClass(cls):
+        cls.myteacher1.delete()
+        cls.myteacher2.delete()
+        cls.myschool.delete()
+        
 if __name__ == '__main__':
     unittest.main() # Run all tests

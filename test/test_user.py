@@ -1,8 +1,7 @@
-import test_setup
 import unittest
+from test_setup import *
 
 from django.contrib.auth import authenticate, get_user_model, get_user
-from users.models import UserGroup
 
 ''' TO-DO: New test cases to add
 username field: 
@@ -17,7 +16,6 @@ Case #2 - Input email that already exist as email (FAIL)
 '''
 
 class testUser(unittest.TestCase):
-    global clean_user
     global create_user
 
     global USERNAME
@@ -28,32 +26,8 @@ class testUser(unittest.TestCase):
     EMAILADDRESS = 'hamato@yoshi.com'
     PASSWORD = 'wowzers'
     
-    def clean_user(username):
-        # Delete user if exists
-        try:
-            checkuser = get_user_model().objects.get(username = username)
-            checkuser.delete()
-        except:
-            pass
-
-    def create_user(usertype, firstname, lastname, userrole, emailaddress = EMAILADDRESS, password = PASSWORD, username = USERNAME):
-        
-        # Create new user
-        newuser = get_user_model().objects.create_user(
-            password = password, 
-            usertype = 'ST', 
-            firstname = 'Test', 
-            lastname = 'Orama',
-            username = username,
-            emailaddress = emailaddress,
-            userrole = 'U'
-        )
-
-        return newuser
-
     def testUser(self):
 
-        clean_user(USERNAME)
         newuser = create_user(password=PASSWORD,usertype='ST',firstname='Test',lastname='Orama',username=USERNAME,emailaddress=EMAILADDRESS,userrole='U')
         
         self.assertEqual(newuser.firstname,'Test')
@@ -115,44 +89,6 @@ class testUser(unittest.TestCase):
         newuser.delete()
 
         self.assertIsNone(get_user_model().objects.get_user(newuser.userid))
-
-    def testUserGroup(self):
-
-        clean_user(USERNAME)
-        clean_user(USERNAME + "1")
-
-        # Create new users
-        newuser = create_user(password=PASSWORD,usertype='ST',firstname='Test',lastname='Orama',username=USERNAME,emailaddress=EMAILADDRESS,userrole='U')
-        newuser2 = create_user(password=PASSWORD,usertype='ST',firstname='Test1',lastname='Orama1',username=USERNAME + "1",emailaddress=EMAILADDRESS + "1",userrole='U')
-
-        # Create and save user group
-        newusergroup = UserGroup(
-            groupuserid=None, 
-            groupname = 'New group', 
-            classid=None, 
-            leaderuserid = newuser.userid, 
-            useridlist = [newuser.userid, newuser2.userid]
-        )
-
-        newusergroupname = newusergroup.groupname
-        newusergroup.groupuserid = newusergroup.save()
-
-        # Get group and compare info
-        newusergroup = UserGroup.objects.get(groupuserid = newusergroup.groupuserid)
-        self.assertEqual(newusergroupname, newusergroup.groupname)
-
-        # Verify user exists in group 
-        newusergroup = UserGroup.objects.get_user_groups(studentuserid=newuser.userid)
-        self.assertTrue(newusergroup)
-
-        # Delete user and verify it no longer exists in group
-        newuser.delete()
-        newusergroup = UserGroup.objects.get_user_groups(studentuserid=newuser.userid)
-        self.assertFalse(newusergroup)
-        
-        # Delete group
-        newusergroup.delete()
-        newuser2.delete()
 
 if __name__ == '__main__':
     unittest.main() # Run all tests

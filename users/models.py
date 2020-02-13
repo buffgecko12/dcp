@@ -13,7 +13,7 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 class MyUserManager(BaseUserManager):
 
     # Create new user
-    def create_user(self, password, schoolid = None, username = None, usertype = None, firstname = None, lastname = None, defaultsignaturescanfile = None, phonenumber = None, emailaddress = None, userrole = None):
+    def create_user(self, password, schoolid = None, username = None, usertype = None, firstname = None, lastname = None, emailaddress = None, userrole = None):
  
         user = self.model(
             userid=None,
@@ -22,8 +22,6 @@ class MyUserManager(BaseUserManager):
             usertype=usertype,
             firstname=firstname,
             lastname=lastname,
-            defaultsignaturescanfile=defaultsignaturescanfile,
-            phonenumber=phonenumber,
             emailaddress=emailaddress,
             userrole=userrole,
         )
@@ -57,8 +55,6 @@ class MyUserManager(BaseUserManager):
                 myUser.usertype,
                 myUser.firstname,
                 myUser.lastname,
-                myUser.defaultsignaturescanfile,
-                myUser.phonenumber,
                 self.normalize_email(myUser.emailaddress),
                 myUser.password,
                 myUser.userrole,
@@ -69,9 +65,6 @@ class MyUserManager(BaseUserManager):
     
     def delete(self, myUser):
         return delete_data('SP_DCPDeleteUser', (myUser.userid,))
-
-    def deactivate(self, myUser):
-        return save_data('SP_DCPDeactivateUser', (myUser.userid,))
 
     def manage_display_info(self, myUser, actiontype, notificationtype):
         mydata = save_data('SP_DCPManageUserDisplayInfo', (myUser.userid, actiontype, notificationtype, ))
@@ -111,32 +104,6 @@ class MyUserManager(BaseUserManager):
         # Send e-mail (if address exists)
         if(myUser.emailaddress):
             send_email(subject=email_subject, body=email_body, to_list=[myUser.emailaddress,])
-    
-class UserGroupManager(models.Manager):
-    
-    def all(self):
-        return self.get_user_groups(None,)
-    
-    def get(self, groupuserid):
-        return get_data_pk(self, 'SP_DCPGetUserGroup(%s,%s,%s)', (groupuserid, None, None))
-    
-    def get_user_groups(self, groupuserid = None, classid = None, studentuserid = None):
-        return get_data(self, 'SP_DCPGetUserGroup(%s,%s,%s)', (groupuserid, classid, studentuserid))
-    
-    def save(self, myUserGroup):
-        return save_data('SP_DCPUpsertUserGroup', 
-             (
-                myUserGroup.groupuserid, 
-                myUserGroup.groupname,
-                myUserGroup.classid,
-                myUserGroup.leaderuserid,
-                myUserGroup.useridlist
-            )
-        )
-        pass # Handled by user-level method
-
-    def delete(self, myUserGroup):
-        return delete_data('SP_DCPDeleteUserGroup', (myUserGroup.groupuserid,))
 
 class UserReputationEventManager(models.Manager):
     
@@ -208,15 +175,12 @@ class MyUser(AbstractBaseUser):
     usertype = models.CharField(max_length=2, choices=usertype_choices)
     firstname = models.CharField(max_length=100)
     lastname = models.CharField(max_length=100)
-    defaultsignaturescanfile = models.BinaryField()
-    phonenumber = models.CharField(max_length=25)
     emailaddress = models.CharField(max_length=250)
     userrole = models.CharField(max_length=1)
     profilepictureid = models.IntegerField()
     reputationvalue = models.IntegerField()
     reputationvaluelastseents = models.DateTimeField()
     is_active = models.BooleanField()
-    datausepolicyacceptedts = models.DateTimeField()
 
     # Define data manager
     objects = MyUserManager()
@@ -241,9 +205,6 @@ class MyUser(AbstractBaseUser):
 
     def delete(self):
         return MyUser.objects.delete(self)
-
-    def deactivate(self):
-        return MyUser.objects.deactivate(self)
     
     def manage_display_info(self, actiontype, notificationtype = None):
         return MyUser.objects.manage_display_info(self, actiontype, notificationtype)
@@ -270,26 +231,6 @@ class MyUser(AbstractBaseUser):
             return True
         else:
             return False
-
-class UserGroup(models.Model):
-    
-    groupuserid = models.IntegerField(primary_key=True)
-    groupname = models.CharField(max_length=100)
-    classid = models.IntegerField()
-    leaderuserid = models.IntegerField()
-    useridlist = ArrayField(models.IntegerField())
-    groupuserinfo = JSONField()
-    
-    class Meta:
-        managed = False
-        
-    objects = UserGroupManager()
-    
-    def save(self):
-        return UserGroup.objects.save(self)
-    
-    def delete(self):
-        return UserGroup.objects.delete(self)
 
 class UserReputationEvent(models.Model):
     

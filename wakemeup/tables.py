@@ -93,7 +93,7 @@ class TeachersTable(tables.Table):
     class Meta:
         model = Teacher
         empty_text = EMPTY_TEXT
-        exclude = ('teacheruserid','reputationvalue','schoolid','profilepictureid','defaultsignaturescanfile','phonenumber')
+        exclude = ('teacheruserid','reputationvalue','schoolid','profilepictureid')
         sequence = ('firstname','lastname','emailaddress','schooldisplayname','classinfo')
 
 class StudentsTable(tables.Table):
@@ -104,13 +104,6 @@ class StudentsTable(tables.Table):
         'objecttype': 'student',
         'objectid': A(objectid)
     }
-
-    defaultsignaturescanfile = tables.TemplateColumn(
-        template_name='wakemeup/admin/fields/display_image.html',
-        extra_context=kwargs,
-        verbose_name='Firma',
-        accessor=A(objectid)
-    )
 
     classinfo = tables.TemplateColumn(
         template_name='wakemeup/admin/fields/teacher_classes.html',
@@ -123,7 +116,7 @@ class StudentsTable(tables.Table):
 
     class Meta:
         model = Student
-        exclude = ('studentuserid','reputationvalue','schoolid','classid','profilepictureid','defaultsignaturescanfile','phonenumber')
+        exclude = ('studentuserid','reputationvalue','schoolid','classid','profilepictureid')
         sequence = ('firstname','lastname','emailaddress','schooldisplayname')
         empty_text = EMPTY_TEXT
 

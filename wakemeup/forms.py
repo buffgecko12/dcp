@@ -8,7 +8,7 @@ from crispy_forms.layout import *
 from crispy_forms.bootstrap import FormActions, TabHolder, Tab, PrependedText, InlineRadios, InlineCheckboxes
 from django.forms.widgets import HiddenInput
 
-from .models.environment import School, Class, Teacher, TeacherBudget, Student
+from .models.environment import School, Class, Teacher, TeacherProgram, Student
 from .models.contract import *
 
 import datetime
@@ -346,9 +346,7 @@ class TeacherForm(forms.Form):
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
-#    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
-#     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
 #     profilepictureid = forms.IntegerField(label='Avatar', required=False)
 
     # Make sure email address does not already exist
@@ -383,9 +381,7 @@ class TeacherForm(forms.Form):
                 'firstname',
                 'lastname',
                 'emailaddress',
- #               'phonenumber',
 #                 'profilepictureid',
-                'defaultsignaturescanfile',
             ),
             getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="teacher"')
         )
@@ -406,9 +402,7 @@ class StudentForm(forms.Form):
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
-#    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
-    defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
 #     profilepictureid = forms.IntegerField(label='Avatar', required=False)
 
     def __init__ (self, *args, **kwargs):
@@ -438,9 +432,7 @@ class StudentForm(forms.Form):
                 'firstname',
                 'lastname',
                 'emailaddress',
-#                'phonenumber',
 #                 'profilepictureid',
-                'defaultsignaturescanfile',
             ),
             getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="student"')
         )
@@ -464,9 +456,7 @@ class MyUserForm(forms.Form):
 
     firstname = forms.CharField(max_length=100,label='Primer nombre')
     lastname = forms.CharField(max_length=100,label='Apellido(s)')
-#    phonenumber = forms.CharField(max_length=25,label='Tel' + mychr('e') + 'fono', required=False)    
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
-#     defaultsignaturescanfile = forms.FileField(label='Firma', required=False)
     profilepictureid = forms.IntegerField(label='Avatar', required=False)
 
     def __init__ (self, *args, **kwargs):
@@ -514,8 +504,6 @@ class MyUserForm(forms.Form):
             'firstname',
             'lastname',
             'emailaddress',
-#            'phonenumber',
-#             'defaultsignaturescanfile',
             InlineRadios('profilepictureid', template = 'wakemeup/admin/profilepicture.html'),
             getAdminFormActions()
         )
@@ -614,18 +602,17 @@ class ContractForm(forms.Form):
         # Extract request argument
         request = kwargs.pop("request")
         contractid = kwargs.pop("contractid")
-        revisionflag = kwargs.pop("revisionflag", None)
 
         # Call base class constructor (i.e. Teacher Form)
         super(ContractForm, self).__init__(*args, **kwargs)
         
         if(contractid != "new"):
             mycontractinfo = ContractInfo.objects.get(contractid)
-            mybudget = TeacherBudget.objects.get(mycontractinfo.teacheruserid).availablebudget
+            mybudget = TeacherProgram.objects.get(mycontractinfo.teacheruserid).availablebudget
             myinitialcontractvalue = mycontractinfo.contractvalue
         else:
             mycontractinfo = None
-            myteacherbudget = TeacherBudget.objects.get(teacheruserid = request.user.userid)
+            myteacherbudget = TeacherProgram.objects.get(teacheruserid = request.user.userid)
             myinitialcontractvalue = 0
 
             # Lookup default budget for teacher
@@ -644,23 +631,6 @@ class ContractForm(forms.Form):
         # If user is teacher, hide teacher field
         if(request.user.usertype == "TR"):
             self.fields['teacheruserid'] = forms.IntegerField(widget=forms.HiddenInput, initial=request.user.userid)
-            
-        # Disable fields when in revision mode
-        if(revisionflag):
-            self.fields['revisiondeadlinets'].widget.attrs['readonly'] = True
-            self.fields['contractvalidstartdate'].widget.attrs['readonly'] = True
-            self.fields['classid'].widget.attrs['readonly'] = True
-            self.fields['teacheruserid'].widget.attrs['readonly'] = True
-            self.fields['contractvalidstartdate'].widget.attrs['class'] = '' # Reset CSS class so datepicker doesn't open
-            self.fields['revisiondeadlinets'].widget.attrs['class'] = '' # Reset CSS class so datepicker doesn't open
-
-            self.fields['partyuserinfo'] = forms.CharField(
-                label='Participantes*<br><div align="left"><button id="enable_partyuserinfoedit" class="btn btn-warning btn-xs"/>Editar</button></div>', 
-                widget=forms.SelectMultiple,
-                required=False
-            )
-
-
         
         # Set form layout
         self.helper.layout = Layout(
@@ -896,7 +866,6 @@ class ContractGoalsForm(forms.Form):
 
         # Extract contractid
         contractid = kwargs.pop("contractid")
-        revisionflag = kwargs.pop("revisionflag", None)
         
         # Call base class constructor (i.e. Teacher Form)
         super(ContractGoalsForm, self).__init__(*args, **kwargs)
@@ -906,7 +875,7 @@ class ContractGoalsForm(forms.Form):
         self.helper = FormHelper()
         setFormHelper(self.helper)
         self.helper.form_tag = False # Disable auto-generation of <form> tags
-        self.fields['initialbudget'].initial = TeacherBudget.objects.get(mycontractinfo.teacheruserid).availablebudget
+        self.fields['initialbudget'].initial = TeacherProgram.objects.get(mycontractinfo.teacheruserid).availablebudget
         self.fields['numparticipants'].initial = mycontractinfo.numparticipants # Get number of participants (used to calculate budget)
         self.fields['initialcontractvalue'].initial = mycontractinfo.contractvalue or 0 # Get number of participants (used to calculate budget)
 
@@ -972,7 +941,6 @@ class ContractSubmitForm(forms.Form):
     def __init__(self, *args, **kwargs):
         
         contractid = kwargs.pop("contractid")
-        revisionflag = kwargs.pop("revisionflag", None)
         
         # Lookup contract info
         mycontract = Contract.objects.get(contractid=contractid)
@@ -992,33 +960,16 @@ class ContractSubmitForm(forms.Form):
         # Give the form an id
         self.helper.attrs={'id':'contract_submit_form'}
 
-        # Add revision field (if required)
-        if(revisionflag):
-            self.fields['revisiondescription'] = forms.CharField(
-                label='<i>Descripci' + mychr('o') + 'n de los cambios al contrato original</i>' + \
-                      '<div align="left"><input type="submit" name="submit_discard" value="Descartar cambios" class="btn btn-warning btn-xs discard_confirm"/></div>' if revisionflag else '', 
-                max_length=500, 
-                widget=forms.Textarea(attrs={"rows":"5","cols":"20"}),
-                required=False
-            )
-            self.fields['revisionrevoteflag'] = forms.BooleanField(
-                label='&#191;Nueva votaci&#243;n por parte de los integrantes?',
-                required=False
-            )
-            
-            self.helper.layout.extend(['revisiondescription','revisionrevoteflag'])
-
         # Add form action buttons
         self.helper.layout.append(
             FormActions(
                 HTML("""<a class="btn btn-secondary" href="{% url 'wakemeup:index' %}" id="submit_cancel">Cancelar</a> """),
                 Submit(
                     'submit_next',
-                    'Modificar' if revisionflag else 'Actualizar' if mycontract.contractstatus == "P" else 'Enviar',
-                    css_class="modify_confirm" if revisionflag else "" if mycontract.contractstatus == "P" else "send_confirm", 
+                    'Actualizar' if mycontract.contractstatus == "P" else 'Enviar',
+                    css_class="" if mycontract.contractstatus == "P" else "send_confirm", 
                     css_id="submit_next"
                 ),
-                HTML("""<a class="btn btn-info " href="{% url '""" + 'wakemeup:create_contract_goals' + """' """ + 'contractid=' + str(contractid) + """ %}" id="submit_previous">Previo</a> """),
             )
         )
 
@@ -1082,10 +1033,6 @@ class EvaluateContractPartyForm(forms.Form):
 
         # Prepare contract party options
         self.fields['highperformers'].widget = forms.SelectMultiple(
-            choices=ContractParty.objects.get_contract_party_options(
-                contractid=contractid, 
-                acceptedflag=True, 
-                userexcludelist=[request.user.userid,]), 
             attrs={'size':4}
         )
 
@@ -1149,7 +1096,7 @@ class ContractPartyGoalRewardForm(forms.Form):
         rewardoptions = [("0","-- Escoger incentivo --")]
         rewardid = initialdata.get('rewardid')
         
-        ContractGoalReward.objects.get_contract_reward_options(contractid=3, goalid=1)
+        ContractReward.objects.get_contract_reward_options(contractid=3) # TO-DO: Check why this is hard-coded
 
         # Call base class constructor (i.e. Teacher Form)
         super(ContractPartyGoalRewardForm, self).__init__(*args, **kwargs)

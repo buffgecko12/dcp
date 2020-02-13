@@ -24,20 +24,6 @@
 	
 	{% render_table contracts %}
 
-	<!-- Evaluate contract party modal -->
-	<div class="modal fade" id="evaluateContractPartyModal" tabindex="-1" role="dialog">
-	  <div class="modal-dialog modal-dialog-centered" role="document">
-	    <div class="modal-content">
-	      <div class="modal-body">
-			<form method="post" id="evaluateContractPartyForm" name="evaluateContractPartyForm" novalidate 
- 				data-evaluatecontractparty-url="{% url 'wakemeup:ajax_evaluate_contract_party' %}"
-				>
-				<div id="mymodaldiv"></div>
-			</form>
-	      </div>
-	    </div>
-	  </div>
-	</div>
 {% endblock %}	
 
 {% block bodyimport %}

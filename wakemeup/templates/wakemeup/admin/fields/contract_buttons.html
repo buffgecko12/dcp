@@ -13,15 +13,6 @@
 					{% if displayinfo.displaytextflag %}
 						<i>No se puede editar ya que<br>ya se aprob&#243; por {{ record.partyapprovalcount }} persona{{record.partyapprovalcount|pluralize:",s"}}</i><br><br>
 					{% endif %}
-					<!--  APPROVE -->
-					<form style="display:inline-block" action="{% url 'wakemeup:contract_accept' contractid=record.contractid %}" method="post">
-					    {% csrf_token %}
-					    <input type="hidden" name="contractid" value="{{ record.contractid }}" />
-					    <input type="hidden" name="partyuserid" value="{{ record.teacheruserid }}" />
-					    <input type="hidden" name="preferredgoalid" value="0" />
-					    <input type="hidden" name="post_source" value="manage_buttons" />
-						<input class="btn {{ displayinfo.buttonsize }} btn-info approve_confirm" name="submit_other" type="submit" value="Aprobar"/>
-					</form>
 				{% endif %}
 				<!-- DELETE -->
 				<form style="display:inline-block" action="{% url 'wakemeup:delete_object' objecttype=objecttype objectid=record.contractid %}" method="post">
@@ -31,24 +22,6 @@
 			{% endif %}
 		{% endif %}
 		{% if record.contractstatus in "A,R,P,E" %}
-			{% if record.revisioneligibilityflag %}
-				{% if record.contractstatus in "A,R" %}
-					<!-- MODIFY -->
-					<form style="display:inline-block" action="{% url 'wakemeup:manage_contract' contractid=record.contractid %}" method="post">
-					    {% csrf_token %}
-						<input class="btn {{ displayinfo.buttonsize }} btn-danger modify_confirm" name="revise" type="submit" value="Modificar"/>
-					    <input type="hidden" name="actiontype" value="revise" />
-					</form>
-				{% endif %}
-			{% endif %}
-			{% if record.contractstatus in "A,E" %}
-				<!-- EVALUATE / FINALIZE -->
-				<form style="display:inline-block" action="{% url 'wakemeup:manage_contract' contractid=record.contractid %}" method="post">
-				    {% csrf_token %}
-					<input class="btn {{ displayinfo.buttonsize }} btn-success" name="submit_other" type="submit" value="{% if record.contractevaluationts %}Finalizar{% else %}Evaluar{% endif %}"/>
-				    <input type="hidden" name="actiontype" value="evaluate" />
-				</form>
-			{% endif %}
 			{% if not record.revisioneligibilityflag and record.contractstatus in "A,R" %}
 				{% if displayinfo.displaytextflag %}
 					<br><br>

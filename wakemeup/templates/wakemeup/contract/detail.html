@@ -222,22 +222,6 @@
 			<div class="d-flex justify-content-center">{% include 'wakemeup/admin/fields/contract_buttons.html' %}</div><br>
 		{% endif %}
 	</div>
-
-	<!-- Accept contract modal -->
-	<div class="modal fade" id="acceptContractModal" tabindex="-1" role="dialog">
-	  <div class="modal-dialog modal-dialog-centered" role="document">
-	    <div class="modal-content">
-	      <div class="modal-body">
-			<form method="post" id="acceptContractForm" novalidate name="acceptContractForm"
- 				data-acceptcontract-url="{% url 'wakemeup:contract_accept' contractid=record.contractid %}"
- 				data-redirect-url="{% url 'wakemeup:contract_list' %}"
-				>
-				<div id="mymodaldiv"></div>
-			</form>
-	      </div>
-	    </div>
-	  </div>
-	</div>
 {% endblock %}
 
 {% block bodyimport %}

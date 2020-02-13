@@ -13,23 +13,6 @@
 		</form>
 	</div>
 	
-	<div class="modal fade" id="editUserGroupModal" tabindex="-1" role="dialog">
-	  <div class="modal-dialog modal-dialog-centered" role="document">
-	    <div class="modal-content">
-	      <div class="modal-body">
-			<form method="post" id="editUserGroupForm" novalidate name="editUserGroupForm"
-				data-editusergroup-url="{% url 'wakemeup:ajax_edit_usergroup' classid=classid %}" 
- 				data-redirect-url="{% url 'wakemeup:edit_object' objecttype='class' objectid=classid %}"
-				data-students-url="{% url 'wakemeup:ajax_load_students' %}" 
-				>
-				<div id="mymodaldiv"></div>
-			<input type="hidden" id="classid" value="{{ classid }}" />
-			</form>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-	
 {% endblock %}
 
 {% block bodyimport %}

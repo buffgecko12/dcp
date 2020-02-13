@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from . import views
 
-app_name= 'wakemeup' # qualifies url pattern names with 'wakemeup' namespace (i.e. 'wakemeup:create_contract')
+app_name = 'wakemeup' # qualifies url pattern names with 'wakemeup' namespace (i.e. 'wakemeup:create_contract')
 urlpatterns = [
 
     # Index (i.e. /wakemeup)
@@ -10,14 +10,7 @@ urlpatterns = [
     # Contract
     url(r'^contract/$', views.contract_list, name="contract_list"),
     url(r'^contract/(?P<contractid>(\d+))/detail$', views.contract_detail, name="contract_detail"),
-    url(r'^contract/(?P<contractid>(\d+))/accept$', views.contract_accept, name="contract_accept"),
-    url(r'^contract/(?P<contractid>(\d+))/evaluate$', views.evaluate_contract, name="evaluate_contract"),
-
-    # Contract - create
     url(r'^contract/(?P<contractid>(\d+|new))$', views.create_contract, name="create_contract"),
-    url(r'^contract/(?P<contractid>(\d+))/goals$', views.create_contract_goals, name="create_contract_goals"),
-    url(r'^contract/(?P<contractid>(\d+))/submit$', views.create_contract_submit, name="create_contract_submit"),
-    url(r'^contract/(?P<contractid>(\d+))/revise$', views.manage_contract, name="manage_contract"),
 
     # Admin
     url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward))(/)?$', views.admin_list, name="admin_list"), # Object list
@@ -37,16 +30,11 @@ urlpatterns = [
 
     # Ajax
     url(r'^ajax/load-classes/', views.load_classes, name='ajax_load_classes'),
-    url(r'^ajax/load-students/', views.load_students, name='ajax_load_students'),
     url(r'^ajax/load-teachers/', views.load_teachers, name='ajax_load_teachers'),
     url(r'^ajax/load-rewards/', views.load_rewards, name='ajax_load_rewards'),
     
     url(r'^ajax/manage-user-display/', views.manage_user_display, name='ajax_manage_user_display'),
-    url(r'^ajax/evaluate-contract-party/', views.evaluate_contract_party, name="ajax_evaluate_contract_party"),
     url(r'^ajax/addreward/', views.addreward, name='ajax_add_reward'),
-    url(r'^ajax/get-contract-info/', views.get_contract_info, name='ajax_get_contract_info'),
-
-    url(r'^admin/class/(?P<classid>\d+)/usergroup/$', views.edit_usergroup, name="ajax_edit_usergroup"), # Edit user group
 
     # Default (catch all)    
     url(r'.*', views.index, name = "default"),

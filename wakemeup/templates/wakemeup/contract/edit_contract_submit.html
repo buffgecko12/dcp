@@ -7,7 +7,6 @@
 {% block content %}
 	<div class="container-fluid">
 		<span class="h1 align-middle display-4">Revisar</span>&nbsp;
-		{% if revisionflag %}<span class="badge badge-danger align-middle">Modificaci&#243;n</span>{% endif %}
 	
 		<legend><u>General</u></legend>
 		<div class="row">
@@ -76,9 +75,6 @@
 			<div class="col col-sm-3">Saldo</div>
 			<div class="col col-sm-9">${{ teacherbudgetinfo.availablebudget|intcomma}}</div>
 		</div><br>
-		{% if revisionflag %}
-		<legend><u>Modificaci&#243;n</u></legend>
-		{% endif %}
 		
 		{% crispy form %}
 	</div>

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-import test.test_setup
+import test.test_env_setup
 from django.contrib.auth import get_user_model
-from wakemeup.models.environment import School, Teacher, Class, Student
+from wakemeup.models.environment import School, Teacher, Class
 from wakemeup.models.contract import Reward
 from lib.UsefulFunctions.stringUtils import mychr
 import json
 
 MAX_BUDGET = 500000
+SCHOOL_YEAR = 2020
 PASSWORD = "adminadmin"
 
 def normalize_field(mystring):
@@ -105,45 +106,17 @@ def load_users():
             classinfo = json.dumps(myclassinfo),
             firstname = myuser.firstname,
             lastname = myuser.lastname,
-            emailaddress = myuser.emailaddress,
-            phonenumber = myuser.phonenumber,
-            defaultsignaturescanfile = myuser.defaultsignaturescanfile
+            emailaddress = myuser.emailaddress
         )
         
         # Save teacher info
         myteacher.save()
-        myteacher.update_budget(maxbudget = MAX_BUDGET)
-
-    student_list = [
-        ('Roger','Federer',ITIRR_SCHOOLID,'1201'),        
-        ('Rafael','Nadal',ITIRR_SCHOOLID,'1201'),        
-        ('Steffi','Graf',ITIRR_SCHOOLID,'1201'),        
-        ('Angelique','Kerber',ITIRR_SCHOOLID,'1201'),        
-        ('Roberto','Clemente',GLV_SCHOOLID,'1201'),        
-        ('Hank','Aaron',GLV_SCHOOLID,'1201'),        
-        ('Nelson','Mandela',GLV_SCHOOLID,'1201'),        
-        ('Jackie','Robinson',GLV_SCHOOLID,'1201'),        
-    ]
-
-    for student in student_list:
-
-        myuser = create_user('ST', student[2], student[0], student[1], 'U')
-        myclassid = Class.objects.get_classes(schoolid = student[2], classdisplayname = student[3])[0].classid
-
-        # Assign student class / info
-        mystudent = Student(
-            studentuserid = myuser.userid,
-            schoolid = myuser.schoolid,
-            classid = myclassid,
-            firstname = myuser.firstname,
-            lastname = myuser.lastname,
-            emailaddress = myuser.emailaddress,
-            phonenumber = myuser.phonenumber,
-            defaultsignaturescanfile = myuser.defaultsignaturescanfile
+        myteacher.update_program(
+            school_year = SCHOOL_YEAR, 
+            schoolid = myteacher.schoolid, 
+            maxbudget = MAX_BUDGET
         )
         
-        mystudent.save()
-
 def load_rewards():
     reward_list = [
         ('Tiquete al cine', 'Tiquete al cine en Innovo.', 6000),

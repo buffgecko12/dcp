@@ -1,4 +1,4 @@
-import test_setup
+import test_env_setup
 import unittest
 from UsefulFunctions.dateUtils import format_timestamp_string_db, format_timestamp_range_string_db, format_timestamp_range_db
 import datetime
@@ -19,3 +19,6 @@ class testTimestamp(unittest.TestCase):
         ts1 = datetime.datetime.now()
         ts2 = ts1+ datetime.timedelta(days=1)
         date_object = format_timestamp_range_db(starttimestamp = ts1, endtimestamp=ts2)
+
+if __name__ == '__main__':
+    unittest.main() # Run all tests

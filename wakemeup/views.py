@@ -23,8 +23,8 @@ import json
 
 from .tables import *
 from .forms import *
-from .models.environment import School, Class, Teacher, Student, TeacherBudget, File
-from .models.contract import Contract, ContractParty, ContractPartyGoalEvaluation, ContractGoal, ContractGoalReward, Reward, ContractInfo
+from .models.environment import School, Class, Teacher, TeacherProgram, File
+from .models.contract import Contract, ContractParty, ContractGoal, ContractPartyReward, Reward
 
 from users.models import UserReputationEvent, UserBadge, UserNotification
 
@@ -67,16 +67,7 @@ view_permissions = {
     'create_contract': {
         'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
     },
-    'manage_contract': {
-        'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-    },
-    'evaluate_contract': {
-        'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-    },
     'addreward': {
-        'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-    },
-    'edit_usergroup': {
         'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
     },
     'add_user': {
@@ -84,14 +75,14 @@ view_permissions = {
     },
     'contract': NO_PERM_REQUIRED,
     'myaccount': NO_PERM_REQUIRED,
-    'useragreement':NO_PERM_REQUIRED,
+    'useragreement': NO_PERM_REQUIRED,
 }
 
 def download_file_fromdb(request, fileid):
     myfile = File.objects.get(fileid)
 
     # Allow access for "public" files (TO-DO: Update to be more inclusive)
-    if(myfile.accessclass == "PB"):
+    if(myfile.accessrules == "PB"):
         return getFileResponse(filedata = myfile.filedata, filename = myfile.filename + myfile.fileextension, filesize = myfile.filesize, contenttype = myfile.filetype)
     else:
         return redirect_home()
@@ -118,24 +109,12 @@ def check_permissions(view):
 
         # Check user permissions
         if myuser.is_authenticated:
-
-            # Look up school's data use policy requirements
-            if(myuser.schoolid):
-                datausepolicyrequiredflag = School.objects.get(schoolid=myuser.schoolid).datausepolicyfileid
-            else:
-                datausepolicyrequiredflag = True # Translates to value exists --> "policy not accepted"
-
-            # Check if user has accepted data use policy and acceptance is required
-            if(myuser.datausepolicyacceptedts or not datausepolicyrequiredflag or myuser.is_admin()):
-                if (
-                    myuser.userrole in view_permissions[viewname][objecttype]['userrole'] or view_permissions[viewname][objecttype]['userrole'][0] == 'ALL' or
-                    myuser.usertype in view_permissions[viewname][objecttype]['usertype'] or view_permissions[viewname][objecttype]['usertype'][0] == 'ALL'
-                ):
-                    # Valid permission - continue
-                    return view(*args, **kwargs)
-            else:
-                # Data use policy has not been accepted yet (and is required)
-                return redirect('wakemeup:useragreement')
+            if (
+                myuser.userrole in view_permissions[viewname][objecttype]['userrole'] or view_permissions[viewname][objecttype]['userrole'][0] == 'ALL' or
+                myuser.usertype in view_permissions[viewname][objecttype]['usertype'] or view_permissions[viewname][objecttype]['usertype'][0] == 'ALL'
+            ):
+                # Valid permission - continue
+                return view(*args, **kwargs)
         else:
             # TO-DO: Re-direct to login page
             return redirect('login')
@@ -144,39 +123,6 @@ def check_permissions(view):
         return redirect_home()
     
     return view_wrapper
-
-def get_effective_contractid(contractid):
-
-    # Determine which contractid to use
-    try:
-        mycontract = Contract.objects.get(contractid=contractid)
-    
-        # If contract is being revised, return tempcontractid
-        if(mycontract.contractstatus == 'R' and mycontract.tempcontractid):
-            return mycontract.tempcontractid
-    except:
-        pass
-
-    return contractid
-
-# AJAX Request handler
-def get_contract_info(request):
-    contractid = request.GET.get('contractid') # Check if existing contract
-    infotype = request.GET.get('infotype')
-    numparticipants = request.GET.get('numparticipants')
-    returndata = ''
-    
-    if(contractid):
-        if(infotype == "hypotheticalcontractvalue"):
-            try:
-                returndata = ContractInfo.objects.get_contract_value(contractid=contractid, numparticipants=numparticipants)[0].contractvalue
-            except:
-                returndata = 0
-        else:
-            mycontractinfo = ContractInfo.objects.get(contractid=contractid)
-            returndata = eval('mycontractinfo.' + infotype)
-    
-    return HttpResponse(returndata)
 
 # AJAX Request handler
 def load_teachers(request):
@@ -224,126 +170,19 @@ def load_classes(request):
 
     return render(request, 'wakemeup/admin/js/class_dropdown_list_options.html', {'classes': classes, 'classid': classid})
 
-def load_students(request):
-
-    # Contract
-    contractid = request.GET.get('contractid')
-    classid = request.GET.get('classid')
-    
-    # User groups
-    groupuserid = request.GET.get('groupuserid')
-    useridlist = request.GET.get('useridlist')
-    leaderuserid = request.GET.get('leaderuserid')
-
-    # Generate list of available participants
-    if(classid):
-        students = []
-
-        # CONTRACTS: Add any user groups associated with class
-        if(not contractid is None):
-
-            # Get user groups associated with class
-            classusergroups = UserGroup.objects.get_user_groups(classid=classid)
-            
-            # Convert user groups to "students"
-            for usergroup in classusergroups:
-                usergroup_student = Student(
-                    studentuserid = usergroup.groupuserid,
-                    classid = usergroup.classid,
-                    firstname = usergroup.groupname
-                )
-                
-                # Add user group to student list
-                students.append(usergroup_student)
-        
-        # Add students for given class
-        for mystudent in Student.objects.getclass(classid=classid):
-            students.append(mystudent)
-    else:
-        students = []
-
-    selected_user_list = []
-    student_list = []
-    
-     # CONTRACTS
-    if(contractid):
-        mycontractparties = ContractParty.objects.get_contract_parties(contractid=contractid)
-
-        for mycontractparty in mycontractparties:
-            selected_user_list.append(mycontractparty.partyuserid)
-
-    # USER GROUPS
-    elif(classid): 
-        
-        # EXISTING GROUP
-        if(groupuserid):
-
-            # LEADER: Mark selected
-            if(useridlist):
-                selected_user_list = [int(leaderuserid) if leaderuserid else UserGroup.objects.get(groupuserid = groupuserid).leaderuserid,]
-
-            # STUDENTS: Mark selected
-            else:
-                selected_user_list = UserGroup.objects.get(groupuserid = groupuserid).useridlist
-            
-        # LEADER: No users selected --> No leader available
-        if(useridlist == ""):
-            students = []
-        
-        # LEADER: Only return users in useridlist
-        if(useridlist):
-            students_revised = []
-            
-            myuseridlist = convert_array_string_to_int(useridlist)
-            
-            # Recreate student list
-            for mystudent in students:
-                if(mystudent.studentuserid in myuseridlist):
-                    students_revised.append(mystudent)
-            
-            students = students_revised
-
-    # Generate final student list (with appended user info)
-    for mystudent in students:
-
-        # Set flag to determine whether student is "selected"
-        if(mystudent.studentuserid in selected_user_list):
-            selected = True
-        else:
-            selected = False
-
-        # Add updated student info to new student list
-        student_list.append(
-            {
-                'studentuserid':mystudent.studentuserid, 
-                'firstname':mystudent.firstname, 
-                'lastname':mystudent.lastname, 
-                'selected': selected
-            }
-        )
-
-    students = student_list
-    
-    return render(request, 'wakemeup/admin/js/student_dropdown_list_options.html', {'students': students})
-
 def load_rewards(request):
     contractid = request.GET.get('contractid') # Check if existing contract
-    goalid = request.GET.get('goalid') # Check if existing contract
     userid = request.user.userid
 
     # Get all existing rewards for given goal
-    if(contractid and goalid):
-        selectedrewards = ContractGoalReward.objects.get_contract_rewards(contractid=contractid, goalid=goalid)        
+    if(contractid):
+        selectedrewards = ContractPartyReward.objects.get_contract_party_rewards(contractid=contractid)        
         selectedrewards = [myreward.rewardid for myreward in selectedrewards]
         
     else:
         selectedrewards = []
 
-    # Get all eligible rewards to display
-    availablerewards = Reward.objects.get_rewards(createdbyuserid = userid)
-    
     context = {
-        'availablerewards': availablerewards,
         'selectedrewards': selectedrewards
     }
     
@@ -373,8 +212,6 @@ def manage_user_display(request):
 def preview_image(request, objecttype, objectid):
     if(objecttype == 'teacher'):
         img = Teacher.objects.get(objectid).defaultsignaturescanfile
-    elif(objecttype == 'student'):
-        img = Student.objects.get(objectid).defaultsignaturescanfile
 
     if(img):
         return renderImageFromDb(img)
@@ -389,10 +226,6 @@ def delete_object(request, objecttype, objectid):
     
     if(objecttype == 'contract'):        
         myredirect = redirect('wakemeup:contract_list')
-    elif(objecttype == 'usergroup'):
-        # Redirect to class associated with user group after delete
-        myusergroup = UserGroup.objects.get(groupuserid = objectid)
-        myredirect = redirect('wakemeup:edit_object', objecttype = 'class', objectid=myusergroup.classid)
     else:
         myredirect = redirect('wakemeup:admin_list', objecttype = objecttype)
         
@@ -444,9 +277,6 @@ def delete_object(request, objecttype, objectid):
             elif(objecttype == 'teacher'):
                 myobject = Teacher.objects.get(objectid)
             
-            elif(objecttype == 'student'):
-                myobject = Student.objects.get(objectid)
-            
             elif(objecttype == 'reward'):
                 myobject = Reward.objects.get(objectid)
     
@@ -460,26 +290,6 @@ def index(request):
 
 def about(request):
     return render(request, 'wakemeup/about.html')
-
-def useragreement(request):
-    # User has accepted the agreement
-    if(request.method == "POST" and request.POST.get('acceptflag')):
-
-        # Mark user as accepted and send back to homepage
-        get_user_model()(userid=request.user.userid).manage_display_info(actiontype='acceptdatausepolicy')
-        return redirect_home()
-    
-    # User has not accepted the agreement - display agreement form
-    else:
-        
-        # Look up school's data use policy requirements
-        if(request.user.schoolid):
-            datausepolicyfileid = School.objects.get(schoolid=request.user.schoolid).datausepolicyfileid 
-        else:
-            datausepolicyfileid = None
-    
-        # Display agreement form
-        return render(request, 'wakemeup/admin/useragreement.html', context={'datausepolicyfileid':datausepolicyfileid})
 
 @check_permissions
 def myaccount(request):
@@ -496,7 +306,6 @@ def myaccount(request):
                 schoolid = form.cleaned_data.get('schoolid'),
                 firstname = form.cleaned_data.get('firstname'),
                 lastname = form.cleaned_data.get('lastname'),
-                phonenumber = form.cleaned_data.get('phonenumber'),
                 emailaddress = form.cleaned_data.get('emailaddress'),
                 profilepictureid = form.cleaned_data.get('profilepictureid'),
             )
@@ -513,7 +322,6 @@ def myaccount(request):
                     'schoolid':myuser.schoolid,
                     'firstname':myuser.firstname,
                     'lastname':myuser.lastname,
-                    'phonenumber':myuser.phonenumber,
                     'emailaddress':myuser.emailaddress,
                     'profilepictureid':myuser.profilepictureid,
                 }
@@ -539,235 +347,13 @@ def myaccount(request):
     return render(request, 'wakemeup/myaccount.html', context)
 
 @check_permissions
-def evaluate_contract(request, contractid):
-
-    # Lookup contract info
-    mycontract = Contract.objects.get(contractid=contractid)
-    
-    if(mycontract):
-        
-        mycontract.contractvalidperiod_disp = display_timestamp_range(mycontract.contractvalidperiod) # Format for display
-
-        # Check if contract has been evaluated already
-        evaluatedflag = True if mycontract.contractevaluationts else False
-    
-        # Initialize forms/formsets
-        form = EvaluateContractForm(contract=mycontract)
-        
-        ContractPartyGoalEvaluationFormSet = formset_factory(form=ContractPartyGoalEvaluationForm, extra=0)
-        ContractPartyGoalRewardFormSet = formset_factory(form=ContractPartyGoalRewardForm, extra=0)
-        
-        goalinfo = None
-        
-        # SAVE
-        if request.method == "POST" and 'submit_other' not in request.POST:
-            
-            submitflag = True if('submit_evaluate' in request.POST) else False
-    
-            # REWARDS
-            if(evaluatedflag):
-                
-                # Create form instance (bind data to form)
-                rewardformset = ContractPartyGoalRewardFormSet(request.POST)
-        
-                if(rewardformset.is_valid()):
-        
-                    reward_data = []
-                    
-                    # Loop through formset
-                    for myform in rewardformset:
-        
-                        reward_data.append({
-                            'contractid': myform.cleaned_data.get('contractid'),
-                            'partyuserid': myform.cleaned_data.get('partyuserid'),
-                            'goalid': myform.cleaned_data.get('goalid'),
-                            'rewardid': myform.cleaned_data.get('rewardid'),
-                            'rewarddeliveredflag': myform.cleaned_data.get('rewarddeliveredflag'),
-                            'actualrewardvalue': myform.cleaned_data.get('actualrewardvalue'),
-                        })
-        
-                    # Save formset data
-                    mycontract.evaluate(actiontype='save', actioncategory='rewards', rewardinfo=json.dumps(reward_data), submitflag=submitflag)
-                    
-                # Take user to next screen
-                if(submitflag):
-                    # SUBMIT - Go back to contract list
-                    return redirect('wakemeup:contract_list')
-                else:
-                    # SAVE - Refresh page
-                    return redirect('wakemeup:evaluate_contract', contractid=contractid)
-            
-            # EVALUATION
-            else:
-                # Create form instance (bind data to form)
-                evaluationformset = ContractPartyGoalEvaluationFormSet(request.POST)
-        
-                if(evaluationformset.is_valid()):
-        
-                    evaluation_data = []
-                    
-                    # Loop through formset
-                    for myform in evaluationformset:
-        
-                        evaluation_data.append({
-                            'contractid': myform.cleaned_data.get('contractid'),
-                            'partyuserid': myform.cleaned_data.get('partyuserid'),
-                            'goalid': myform.cleaned_data.get('goalid'),
-                            'achievedflag': myform.cleaned_data.get('achievedflag'),
-                            'experiencerating': myform.cleaned_data.get('experiencerating'),
-                            'highperformerflag': myform.cleaned_data.get('highperformerflag'),
-                            'topperformerflag': myform.cleaned_data.get('topperformerflag'),
-                            'feedbackmsg': myform.cleaned_data.get('feedbackmsg'),
-                        })
-        
-                    # Save formset data
-                    mycontract.evaluate(actiontype='save', actioncategory='evaluation', evaluationinfo=json.dumps(evaluation_data), submitflag=submitflag)
-        
-                    # Refresh page
-                    return redirect('wakemeup:evaluate_contract', contractid=contractid)
-            
-        # DISPLAY
-        else:
-            # Check contract is in "evaluation" mode and user has proper permissions
-            if(mycontract.contractstatus == 'E' and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
-    
-                # Get accepted goal
-                goalinfo = ContractGoal.objects.get_contract_goals(contractid=contractid,acceptedflag=True)[0]
-
-                # EVALUATION
-                # Get parties that accepted the contract goal (assumes only one accepted goal per contract)
-                goalparties = ContractPartyGoalEvaluation.objects.get_contract_party_evaluations(contractid=contractid,goalid=goalinfo.goalid)
-    
-                # Build formset's initial data
-                goalparty_data = []
-                
-                for goalparty in goalparties:
-                    goalparty_data.append(
-                        {
-                            'partyuserfullname':goalparty.partyuserfullname,
-                            'contractid':goalparty.contractid,
-                            'partyuserid':goalparty.partyuserid,
-                            'goalid': goalparty.goalid,
-                            'achievedflag': goalparty.achievedflag,
-                            'experiencerating': goalparty.experiencerating,
-                            'highperformerflag': goalparty.highperformerflag,
-                            'topperformerflag': goalparty.topperformerflag,
-                            'feedbackmsg': goalparty.feedbackmsg
-                        }
-                    )
-                    
-                # Populate evaluation formset with initial data
-                evaluationformset = ContractPartyGoalEvaluationFormSet(initial=goalparty_data)
-
-                # Initialize reward formset
-                rewardsformset = None
-                
-                # REWARDS
-                if(evaluatedflag):
-                    
-                    # Get parties that earned rewards
-                    rewardparties = ContractPartyGoalEvaluation.objects.get_contract_party_evaluations(contractid=contractid, achievedflag = True)
-    
-                    # Build formset's initial data
-                    rewardparty_data = []
-                    
-                    for rewardparty in rewardparties:
-                        rewardparty_data.append(
-                            {
-                                'partyuserfullname':rewardparty.partyuserfullname,
-                                'contractid':rewardparty.contractid,
-                                'partyuserid':rewardparty.partyuserid,
-                                'goalid': rewardparty.goalid,
-                                'rewardid': rewardparty.rewardid,
-                                'rewarddeliveredflag': rewardparty.rewarddeliveredflag,
-                                'actualrewardvalue': rewardparty.actualrewardvalue,
-                                'rewardoptions': rewardparty.rewardoptions,
-                            }
-                        )
-                    
-                    rewardsformset = ContractPartyGoalRewardFormSet(initial=rewardparty_data)
-            else:
-                # Unauthorized access
-                return redirect_home() 
-    
-        context = {
-            'form': form, 
-            'evaluationformset': evaluationformset, 
-            'rewardsformset': rewardsformset, 
-            'contract': mycontract,
-            'goalinfo': goalinfo
-        }
-        
-        return render(request, 'wakemeup/contract/evaluate_contract.html', context)
-    
-    # Handle off-case for invalid object id
-    else:
-        return redirect_home()
-
-def evaluate_contract_party(request):
-
-    mycontract = None
-    goalinfo = None
-    
-    if(request.method == "POST"):
-
-        # Get contractid
-        contractid = request.POST.get('contractid')
-
-        # Bind data to form
-        form = EvaluateContractPartyForm(request.POST, request=request, contractid=contractid)
-    
-        if(form.is_valid()):
-            
-            # TO-DO: Figure out why this isn't working with cleaned_data
-            highperformers = request.POST.getlist('highperformers[]')
-            
-            mycontractparty = ContractParty(
-                contractid = form.cleaned_data.get('contractid'),
-                partyuserid = form.cleaned_data.get('partyuserid')
-            )
-
-            # Assemble evaluation info into JSON            
-            evaluationinfo = json.dumps({
-                'teacherrating':form.cleaned_data.get('experiencerating_teacher'),
-                'highperformers':highperformers,
-            })
-
-            # Save info
-            mycontractparty.evaluate_contract(evaluationinfo, form.cleaned_data.get('feedback'))
-            
-            # Return response
-            return HttpResponse('success')
-    else:
-
-        # Read in GET parameters        
-        contractid = request.GET.get('contractid')
-        partyuserid = request.GET.get('partyuserid')
-
-        # Get contract/goal info
-        mycontract = Contract.objects.get(contractid=contractid)
-        goalinfo = ContractGoal.objects.get_contract_goals(contractid=contractid,acceptedflag=True)[0] # Accepted goal (assumes only one)
-        
-        form = EvaluateContractPartyForm(request=request, contractid=contractid, initial = {'contractid':contractid,'partyuserid':partyuserid})
-
-    return render(request, 'wakemeup/contract/evaluate_contract_party.html', {'form': form, 'contract':mycontract,'goalinfo':goalinfo})
-
-@check_permissions
 def create_contract(request, contractid):
 
-    # Get correct contractid to use (in case of revision)
-    contractid_effective = get_effective_contractid(contractid)
-
-    if(contractid != contractid_effective):
-        revisionflag = True
-    else:
-        revisionflag = False
-    
     # SAVE CONTRACT
-    if request.method == "POST" and 'submit_other' not in request.POST: # Ignore submits from other forms
+    if request.method == "POST":
 
         # Create form instance (bind data to form)
-        form = ContractForm(request.POST, request=request, contractid=contractid_effective, revisionflag = revisionflag)
+        form = ContractForm(request.POST, request=request, contractid=contractid)
 
         if(form.is_valid()):
 
@@ -776,77 +362,35 @@ def create_contract(request, contractid):
                 contractname = form.cleaned_data.get('contractname'),
                 teacheruserid = form.cleaned_data.get('teacheruserid'),
                 classid = form.cleaned_data.get('classid'),
-                contracttype = form.cleaned_data.get('contracttype'),
                 contractvalidperiod = format_timestamp_range_db(form.cleaned_data.get('contractvalidstartdate'),form.cleaned_data.get('contractvalidenddate')),
-                revisiondeadlinets = form.cleaned_data.get('revisiondeadlinets'),
                 contractstatus = form.cleaned_data.get('contractstatus'),
-                guardianapprovalflag = False,
             )
-
-            # Prepare party user info
-            partyuserinfo_dict = {
-                'deletedparties': [], # Array of partyuserid values
-                'currentparties': [], # Array of party user tuples
-            }
-
-            # Convert string array to int
-            partyuserinfo = form.cleaned_data.get('partyuserinfo')
-            partyuserinfo = convert_array_string_to_int_old(partyuserinfo)
-
-            # Add contract parties to dictionary
-            for myparty in partyuserinfo:
-                partyuserinfo_dict['currentparties'].append(
-                    {'partyuserid':myparty, 'contractrole':'PT'} # Add contract parties as participants
-                )
-
-            # Determine which parties were deleted
-            if(form.cleaned_data.get('contractid')):
-                deleted_parties = []
-                mycontractparties = ContractParty.objects.get_contract_parties(contractid=contractid_effective)
-
-                for mycontractparty in mycontractparties:
-                    if(str(mycontractparty.partyuserid) not in partyuserinfo):
-                        deleted_parties.append(mycontractparty.partyuserid)
-
-                partyuserinfo_dict['deletedparties'] = deleted_parties
-                    
-            # Convert dict to json and assign to contract
-            mycontract.partyuserinfo = json.dumps(partyuserinfo_dict)
 
             # Save contract
             originalcontractid = mycontract.contractid
             mycontract.contractid = mycontract.save()
 
-            # For new contracts, set status to 'D'            
-            if(not originalcontractid):
-                mycontract.change_status('D')
-
-            # Return to main page
-            return redirect('wakemeup:create_contract_goals', contractid = contractid if revisionflag else mycontract.contractid)
-              
     # NEW CONTRACT
     elif(contractid == 'new'):
-        form = ContractForm(request=request, contractid=contractid,initial={'contractstatus':'D'}, revisionflag=revisionflag)
+        form = ContractForm(request=request, contractid=contractid)
         
     # EDIT EXISTING CONTRACT
     else:
         # Lookup object
-        mycontract = Contract.objects.get(contractid=contractid_effective)
+        mycontract = Contract.objects.get(contractid=contractid)
 
         if(mycontract):
             # Populate existing form only for "Draft" contracts and if user is contract's owner or super / admin user
-            if(mycontract.contractstatus in ('D','P') and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
+            if(mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN):
 
-                form = ContractForm(request=request, contractid=contractid_effective, revisionflag=revisionflag,
+                form = ContractForm(request=request, contractid=contractid,
                     initial = {
                         'contractid': mycontract.contractid,
                         'contractname': mycontract.contractname,
                         'teacheruserid': mycontract.teacheruserid,
                         'classid': mycontract.classid,
-                        'contracttype': mycontract.contracttype,
                         'contractvalidstartdate': mycontract.contractvalidperiod.lower,
                         'contractvalidenddate': mycontract.contractvalidperiod.upper,
-                        'revisiondeadlinets': mycontract.revisiondeadlinets,
                         'contractstatus': mycontract.contractstatus,
                     }
                 )
@@ -858,249 +402,7 @@ def create_contract(request, contractid):
         else:
             return redirect_home()
         
-    return render(request, 'wakemeup/contract/edit_contract.html', {'form': form,'revisionflag':revisionflag})
-
-@check_permissions
-def create_contract_goals(request, contractid):
-
-    # Get correct contractid to use (in case of revision)
-    contractid_effective = get_effective_contractid(contractid)
-
-    if(contractid != contractid_effective):
-        revisionflag = True
-    else:
-        revisionflag = False
-    
-    # SAVE GOALS
-    if request.method == "POST":
-
-        # Create form instance (bind data to form)
-        form = ContractGoalsForm(request.POST, contractid=contractid_effective, revisionflag=revisionflag)
-
-        if(form.is_valid()):
-
-            for goaltype in ('e','m','d'):
-                goaltypeid = goaltype + '_'
-
-                myrewardinfo = form.cleaned_data.get(goaltypeid + 'rewardinfo')
-                mygoaldescription = form.cleaned_data.get(goaltypeid + 'goaldescription')
-                mygoalid = form.cleaned_data.get(goaltypeid + 'goalid')
-                mymaxnumrewards = form.cleaned_data.get(goaltypeid + 'maxnumrewards')
-                myacceptedflag = form.cleaned_data.get(goaltypeid + 'acceptedflag')
-                myrewardselectedby = form.cleaned_data.get(goaltypeid + 'rewardselectedby')
-                
-                # Only save goal if rewards and description have been specified
-                if (myrewardinfo and mygoaldescription):
-                    rewardinfo = convert_array_string_to_int_old(myrewardinfo)
-                    rewardinfo_dict = {'currentrewards': []}
-    
-                    for myreward in rewardinfo:
-                        rewardinfo_dict["currentrewards"].append({'rewardid':myreward})
-    
-                    rewardinfo_dict = json.dumps(rewardinfo_dict)
-    
-                    mycontractgoal = ContractGoal(
-                        contractid = contractid_effective,
-                        goalid = mygoalid,
-                        difficultylevel = goaltype.upper(), # Difficultylevel
-                        goaldescription = mygoaldescription,
-                        acceptedflag = myacceptedflag,
-                        rewardinfo = rewardinfo_dict,
-                        maxnumrewards = mymaxnumrewards,
-                        rewardselectedby = myrewardselectedby
-                    )
-        
-                    # Save contract goal
-                    mycontractgoal.goalid = mycontractgoal.save()
-                # Delete existing goal
-                elif (mygoalid):
-                    ContractGoal(contractid = contractid_effective, goalid = mygoalid).delete()
-
-            if('submit_previous' in request.POST):
-                # Go to previous page
-                return redirect('wakemeup:create_contract', contractid=contractid)
-            else:
-                # Go to preview/submit page
-                return redirect('wakemeup:create_contract_submit', contractid=contractid)
-
-    # EDIT EXISTING GOALS
-    else:
-        # Initialize initial_data 
-        initial_data = {'contractid':contractid_effective}
-
-        # Get contract goals
-        mycontract = Contract.objects.get(contractid=contractid_effective)
-        mygoals = ContractGoal.objects.get_contract_goals(contractid=contractid_effective)
-
-        if(mycontract):
-            if(mycontract.contractstatus in ('D','P') and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
-                for mygoal in mygoals:
-                    # Use difficultylevel (i.e. e/m/d) for id tag (assumes MAX one goal per difficultylevel)
-                    goaltypeid = mygoal.difficultylevel.lower() + "_"
-        
-                    initial_data.update({
-                        goaltypeid + 'goalid':mygoal.goalid,
-                        goaltypeid + 'goaldescription':mygoal.goaldescription,
-                        goaltypeid + 'rewardinfo':"",
-                        goaltypeid + 'maxnumrewards':mygoal.maxnumrewards,
-                        goaltypeid + 'acceptedflag':mygoal.acceptedflag,
-                        goaltypeid + 'rewardselectedby':mygoal.rewardselectedby,
-                        }
-                    )
-        
-                form = ContractGoalsForm(contractid=contractid_effective, initial = initial_data, revisionflag=revisionflag)
-            else:
-                # Unauthorized access
-                return redirect_home() 
-        else:
-            # Unauthorized access
-            return redirect_home() 
-
-    return render(request, 'wakemeup/contract/edit_contract_goals.html', {'form': form, 'revisionflag':revisionflag})
-
-@check_permissions
-def create_contract_submit(request, contractid):
-
-    # Get correct contractid to use (in case of revision)
-    contractid_effective = get_effective_contractid(contractid)
-
-    if(contractid != contractid_effective):
-        revisionflag = True
-    else:
-        revisionflag = False
-
-    # SUBMIT
-    if(request.method == "POST"):
-
-        # Lookup original contract info
-        mycontract_orig = Contract.objects.get(contractid=contractid)
-
-        # DISCARD REVISION
-        if('submit_discard' in request.POST):
-            mycontract_orig.revise(actiontype='cancel')
-
-            # Return to contract list            
-            return redirect('wakemeup:contract_list')
-        
-        form = ContractSubmitForm(request.POST, contractid=contractid_effective, revisionflag=revisionflag)
-        
-        if(form.is_valid()):
-
-            # Lookup contract info
-            mycontract = Contract.objects.get(contractid=contractid_effective)
-
-            # REVISION
-            if(mycontract_orig.tempcontractid):
-
-                # SUBMIT REVISION
-                revise_results = mycontract_orig.revise(
-                    actiontype='submit',
-                    revisiondescription=form.cleaned_data.get('revisiondescription'),
-                    revisionrevoteflag=form.cleaned_data.get('revisionrevoteflag'),
-                )
-
-                # Get any newly added parties
-                mynewparties = revise_results.get('newparties')
-
-                # Send e-mails to original users
-                myoriginalparties = revise_results.get('originalparties')
-                if(myoriginalparties):
-                    mycontract.send_emails(
-                        email_subject = 'Duitama Colegio Project - Contrato (#' + str(contractid) + ') ha sido modificado',
-                        email_body = 'Su contrato (#' + str(contractid) + ') ha sido modificado: ' + \
-                            request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':contractid})),
-                        useridlist = myoriginalparties
-                    )
-
-                # Send e-mails to users in "new parties" list (if any)
-                if(mynewparties):
-                    mycontract.send_emails(
-                        email_subject = 'Duitama Colegio Project - Contrato nuevo (#' + str(contractid) + ')',
-                        email_body = 'Se envi' + mychr('o') + ' un contrato nuevo: ' + \
-                            request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':contractid})),
-                        useridlist = mynewparties
-                    )
-
-            # NON-REVISION
-            else:
-                # Set contract status to pending
-                mycontract.change_status('P') 
-
-                # SUBMIT NEW CONTRACT
-                if(mycontract_orig.contractstatus == 'D'):
-                    # Send e-mails
-                    mycontract.send_emails(
-                        email_subject = 'Duitama Colegio Project - Contrato nuevo (#' + str(contractid) + ')',
-                        email_body = 'Se envi' + mychr('o') + ' un contrato nuevo: ' + \
-                            request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':contractid}))
-                    )
-                    
-                # UPDATE EXISTING CONTRACT
-                elif(mycontract_orig.contractstatus == 'P'):
-                    # Send e-mails
-                    mycontract.send_emails(
-                        email_subject = 'Duitama Colegio Project - Contrato (#' + str(contractid) + ') ha sido actualizado',
-                        email_body = 'Su contrato (#' + str(contractid) + ') ha sido actualizado: ' + \
-                            request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':contractid}))
-                    )
-
-            # Go back to home page
-            return redirect_home()
-    else:
-        mycontract = Contract.objects.get(contractid=contractid_effective)
-
-        if(mycontract):
-            if(mycontract.contractstatus in ('D','P') and (mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN)):
-        
-                mycontract.contractvalidperiod_disp = display_timestamp_range(mycontract.contractvalidperiod) # Format for display
-                classinfo = Class.objects.get(classid=mycontract.classid)
-                contractinfo = ContractInfo.objects.get(contractid_effective)
-                teacherbudgetinfo = TeacherBudget.objects.get(teacheruserid=mycontract.teacheruserid)
-                
-                # Prepare context info
-                context = {
-                    'form':ContractSubmitForm(contractid = contractid, revisionflag=revisionflag),
-                    'record':mycontract,
-                    'classinfo':classinfo,
-                    'contractinfo':contractinfo, #Contains budget info
-                    'teacherbudgetinfo':teacherbudgetinfo,
-                    'revisionflag':revisionflag,
-                } 
-        
-                return render(request, 'wakemeup/contract/edit_contract_submit.html', context)
-
-        # Unauthorized access
-        return redirect_home() 
-
-@check_permissions
-def manage_contract(request, contractid):
-
-    if(request.method == "POST"):
-        mycontract = Contract.objects.get(contractid=contractid)
-        actiontype = request.POST.get('actiontype')
-
-        if(mycontract):
-            
-            # REVISE CONTRACT
-            if(actiontype == "revise"):
-                
-                # Put contract in revision mode
-                if(mycontract.contractstatus == 'A'):
-                    mycontract.revise(actiontype='revise')
-                
-                # Redirect to edit contract page
-                return redirect('wakemeup:create_contract', contractid=contractid)
-
-            # EVALUATE CONTRACT
-            elif(actiontype == "evaluate"):
-                if(mycontract.contractstatus == 'A'):
-                    mycontract.evaluate(actiontype='evaluate')
-                    
-                # Redirect to evaluate page
-                return redirect('wakemeup:evaluate_contract', contractid=contractid)
-
-    # Unauthorized access
-    return redirect_home() 
+    return render(request, 'wakemeup/contract/edit_contract.html', {'form': form,})
 
 @check_permissions
 def addreward(request):
@@ -1129,53 +431,6 @@ def addreward(request):
     return render(request, 'wakemeup/contract/edit_contract_goals_addreward.html', {'form': form})
 
 @check_permissions
-def edit_usergroup(request, classid):
-    if request.method == 'POST':
-
-        # Create form instance (bind data to form)
-        form = UserGroupForm(request.POST,classid=classid)
-
-        if form.is_valid():
-            myusergroup = UserGroup(
-                groupuserid = form.cleaned_data.get('groupuserid'),
-                groupname = form.cleaned_data.get('groupname'),
-                classid = form.cleaned_data.get('classid'),
-                leaderuserid = form.cleaned_data.get('leaderuserid'),
-                useridlist = convert_array_string_to_int(form.cleaned_data.get('useridlist'))
-            )
-
-            # Save user group
-            myusergroup.save()
-
-            # Return success response
-            return HttpResponse("Grupo actualizado.")
-    else:
-        # Retrieve parameters
-        groupuserid = request.GET.get('groupuserid')
-        classid = request.GET.get('classid')
-
-        # Initialize form
-        form=UserGroupForm(
-            classid=classid,
-            initial={}
-        )
-        
-        myusergroup = UserGroup.objects.get(groupuserid=groupuserid)
-
-        # Add initial data (if existing object)        
-        if(myusergroup):
-            form.initial.update({
-                'groupuserid' : myusergroup.groupuserid,
-                'classid' : myusergroup.classid,
-                'groupname' : myusergroup.groupname,
-                'leaderuserid' : myusergroup.leaderuserid,
-                'useridlist' : myusergroup.useridlist,
-            })
-
-    return render(request, 'wakemeup/admin/edit_usergroup.html', {'form': form})
-
-# Admin
-@check_permissions
 def admin_list(request, objecttype):
 
     # Get teacheruserid (if teacher is logged on)
@@ -1197,9 +452,6 @@ def admin_list(request, objecttype):
     elif objecttype == 'teacher':
         objectSet = TeachersTable(Teacher.objects.get_teachers(teacheruserid = teacheruserid))
 
-    elif objecttype == 'student':
-        objectSet = StudentsTable(Student.objects.all())
-
     elif objecttype == 'reward':
 
         # Only show rewards created by logged on teacher
@@ -1209,7 +461,7 @@ def admin_list(request, objecttype):
             createdbyuserid = None
 
         # Look up rewards
-        objectSet = RewardsTable(Reward.objects.get_rewards(createdbyuserid = createdbyuserid))
+        objectSet = RewardsTable(Reward.objects.get_rewards())
 
     else:
         pass
@@ -1254,8 +506,6 @@ def edit_object(request, objecttype, objectid):
             'studentgroups':usergroupstable, 
             'classid':objectid
         })
-
-
         
     elif objecttype == 'teacher':
         objectForm = TeacherForm
@@ -1335,7 +585,6 @@ def edit_object(request, objecttype, objectid):
                         filetype = mydatausepolicyfile.content_type,
 #                         description = 'File description',
                         filedata = psycopg2.Binary(mydatafile),
-                        accessclass = 'PB' # File accessible to public
                     )
                     
                     # Save new file and capture fileid
@@ -1399,25 +648,18 @@ def edit_object(request, objecttype, objectid):
                     classinfo = classinfo,
                     firstname = form.cleaned_data.get('firstname'),
                     lastname = form.cleaned_data.get('lastname'),
-                    defaultsignaturescanfile = psycopg2.Binary(mydatafile),
-                    phonenumber = form.cleaned_data.get('phonenumber'),
                     emailaddress = form.cleaned_data.get('emailaddress'),
                     profilepictureid = form.cleaned_data.get('profilepictureid'),
                 )
             
             elif(objecttype == 'student'):
 
-                # Get signature scan file
-                mydatafile = convert_form_binary_to_db(request.FILES.get('defaultsignaturescanfile'))
-                
                 myobject = objectClass(
                     studentuserid = form.cleaned_data.get('studentuserid'),
                     schoolid = form.cleaned_data.get('schoolid'),
                     classid = form.cleaned_data.get('classid'),
                     firstname = form.cleaned_data.get('firstname'),
                     lastname = form.cleaned_data.get('lastname'),
-                    defaultsignaturescanfile = psycopg2.Binary(mydatafile),
-                    phonenumber = form.cleaned_data.get('phonenumber'),
                     emailaddress = form.cleaned_data.get('emailaddress'),
                     profilepictureid = form.cleaned_data.get('profilepictureid'),
                 )
@@ -1490,7 +732,6 @@ def edit_object(request, objecttype, objectid):
                         'firstname': myobject.firstname,
                         'lastname': myobject.lastname,
                         'defaultsignaturescanfile': myobject.defaultsignaturescanfile,
-                        'phonenumber': myobject.phonenumber,
                         'emailaddress': myobject.emailaddress,
                         'profilepictureid': myobject.profilepictureid,
                     }
@@ -1504,8 +745,6 @@ def edit_object(request, objecttype, objectid):
                         'classid': myobject.classid,
                         'firstname': myobject.firstname,
                         'lastname': myobject.lastname,
-                        'defaultsignaturescanfile': myobject.defaultsignaturescanfile,
-                        'phonenumber': myobject.phonenumber,
                         'emailaddress': myobject.emailaddress,
                         'profilepictureid': myobject.profilepictureid,
                     }
@@ -1537,14 +776,12 @@ def contract_detail(request, contractid):
         if(mycontract.contractstatus != 'D' and (request.user.userid in (mycontract.get_users()) or request.user.userrole in PERM_ADMIN)):
             mycontract.contractvalidperiod_disp = display_timestamp_range(mycontract.contractvalidperiod) # Format for display
             classinfo = Class.objects.get(classid=mycontract.classid)
-            contractinfo = ContractInfo.objects.get(contractid=contractid, allowrevisioncontractflag=True)
             
             # Prepare context info
             context = {
                 'record':mycontract,
                 'objecttype':'contract', # Used for contract button links
                 'classinfo':classinfo,
-                'contractinfo':contractinfo, #Contains budget info
                 'displayinfo': {
                     'buttonsize':'', # Contract button size
                     'displaytextflag':False # Hide info text
@@ -1556,68 +793,6 @@ def contract_detail(request, contractid):
     # Contract doesn't exist or is a "Draft"
     return redirect_home()
         
-@check_permissions
-def contract_accept(request, contractid):
-
-    if(request.method == "POST"):
-        form = ContractPartyAcceptForm(request.POST,request.FILES, request=request, contractid=contractid)
-        
-        # Determine where the button was clicked from
-        post_source = request.POST.get('post_source')
-
-        if(form.is_valid()):
-
-#             mydatafile = convert_form_binary_to_db(request.FILES.get('partyapprovalsignature'))
-            mycontractid = form.cleaned_data.get('contractid')
-            mycontract = Contract.objects.get(contractid=mycontractid) # Used to generate e-mails
-            
-            # Process guardian approval info
-            myguardianapprovalinfo = {'requiredfields':[]}
-            
-            for field in ('idfullname','idnumber','idissuedate','idissuelocation'):
-                if(form.cleaned_data.get(field)):
-                    myguardianapprovalinfo['requiredfields'].append({field:form.cleaned_data.get(field)})
-            
-            # Create new contractparty object
-            mycontractparty = ContractParty(
-                contractid = mycontractid,
-                partyuserid = form.cleaned_data.get('partyuserid'),
-                preferredgoalid = form.cleaned_data.get('preferredgoalid'),
-#                 partyapprovalsignature = psycopg2.Binary(mydatafile),
-                partylogonuserid = request.user.userid,
-                guardianapprovalinfo = json.dumps(myguardianapprovalinfo)
-            )
-
-            # Accept contract
-            approveresult = mycontractparty.approve_contract()
-            
-            # Send e-mails if contract approved by all parties
-            if(approveresult):
-
-                # Send e-mails
-                mycontract.send_emails(
-                    email_subject = 'Duitama Colegio Project - Contrato #' + str(mycontractid) + ' ha sido aprobado',
-                    email_body = 'Se aprob' + mychr('o') + ' su contrato (#' + str(mycontractid) + '): ' + \
-                        request.build_absolute_uri(reverse('wakemeup:contract_detail',kwargs={'contractid':mycontractid})),
-                )
-            
-            # APPROVE CONTRACT (teacher) - Redirect to contract list
-            if(post_source):
-                return redirect('wakemeup:contract_list')
-            
-            # ACCEPT CONTRACT (student) - Return message
-            else:
-                return HttpResponse("success")
-    else:
-        initial = {
-            'contractid': request.GET.get('contractid'),
-            'partyuserid': request.GET.get('partyuserid'),
-            'preferredgoalid': request.GET.get('preferredgoalid')
-        }
-        form = ContractPartyAcceptForm(initial=initial, request=request, contractid=contractid)
-
-    return render(request, 'wakemeup/contract/approve_contract.html', {'form': form})
-
 @check_permissions
 def contract_list(request):
     
@@ -1697,7 +872,6 @@ def add_user(request):
                 firstname = form.cleaned_data.get('firstname'),
                 lastname = form.cleaned_data.get('lastname'),
                 defaultsignaturescanfile = form.cleaned_data.get('defaultsignaturescanfile'),
-                phonenumber = form.cleaned_data.get('phonenumber'),
                 emailaddress = myemailaddress,
                 userrole = form.cleaned_data.get('userrole'),
             )
@@ -1719,15 +893,6 @@ def add_user(request):
                              'Bienvenidos!' + '\n\n' + \
                              'Duitama Colegio Project'
             )
-
-            # If student, save additional data
-            if(form.cleaned_data.get('usertype') == "ST"):
-                mystudent = Student(
-                    studentuserid=newuser.userid,
-                    classid=form.cleaned_data.get("classid"),
-                    emailaddress=newuser.emailaddress  # Include email address because it is NULL-able/overwritable
-                )
-                mystudent.save()
 
             # Go back to index page
             return render(request, 'wakemeup/admin/add_user_confirmation.html', {'userinfo':newuser, 'conf_password_display':conf_password_display})

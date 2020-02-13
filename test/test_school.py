@@ -1,40 +1,33 @@
-import test_setup
 import unittest
-import json
+from test_setup import *
 
-from wakemeup.models.environment import School
+from wakemeup.models.school import School
 
 class testSchool(unittest.TestCase):
     
-    # Create new school
-    def testCreateNewSchool(self):
-        guardianapprovalpolicy = json.dumps(
-            {
-                'guardianapprovalrequiredflag':True,
-                'idnumberrequiredflag':True,
-                'idissuerequiredflag':False,
-            }
-        )
+    def setUp(self):
+        self.myschool = create_school(schoolabbreviation = "MCHS", schooldisplayname = 'Mount Carmel High School')
+    
+    def testCreateSchool(self):
+        self.assertTrue(self.myschool.schoolid)
+        self.assertEqual(self.myschool.schooldisplayname, 'Mount Carmel High School')
+
+    def testGetSchool(self):
+        self.assertTrue(School.objects.get(self.myschool.schoolid))
+        self.assertTrue(School.objects.all())
+        self.assertTrue(School.objects.school_choices(schoolid = self.myschool.schoolid))
         
-        newschool = School(None, 'MySchool', 'MyAbbreviation', '123 Fake Ln', 'San Diego', 'CA',None, guardianapprovalpolicy)
-        self.assertEqual(newschool.schooldisplayname, 'MySchool')
-        self.assertFalse(newschool.schoolid)
-    
-        # Save school
-        newschoolid = newschool.save()
-    
-        # Get school
-        newschool_get = School.objects.get(newschoolid)
+    def testUpdateSchool(self):    
+        self.myschool.schoolabbreviation = 'CMHS'
+        self.myschool.save()
+        self.assertEqual(self.myschool.schoolabbreviation,'CMHS')
 
-        self.assertEqual(newschool.schooldisplayname, newschool_get.schooldisplayname)
-        self.assertTrue(newschool_get.schoolid)
-    
-        # Get all schools
-        allschools = School.objects.all()
-        self.assertTrue(allschools)
+    def testDeleteSchool(self):
+        self.myschool.delete()
+        self.assertFalse(refresh(self.myschool))
 
-        # Delete school
-        newschool_get.delete()
+    def tearDown(self):
+        self.myschool.delete()
 
 if __name__ == '__main__':
     unittest.main() # Run all tests

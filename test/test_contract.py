@@ -1,466 +1,122 @@
-import test_setup
 import unittest
-
-import test_user
-
-from django.contrib.auth import get_user_model
-
-from wakemeup.models.contract import *
-from wakemeup.models.environment import School, Class, Teacher
+from test_setup import *
+from wakemeup.models.program import *
+from wakemeup.models.environment import *
+from lib.UsefulFunctions.miscUtils import get_school_year
 
 import json
-from datetime import datetime, timedelta
 
-from psycopg2.extras import DateTimeTZRange
-
-from users.models import UserGroup
+DEFAULT_SCHOOL_YEAR = get_school_year()
 
 class testContracts(unittest.TestCase):
 
-    global refresh_contract
-    
     # Create main test environment
     @classmethod
-    def setUpClass(self):
-        global newschool
-        global newclass
-        global newteacher
-        global newuser
-        global signaturefile
+    def setUpClass(cls):
+        cls.myschool = create_school()
+        cls.myclass1 = create_class(schoolid=cls.myschool.schoolid)
+        cls.myclass2 = create_class(schoolid=cls.myschool.schoolid)
+        cls.myclass3 = create_class(schoolid=cls.myschool.schoolid)
+        cls.myteacher1 = create_user(usertype='TR',emailaddress='test1@mail.com')
+        cls.myteacher2 = create_user(usertype='TR')
 
-        global newreward
-        global create_usergroup
+        # Associate classes with teachers
+        create_teacher_class(cls.myteacher1.userid, cls.myclass1.classid)
+        TeacherClass(teacheruserid=cls.myteacher2.userid,classid=None).save(classidlist=[cls.myclass2.classid, cls.myclass3.classid])
 
-        # Prepare signature file        
-        signaturefile = test_setup.readfile('test/img/sampleimg.jpg')
-
-        # Create environment
-        newschool = School(None, 'My school','My abbreviation', '123 Fake Ln.','San Diego','CA')
-        newschool.schoolid = newschool.save()
+        # Create contract file
+        cls.myfile = create_file(filename='contractscan',fileextension='pdf',filetype='application/pdf',filedescription='Class 1 - Contract',filestore='DB',filecategory='CT')
         
-        newclass = Class(None, newschool.schoolid, 'My Class 1')
-        newclass.classid = newclass.save()
-        
-        newclass2 = Class(None, newschool.schoolid, 'My Class 2')
-        newclass2.classid = newclass2.save()
-
-        # Teacher class info
-        classinfo = json.dumps(
-            { # classes info JSON
-                "currentclasses" : [
-                    {"classid" : newclass.classid},
-                    {"classid" : newclass2.classid}
-                ]
-            }
-        )
-        
-        # Delete user if already exists
-        try:
-            checkuser = get_user_model().objects.get(username = 'teacher1')
-            checkuser.delete()
-        except:
-            pass
-        
-        # Create new teacher
-        newuser = get_user_model().objects.create_user(
-            password = 'adminadmin', usertype = 'TR', firstname = 'Teacher', 
-            lastname = 'Isgood', username = 'teacher1', emailaddress = 'teacher@bufu.com', userrole = 'U'
-        )
-        
-        newteacher = Teacher(teacheruserid=newuser.userid, schoolid=newschool.schoolid, classinfo=classinfo)
-        newteacherid = newteacher.save()
-
-        # Create new reward
-        newreward = Reward(rewarddescription = 'Goal #101', rewardvalue = 755, createdbyuserid = newuser.userid)
-        newreward.rewardid = newreward.save()
-
     # Re-create environment for each test case        
     def setUp(self):
-        global newcontract
-        global myusergroup
-
-        # Contract goal info
-        goalinfo = json.dumps(
-            { # classes info JSON
-                "currentgoals" : [
-                    {"goalid" : None, "difficultylevel" : "M", "goaldescription" : "Some MEDIUM description", 
-                     "rewardinfo": {"currentrewards" : [
-                         {"rewardid" : 1},
-                         {"rewardid" : 2},
-                         ]}
-                     },
-                    {"goalid" : None, "difficultylevel" : "E", "goaldescription" : "Some easy goal", 
-                     "rewardinfo": {"currentrewards" : [{"rewardid" : 1}]}},
-                ]
-            }
-        )
-
-        myusergroup = self.create_usergroup()
 
         # Contract party info
-        partyinfo = json.dumps(
-            {
-                "currentparties" : [
-                    {"partyuserid": 1,"contractrole": "MR"},
-                    {"partyuserid": 2,"contractrole": "PL"},
-                    {"partyuserid": 3,"contractrole": "BL"},
-                    {"partyuserid": 4,"contractrole": "PT"},
-                    {"partyuserid": myusergroup.groupuserid,"contractrole": "PT"},
-                ]
-            }
-        )
+        partyinfo = json.dumps([
+            {"teacheruserid":self.myteacher1.userid,"classid":self.myclass1.classid,"numparticipants":10,"numwinners":5},
+            {"teacheruserid":self.myteacher2.userid,"classid":self.myclass2.classid,"numparticipants":20,"numwinners":7}
+        ])
 
-        # Create new contract
-        newcontract = Contract(
-            None, # contractid
-            'My new contract', # contractname
-            newclass.classid, 
-            None, # classdisplayname
-            'G', # contracttype
-            newteacher.teacheruserid, 
-            None, # teacherfirstname
-            None, # teacherlastname
-            DateTimeTZRange(datetime(2015, 1, 1, 0, 0, 0), datetime(2016, 1, 1, 0, 0, 0)), # Contract Valid Period
-            False, # Guardian approval flag
-            datetime.now() + timedelta(days=10), # Revision deadline ts
-            None, # Revision description
-            None, # Revision approval TS
-            'Don''t do dees!', # Student leader reqs
-            'Great teacher reqs', # Teacher reqs 
-            'Some student reqs', # Student reqs
-            None, # Contract scan file
-            None, # Contract approval TS
-            None, # Contract status ("draft")
-            goalinfo, # goal info (JSON)
-            partyinfo  # party info (JSON)
-            )
-                
-        # Save new contract
-        newcontract.contractid = newcontract.save()
+        # Create contract
+        self.mycontract1 = create_contract(contractname='Reading activity',partyinfo=partyinfo)
+        self.mycontract2 = create_contract(contractname='Reading activity 2',partyinfo=partyinfo,schoolyear=2000)
+
+        # Contract parties / reward
+        self.mycontractparty1 = create_contract_party(contractid=self.mycontract1.contractid,teacheruserid=self.myteacher2.userid,classid=self.myclass3.classid)
+#         self.mycontractpartyreward = create_contract_party_reward()
+
+        # Associate file with contract 1
+        self.myfile.contractid = self.mycontract1.contractid
+        self.myfile.save()
         
-        # Set contract status as "draft"
-        newcontract.change_status('D')
-        
-    def create_usergroup(self):
-        USERNAME = test_user.USERNAME
-        PASSWORD = test_user.PASSWORD
-        EMAILADDRESS = test_user.EMAILADDRESS
-        test_user.clean_user(USERNAME)
-        test_user.clean_user(USERNAME + "1")
-
-        # Create new users
-        newuser = test_user.create_user(password=PASSWORD,usertype='ST',firstname='Test',lastname='Orama',username=USERNAME,emailaddress=EMAILADDRESS,userrole='U')
-        newuser2 = test_user.create_user(password=PASSWORD,usertype='ST',firstname='Test1',lastname='Orama1',username=USERNAME + "1",emailaddress=EMAILADDRESS + "1",userrole='U')
-
-        # Create and save user group
-        newusergroup = UserGroup(
-            groupuserid=None, 
-            groupname = 'New group', 
-            classid=None, 
-            leaderuserid = newuser.userid, 
-            useridlist = [newuser.userid, newuser2.userid]
-        )
-
-        newusergroup.groupuserid = newusergroup.save()
-
-        return UserGroup.objects.get(groupuserid=newusergroup.groupuserid)
-
-    def refresh_contract(self):
-        return Contract.objects.get(contractid=self.contractid)
-        
+    ### CONTRACTS ###
     def testCreateContract(self):
-        pass
-
-    def testReward(self):
-        newreward.rewarddescription = "New Description text"
-        newreward.save()
-        newrewardget = Reward.objects.get(rewardid=newreward.rewardid)
-        self.assertNotEqual(newrewardget.rewarddescription,"Goal #102")
+        self.assertTrue(self.mycontract1.contractid)
 
     def testGetContract(self):
-        mycontract = Contract.objects.get(newcontract.contractid)
+        self.assertTrue(Contract.objects.get(contractid=self.mycontract1.contractid))
+        self.assertEqual(len(Contract.objects.get_contracts(schoolyear=2000)),1) # specific school year
+        self.assertEqual(len(Contract.objects.get_contracts(schoolyear=DEFAULT_SCHOOL_YEAR)),1) # default school year
+        self.assertEqual(len(Contract.objects.get_contracts(teacheruserid=self.myteacher1.userid)),2) # teacher (positive) - 2 contracts
+        self.assertFalse(Contract.objects.get_contracts(teacheruserid=-1)) # teacher (negative)
 
-        self.assertEqual(mycontract.studentrequirements,newcontract.studentrequirements)
+    def testDeleteContract(self):
+        self.mycontract2.delete()
+        self.assertFalse(refresh(self.mycontract2))
 
-        # Check status is "draft")
-        self.assertEqual(mycontract.contractstatus,'D')
+    def testContractFile(self):
+        self.assertTrue(File.objects.get_files(contractid=self.mycontract1.contractid)) # positive
+        self.assertFalse(File.objects.get_files(contractid=self.mycontract2.contractid)) # negative
 
-        # Set contract as pending (i.e. awaiting approval)        
-        mycontract.change_status('P')
-        mycontract = Contract.objects.get(mycontract.contractid)
-
-        # Check status is changed to "pending")
-        self.assertEqual(mycontract.contractstatus,'P')
-
-        mycontractinfo = ContractInfo.objects.get(contractid=mycontract.contractid)
-        mycontractvalue = ContractInfo.objects.get_contract_value(contractid=mycontract.contractid,numparticipants=2)
-
-    # TO-DO: Fix the "approve" part
-    def testReviseContract(self):
-
-        mycontract = Contract.objects.get(newcontract.contractid)
-        mycontractgoal = ContractGoal.objects.get(contractid=mycontract.contractid,goalid=1)
-
-        # Check revision approval TS is not set
-        mycontract = Contract.objects.get(mycontract.contractid)
-        self.assertIsNone(mycontract.revisionapprovalts)
-
-        # Revise contract (user clicks "revise" button)
-        tempcontractid = mycontract.revise(actiontype='revise')['tempcontractid']
-
-        # Check that new temp contract was generated
-        tempcontract = Contract.objects.get(contractid=tempcontractid)
-        tempcontractgoal = ContractGoal.objects.get(contractid=tempcontractid,goalid=1)
-
-        self.assertIsNotNone(tempcontractid)
-        self.assertIsNotNone(tempcontract)
-
-        # Make sure values on original contract are set properly
-        mycontract = refresh_contract(mycontract)
-        self.assertEqual(mycontract.tempcontractid, tempcontractid)
-        self.assertEqual(mycontract.contractstatus,'R')
-        self.assertEqual(mycontractgoal.goaldescription, tempcontractgoal.goaldescription)
-        self.assertNotEqual(mycontractgoal.goaldescription,'yum yum')
-       
-        # Change some values on temp contract
-        tempcontractgoal.goaldescription = 'yum yum'
-        tempcontractgoal.save()
+    ### CONTRACT PARTIES ###
+    def testCreateContractParty(self):
+        pass
+    
+    def testGetContractParty(self):
         
-        # Submit revision
-        mycontract.revise(actiontype='submit', revisiondescription='Some notes')
-        mycontract = refresh_contract(mycontract)
-        tempcontract = refresh_contract(tempcontract)
-        
-        # Verify temp contract was deleted
-        self.assertIsNone(tempcontract)
-
-        # Verify new values were applied to original contract
-        mycontractgoal = ContractGoal.objects.get(contractid=mycontract.contractid,goalid=1)
-        self.assertEqual(mycontractgoal.goaldescription,'yum yum')
-
-        # Verify revision info was set properly
-        self.assertIsNone(mycontract.tempcontractid)
-        self.assertIsNotNone(mycontract.revisionapprovalts)
-        self.assertEqual(mycontract.revisiondescription, 'Some notes')
-        self.assertEqual(mycontract.contractstatus,'A')
-
-        # Revise contract again
-        tempcontractid = mycontract.revise(actiontype='revise')['tempcontractid']
-
-        # Verify contact status set
-        mycontract = refresh_contract(mycontract)
-        self.assertEqual(mycontract.contractstatus,'R')
-        
-        tempcontractgoal = ContractGoal.objects.get(contractid=tempcontractid,goalid=1)
-        tempcontractgoal.goaldescription = 'something new'
-        tempcontractgoal.save()
-        tempcontract = Contract.objects.get(contractid=tempcontractid)
-        
-        self.assertNotEqual(tempcontractgoal.goaldescription,mycontractgoal.goaldescription)
-        
-        # Cancel revision
-        mycontract.revise(actiontype='cancel')
-        
-        # Verify no changes made
-        mycontract = refresh_contract(mycontract)
-        mycontractgoal_after = ContractGoal.objects.get(contractid=mycontractgoal.contractid, goalid=mycontractgoal.goalid)
-        self.assertEqual(mycontractgoal.goaldescription,mycontractgoal_after.goaldescription)
-
-        # Verify original contract revision fields reset
-        self.assertIsNone(mycontract.tempcontractid)
-        self.assertEqual(mycontract.contractstatus,'A')
-
-        # Verify temp contract was deleted
-        tempcontract = refresh_contract(tempcontract)
-        self.assertIsNone(tempcontract)
-
-    def testContractGoals(self):
-        
-        # Modify goal info
-        newgoalinfo = json.dumps(
-            { # classes info JSON
-                "deletedgoals" : [3],
-                "currentgoals" : [
-                    {"goalid" : None, "difficultylevel" : "D", "goaldescription" : "Some new goal"},
-                    {"goalid" : None, "difficultylevel" : "M", "goaldescription" : "Some NEW MEDIUM goal"},
-                ]
-            }
-        )
-
-        # Get all goals
-        allgoals = ContractGoal.objects.all()
-        self.assertIsNotNone(allgoals)
-
-        # Get all medium goals
-        getmediumgoals = ContractGoal.objects.get_contract_goals(difficultylevel = 'M')
-        self.assertIsNotNone(getmediumgoals)
-        
-        # Check goal info was set properly
-        mycontractgoal = ContractGoal.objects.get(contractid = newcontract.contractid, goalid = 1)
-        self.assertEqual(mycontractgoal.goaldescription, "Some MEDIUM description")
-
-        mycontractgoal = ContractGoal.objects.get(contractid = newcontract.contractid, goalid = 2)
-        self.assertEqual(mycontractgoal.difficultylevel, "E")
-
-        # Update existing goal and verify save
-        mycontractgoal.difficultylevel = "D"
-        mycontractgoal.save()
-        mycontractgoal = ContractGoal.objects.get(contractid = newcontract.contractid, goalid = 2)
-        self.assertEqual(mycontractgoal.difficultylevel, "D")
-
-        # Create new goal
-        newcontractgoal = ContractGoal(
-            contractid=newcontract.contractid, 
-            goalid=None, 
-            difficultylevel='M', 
-            goaldescription='Manual goal', 
-            acceptedflag=None,
-            rewardinfo = json.dumps({"currentrewards" : [{"rewardid" : newreward.rewardid}]}),
-        )
-
-        newcontractgoalid = newcontractgoal.save()
-        newcontractgoal = ContractGoal.objects.get(contractid = newcontract.contractid, goalid = newcontractgoalid)
-        self.assertEqual(newcontractgoal.goaldescription,"Manual goal")
-                
-#         mycontractgoalreward = ContractGoalReward.objects.get(contractid = newcontractgoal.contractid, goalid=newcontractgoal.goalid, rewardid=newrewardid)
-#         self.assertEqual(mycontractgoalreward.rewardvalue,50)
-
-        # Check delete goal
-        mycontractgoal.delete()
-        mycontractgoal = ContractGoal.objects.get(contractid = newcontract.contractid, goalid = 2)
-        self.assertIsNone(mycontractgoal)        
-        
-        # Check reward info set properly
-        mycontractgoalreward = ContractGoalReward.objects.get(contractid = newcontract.contractid, goalid=3, rewardid=newreward.rewardid)
-        self.assertEqual(mycontractgoalreward.rewarddescription,"Goal #101")
-
-        mycontractgoalreward = ContractGoalReward.objects.get(contractid = newcontract.contractid, goalid=3, rewardid=newreward.rewardid)
-        self.assertEqual(mycontractgoalreward.rewardvalue,755)
-
-        # Create new reward
-        newcontractgoalreward = ContractGoalReward(newcontract.contractid, 1, newreward.rewardid)
-        newcontractgoalrewardid = newcontractgoalreward.save()
-        newcontractgoalreward = ContractGoalReward.objects.get(newcontract.contractid, 1, newreward.rewardid)
-        self.assertEqual(newcontractgoalreward.rewarddescription,'Goal #101')
-
-        # Check delete reward
-        mycontractgoalreward.delete()
-        mycontractgoalreward = ContractGoalReward.objects.get(contractid = newcontract.contractid, goalid=3, rewardid=newreward.rewardid)
-        self.assertIsNone(mycontractgoalreward)
-
-    def testContractGoalRewards(self):
-        
-        allrewards = ContractGoalReward.objects.all()
-
-        # Get newly created reward
-        getreward = ContractGoalReward.objects.get(contractid = newcontract.contractid, goalid = 1, rewardid = 1)
-        self.assertIsNotNone(getreward)
-
-        # Modify reward info
-        newrewardinfo = json.dumps(
-            { # classes info JSON
-                "deletedrewards" : [1],
-                "currentrewards" : [
-                    {"rewardid" : 1},
-                    {"rewardid" : 2},
-                ]
-            }
-        )
-
-#        ContractGoalReward.objects.modify_contract_rewards(newcontract.contractid, newrewardinfo)
-
-        # Verify updated reward info
-#         getnewreward = ContractGoalReward.objects.get(contractid = newcontract.contractid, goalid = 1, rewardid = 2)
-#         self.assertEqual(getnewreward.rewarddescription,"Some NEW MEDIUM reward")
-
-    def testContractParties(self):    
-        # Get all parties
-        allparties = ContractParty.objects.all()
-        self.assertIsNotNone(allparties)
-        
-        # Get single party
-        getparty = ContractParty.objects.get(newcontract.contractid,2)
-        self.assertIsNotNone(getparty)
-        
-        # Get all parties for given contract
-        getparties = ContractParty.objects.get_contract_parties(newcontract.contractid, None, None)
-        self.assertIsNotNone(getparties)
-
-        # Check backup leader
-        getbackupleader = ContractParty.objects.get_contract_parties(newcontract.contractid, None, 'BL')
-        self.assertIsNotNone(getbackupleader)
-        
-        # Modify contract parties
-        newpartyinfo = json.dumps(
-            { # parties info JSON
-                "deletedparties" : [1],
-                "currentparties" : [
-                    {"partyuserid" : 3, "contractrole" : "PT"},
-                ]
-            }
-        )
-        ContractParty.objects.modify_contract_parties(newcontract.contractid, newpartyinfo)
-
-        # Verify party was deleted
-        getnewparty = ContractParty.objects.get(newcontract.contractid,1)
-        self.assertIsNone(getnewparty)
-        
-        # Verify contract role was changed
-        getbackupleader = ContractParty.objects.get_contract_parties(newcontract.contractid, None, 'BL')
-        self.assertFalse(getbackupleader)
-
-        # Set party attributes
-        getparty.partylogonuserid = 2
-        getparty.partyapprovalsignature = signaturefile
-        getparty.partyapprovalts = datetime.utcnow()
-
-        # Setup remaining parties
-        getparty3 = ContractParty.objects.get(newcontract.contractid,partyuserid=3)
-        getparty3.partylogonuserid = 2
-
-        getparty4 = ContractParty.objects.get(newcontract.contractid,partyuserid=4)
-        getparty4.partylogonuserid = 2
-
-        getparty5 = ContractParty.objects.get(newcontract.contractid,partyuserid=myusergroup.groupuserid)
-        getparty5.partylogonuserid = 2
-
-        # Approve contract (3 out of required 4 users)
-        getparty.approve_contract() # Userid = 2
-        getparty3.approve_contract()
-        getparty4.approve_contract()
-        
-        # Check contract has not been approved yet (3 out of required 4 have approved)
-        newcontractget = Contract.objects.get(newcontract.contractid)
-        self.assertIsNone(newcontractget.contractapprovalts)
-
-        # Submit final approval (4 out of 4)
-        getparty5.approve_contract()
-
-        # Get users
-        contractusers = newcontractget.get_users()
-        self.assertIsNotNone(contractusers)
+        self.assertIsNotNone(ContractParty.objects.all()) # all parties
+        self.assertTrue(ContractParty.objects.get(contractid=self.mycontract1.contractid,teacheruserid=self.myteacher1.userid,classid=self.myclass1.classid)) # specific party
+        self.assertEqual(len(ContractParty.objects.get_contract_parties(contractid=self.mycontract1.contractid)),3) # a specific contract's parties (3)
+        self.assertEqual(len(ContractParty.objects.get_contract_parties(contractid=self.mycontract1.contractid,teacheruserid=self.myteacher2.userid)),2) # a teacher's parties (2) for a specific contract
 
         # Check that expected users are all included in contract users
-        mypartygroup = getparty5.groupinfo['useridlist']
-        self.assertTrue(set(mypartygroup) <= set(contractusers)) # user group users
-        self.assertTrue(newcontractget.teacheruserid in contractusers) # teacher
-        self.assertTrue(set([2,3,4]) <= set(contractusers)) # regular users 
+#         self.assertTrue(set([2,3,4]) <= set(contractusers)) # regular users 
 
-        # Check contract is approved
-        newcontractget = Contract.objects.get(newcontract.contractid)
-        self.assertIsNotNone(newcontractget.contractapprovalts)
+    def testUpdateContractParty(self):
+        
+        # Update values
+        self.mycontractparty1.numwinners = 4
+        self.mycontractparty1.save()
+
+        # Test values
+        self.mycontractparty1 = refresh(self.mycontractparty1)
+        self.assertTrue(self.mycontractparty1.numwinners,4)
+        self.assertIsNone(self.mycontractparty1.numparticipants)
+
+    def testdeleteContractParty(self):
+        # Check parties exist
+        self.assertTrue(ContractParty.objects.get_contract_parties(teacheruserid=self.myteacher2.userid))
+
+        # Delete parties        
+        for mycontract in ContractParty.objects.get_contract_parties(teacheruserid=self.myteacher2.userid):
+            mycontract.delete()
+            
+        # Check appropriate parties deleted
+        self.assertFalse(ContractParty.objects.get_contract_parties(teacheruserid=self.myteacher2.userid))
+        self.assertTrue(ContractParty.objects.get_contract_parties(teacheruserid=self.myteacher1.userid))
 
     def tearDown(self):
-        
-        # Set back to draft and delete
-        newcontract.change_status('D')
-        newcontract.delete()
+        self.mycontract1.delete() # Deletes any related contract info (i.e. parties)
+        self.mycontract2.delete()
 
     @classmethod
     def tearDownClass(self):
-        newschool.delete()
-        newuser.delete()
-        newreward.delete()
+        self.myschool.delete()
+        self.myclass1.delete() # Deletes any related teacher-class associations as well
+        self.myclass2.delete()
+        self.myclass3.delete()
+        self.myteacher1.delete()
+        self.myteacher2.delete()
+        self.myfile.delete()
         
 if __name__ == '__main__':
     unittest.main() # Run all tests

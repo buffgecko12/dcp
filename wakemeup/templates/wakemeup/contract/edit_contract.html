@@ -8,22 +8,6 @@
 
 {% block title %}Editar contrato{% endblock %}
 
-{% block content %}
-	<div class="container-fluid">
-		<span class="h1 align-middle display-4">General</span>&nbsp;
-		{% if revisionflag %}<span class="badge badge-danger align-middle">Modificaci&#243;n</span>{% endif %}
-		<br>
-		<form method="post" id="contractForm" novalidate 
-			data-teachers-url="{% url 'wakemeup:ajax_load_teachers' %}" 
-			data-classes-url="{% url 'wakemeup:ajax_load_classes' %}" 
-			data-students-url="{% url 'wakemeup:ajax_load_students' %}" 
-			data-contractinfo-url="{% url 'wakemeup:ajax_get_contract_info' %}" 
-		>
-			{% crispy form %}
-		</form>
-	</div>
-{% endblock %}
-
 {% block bodyimport %}
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment-with-locales.min.js"></script>
 	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
@@ -34,13 +18,6 @@
 		var contractId = $("#id_contractid").val();
 		var dateFormat = "DD/MM/YYYY";
     
-		// Check if this is a revision
-		var revisionflag = false
-		
-		if('{{revisionflag}}' == 'True') {
-			revisionflag = true
-		}
-
 		// Create button info
 		var adminbuttoninfo = [
 			{'name':'submit_next','type':'button','displayvalue_initial':'Siguiente','displayvalue_submit':'Enviando...'},
@@ -104,80 +81,73 @@
     		// Submit form
     		$("#contractForm").submit();
     		
-    		// Re-disable (potentially) disabled fields after submit
-    		if(revisionflag) {
-        		$("#id_partyuserinfo").prop('disabled',true)
-    		}
-
     		// Re-enable buttons (if taking too long)
     		toggleButtonTimeout(adminbuttoninfo, 'enable')
     	})
 
 		// REVISION DEADLINE: Update max revision deadline display
 	    function update_revisiondeadline_info() {
-			// Don't update info for "Revision" view
-			if(!revisionflag) {
-				var revisiondeadlinets = $("#id_revisiondeadlinets")
-				var contractvalidstartdate = $("#id_contractvalidstartdate")
-				var contractvalidenddate = $("#id_contractvalidenddate")
+
+			var revisiondeadlinets = $("#id_revisiondeadlinets")
+			var contractvalidstartdate = $("#id_contractvalidstartdate")
+			var contractvalidenddate = $("#id_contractvalidenddate")
+			
+			var revisionresetflag = true
+			
+			// Convert dates to "moment" objects
+			var startdate = moment(contractvalidstartdate.val(), dateFormat)
+			var enddate = moment(contractvalidenddate.val(), dateFormat)
+
+			var displaymsg = ""
+			
+			// Calculate max revision deadline
+			var datediff = dateDiff(startdate, enddate)
+			
+			// Determine max revision date (if two valid dates have been provided)
+			if(datediff >= 0) {
+				var minstartdate = startdate.format(dateFormat)
 				
-				var revisionresetflag = true
+				var maxdatediff = Math.floor(datediff * .85)
+				var maxrevisiondeadlinets = startdate.add(maxdatediff, 'day')
 				
-				// Convert dates to "moment" objects
-				var startdate = moment(contractvalidstartdate.val(), dateFormat)
-				var enddate = moment(contractvalidenddate.val(), dateFormat)
-	
-				var displaymsg = ""
+				// Set new display message
+		        displaymsg = '<small><i><strong>No m&#225;s tardar ' + maxrevisiondeadlinets.format(dateFormat) + '<strong></i></small>';
+
+		        // Update revision deadline datepicker calendar
+				revisiondeadlinets.daterangepicker({
+					autoUpdateInput: false,
+				    singleDatePicker: true,
+					  minDate: minstartdate,
+					  maxDate: maxrevisiondeadlinets.format(dateFormat),
+				    drops: 'up',
+				    opens: 'center'
+				})
 				
-				// Calculate max revision deadline
-				var datediff = dateDiff(startdate, enddate)
-				
-				// Determine max revision date (if two valid dates have been provided)
-				if(datediff >= 0) {
-					var minstartdate = startdate.format(dateFormat)
-					
-					var maxdatediff = Math.floor(datediff * .85)
-					var maxrevisiondeadlinets = startdate.add(maxdatediff, 'day')
-					
-					// Set new display message
-			        displaymsg = '<small><i><strong>No m&#225;s tardar ' + maxrevisiondeadlinets.format(dateFormat) + '<strong></i></small>';
-	
-			        // Update revision deadline datepicker calendar
-					revisiondeadlinets.daterangepicker({
-						autoUpdateInput: false,
-					    singleDatePicker: true,
-						  minDate: minstartdate,
-						  maxDate: maxrevisiondeadlinets.format(dateFormat),
-					    drops: 'up',
-					    opens: 'center'
-					})
-					
-					// Re-create apply handler
-					$('#id_revisiondeadlinets').on('apply.daterangepicker', function(ev, picker) {
-					    $(this).val(picker.startDate.format('DD/MM/YYYY'));
-					});
-	
-			        // Enable revisiondeadlinets field
-			        revisionresetflag = false
-			        
-			        // Check to make sure any previous revisiondeadlinets value is still valid with new timeframe
-			        if(revisiondeadlinets.val()) {
-			        	var datediff = dateDiff(moment(revisiondeadlinets.val(),dateFormat), maxrevisiondeadlinets)
-	
-			        	if(dateDiff && datediff < 0) {
-			        		revisionresetflag = true
-			        	}
-			        }
-				}
-	
-				// Toggle revisiondeadlinets field
-				if(revisionresetflag) {
-					revisiondeadlinets.val('')
-				}
-				
-				//Update display and submit button
-				$("#revisiondeadlinets_info").html(displaymsg);
+				// Re-create apply handler
+				$('#id_revisiondeadlinets').on('apply.daterangepicker', function(ev, picker) {
+				    $(this).val(picker.startDate.format('DD/MM/YYYY'));
+				});
+
+		        // Enable revisiondeadlinets field
+		        revisionresetflag = false
+		        
+		        // Check to make sure any previous revisiondeadlinets value is still valid with new timeframe
+		        if(revisiondeadlinets.val()) {
+		        	var datediff = dateDiff(moment(revisiondeadlinets.val(),dateFormat), maxrevisiondeadlinets)
+
+		        	if(dateDiff && datediff < 0) {
+		        		revisionresetflag = true
+		        	}
+		        }
 			}
+
+			// Toggle revisiondeadlinets field
+			if(revisionresetflag) {
+				revisiondeadlinets.val('')
+			}
+			
+			//Update display and submit button
+			$("#revisiondeadlinets_info").html(displaymsg);
 	    }
 	    
 	    // REVISION DEADLINE: Start/End date listeners
@@ -294,11 +264,6 @@
 		$(document).ready(function(){
 			update_teachers();
 	    	update_revisiondeadline_info()
-	    	
-	    	// Disabled participants field by default
-	    	if(revisionflag) {
-	    		$("#id_partyuserinfo").prop('disabled',true)
-	    	}
 		});
 	</script>
 {% endblock %}
