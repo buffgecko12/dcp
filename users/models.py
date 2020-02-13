@@ -4,10 +4,20 @@ from django.db import models
 from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
 from lib.UsefulFunctions.emailUtils import send_email
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-
 from django.contrib.postgres.fields import ArrayField, JSONField
+
+class MyModel(models.Model):
+
+    class Meta:
+        managed = False
+        abstract = True
+    
+    def save(self, *args, **kwargs):
+        return type(self).objects.save(self)
+    
+    def delete(self):
+        return type(self).objects.delete(self)
 
 # Don't override default methods (get, all, save, delete) to avoid clashing with Django authentication
 class MyUserManager(BaseUserManager):
@@ -232,68 +242,37 @@ class MyUser(AbstractBaseUser):
         else:
             return False
 
-class UserReputationEvent(models.Model):
+class UserReputationEvent(MyUser, MyModel):
     
     eventid = models.BigIntegerField(primary_key=True)
-    userid = models.IntegerField()
     sourceeventid = models.IntegerField()
     contractid = models.IntegerField()
     pointvalue = models.IntegerField(verbose_name="Puntos")
     eventts = models.DateTimeField(verbose_name="Fecha")
     eventdisplayname = models.CharField(max_length=100,verbose_name="Evento")
     
-    class Meta:
-        managed = False
-        
     objects = UserReputationEventManager()
     
-    def save(self):
-        return UserReputationEvent.objects.save(self)
+class UserNotification(MyUser, MyModel):
     
-    def delete(self):
-        return UserReputationEvent.objects.delete(self)
-
-class UserNotification(models.Model):
-    
-    userid = models.IntegerField(primary_key=True)
-    notificationid = models.BigIntegerField()
+    notificationid = models.BigIntegerField(primary_key=True)
     notificationts = models.DateTimeField()
     notificationseen = models.BooleanField()
     notificationtext = models.CharField(max_length=500)
     contractid = models.IntegerField()
     sourceeventid = models.IntegerField()
     
-    class Meta:
-        managed = False
-        
     objects = UserNotificationManager()
     
-    def save(self):
-        return UserNotification.objects.save(self)
+class UserBadge(MyUser, MyModel):
     
-    def delete(self):
-        return UserNotification.objects.delete(self)
-
-class UserBadge(models.Model):
-    
-    userid = models.IntegerField()
     badgeid = models.IntegerField(primary_key=True)
     badgelevel = models.CharField(max_length=1,verbose_name='Nivel')
     badgeshortname = models.CharField(max_length=50)
     badgedisplayname = models.CharField(max_length=50,verbose_name='Titulo')
     badgeachievedts = models.DateTimeField(verbose_name='Fecha')
     badgedescription = models.CharField(max_length=500, verbose_name='Descripci' + mychr('o') + 'n')
-    profilepictureid = models.IntegerField()
     profilepicturefilepath = models.CharField(max_length=250)
     profilepicturefilename = models.CharField(max_length=250)
     
-    class Meta:
-        managed = False
-        
     objects = UserBadgeManager()
-    
-    def save(self):
-        return UserBadge.objects.save(self)
-    
-    def delete(self):
-        return UserBadge.objects.delete(self)
