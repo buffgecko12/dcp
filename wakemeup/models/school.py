@@ -126,7 +126,7 @@ class Class(School):
 
     objects = ClassManager()
 
-class Teacher(MyModel, get_user_model()): #TODO - remove MyModel when fixing user models
+class Teacher(MyModel, get_user_model()):
 
     teacheruserid = models.IntegerField(primary_key=True,verbose_name='ID')
     

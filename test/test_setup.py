@@ -31,6 +31,8 @@ def refresh(myobject):
         kwargs = {"classid":myobject.classid}
     if(objectname == 'teacherclass'):
         kwargs = {"teacheruserid":myobject.teacheruserid,"classid":myobject.classid}
+    if(objectname == 'teacherprogram'):
+        kwargs = {"teacheruserid":myobject.teacheruserid,"schoolyear":myobject.schoolyear}
 
     return objecttype.objects.get(**kwargs)
 
@@ -60,7 +62,7 @@ def create_class(schoolid, schoolyear = DEFAULT_SCHOOL_YEAR, classdisplayname = 
     return myclass
 
 ### USER ###
-def create_user(usertype='TR', firstname='Joe', lastname='Smith', userrole='U', emailaddress='test@email.com', password='password', username='user1'):
+def create_user(usertype='TR', firstname='Joe', lastname='Smith', userrole='U', emailaddress='test@email.com', password='password', username='user1', schoolid=None):
 
     # Delete user if exists
     try:
@@ -77,6 +79,7 @@ def create_user(usertype='TR', firstname='Joe', lastname='Smith', userrole='U', 
         lastname = lastname,
         username = username,
         emailaddress = emailaddress,
+        schoolid = schoolid,
         userrole = 'U'
     )
 
@@ -168,3 +171,17 @@ def create_reward(schoolyear=DEFAULT_SCHOOL_YEAR,rewarddisplayname='Some reward'
     
     myreward.rewardid=myreward.save()
     return myreward
+
+def create_teacher_program(teacheruserid,schoolyear,schoolid,maxbudget=400000,teachersurveyts=None,studentsurveyurl=None,notes=None):
+    myteacherprogram = TeacherProgram(
+        teacheruserid=teacheruserid,
+        schoolyear=schoolyear,
+        schoolid=schoolid,
+        maxbudget=maxbudget,
+        teachersurveyts=teachersurveyts,
+        studentsurveyurl=studentsurveyurl,
+        notes=notes
+    )
+    
+    myteacherprogram.save()
+    return myteacherprogram

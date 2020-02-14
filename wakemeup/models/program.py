@@ -125,23 +125,23 @@ class RewardManager(models.Manager):
 
 class TeacherProgramManager(models.Manager):
     def all(self):
-        return self.get_teacher_budgets()
+        return self.get_teacher_programs()
     
     def get(self, teacheruserid, schoolyear):
         return get_data_pk(self, 'SP_DCPGetTeacherProgram(%s,%s)', (teacheruserid, schoolyear))
     
-    def get_teacher_budgets(self, teacheruserid = None, schoolyear = None):
+    def get_teacher_programs(self, teacheruserid = None, schoolyear = None):
         return get_data(self, 'SP_DCPGetTeacherProgram(%s,%s)', (teacheruserid, schoolyear))
         
     def save(self, myTeacherProgram):
         return save_data('SP_DCPUpsertTeacherProgram', (
             myTeacherProgram.teacheruserid,
-            myTeacherProgramschoolyear,
-            myTeacherProgramschoolid,
-            myTeacherProgrammaxbudget,
-            myTeacherProgramteachersurveyts,
-            myTeacherProgramstudentsurveyurl,
-            myTeacherProgramnotes,
+            myTeacherProgram.schoolyear,
+            myTeacherProgram.schoolid,
+            myTeacherProgram.maxbudget,
+            myTeacherProgram.teachersurveyts,
+            myTeacherProgram.studentsurveyurl,
+            myTeacherProgram.notes,
             )
         )
         
@@ -185,7 +185,6 @@ class Contract(MyModel):
 
 class ContractParty(Contract, TeacherClass):
 
-    # Get party attributes    
     numparticipants = models.SmallIntegerField(primary_key=True)
     numwinners = models.SmallIntegerField()
     
@@ -200,9 +199,8 @@ class ContractPartyReward(ContractParty, Reward):
     objects = ContractPartyRewardManager()
 
 class TeacherProgram(Teacher):
-    
-#     teacheruserid = models.IntegerField(primary_key=True,verbose_name='ID')
-    schoolyear = models.SmallIntegerField(verbose_name='A' + mychr('n') + 'o escolar')
+
+    schoolyear = models.SmallIntegerField(primary_key=True,verbose_name='A' + mychr('n') + 'o escolar')
     maxbudget = models.IntegerField(verbose_name='Prespuesto m' + mychr('a') + 'ximo')
     budgetspent = models.IntegerField(verbose_name='Gastos')
     availablebudget = models.IntegerField(verbose_name='Saldo')
