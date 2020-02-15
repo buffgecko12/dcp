@@ -132,5 +132,6 @@ class Teacher(MyModel, get_user_model()):
     
 class TeacherClass(Teacher, Class):
 
-    id = models.IntegerField(primary_key=True) # Each table must have PK specification
+    id = models.IntegerField(primary_key=True) # dummy field; each table must have PK specification
+
     objects = TeacherClassManager()
