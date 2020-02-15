@@ -3,6 +3,7 @@ import test_env_setup
 from wakemeup.models.school import *
 from wakemeup.models.environment import *
 from wakemeup.models.program import *
+from user.models.authorization import *
 from lib.UsefulFunctions.miscUtils import *
 from django.contrib.auth import get_user_model
 from psycopg2.extras import DateTimeTZRange
@@ -33,6 +34,12 @@ def refresh(myobject):
         kwargs = {"teacheruserid":myobject.teacheruserid,"classid":myobject.classid}
     if(objectname == 'teacherprogram'):
         kwargs = {"teacheruserid":myobject.teacheruserid,"schoolyear":myobject.schoolyear}
+    if(objectname == 'role'):
+        kwargs = {"roleid":myobject.roleid}
+    if(objectname == 'object'):
+        kwargs = {"objectid":myobject.objectid,"objectclass":objectclass}
+    if(objectname == 'roleacl'):
+        kwargs = {"roleid":myobject.roleid,"objectid":myobject.objectid,"objectclass":myobject.objectclass}
     if(objectname == 'myuser'):
         kwargs = {"userid":myobject.userid}
         return objecttype.objects.get_user(**kwargs) # different "get" method
@@ -188,3 +195,38 @@ def create_teacher_program(teacheruserid,schoolyear,schoolid,maxbudget=400000,te
     
     myteacherprogram.save()
     return myteacherprogram
+
+def create_role(name="New role",description="Some description",publicflag=None,schoollist=None,usertypelist=None,userlist=None):
+    myrole = Role(
+        roleid=None,
+        name=name,
+        description=description,
+        publicflag=publicflag,
+        schoollist=schoollist,
+        usertypelist=usertypelist,
+        userlist=userlist
+        )
+    
+    myrole.roleid = myrole.save()
+    return myrole
+
+def create_object(objectclass="VW",objectname="download_file"):
+    myobject = Object(
+        objectid=None,
+        objectclass=objectclass,
+        objectname=objectname
+        )
+    
+    myobject.objectid = myobject.save()
+    return myobject
+
+def create_roleACL(roleid,objectid,objectclass,accesslevel=4):
+    myroleacl = RoleACL(
+        roleid=roleid,
+        objectid=objectid,
+        objectclass=objectclass,
+        accesslevel=accesslevel
+        )
+
+    myroleacl.save()
+    return myroleacel
