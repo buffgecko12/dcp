@@ -33,6 +33,9 @@ def refresh(myobject):
         kwargs = {"teacheruserid":myobject.teacheruserid,"classid":myobject.classid}
     if(objectname == 'teacherprogram'):
         kwargs = {"teacheruserid":myobject.teacheruserid,"schoolyear":myobject.schoolyear}
+    if(objectname == 'myuser'):
+        kwargs = {"userid":myobject.userid}
+        return objecttype.objects.get_user(**kwargs) # different "get" method
 
     return objecttype.objects.get(**kwargs)
 

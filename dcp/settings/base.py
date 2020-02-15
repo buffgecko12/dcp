@@ -29,7 +29,7 @@ PREREQ_APPS = [
 
 # Define project apps
 PROJECT_APPS = [
-    'users.apps.UsersConfig',
+    'user.apps.UsersConfig',
     'wakemeup.apps.WakemeupConfig',
     'crispy_forms',
     'django_tables2',
@@ -113,8 +113,8 @@ LOGIN_REDIRECT_URL = '/' # Where to redirect login requests if "next" is not spe
 LOGOUT_REDIRECT_URL = 'wakemeup:index' # Where to redirect login requests if "next" is not specified
 
 # Authentication
-AUTH_USER_MODEL = 'users.MyUser' # Custom user model
-AUTHENTICATION_BACKENDS=['users.backends.MyBackend']
+AUTH_USER_MODEL = 'user.MyUser' # Custom user model
+AUTHENTICATION_BACKENDS=['user.backends.MyBackend']
 # MAX_UPLOAD_SIZE = 5242880 # Limit max file upload size for RestrictedFileField class
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True # Kill session on browser close
 
