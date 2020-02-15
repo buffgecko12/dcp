@@ -7,17 +7,7 @@ from lib.UsefulFunctions.emailUtils import send_email
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.postgres.fields import ArrayField, JSONField
 
-class MyModel(models.Model):
-
-    class Meta:
-        managed = False
-        abstract = True
-    
-    def save(self, *args, **kwargs):
-        return type(self).objects.save(self)
-    
-    def delete(self):
-        return type(self).objects.delete(self)
+from user.models.base import MyModel
 
 # Don't override default methods (get, all, save, delete) to avoid clashing with Django authentication
 class MyUserManager(BaseUserManager):
@@ -46,15 +36,15 @@ class MyUserManager(BaseUserManager):
         return user
 
     def all(self):
-        return get_data(self, 'SP_DCPGetUser(%s,%s,%s)', (None, None, None))
+        return get_data(self, 'SP_DCPGetUser(%s,%s,%s,%s)', (None, None, None, None))
 
     # Get info for one specific user
-    def get_user(self, userid):
-        return get_data_pk(self, 'SP_DCPGetUser(%s,%s,%s)', (userid, None, None)) # Use tuple instead of array for input parameters
+    def get_user(self, userid, activeflag = None):
+        return get_data_pk(self, 'SP_DCPGetUser(%s,%s,%s,%s)', (userid, None, None, activeflag))
 
     # Lookup user for authentication (email / username)
     def get_user_auth(self, username = None, emailaddress = None):
-        return get_data_pk(self, 'SP_DCPGetUser(%s,%s,%s)', (None, username, emailaddress))
+        return get_data_pk(self, 'SP_DCPGetUser(%s,%s,%s,%s)', (None, username, emailaddress, None))
 
     def save_user(self, myUser):
         return save_data('SP_DCPUpsertUser', 
@@ -85,11 +75,12 @@ class MyUserManager(BaseUserManager):
             'profilepicturefile':mydata[2]
         })
 
-    # TO-DO: possibly remove
+    def check_access(self, myUser, myobject, requestedaccess):
+        pass
+
     def add_event(self, myUser, eventid, contractid):
         return save_data('SP_DCPProcessUserEvent', (myUser.userid, eventid, contractid,))
 
-    # TO-DO: possibly remove
     def add_notification(self, myUser, notificationid, contractid):
         return save_data('SP_DCPUpsertUserNotification', (myUser.userid, notificationid, contractid))
 
@@ -219,11 +210,12 @@ class MyUser(AbstractBaseUser):
     def manage_display_info(self, actiontype, notificationtype = None):
         return MyUser.objects.manage_display_info(self, actiontype, notificationtype)
         
-    # TO-DO: possibly remove
+    def check_access(self, myobject, requestedaccess = 'R'):
+        return MyUser.objects.check_access(self, myobject, requestedaccess)
+    
     def add_event(self, eventid, contractid = None):
         return MyUser.objects.add_event(self, eventid, contractid)
         
-    # TO-DO: possibly remove
     def add_notification(self, notificationid, contractid = None):
         return MyUser.objects.add_notification(self, notificationid, contractid)
         
