@@ -76,22 +76,21 @@ class testUser(unittest.TestCase):
         self.assertFalse(get_user_model().objects.get_user_auth(None, 'wrongemail')) # negative
         self.assertFalse(get_user_model().objects.get_user_auth('elsha', None)) # negative
 
-    def testCheckUserRoles(self):
+    def testCheckUserType(self):
 
         # Check user roles - regular user
-        self.assertEqual(self.myuser.userrole,"U")
         self.assertFalse(self.myuser.is_admin())
         self.assertFalse(self.myuser.is_superuser())
 
         # Check user roles - admin
-        self.myuser.userrole = 'A'
+        self.myuser.usertype = 'AD'
         self.myuser.save_user()
         self.myuser = refresh(self.myuser)
         self.assertTrue(self.myuser.is_admin())
         self.assertFalse(self.myuser.is_superuser())
 
         # Check user roles - super user
-        self.myuser.userrole = 'S'
+        self.myuser.usertype = 'SU'
         self.myuser.save_user()
         self.myuser = refresh(self.myuser)
         self.assertTrue(self.myuser.is_admin())

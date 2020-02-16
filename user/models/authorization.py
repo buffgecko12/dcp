@@ -30,11 +30,11 @@ class RoleManager(models.Manager):
     def all(self):
         return self.get_roles()
     
-    def get(self, roleid):
-        return get_data_pk(self, 'SP_DCPGetRole(%s)', (roleid,))
+    def get(self, roleid, rolename = None):
+        return get_data_pk(self, 'SP_DCPGetRole(%s,%s)', (roleid, rolename))
 
-    def get_roles(self, roleid = None):
-        return get_data(self, 'SP_DCPGetRole(%s)', (roleid,))
+    def get_roles(self, roleid = None, rolename = None):
+        return get_data(self, 'SP_DCPGetRole(%s,%s)', (roleid, rolename))
     
     def save(self, myRole):
         return save_data('SP_DCPUpsertRole', (
@@ -50,6 +50,9 @@ class RoleManager(models.Manager):
     
     def delete(self, myRole):
         return delete_data('SP_DCPDeleteRole', (myRole.roleid,))
+
+    def modify_role_item(self, myRole, userid, schoolid, usertype, changetype = 'A'):
+        return save_data('SP_DCPModifyRoleItem', (myRole.roleid, userid, schoolid, usertype, changetype))
 
 class RoleACLManager(models.Manager):
     def all(self):
@@ -93,8 +96,11 @@ class Role(MyModel):
 
     objects = RoleManager()
     
+    def modify_role_item(self, userid = None, schoolid = None, usertype = None, changetype = 'A'):
+        return Role.objects.modify_role_item(self, userid, schoolid, usertype, changetype)
+
 class RoleACL(Role, Object):
     
-    id = models.IntegerField(primary_key=True) # dummy field
+    accesslevel = models.SmallIntegerField(primary_key=True)
     
     objects = RoleACLManager()

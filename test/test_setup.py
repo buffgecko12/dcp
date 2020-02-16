@@ -37,7 +37,7 @@ def refresh(myobject):
     if(objectname == 'role'):
         kwargs = {"roleid":myobject.roleid}
     if(objectname == 'object'):
-        kwargs = {"objectid":myobject.objectid,"objectclass":objectclass}
+        kwargs = {"objectid":myobject.objectid,"objectclass":myobject.objectclass}
     if(objectname == 'roleacl'):
         kwargs = {"roleid":myobject.roleid,"objectid":myobject.objectid,"objectclass":myobject.objectclass}
     if(objectname == 'myuser'):
@@ -48,6 +48,10 @@ def refresh(myobject):
 
 ### SCHOOL ###
 def create_school(schoolabbreviation = 'School 1', schooldisplayname = 'School 1 Full Name', address = None, city = None, department = None ):
+    
+    # Delete all roles first (should be school-specific)
+    Role().delete()
+    
     myschool = School(
         schoolabbreviation = schoolabbreviation,
         schooldisplayname = schooldisplayname,
@@ -72,7 +76,7 @@ def create_class(schoolid, schoolyear = DEFAULT_SCHOOL_YEAR, classdisplayname = 
     return myclass
 
 ### USER ###
-def create_user(usertype='TR', firstname='Joe', lastname='Smith', userrole='U', emailaddress='test@email.com', password='password', username='user1', schoolid=None):
+def create_user(usertype='TR', firstname='Joe', lastname='Smith', emailaddress='test@email.com', password='password', username='user1', schoolid=None):
 
     # Delete user if exists
     try:
@@ -90,7 +94,6 @@ def create_user(usertype='TR', firstname='Joe', lastname='Smith', userrole='U', 
         username = username,
         emailaddress = emailaddress,
         schoolid = schoolid,
-        userrole = 'U'
     )
 
     return newuser
@@ -220,7 +223,7 @@ def create_object(objectclass="VW",objectname="download_file"):
     myobject.objectid = myobject.save()
     return myobject
 
-def create_roleACL(roleid,objectid,objectclass,accesslevel=4):
+def create_role_ACL(roleid,objectid,objectclass,accesslevel=4):
     myroleacl = RoleACL(
         roleid=roleid,
         objectid=objectid,
@@ -229,4 +232,4 @@ def create_roleACL(roleid,objectid,objectclass,accesslevel=4):
         )
 
     myroleacl.save()
-    return myroleacel
+    return myroleacl

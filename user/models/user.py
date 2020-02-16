@@ -13,7 +13,7 @@ from user.models.base import MyModel
 class MyUserManager(BaseUserManager):
 
     # Create new user
-    def create_user(self, password, schoolid = None, username = None, usertype = None, firstname = None, lastname = None, emailaddress = None, userrole = None):
+    def create_user(self, password, schoolid = None, username = None, usertype = None, firstname = None, lastname = None, emailaddress = None):
  
         user = self.model(
             userid=None,
@@ -23,7 +23,6 @@ class MyUserManager(BaseUserManager):
             firstname=firstname,
             lastname=lastname,
             emailaddress=emailaddress,
-            userrole=userrole,
         )
 
         # Save hashed password
@@ -57,7 +56,6 @@ class MyUserManager(BaseUserManager):
                 myUser.lastname,
                 self.normalize_email(myUser.emailaddress),
                 myUser.password,
-                myUser.userrole,
                 myUser.profilepictureid,
                 myUser.last_login,
             )
@@ -75,8 +73,8 @@ class MyUserManager(BaseUserManager):
             'profilepicturefile':mydata[2]
         })
 
-    def check_access(self, myUser, myobject, requestedaccess):
-        pass
+    def check_access(self, myUser, objectid, objectclass, requestedaccess):
+        return get_data(self, 'SP_DCPCheckUserObjectAccess(%s,%s,%s,%s)', (myUser.userid, objectid, objectclass, requestedaccess))[0].hasaccess
 
     def add_event(self, myUser, eventid, contractid):
         return save_data('SP_DCPProcessUserEvent', (myUser.userid, eventid, contractid,))
@@ -177,7 +175,6 @@ class MyUser(AbstractBaseUser):
     firstname = models.CharField(max_length=100)
     lastname = models.CharField(max_length=100)
     emailaddress = models.CharField(max_length=250)
-    userrole = models.CharField(max_length=1)
     profilepictureid = models.IntegerField()
     reputationvalue = models.IntegerField()
     reputationvaluelastseents = models.DateTimeField()
@@ -210,8 +207,8 @@ class MyUser(AbstractBaseUser):
     def manage_display_info(self, actiontype, notificationtype = None):
         return MyUser.objects.manage_display_info(self, actiontype, notificationtype)
         
-    def check_access(self, myobject, requestedaccess = 'R'):
-        return MyUser.objects.check_access(self, myobject, requestedaccess)
+    def check_access(self, objectid, objectclass, requestedaccess = 4):
+        return MyUser.objects.check_access(self, objectid, objectclass, requestedaccess)
     
     def add_event(self, eventid, contractid = None):
         return MyUser.objects.add_event(self, eventid, contractid)
@@ -223,13 +220,13 @@ class MyUser(AbstractBaseUser):
         return MyUser.objects.send_email(self, email_subject, email_body)
         
     def is_admin(self):
-        if(self.userrole == 'A' or self.userrole == 'S'):
+        if(self.usertype == 'AD' or self.usertype == 'SU'):
             return True
         else:
             return False
 
     def is_superuser(self):
-        if(self.userrole == 'S'):
+        if(self.usertype == 'SU'):
             return True
         else:
             return False
