@@ -96,6 +96,23 @@ class testAuthorization(unittest.TestCase):
         self.myrole_teachers.modify_role_item(usertype='AD')
         self.myrole_teachers.modify_role_item(usertype='AD',changetype='D') # Delete
         
+    def testModifyRoleItemDuplicate(self):
+        
+        # Check initial access (read, but not edit)
+        self.assertTrue(self.mystudent.check_access(objectid=self.myfile2.fileid,objectclass='FL',requestedaccesslevel=4))
+        self.assertFalse(self.mystudent.check_access(objectid=self.myfile2.fileid,objectclass='FL',requestedaccesslevel=8))
+
+        # Add student twice to teachers role and verify edit access
+        for mycount in [1,2]:
+            self.myrole_teachers.modify_role_item(userid=self.mystudent.userid)
+
+        self.assertTrue(self.mystudent.check_access(objectid=self.myfile2.fileid,objectclass='FL',requestedaccesslevel=8))
+
+        # Delete and verify
+        self.myrole_teachers.modify_role_item(userid=self.mystudent.userid,changetype='D')
+        self.assertTrue(self.mystudent.check_access(objectid=self.myfile2.fileid,objectclass='FL',requestedaccesslevel=4))
+        self.assertFalse(self.mystudent.check_access(objectid=self.myfile2.fileid,objectclass='FL',requestedaccesslevel=8))
+        
     def testGetRole(self):
         self.assertIsNotNone(refresh(self.myrole_twousers)) # single role
         self.assertTrue(Role.objects.get_roles(rolename='Teachers'))

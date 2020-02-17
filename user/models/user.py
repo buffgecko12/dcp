@@ -73,8 +73,8 @@ class MyUserManager(BaseUserManager):
             'profilepicturefile':mydata[2]
         })
 
-    def check_access(self, myUser, objectid, objectclass, requestedaccess):
-        return get_data(self, 'SP_DCPCheckUserObjectAccess(%s,%s,%s,%s)', (myUser.userid, objectid, objectclass, requestedaccess))[0].hasaccess
+    def check_access(self, myUser, objectid, objectclass, requestedaccesslevel):
+        return get_data(self, 'SP_DCPCheckUserObjectAccess(%s,%s,%s,%s)', (myUser.userid, objectid, objectclass, requestedaccesslevel))[0].hasaccess
 
     def add_event(self, myUser, eventid, contractid):
         return save_data('SP_DCPProcessUserEvent', (myUser.userid, eventid, contractid,))
@@ -207,8 +207,8 @@ class MyUser(AbstractBaseUser):
     def manage_display_info(self, actiontype, notificationtype = None):
         return MyUser.objects.manage_display_info(self, actiontype, notificationtype)
         
-    def check_access(self, objectid, objectclass, requestedaccess = 4):
-        return MyUser.objects.check_access(self, objectid, objectclass, requestedaccess)
+    def check_access(self, objectid, objectclass, requestedaccesslevel = 4):
+        return MyUser.objects.check_access(self, objectid, objectclass, requestedaccesslevel)
     
     def add_event(self, eventid, contractid = None):
         return MyUser.objects.add_event(self, eventid, contractid)
