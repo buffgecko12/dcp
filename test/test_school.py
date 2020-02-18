@@ -23,11 +23,11 @@ class testSchool(unittest.TestCase):
         self.assertEqual(self.myschool.schoolabbreviation,'CMHS')
 
     def testDeleteSchool(self):
-        self.myschool.delete()
+        delete_school(self.myschool)
         self.assertFalse(refresh(self.myschool))
 
     def tearDown(self):
-        self.myschool.delete()
+        delete_school(self.myschool)
 
 if __name__ == '__main__':
     unittest.main() # Run all tests

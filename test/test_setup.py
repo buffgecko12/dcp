@@ -49,9 +49,6 @@ def refresh(myobject):
 ### SCHOOL ###
 def create_school(schoolabbreviation = 'School 1', schooldisplayname = 'School 1 Full Name', address = None, city = None, department = None ):
     
-    # Delete all roles first (should be school-specific)
-    Role().delete()
-    
     myschool = School(
         schoolabbreviation = schoolabbreviation,
         schooldisplayname = schooldisplayname,
@@ -60,7 +57,10 @@ def create_school(schoolabbreviation = 'School 1', schooldisplayname = 'School 1
         department = department
     )
 
-    myschool.schoolid = myschool.save()
+    myschool_ret = myschool.save()
+    myschool.schoolid = myschool_ret[0] # schoolid
+    myschool.defaultroleids = myschool_ret[1] # default roleids
+
     return myschool
 
 def create_class(schoolid, schoolyear = DEFAULT_SCHOOL_YEAR, classdisplayname = '901', gradelevel = 9, numstudentsurveys = 0):
@@ -233,3 +233,12 @@ def create_role_ACL(roleid,objectid,objectclass,accesslevel=4):
 
     myroleacl.save()
     return myroleacl
+
+def delete_school(myschool):
+    
+    # Delete roles
+    for myschoolrole in ('teachers','school','admin'):
+        Role(myschool.defaultroleids[myschoolrole]).delete()
+
+    # Delete school
+    myschool.delete()

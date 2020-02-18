@@ -77,7 +77,7 @@ class testTeacherClass(unittest.TestCase):
     def tearDownClass(cls):
         cls.myteacher1.delete()
         cls.myteacher2.delete()
-        cls.myschool.delete()
+        delete_school(cls.myschool)
         
 if __name__ == '__main__':
     unittest.main() # Run all tests

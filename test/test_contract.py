@@ -136,7 +136,7 @@ class testContracts(unittest.TestCase):
 
     @classmethod
     def tearDownClass(self):
-        self.myschool.delete()
+        delete_school(self.myschool)
         self.myclass1.delete() # Deletes any related teacher-class associations as well
         self.myclass2.delete()
         self.myclass3.delete()

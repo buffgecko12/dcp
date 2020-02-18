@@ -37,7 +37,7 @@ class testClass(unittest.TestCase):
         
     @classmethod
     def tearDownClass(cls):
-        cls.myschool.delete()
+        delete_school(cls.myschool)
     
 if __name__ == '__main__':
     unittest.main() # Run all tests
