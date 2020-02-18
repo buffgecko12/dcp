@@ -60,7 +60,7 @@ class SchoolManager(models.Manager):
                 mySchool.city,
                 mySchool.department
             )
-         )[0] # Return schoolid
+         ) # Return schoolid + roles
         
     def delete(self, mySchool):
         return delete_data('SP_DCPDeleteSchool', (mySchool.schoolid,))
