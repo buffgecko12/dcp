@@ -6,14 +6,20 @@ class testAuthorization(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.myteacher1 = create_user(usertype='TR')
-        cls.myteacher2 = create_user(usertype='TR')
-        cls.mystudent = create_user(usertype='ST')
+        cls.myschool1 = create_school(schoolabbreviation='School1')
+        cls.myschool2 = create_school(schoolabbreviation='School2')
+        cls.myteacher1 = create_user(usertype='TR', schoolid=cls.myschool1.schoolid)
+        cls.myteacher2 = create_user(usertype='TR', schoolid=cls.myschool2.schoolid)
+        cls.mystudent = create_user(usertype='ST', schoolid=cls.myschool1.schoolid)
         cls.myadmin = create_user(usertype='AD')
         cls.mysuperuser = create_user(usertype='SU')
         
         cls.myfile1 = create_file(filename='Some document')
         cls.myfile2 = create_file(filename='Contract form')
+        cls.myfile3 = create_file(filename='Public document')
+        cls.myfile4 = create_file(filename='Welcome video - School 1')
+        cls.myfile5 = create_file(filename='Teachers only file - School 1')
+        cls.myfile6 = create_file(filename='Welcome video - School 2')
         
     def setUp(self):
         
@@ -36,10 +42,48 @@ class testAuthorization(unittest.TestCase):
         self.myroleacl3 = create_role_ACL(self.myrole_admin.roleid,self.myfile2.fileid,'FL',12) # Delete access to file
         self.myroleacl4 = create_role_ACL(self.myrole_teachers.roleid,self.myobject1.objectid,self.myobject1.objectclass,4) # Read access to "Teachers"
 
+        # ACLS - School
+        self.myroleacl5 = create_role_ACL(self.myschool1.defaultroleids['school'],self.myfile4.fileid,'FL',4) # Read access to school
+        self.myroleacl6 = create_role_ACL(self.myschool1.defaultroleids['teachers'],self.myfile5.fileid,'FL',8) # Read access to teachers at a school
+
+        # ACLS - Public
+        self.myroleacl7 = create_role_ACL(self.myrole_public.roleid,self.myfile3.fileid,'FL',4)
+
     def testCheckAuthorization(self):
+        
+        # Access levels
         self.assertTrue(self.myteacher1.check_access(self.myfile2.fileid,'FL',1)) # Browse
         self.assertTrue(self.myteacher1.check_access(self.myfile2.fileid,'FL')) # Default read
         self.assertFalse(self.myteacher1.check_access(self.myfile2.fileid,'FL',12)) # Edit
+        
+        # Public
+        self.assertTrue(self.mystudent.check_access(self.myfile3.fileid,'FL',4))
+        self.assertFalse(self.mystudent.check_access(self.myfile3.fileid,'FL',8))
+    
+        # User
+        self.myroleacl = create_role_ACL(self.myrole_oneuser.roleid,self.myfile3.fileid,'FL',8) # Edit access to file
+        self.assertTrue(self.mystudent.check_access(self.myfile3.fileid,'FL',8))
+
+        # School
+        self.assertTrue(self.mystudent.check_access(self.myfile4.fileid,'FL',4))
+        self.assertFalse(self.mystudent.check_access(self.myfile4.fileid,'FL',8))
+        self.assertFalse(self.myteacher2.check_access(self.myfile4.fileid,'FL',1))
+
+        # Teacher (UserType)
+        self.assertTrue(self.myteacher1.check_access(self.myobject1.objectid,self.myobject1.objectclass,4))
+        self.assertFalse(self.myteacher1.check_access(self.myobject1.objectid,self.myobject1.objectclass,8))
+        self.assertFalse(self.mystudent.check_access(self.myobject1.objectid,self.myobject1.objectclass,1))
+        
+        # Teacher (UserType) at a school
+        self.assertTrue(self.myteacher1.check_access(self.myfile5.fileid,'FL',8))
+        self.assertFalse(self.myteacher1.check_access(self.myfile4.fileid,'FL',8))
+        self.assertFalse(self.myteacher2.check_access(self.myfile4.fileid,'FL',8))
+
+        # No access
+        
+    
+        # No permission defined
+        
     
     def testcreateRoleACL(self):
         pass
@@ -160,15 +204,31 @@ class testAuthorization(unittest.TestCase):
         self.myroleacl2.delete()
         self.myroleacl3.delete()
         self.myroleacl4.delete()
+        self.myroleacl5.delete()
+#         self.myroleacl6.delete()
+        self.myroleacl7.delete()
+
+        self.myobject1.delete()
+        self.myobject2.delete()
+        self.myobject3.delete()
 
     @classmethod
     def tearDownClass(cls):
         cls.myteacher1.delete()
         cls.myteacher2.delete()
         cls.mystudent.delete()
+        cls.myadmin.delete()
+        cls.mysuperuser.delete()
         
         cls.myfile1.delete()
         cls.myfile2.delete()
+        cls.myfile3.delete()
+        cls.myfile4.delete()
+        cls.myfile5.delete()
+        cls.myfile6.delete()
+
+        delete_school(cls.myschool1)
+        delete_school(cls.myschool2)
 
 if __name__ == '__main__':
     unittest.main() # Run all tests
