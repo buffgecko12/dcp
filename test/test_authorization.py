@@ -81,7 +81,7 @@ class testAuthorization(unittest.TestCase):
 
         # Teacher (UserType)
         self.assertTrue(self.myteacher1.check_access(self.myobject1.objectid,self.myobject1.objectclass,4))
-        self.assertTrue(self.myteacher3.check_access(self.myobject1.objectid,self.myobject1.objectclass,4))
+        self.assertTrue(self.myteacher2.check_access(self.myobject1.objectid,self.myobject1.objectclass,4))
         self.assertFalse(self.myteacher1.check_access(self.myobject1.objectid,self.myobject1.objectclass,8))
         self.assertFalse(self.mystudent.check_access(self.myobject1.objectid,self.myobject1.objectclass,1))
         
