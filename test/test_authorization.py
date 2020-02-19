@@ -6,20 +6,32 @@ class testAuthorization(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        
+        # School
         cls.myschool1 = create_school(schoolabbreviation='School1')
         cls.myschool2 = create_school(schoolabbreviation='School2')
+        cls.myclass1 = create_class(schoolid=cls.myschool1.schoolid)
+        
+        # Users
         cls.myteacher1 = create_user(usertype='TR', schoolid=cls.myschool1.schoolid)
         cls.myteacher2 = create_user(usertype='TR', schoolid=cls.myschool2.schoolid)
+        cls.myteacherclass1 = create_teacher_class(cls.myteacher1.userid,cls.myclass1.classid)
         cls.mystudent = create_user(usertype='ST', schoolid=cls.myschool1.schoolid)
         cls.myadmin = create_user(usertype='AD')
         cls.mysuperuser = create_user(usertype='SU')
+
+        # Contract
+        cls.mycontract = create_contract()
+        cls.mycontractparty = create_contract_party(cls.mycontract.contractid,cls.myteacherclass1.teacheruserid,cls.myteacherclass1.classid)
         
+        # Files        
         cls.myfile1 = create_file(filename='Some document')
         cls.myfile2 = create_file(filename='Contract form')
         cls.myfile3 = create_file(filename='Public document')
         cls.myfile4 = create_file(filename='Welcome video - School 1')
         cls.myfile5 = create_file(filename='Teachers only file - School 1')
         cls.myfile6 = create_file(filename='Welcome video - School 2')
+        cls.myfile7 = create_file(filename='Contract File - Teacher 1',contractid=cls.mycontract.contractid)
         
     def setUp(self):
         
@@ -32,9 +44,7 @@ class testAuthorization(unittest.TestCase):
         self.myrole_public = create_role(name="Public",publicflag=True)
         
         # Objects
-        self.myobject1 = create_object(objectclass='BO', objectname='contract') # teachers / site admin / super user
-        self.myobject2 = create_object(objectclass='BO', objectname='class') # site admin / super user
-        self.myobject3 = create_object(objectclass='VW', objectname='some_view')
+        self.myobject1 = create_object(objectclass='BO', objectname='contract')
         
         # ACLs
         self.myroleacl1 = create_role_ACL(self.myrole_public.roleid,self.myfile2.fileid,'FL',4) # Read access to "Public"
@@ -79,11 +89,30 @@ class testAuthorization(unittest.TestCase):
         self.assertFalse(self.myteacher1.check_access(self.myfile4.fileid,'FL',8))
         self.assertFalse(self.myteacher2.check_access(self.myfile4.fileid,'FL',8))
 
-        # No access
+        # Contract-related
+        self.assertTrue(self.myteacher1.check_access(self.myfile7.fileid,'FL',4))
+        self.assertFalse(self.myteacher1.check_access(self.myfile7.fileid,'FL',8))
+        self.assertFalse(self.myteacher2.check_access(self.myfile7.fileid,'FL',1))
+        self.assertFalse(self.mystudent.check_access(self.myfile7.fileid,'FL',1))
+
+    def testRevokedAuthorization(self):
         
+        # Check before
+        self.assertTrue(self.mystudent.check_access(self.myfile3.fileid,'FL',1))
+
+        # Revoke access and check again
+        self.myroleacl7.accesslevel = 0
+        self.myroleacl7.save()
+        self.assertFalse(self.mystudent.check_access(self.myfile3.fileid,'FL',1)) # No access
     
-        # No permission defined
+    def testUndefinedAuthorization(self):
         
+        # Check before
+        self.assertTrue(self.mystudent.check_access(self.myfile3.fileid,'FL',1))
+        
+        # Delete access and check again
+        self.myroleacl7.delete()
+        self.assertFalse(self.mystudent.check_access(self.myfile3.fileid,'FL',1))
     
     def testcreateRoleACL(self):
         pass
@@ -205,12 +234,10 @@ class testAuthorization(unittest.TestCase):
         self.myroleacl3.delete()
         self.myroleacl4.delete()
         self.myroleacl5.delete()
-#         self.myroleacl6.delete()
+        self.myroleacl6.delete()
         self.myroleacl7.delete()
 
         self.myobject1.delete()
-        self.myobject2.delete()
-        self.myobject3.delete()
 
     @classmethod
     def tearDownClass(cls):
@@ -226,6 +253,12 @@ class testAuthorization(unittest.TestCase):
         cls.myfile4.delete()
         cls.myfile5.delete()
         cls.myfile6.delete()
+        cls.myfile7.delete()
+
+        cls.myclass1.delete()
+        cls.myteacherclass1.delete()
+
+        cls.mycontract.delete() # deletes associated contract objects (i.e. party)
 
         delete_school(cls.myschool1)
         delete_school(cls.myschool2)
