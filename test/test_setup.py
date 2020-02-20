@@ -4,12 +4,9 @@ from wakemeup.models.school import *
 from wakemeup.models.environment import *
 from wakemeup.models.program import *
 from user.models.authorization import *
-from lib.UsefulFunctions.miscUtils import *
 from django.contrib.auth import get_user_model
 from psycopg2.extras import DateTimeTZRange
-from datetime import datetime, timedelta
-
-DEFAULT_SCHOOL_YEAR = get_school_year()
+from datetime import date, datetime, timedelta
 
 def refresh(myobject):
     objecttype = type(myobject)
@@ -28,6 +25,10 @@ def refresh(myobject):
         kwargs = {"rewardid":myobject.rewardid}
     if(objectname == 'school'):
         kwargs = {"schoolid":myobject.schoolid}
+    if(objectname == 'schoolcalendar'):
+        kwargs = {"schoolcalendaritemid":myobject.calendaritemid,}
+    if(objectname == 'schoolreward'):
+        kwargs = {"schoolid":myobject.schoolid,"rewardid":myobject.rewardid}
     if(objectname == 'class'):
         kwargs = {"classid":myobject.classid}
     if(objectname == 'teacherclass'):
@@ -63,7 +64,27 @@ def create_school(schoolabbreviation = 'School 1', schooldisplayname = 'School 1
 
     return myschool
 
-def create_class(schoolid, schoolyear = DEFAULT_SCHOOL_YEAR, classdisplayname = '901', gradelevel = 9, numstudentsurveys = 0):
+def create_school_calendar(schoolid = None, schoolyear = None, itemdate = date.today(), itemtype = 'CTP', itemdescription = 'Some deadline', round = 1):
+    
+    myschoolcalendar = SchoolCalendar(
+        schoolid = schoolid,
+        schoolyear = schoolyear,
+        itemdate = itemdate,
+        itemtype = itemtype,
+        itemdescription = itemdescription,
+        round = round
+    )
+
+    myschoolcalendar.save()
+    return myschoolcalendar
+
+def create_school_reward(schoolid, rewardid, schoolyear = None):
+    
+    myschoolreward = SchoolReward(schoolid = schoolid, rewardid = rewardid, schoolyear = schoolyear)
+    myschoolreward.save()
+    return myschoolreward
+
+def create_class(schoolid, schoolyear = None, classdisplayname = '901', gradelevel = 9, numstudentsurveys = 0):
     myclass = Class(
         schoolid = schoolid,
         schoolyear = schoolyear,
@@ -104,7 +125,7 @@ def create_teacher_class(teacheruserid, classid):
     return myteacherclass
 
 def create_file(filename='sampleimg',fileextension='jpg',filesize=5000,filetype=None,filedescription=None,filestore='FS',fileURL=None,\
-                filepath=None,fileclass='General',filecategory='MS',contractid=None,schoolyear=DEFAULT_SCHOOL_YEAR,srcfilepath='test/img/sampleimg.jpg'):
+                filepath=None,fileclass='General',filecategory='MS',contractid=None,schoolyear=None,srcfilepath='test/img/sampleimg.jpg'):
     
     myfile = File(
         filename = filename,
@@ -125,7 +146,7 @@ def create_file(filename='sampleimg',fileextension='jpg',filesize=5000,filetype=
     myfile.fileid = myfile.save()
     return myfile
 
-def create_contract(schoolyear=DEFAULT_SCHOOL_YEAR,contractname='My activity',round=1,contractvalidperiod=DateTimeTZRange(datetime(2020,1,1,0,0,0),datetime(2021,1,1,0,0,0)),\
+def create_contract(schoolyear=None,contractname='My activity',round=1,contractvalidperiod=DateTimeTZRange(datetime(2020,1,1,0,0,0),datetime(2021,1,1,0,0,0)),\
                     proposalts=None,evaluationts=None,evidencets=None,contractstatus=None,notes=None,partyinfo=None,contractvalue=None):
         
     mycontract = Contract(
@@ -172,7 +193,7 @@ def create_contract_party_reward(contractid, teacheruserid, classid, rewardid, q
     mycontractpartyreward.save()
     return mycontractpartyreward
 
-def create_reward(schoolyear=DEFAULT_SCHOOL_YEAR,rewarddisplayname='Some reward',rewardvalue=10000,rewarddescription='Some description',vendor='Vendor 1'):
+def create_reward(schoolyear=None,rewarddisplayname='Some reward',rewardvalue=10000,rewarddescription='Some description',vendor='Vendor 1'):
     myreward = Reward(
         rewardid=None,
         schoolyear=schoolyear,
@@ -242,3 +263,6 @@ def delete_school(myschool):
 
     # Delete school
     myschool.delete()
+
+def delete_school_calendar(myschool):
+    SchoolCalendar(schoolid=myschool.schoolid).delete()

@@ -73,6 +73,55 @@ class SchoolManager(models.Manager):
 
         return(school_choices)
 
+class SchoolCalendarManager(models.Manager):
+    def all(self):
+        return self.get_school_calendars()
+     
+    def get_school_calendars(self, calendaritemid = None, schoolid = None, schoolyear = None):
+        return get_data(self, 'SP_DCPGetSchoolCalendar(%s,%s,%s)', (calendaritemid, schoolid, schoolyear))
+     
+    def get(self, calendaritemid):
+        return get_data_pk(self, 'SP_DCPGetSchoolCalendar(%s,%s,%s)', (calendaritemid, None, None))
+     
+    def save(self, mySchoolCalendar):
+        return save_data('SP_DCPUpsertSchoolCalendar',
+            (
+                mySchoolCalendar.calendaritemid,
+                mySchoolCalendar.schoolid,
+                mySchoolCalendar.schoolyear or DEFAULT_SCHOOL_YEAR,
+                mySchoolCalendar.itemdate,
+                mySchoolCalendar.itemtype,
+                mySchoolCalendar.itemdescription,
+                mySchoolCalendar.round
+            )
+         )[0]
+         
+    def delete(self, mySchoolCalendar):
+        return delete_data('SP_DCPDeleteSchoolCalendar', (mySchoolCalendar.calendaritemid, mySchoolCalendar.schoolid, mySchoolCalendar.schoolyear))
+ 
+class SchoolRewardManager(models.Manager):
+    def all(self):
+        return self.get_school_rewards()
+     
+    def get_school_rewards(self, schoolid = None, rewardid = None, schoolyear = None):
+        return get_data(self, 'SP_DCPGetSchoolReward(%s,%s,%s)', (schoolid, rewardid, schoolyear))
+     
+    def get(self, schoolid, rewardid):
+        return get_data_pk(self, 'SP_DCPGetSchoolReward(%s,%s,%s)', (schoolid, rewardid, None))
+     
+    def save(self, mySchoolReward, rewardidlist = None):
+        return save_data('SP_DCPUpsertSchoolReward',
+            (
+                mySchoolReward.schoolid,
+                mySchoolReward.rewardid,
+                rewardidlist,
+                mySchoolReward.schoolyear or DEFAULT_SCHOOL_YEAR
+            )
+         )
+         
+    def delete(self, mySchoolReward):
+        return delete_data('SP_DCPDeleteSchoolReward', (mySchoolReward.schoolid, mySchoolReward.rewardid, mySchoolReward.schoolyear))
+
 class TeacherClassManager(models.Manager):
     def all(self):
         return self.get_teacher_classes()
@@ -115,6 +164,24 @@ class School(MyModel):
     department = models.CharField(max_length=100, verbose_name='Departamento')
 
     objects = SchoolManager()
+
+class SchoolCalendar(School):
+     
+    calendaritemid = models.IntegerField(primary_key=True)
+    schoolyear = models.SmallIntegerField(verbose_name='School Year')
+    itemdate = models.DateField(verbose_name='Fecha')
+    itemtype = models.CharField(max_length=100)
+    itemdescription = models.CharField(max_length=500)
+    round = models.SmallIntegerField()
+ 
+    objects = SchoolCalendarManager()
+ 
+class SchoolReward(School):
+     
+    rewardid = models.IntegerField(primary_key=True) # Dummy field
+    schoolyear = models.SmallIntegerField(verbose_name='School Year')
+ 
+    objects = SchoolRewardManager()
     
 class Class(School):
     
