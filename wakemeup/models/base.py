@@ -7,7 +7,7 @@ class MyModel(models.Model):
         abstract = True
     
     def save(self, *args, **kwargs):
-        return type(self).objects.save(self)
+        return type(self).objects.save(self, *args, **kwargs)
     
     def delete(self):
         return type(self).objects.delete(self)
