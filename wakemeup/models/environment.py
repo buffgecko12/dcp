@@ -2,7 +2,10 @@
 from django.db import models
 from wakemeup.models.base import MyModel
 from lib.UsefulFunctions.dbUtils import *
+from lib.UsefulFunctions.miscUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
+
+DEFAULT_SCHOOL_YEAR = get_school_year()
 
 class FileManager(models.Manager):
     def all(self):
@@ -30,7 +33,7 @@ class FileManager(models.Manager):
                 myFile.fileclass,
                 myFile.filecategory,
                 myFile.contractid,
-                myFile.schoolyear
+                myFile.schoolyear or DEFAULT_SCHOOL_YEAR
             )
          )[0] # Return fileid
         

@@ -112,7 +112,7 @@ class RewardManager(models.Manager):
         return save_data('SP_DCPUpsertReward', 
             (
                 myReward.rewardid, 
-                myReward.schoolyear,
+                myReward.schoolyear or DEFAULT_SCHOOL_YEAR,
                 myReward.rewarddisplayname, 
                 myReward.rewarddescription,
                 myReward.rewardvalue,
