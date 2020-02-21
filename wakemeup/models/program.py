@@ -136,7 +136,7 @@ class TeacherProgramManager(models.Manager):
     def save(self, myTeacherProgram):
         return save_data('SP_DCPUpsertTeacherProgram', (
             myTeacherProgram.teacheruserid,
-            myTeacherProgram.schoolyear,
+            myTeacherProgram.schoolyear or DEFAULT_SCHOOL_YEAR,
             myTeacherProgram.schoolid,
             myTeacherProgram.maxbudget,
             myTeacherProgram.teachersurveyts,
