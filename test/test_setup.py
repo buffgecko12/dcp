@@ -1,4 +1,4 @@
-import test_env_setup
+import test.test_env_setup
 
 from wakemeup.models.school import *
 from wakemeup.models.environment import *
@@ -258,8 +258,9 @@ def create_role_ACL(roleid,objectid,objectclass,accesslevel=4):
 def delete_school(myschool):
     
     # Delete roles
-    for myschoolrole in ('teachers','school','admin'):
-        Role(myschool.defaultroleids[myschoolrole]).delete()
+    if(getattr(myschool,'defaultroleids',None)):
+        for myschoolrole in ('teachers','school','admin'):
+            Role(myschool.defaultroleids[myschoolrole]).delete()
 
     # Delete school
     myschool.delete()

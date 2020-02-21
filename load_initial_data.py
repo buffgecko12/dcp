@@ -1,32 +1,15 @@
 # -*- coding: utf-8 -*-
 import test.test_env_setup
+from test.test_setup import create_user, delete_school
 from django.contrib.auth import get_user_model
-from wakemeup.models.environment import School, Teacher, Class
-from wakemeup.models.contract import Reward
-from lib.UsefulFunctions.stringUtils import mychr
+from wakemeup.models.school import *
+from wakemeup.models.program import *
+
+from lib.UsefulFunctions.stringUtils import *
 import json
 
-MAX_BUDGET = 500000
-SCHOOL_YEAR = 2020
+MAX_BUDGET = 400000
 PASSWORD = "adminadmin"
-
-def normalize_field(mystring):
-    return mystring.replace(" ","").lower()
-
-def create_user(usertype, schoolid, firstname,lastname,userrole):
-    newuser = get_user_model().objects.create_user(
-        password = PASSWORD, 
-        usertype = usertype,
-        schoolid = schoolid,
-        firstname = firstname, 
-        lastname = lastname, 
-        username = normalize_field(firstname), 
-        emailaddress = None,
-#         emailaddress = normalize_field(firstname) + '@' + normalize_field(lastname) + '.com', 
-        userrole = userrole
-    )
-    
-    return newuser
 
 def load_schools_classes():
 
@@ -64,7 +47,7 @@ def load_schools_classes():
         )
         
         # Create school
-        myschoolid = myschool.save()
+        myschoolid = myschool.save()[0]
 
         if(school[0] == "GLV"):
             GLV_SCHOOLID = myschoolid
@@ -76,71 +59,69 @@ def load_schools_classes():
             mynewclass = Class(schoolid = myschoolid, classid = None, gradelevel = myclass[0], classdisplayname = myclass[1])
             mynewclass.save()
 
+def create_users(userlist):
+    for myuser in userlist:
+        
+        # Create user
+        newuser = create_user(
+            usertype = myuser['usertype'], 
+            schoolid = myuser['schoolid'], 
+            firstname = myuser['firstname'],
+            lastname = myuser['lastname'],
+            password = PASSWORD,
+            username = normalize_field(myuser['firstname']), 
+            emailaddress = normalize_field(myuser['firstname']) + '@' + normalize_field(myuser['lastname']) + '.com', # Remove on production
+        )
+
+        # Teacher info
+        if(newuser.usertype == "TR"):
+            
+            myclassinfo = []
+            myclasslist = myuser.get('classlist')
+            
+            # Convert class name list to classid list
+            for myclass in myclasslist:
+                myclassinfo.append(Class.objects.get_classes(schoolid = newuser.schoolid, classdisplayname = myclass)[0].classid)
+            
+            # Assign teacher classes
+            myteacherclass = TeacherClass(teacheruserid = newuser.userid).save(classidlist=myclassinfo)
+            
+            # Set program info
+            myteacherprogram = TeacherProgram(
+                teacheruserid = newuser.userid, 
+                schoolyear = None, # Use default
+                schoolid = newuser.schoolid, 
+                maxbudget = MAX_BUDGET
+            )
+        
 def load_users():
-    admin_list = [
-        ('AD', None, 'admin','admin','S'),
+    user_list = [
+        {"usertype":"SU", "schoolid":None, "firstname":"admin","lastname":"admin"},
+        {"usertype":"TR", "schoolid":GLV_SCHOOLID, "firstname":"Chris","lastname":"Khosravi","classlist":["1201"]},
     ]
 
-    for admin in admin_list:
-        create_user(admin[0], admin[1], admin[2], admin[3], admin[4])
+    create_users(user_list)
 
-    teacher_list = [        
-         ('Chris','Khosravi',GLV_SCHOOLID,['1201'],),
-    ]
-
-    for teacher in teacher_list:
-        myclassinfo = {'currentclasses':[]}
-        myschoolid = teacher[2]
-
-        myuser = create_user('TR', myschoolid, teacher[0], teacher[1], 'U')
-
-        # Convert class name list to classid list
-        for myclass in teacher[3]:
-            myclassid = Class.objects.get_classes(schoolid = myschoolid, classdisplayname = myclass)[0].classid
-            myclassinfo['currentclasses'].append({'classid':myclassid})
-        
-        # Assign teacher classes
-        myteacher = Teacher(
-            teacheruserid = myuser.userid,
-            schoolid = myschoolid,
-            classinfo = json.dumps(myclassinfo),
-            firstname = myuser.firstname,
-            lastname = myuser.lastname,
-            emailaddress = myuser.emailaddress
-        )
-        
-        # Save teacher info
-        myteacher.save()
-        myteacher.update_program(
-            school_year = SCHOOL_YEAR, 
-            schoolid = myteacher.schoolid, 
-            maxbudget = MAX_BUDGET
-        )
-        
 def load_rewards():
     reward_list = [
-        ('Tiquete al cine', 'Tiquete al cine en Innovo.', 6000),
-        ('Pizza', 'Pizza y gaseosa.', 5000),
-        ('Hamburguesa', 'Hamburguesa y gaseoas.', 5000),
-        ('Guatika', 'Tiquete a Guatika.', 25000),
-        ('B' + mychr('a') + 'lon de f' + mychr('u') + 'tbol', 'B' + mychr('a') + 'lon de f' + mychr('u') + 'tbol', 15000)
+        {"rewarddisplayname":"Tiquete al cine", "rewarddescription":"Tiquete al cine.", "rewardvalue":6500, "vendor":"Innovo"},
+        {"rewarddisplayname":"Hamburguesa", "rewarddescription":"Hamburguesa y papas y gaseosa.", "rewardvalue":6000,"vendor":"Cowfish"},
+        {"rewarddisplayname":"B" + mychr("a") + "lon de f" + mychr("u") + "tbol", "rewarddescription": "B" + mychr("a") + "lon de f" + mychr("u") + "tbol", "rewardvalue":15000,"vendor":None}
     ]
 
     for reward in reward_list:
-        myreward = Reward(
-            rewardid = None,
-            rewarddisplayname = reward[0],
-            rewarddescription = reward[1],
-            rewardvalue = reward[2],
-            createdbyuserid = 0, 
-        )
-        
-        myreward.save(globalflag = True)
+        Reward(
+            rewarddisplayname = reward['rewarddisplayname'],
+            rewarddescription = reward['rewarddescription'],
+            rewardvalue = reward['rewardvalue'],
+            vendor = reward['vendor'],
+        ).save()
 
 def load_all():
+    
     # Clean out any existing schools
-    School(schoolid=1).delete()
-    School(schoolid=2).delete()
+    delete_school(School(schoolid=1))
+    delete_school(School(schoolid=2))
 
     load_schools_classes()
     load_users()
