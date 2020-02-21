@@ -140,5 +140,7 @@ THOUSAND_SEPARATOR = '.'
 
 SHORT_DATETIME_FORMAT = 'j/n/y' # Used for django-tables2
 
+SILENCED_SYSTEM_CHECKS = ['models.E005']
+
 # Custom settings
 DEFAULT_SCHOOL_YEAR = config('DEFAULT_SCHOOL_YEAR') # Default school year to display
