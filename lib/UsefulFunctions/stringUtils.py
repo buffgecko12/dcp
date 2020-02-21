@@ -1,3 +1,6 @@
+def normalize_field(mystring):
+    return mystring.replace(" ","").lower()
+
 def mychr(string):
     mystring = ""
     
