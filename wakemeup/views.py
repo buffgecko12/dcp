@@ -1,14 +1,9 @@
 from django.contrib.auth import get_user_model
-
 from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from django.urls import reverse
-
 from django.core.validators import validate_email
 from django.core.mail import send_mail
-
-from django_tables2 import RequestConfig
-
 from django.forms.models import formset_factory
 
 from lib.UsefulFunctions.imgUtils import renderImageFromDb
@@ -18,65 +13,17 @@ from lib.UsefulFunctions.stringUtils import *
 from lib.UsefulFunctions.httpUtils import *
 from lib.UsefulFunctions.fileUtils import get_file_name_info
 
+from django_tables2 import RequestConfig
+
 import psycopg2
 import json
 
-from .tables import *
-from .forms import *
-from .models.environment import School, Class, Teacher, TeacherProgram, File
-from .models.contract import Contract, ContractParty, ContractGoal, ContractPartyReward, Reward
-
-from users.models import UserReputationEvent, UserBadge, UserNotification
-
-# Define user permission roles
-PERM_NONE = ['NONE']
-PERM_ADMIN = ['S','A']
-PERM_SUPER = ['S']
-PERM_TEACHER = ['TR']
-PERM_STUDENT = ['ST']
-PERM_ALL = ['ALL']
-
-NO_PERM_REQUIRED = {'all': {'userrole':PERM_ALL, 'usertype':PERM_ALL}}
-
-# Define view permissions
-#TO-DO: Move to database
-view_permissions = {
-    'admin_list': {
-        'school':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
-        'class':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-        'teacher':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-        'student':{'userrole':PERM_ADMIN, 'usertype':PERM_STUDENT},
-        'reward':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-    },
-    'delete_object': {
-        'school': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
-        'class': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
-        'teacher': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
-        'student': {'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
-        'reward': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-        'contract': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-        'usergroup': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-    },
-    'edit_object': {
-        'school':{'userrole':PERM_ADMIN, 'usertype':PERM_NONE},
-        'class':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-        'teacher':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-        'student':{'userrole':PERM_ADMIN, 'usertype':PERM_STUDENT},
-        'reward':{'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-    },
-    'create_contract': {
-        'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-    },
-    'addreward': {
-        'all': {'userrole':PERM_ADMIN, 'usertype':PERM_TEACHER},
-    },
-    'add_user': {
-        'all': {'userrole':PERM_SUPER, 'usertype':PERM_TEACHER},
-    },
-    'contract': NO_PERM_REQUIRED,
-    'myaccount': NO_PERM_REQUIRED,
-    'useragreement': NO_PERM_REQUIRED,
-}
+from wakemeup.tables import *
+from wakemeup.forms import *
+from wakemeup.models.school import *
+from wakemeup.models.program import *
+from wakemeup.models.environment import *
+from user.models.user import UserReputationEvent, UserBadge, UserNotification
 
 def download_file_fromdb(request, fileid):
     myfile = File.objects.get(fileid)
@@ -109,10 +56,7 @@ def check_permissions(view):
 
         # Check user permissions
         if myuser.is_authenticated:
-            if (
-                myuser.userrole in view_permissions[viewname][objecttype]['userrole'] or view_permissions[viewname][objecttype]['userrole'][0] == 'ALL' or
-                myuser.usertype in view_permissions[viewname][objecttype]['usertype'] or view_permissions[viewname][objecttype]['usertype'][0] == 'ALL'
-            ):
+            if (False): # Check user view permission
                 # Valid permission - continue
                 return view(*args, **kwargs)
         else:

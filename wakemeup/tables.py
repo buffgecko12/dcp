@@ -1,8 +1,8 @@
 import django_tables2 as tables
 from django_tables2.utils import A # alias for accessor
-from .models.environment import School, Class, Teacher, Student
-from .models.contract import Contract, Reward
-from users.models import UserReputationEvent, UserBadge, UserGroup
+from wakemeup.models.school import *
+from wakemeup.models.program import *
+from user.models.user import UserReputationEvent, UserBadge
 
 from lib.UsefulFunctions.dateUtils import display_timestamp_range, display_timestamp
 from lib.UsefulFunctions.stringUtils import mychr
@@ -95,30 +95,6 @@ class TeachersTable(tables.Table):
         empty_text = EMPTY_TEXT
         exclude = ('teacheruserid','reputationvalue','schoolid','profilepictureid')
         sequence = ('firstname','lastname','emailaddress','schooldisplayname','classinfo')
-
-class StudentsTable(tables.Table):
-
-    objectid = 'studentuserid'
-    
-    kwargs={
-        'objecttype': 'student',
-        'objectid': A(objectid)
-    }
-
-    classinfo = tables.TemplateColumn(
-        template_name='wakemeup/admin/fields/teacher_classes.html',
-        extra_context=kwargs,
-        verbose_name='Curso',
-        accessor=A('classinfo')
-    )
-
-    manage_buttons = getManageButtons(accessor=objectid)
-
-    class Meta:
-        model = Student
-        exclude = ('studentuserid','reputationvalue','schoolid','classid','profilepictureid')
-        sequence = ('firstname','lastname','emailaddress','schooldisplayname')
-        empty_text = EMPTY_TEXT
 
 class RewardsTable(tables.Table):
 
@@ -242,28 +218,3 @@ class UserBadgesTable(tables.Table):
         exclude = ('badgeid','userid','badgeshortname', 'badgelevel', 'profilepictureid', 'profilepicturefilepath', 'profilepicturefilename')
         empty_text = EMPTY_TEXT
         row_attrs={"class":"small"}
-
-class UserGroupsTable(tables.Table):
-
-    objectid = 'groupuserid'
-
-    groupname = tables.Column(verbose_name='Nombre')
-    groupuserinfo = tables.TemplateColumn(
-        template_name='wakemeup/admin/fields/user_groups.html',
-        verbose_name='Integrantes'
-    )    
-
-    manage_buttons = tables.TemplateColumn(
-        template_name='wakemeup/admin/fields/usergroup_buttons.html',
-        verbose_name='',
-        accessor=A(objectid)
-    )
-
-    class Meta:
-        model = UserGroup
-        empty_text = EMPTY_TEXT
-        fields = ('groupname','groupuserinfo')
-        row_attrs = {
-            'class': "small",
-        }
-
