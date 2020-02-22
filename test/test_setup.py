@@ -1,4 +1,17 @@
-import test.test_env_setup
+# Hack to get around import issues
+import sys
+
+testflag = False
+
+for myval in sys.argv:
+    if('test' in myval):
+        testflag = True
+        break
+
+if(testflag):
+    import test_env_setup
+else:
+    import test.test_env_setup
 
 from wakemeup.models.school import *
 from wakemeup.models.environment import *
