@@ -20,10 +20,11 @@ from user.models.authorization import *
 from django.contrib.auth import get_user_model
 from psycopg2.extras import DateTimeTZRange
 from datetime import date, datetime, timedelta
+from lib.UsefulFunctions.miscUtils import get_objectname
 
 def refresh(myobject):
     objecttype = type(myobject)
-    objectname = myobject.__class__.__name__.lower()
+    objectname = get_objectname(myobject)
     kwargs = {}
     
     if(objectname == 'contract'):
@@ -257,11 +258,15 @@ def create_object(objectclass="VW",objectname="download_file"):
     myobject.objectid = myobject.save()
     return myobject
 
-def create_role_ACL(roleid,objectid,objectclass,accesslevel=4):
+def create_role_ACL(myrole,myobject,accesslevel=4):
+    if(get_objectname(myobject) == 'file'):
+        myobject.objectclass = 'FL'
+        myobject.objectid = myobject.fileid
+        
     myroleacl = RoleACL(
-        roleid=roleid,
-        objectid=objectid,
-        objectclass=objectclass,
+        roleid=myrole.roleid,
+        objectid=myobject.objectid,
+        objectclass=myobject.objectclass,
         accesslevel=accesslevel
         )
 

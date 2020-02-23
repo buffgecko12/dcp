@@ -39,27 +39,29 @@ class testAuthorization(unittest.TestCase):
         self.myrole_all = create_role(name="All",userlist=[self.myteacher1.userid,self.myteacher2.userid,self.mystudent.userid],usertypelist=['TR','ST','AD','SF'],publicflag=True)
         self.myrole_twousers = create_role(name="User 1 and User 2",userlist=[self.myteacher1.userid,self.myteacher2.userid])
         self.myrole_oneuser = create_role(name="User 3",userlist=[self.mystudent.userid])
-        self.myrole_teachers = create_role(name="Teachers",usertypelist=['TR'])
-        self.myrole_admin = create_role(name="Administration",usertypelist=['AD'])
-        self.myrole_public = create_role(name="Public",publicflag=True)
+        self.myrole_teachers = create_role(name="Teachers_test",usertypelist=['TR'])
+        self.myrole_admin = create_role(name="Administration_test",usertypelist=['AD'])
+        self.myrole_public = create_role(name="Public_test",publicflag=True)
         
         # Objects
-        self.myobject1 = create_object(objectclass='BO', objectname='contract')
+        self.myobject1 = create_object(objectclass='BO', objectname='contract_test')
         
         # ACLs
-        self.myroleacl1 = create_role_ACL(self.myrole_public.roleid,self.myfile2.fileid,'FL',4) # Read access to "Public"
-        self.myroleacl2 = create_role_ACL(self.myrole_teachers.roleid,self.myfile2.fileid,'FL',8) # Edit access to "Teachers"
-        self.myroleacl3 = create_role_ACL(self.myrole_admin.roleid,self.myfile2.fileid,'FL',12) # Delete access to file
-        self.myroleacl4 = create_role_ACL(self.myrole_teachers.roleid,self.myobject1.objectid,self.myobject1.objectclass,4) # Read access to "Teachers"
+        self.myroleacl1 = create_role_ACL(self.myrole_public,self.myfile2,4) # Read access to "Public"
+        self.myroleacl2 = create_role_ACL(self.myrole_teachers,self.myfile2,8) # Edit access to "Teachers"
+        self.myroleacl3 = create_role_ACL(self.myrole_admin,self.myfile2,12) # Delete access to file
+        self.myroleacl4 = create_role_ACL(self.myrole_teachers,self.myobject1,4) # Read access to "Teachers"
 
         # ACLS - School
-        self.myroleacl5 = create_role_ACL(self.myschool1.defaultroleids['school'],self.myfile4.fileid,'FL',4) # Read access to school
-        self.myroleacl6 = create_role_ACL(self.myschool1.defaultroleids['teachers'],self.myfile5.fileid,'FL',8) # Read access to teachers at a school
+        self.myroleacl5 = create_role_ACL(Role(roleid=self.myschool1.defaultroleids['school']),self.myfile4,4) # Read access to school
+        self.myroleacl6 = create_role_ACL(Role(roleid=self.myschool1.defaultroleids['teachers']),self.myfile5,8) # Read access to teachers at a school
 
         # ACLS - Public
-        self.myroleacl7 = create_role_ACL(self.myrole_public.roleid,self.myfile3.fileid,'FL',4)
+        self.myroleacl7 = create_role_ACL(self.myrole_public,self.myfile3,4)
 
     def testCheckAuthorization(self):
+        
+        self.assertFalse(self.myteacher1.check_access(-1,'FL',1)) # Invalid file 
         
         # Access levels
         self.assertTrue(self.myteacher1.check_access(self.myfile2.fileid,'FL',1)) # Browse
@@ -71,7 +73,7 @@ class testAuthorization(unittest.TestCase):
         self.assertFalse(self.mystudent.check_access(self.myfile3.fileid,'FL',8))
     
         # User
-        self.myroleacl = create_role_ACL(self.myrole_oneuser.roleid,self.myfile3.fileid,'FL',8) # Edit access to file
+        self.myroleacl = create_role_ACL(self.myrole_oneuser,self.myfile3,8) # Edit access to file
         self.assertTrue(self.mystudent.check_access(self.myfile3.fileid,'FL',8))
 
         # School
@@ -142,10 +144,12 @@ class testAuthorization(unittest.TestCase):
     def testGetObject(self):
         self.assertIsNotNone(refresh(self.myobject1))
         self.assertTrue(Object.objects.get_objects(objectclass='BO')) # Files
+        self.assertTrue(Object.objects.get_object_by_name(objectname='contract_test')) # Files
+        self.assertFalse(Object.objects.get_object_by_name(objectname='homero')) # Files
         self.assertTrue(Object.objects.all()) # All
         
     def testUpdateObject(self):
-        self.assertTrue(self.myobject1.objectname,'contract')
+        self.assertTrue(self.myobject1.objectname,'contract_test')
         self.myobject1.objectname='contracts'
         self.myobject1.save()
         self.myobject1 = refresh(self.myobject1)
@@ -189,7 +193,7 @@ class testAuthorization(unittest.TestCase):
         
     def testGetRole(self):
         self.assertIsNotNone(refresh(self.myrole_twousers)) # single role
-        self.assertTrue(Role.objects.get_roles(rolename='Teachers'))
+        self.assertTrue(Role.objects.get_roles(rolename='Teachers_test'))
         self.assertTrue(Role.objects.all()) # all roles
 
     def testUpdateRole(self):
