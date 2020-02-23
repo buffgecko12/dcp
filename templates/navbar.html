@@ -25,7 +25,7 @@
 						{% if user.is_admin or user.usertype == "TR" %}
 							<a class="dropdown-item {% if url_name == 'create_contract' %} active {% endif %}" href="{% url 'wakemeup:create_contract' contractid='new' %}">Crear contrato</a>
 						{% endif %}
-						<a class="dropdown-item {% if url_name == 'contract_list' %} active {% endif %}" href="{% url 'wakemeup:contract_list' %}">Mis contratos</a>
+						<a class="dropdown-item {% if url_name == 'list_contract' %} active {% endif %}" href="{% url 'wakemeup:list_contract' %}">Mis contratos</a>
 					</div>
 				</li>
 				{% if user.is_admin or user.usertype == "TR" %}
@@ -46,7 +46,7 @@
 							{% endif %}
 							<a class="dropdown-item" href="{% url 'wakemeup:admin_list' objecttype='reward' %}">Premios</a>
 							<div class="dropdown-divider"></div>
-							<a class="dropdown-item {% if url_name == 'add_user' %} active {% endif %}" href="{% url 'wakemeup:add_user' %}">Crear usuario</a>
+							<a class="dropdown-item {% if url_name == 'create_user' %} active {% endif %}" href="{% url 'wakemeup:create_user' %}">Crear usuario</a>
 						</div>
 					</li>
 				{% endif %}

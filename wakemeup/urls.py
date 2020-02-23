@@ -8,8 +8,8 @@ urlpatterns = [
     url(r'^$', views.index, name="index"),
 
     # Contract
-    url(r'^contract/$', views.contract_list, name="contract_list"),
-    url(r'^contract/(?P<contractid>(\d+))/detail$', views.contract_detail, name="contract_detail"),
+    url(r'^contract/$', views.list_contract, name="list_contract"),
+    url(r'^contract/(?P<contractid>(\d+))/detail$', views.get_contract, name="get_contract"),
     url(r'^contract/(?P<contractid>(\d+|new))$', views.create_contract, name="create_contract"),
 
     # Admin
@@ -19,7 +19,7 @@ urlpatterns = [
     url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward|contract|usergroup))/(?P<objectid>\d+)/delete$', views.delete_object, name="delete_object"), # Delete object    
 
     # User (TO-DO: Move to root)    
-    url(r'^admin/add_user', views.add_user, name="add_user"),
+    url(r'^admin/create_user', views.create_user, name="create_user"),
     url(r'^myaccount', views.myaccount, name="myaccount"),
 
     # Misc

@@ -158,7 +158,7 @@ class ContractsTable(tables.Table):
         if(record.contractstatus == "D"):
             return reverse('wakemeup:create_contract', kwargs={'contractid':record.contractid})
         else:
-            return reverse('wakemeup:contract_detail', kwargs={'contractid':record.contractid})
+            return reverse('wakemeup:get_contract', kwargs={'contractid':record.contractid})
     
     teacheruserid = tables.Column(verbose_name="Docente")
     goalinfo = tables.TemplateColumn(template_name='wakemeup/admin/fields/contract_goals.html', verbose_name='Metas')

@@ -48,7 +48,7 @@
 					{% if party.partyapprovalts %}
 						<i>Ya se acept&#243;<br>({{ party.partyapprovalts }})</i>
 					{% elif record.contractstatus == "P" %}
-						<a class="btn {{ displayinfo.buttonsize }} btn-primary" href="{% url 'wakemeup:contract_detail' contractid=record.contractid %}#participants" >Aceptar</a>
+						<a class="btn {{ displayinfo.buttonsize }} btn-primary" href="{% url 'wakemeup:get_contract' contractid=record.contractid %}#participants" >Aceptar</a>
 					{% endif %}<br><br>
 				{% endif %}
 			{% endfor %}
