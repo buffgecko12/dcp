@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import test.test_env_setup
-from test.test_setup import create_user, delete_school
+from test.test_setup import *
 from django.contrib.auth import get_user_model
 from wakemeup.models.school import *
 from wakemeup.models.program import *
@@ -117,6 +117,53 @@ def load_rewards():
             vendor = reward['vendor'],
         ).save()
 
+
+def load_authorization():
+    
+    ''' User types
+    SU - Super user
+    SA - Site admin
+    AD - Admin (program administrator)
+    TR - teacher
+    ST - student
+    SF - school staff
+    OT - other
+    '''
+    
+    # Default user roles
+    myrole_super = create_role(name='Super users',description='Full access',usertypelist=['SU'])
+    myrole_admin = create_role(name='Program administrators',description='Access to administer site',usertypelist=['SA'])
+    myrole_staff = create_role(name='Staff',description='School staff',usertypelist=['SF'])
+    myrole_teachers = create_role(name='Teachers',description='Teachers',usertypelist=['TR'])
+    myrole_public = create_role(name='Public',description='All users',publicflag=True)
+    
+    # Default object roles
+    myrole_contract_view = create_role(name='Contract - View',description='View contract',usertypelist=['AD','TR'])
+    myrole_contract_edit = create_role(name='Contract - Edit',description='Edit contract',usertypelist=[])
+    myrole_contract_delete = create_role(name='Contract - Delete',description='Delete contract',usertypelist=['SU','SA'])
+
+    myrole_user_view = create_role(name='User - View',description='View user',publicflag=True)
+    myrole_user_edit = create_role(name='User - Edit',description='Edit user',publicflag=True)
+    myrole_user_delete = create_role(name='User - Delete',description='Delete user',usertypelist=['SU','SA'])
+
+    # Default business objects
+    myobj_contract = create_object(objectclass='BO',objectname='contract')
+    myobj_school = create_object(objectclass='BO',objectname='school')
+    myobj_class = create_object(objectclass='BO',objectname='class')
+    myobj_user = create_object(objectclass='BO',objectname='user')
+    myobj_reward = create_object(objectclass='BO',objectname='reward')
+
+    # Contract ACLs
+    create_role_ACL(myrole_contract_view,myobj_contract,4) # View
+    create_role_ACL(myrole_contract_edit,myobj_contract,8) # Edit
+    create_role_ACL(myrole_contract_delete,myobj_contract,12) # Delete
+
+    # User ACLs
+    create_role_ACL(myrole_user_view,myobj_user,4) # View
+    create_role_ACL(myrole_user_edit,myobj_user,8) # Edit
+    create_role_ACL(myrole_user_delete,myobj_user,12) # Delete
+
+
 def load_all():
     
     # Clean out any existing schools
@@ -126,6 +173,7 @@ def load_all():
     load_schools_classes()
     load_users()
     load_rewards()
+    load_authorization()
     
 if (__name__ == '__main__'):
     load_all()
