@@ -24,6 +24,7 @@ from wakemeup.models.school import *
 from wakemeup.models.program import *
 from wakemeup.models.environment import *
 from user.models.user import UserReputationEvent, UserBadge, UserNotification
+from user.models.authorization import Object
 
 def download_file_fromdb(request, fileid):
     myfile = File.objects.get(fileid)
@@ -34,19 +35,50 @@ def download_file_fromdb(request, fileid):
     else:
         return redirect_home()
 
-# Check user authentication / authorization
-def check_permissions(view):
-    viewname = view.__name__
-
-    # Group create contract views together
-    if(viewname[0:15] == 'create_contract'):
-        viewname = "create_contract"
-    elif(viewname[0:8] == 'contract'):
-        viewname = "contract"
+# Check authentication (logged in)
+def check_authentication(view):
     
     def view_wrapper(*args, **kwargs):
+        myuser = args[0].user
 
-        # Set objecttype (admin list)
+        # Check user is logged on
+        if myuser.is_authenticated:
+            return view(*args, **kwargs)
+        else:
+            return redirect('login')
+        
+    return view_wrapper
+
+# Check authorization (logged in & permissions)
+def check_authorization(view):
+    
+    # Parse out view info
+    viewname = view.__name__ # i.e. "create_contract"
+    viewname_split = viewname.split("_")
+    view_action = viewname_split[0]
+    view_object = viewname_split[1] if len(viewname_split) > 1 else None
+
+    # Convert to access levels
+    if(view_action == "list"):
+        myrequestedaccesslevel = 1
+    if(view_action == "get"):
+        myrequestedaccesslevel = 4
+    if(view_action == "create"):
+        myrequestedaccesslevel = 8
+    if(view_action == "delete"):
+        myrequestedaccesslevel = 12
+    else:
+        myrequestedaccesslevel = 1
+        
+    # Get object name
+    if(view_action in ('list','get','create','delete')):
+        myobject = Object.objects.get_object_by_name(objectname=view_object) # business object
+    else:
+        myobject = Object.objects.get_object_by_name(objectname=viewname) # view
+
+    def view_wrapper(*args, **kwargs):
+
+        # Set objecttype (admin list) # TO-DO: Check this
         if('objecttype' in kwargs):
             objecttype = kwargs['objecttype']
         else:
@@ -54,18 +86,24 @@ def check_permissions(view):
 
         myuser = args[0].user
 
-        # Check user permissions
+        # Check user is logged on
         if myuser.is_authenticated:
-            if (False): # Check user view permission
-                # Valid permission - continue
-                return view(*args, **kwargs)
+
+            # Check valid object
+            if(myobject):
+
+                # Check user has requested access to object
+                if (myuser.check_access(objectid=myobject.objectid,objectclass=myobject.objectclass,requestedaccesslevel=myrequestedaccesslevel)):
+                    
+                    # Valid permission - continue
+                    return view(*args, **kwargs)
         else:
-            # TO-DO: Re-direct to login page
+            # Not authenticated - redirect to login page
             return redirect('login')
         
-        # Invalid permission - redirect to homepage
+        # Not authorized - redirect to homepage (TO-DO: Create "not authorized" page
         return redirect_home()
-    
+
     return view_wrapper
 
 # AJAX Request handler
@@ -165,11 +203,11 @@ def preview_image(request, objecttype, objectid):
 def redirect_home():
     return redirect('wakemeup:index')        
 
-@check_permissions
+@check_authorization
 def delete_object(request, objecttype, objectid):
     
     if(objecttype == 'contract'):        
-        myredirect = redirect('wakemeup:contract_list')
+        myredirect = redirect('wakemeup:list_contract')
     else:
         myredirect = redirect('wakemeup:admin_list', objecttype = objecttype)
         
@@ -235,7 +273,7 @@ def index(request):
 def about(request):
     return render(request, 'wakemeup/about.html')
 
-@check_permissions
+@check_authentication
 def myaccount(request):
     if request.method == "POST":
         
@@ -290,7 +328,7 @@ def myaccount(request):
 
     return render(request, 'wakemeup/myaccount.html', context)
 
-@check_permissions
+@check_authorization
 def create_contract(request, contractid):
 
     # SAVE CONTRACT
@@ -348,7 +386,7 @@ def create_contract(request, contractid):
         
     return render(request, 'wakemeup/contract/edit_contract.html', {'form': form,})
 
-@check_permissions
+@check_authorization
 def addreward(request):
 
     if request.method == 'POST':
@@ -374,7 +412,7 @@ def addreward(request):
 
     return render(request, 'wakemeup/contract/edit_contract_goals_addreward.html', {'form': form})
 
-@check_permissions
+@check_authorization
 def admin_list(request, objecttype):
 
     # Get teacheruserid (if teacher is logged on)
@@ -414,7 +452,7 @@ def admin_list(request, objecttype):
         
     return render(request, 'wakemeup/admin/index.html', {'objects' : objectSet, 'objecttype': objecttype})
 
-@check_permissions
+@check_authorization
 def edit_object(request, objecttype, objectid):
     form_template = 'wakemeup/admin/edit_form.html'
     contextkwargs = {}
@@ -710,8 +748,8 @@ def edit_object(request, objecttype, objectid):
         
     return render(request, form_template, {'form': form, 'objecttype':objecttype, **contextkwargs})
 
-@check_permissions
-def contract_detail(request, contractid):
+@check_authorization
+def get_contract(request, contractid):
     mycontract = Contract.objects.get(contractid=contractid)
 
     # Make sure contract exists
@@ -737,8 +775,8 @@ def contract_detail(request, contractid):
     # Contract doesn't exist or is a "Draft"
     return redirect_home()
         
-@check_permissions
-def contract_list(request):
+@check_authorization
+def list_contract(request):
     
     # Determine which contracts to display
     if request.user.userrole in PERM_ADMIN:
@@ -765,8 +803,8 @@ def contract_list(request):
         
     return render(request, 'wakemeup/contract/list.html', context)
 
-@check_permissions
-def add_user(request):
+@check_authorization
+def create_user(request):
     
     if request.method == 'POST':
         # Go home if user clicks cancel
@@ -839,12 +877,12 @@ def add_user(request):
             )
 
             # Go back to index page
-            return render(request, 'wakemeup/admin/add_user_confirmation.html', {'userinfo':newuser, 'conf_password_display':conf_password_display})
+            return render(request, 'wakemeup/admin/create_user_confirmation.html', {'userinfo':newuser, 'conf_password_display':conf_password_display})
     else:
         # Return empty form
         form = SignupForm(request=request)
         
-    return render(request, 'wakemeup/admin/add_user.html', {'form': form})
+    return render(request, 'wakemeup/admin/create_user.html', {'form': form})
 
 def reset_password(email, from_email, template='registration/password_reset_email.html'):
     form = PasswordResetForm({'email':email})
