@@ -10,11 +10,14 @@ class ObjectManager(models.Manager):
         return self.get_objects()
     
     def get(self, objectid, objectclass):
-        return get_data_pk(self, 'SP_DCPGetObject(%s,%s)', (objectid, objectclass))
+        return get_data_pk(self, 'SP_DCPGetObject(%s,%s,%s)', (objectid, objectclass, None))
     
-    def get_objects(self, objectid = None, objectclass = None):
-        return get_data(self, 'SP_DCPGetObject(%s,%s)', (objectid, objectclass))
+    def get_objects(self, objectid = None, objectclass = None, objectname = None):
+        return get_data(self, 'SP_DCPGetObject(%s,%s,%s)', (objectid, objectclass, objectname))
 
+    def get_object_by_name(self, objectname):
+        return get_data_pk(self, 'SP_DCPGetObject(%s,%s,%s)', (None, None, objectname))
+    
     def save(self, myObject):
         return save_data('SP_DCPUpsertObject', (
             myObject.objectid,
