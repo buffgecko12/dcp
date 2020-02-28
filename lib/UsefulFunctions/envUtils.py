@@ -1,7 +1,7 @@
 import os
 
 def check_devprod():
-    if os.environ.get('ENV') != 'development':
+    if os.environ.get('ENV') == 'production':
         return "production"
     else:
         return "development"
