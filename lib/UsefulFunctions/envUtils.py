@@ -1,8 +1,10 @@
 import os
 
-def check_devprod():
-    if os.environ.get('ENV') == 'production':
-        return "production"
+def check_env():
+    myenv = os.environ.get('ENV')
+    
+    if myenv in('production','staging','test'):
+        return myenv
     else:
         return "development"
 
@@ -11,17 +13,25 @@ def get_env_settings():
     myenvsettings = {}
     
     # Check what environment we're in
-    myenv = check_devprod()
+    myenv = check_env()
     
+    # Production
     if(myenv == "production"):\
         myenvsettings.update(
             {
                 'ssl_require':True,
-                'settingsmodule':'dcp.settings.prod'
+                'settingsmodule':'dcp.settings.prd'
                 }
         )
+
+    # Staging    
+    elif(myenv == "staging"):
+        myenvsettings.update(
+            {'settingsmodule':'dcp.settings.stg'}
+        )
     
-    elif(myenv == "development"):
+    # Test / development
+    elif(myenv in("test","development")):
         myenvsettings.update(
             {'settingsmodule':'dcp.settings.dev'}
         )
