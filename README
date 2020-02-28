@@ -1,0 +1,34 @@
+INSTALLATION NOTES
+
+Development Environment
+jre SE
+eclipse - javascript developer
+  pyDev
+postgres
+python (32-bit win)
+  pip (may already be included in python install)
+  virtualenv and virtualenvwrapper
+  psycopg2 (Postgres)
+  Django
+  heroku
+GitBash
+SQL Data Modeler / Developer
+  - Postgres DSN: https://stackoverflow.com/questions/7592519/oracle-sql-developer-and-postgresql
+Heroku CLI
+
+Repository (dcprepo)
+- install dependencies (ConfigParser)
+- add libraries to project path (configure src folders)
+- configure database.ini
+- environment variables
+  - setx ENV "development" (development environment); requires Eclipse restart
+
+Application (dcp)
+- update environment variables (.env)
+- install dependencies (requirements.txt)
+- configure source folders (/lib, /test)
+- configure load_initial_data scripts (repository, application)
+- configure SSL: https://devcenter.heroku.com/articles/acquiring-an-ssl-certificate
+
+Links
+https://docs.djangoproject.com/en/3.0/intro/install/
