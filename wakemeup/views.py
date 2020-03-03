@@ -853,9 +853,9 @@ def create_user(request):
                 usertype = form.cleaned_data.get('usertype'),
                 firstname = form.cleaned_data.get('firstname'),
                 lastname = form.cleaned_data.get('lastname'),
-                defaultsignaturescanfile = form.cleaned_data.get('defaultsignaturescanfile'),
+#                 defaultsignaturescanfile = form.cleaned_data.get('defaultsignaturescanfile'),
                 emailaddress = myemailaddress,
-                userrole = form.cleaned_data.get('userrole'),
+#                 userrole = form.cleaned_data.get('userrole'),
             )
 
             # Send confirmation / review e-mail (only if e-mail provided)
