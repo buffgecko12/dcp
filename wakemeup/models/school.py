@@ -156,7 +156,7 @@ class TeacherClassManager(models.Manager):
 ### MODELS ###
 class School(MyModel):
     
-    schoolid = models.IntegerField(primary_key=True, verbose_name='ID')
+    schoolid = models.IntegerField(primary_key=True, verbose_name='ID') # Using PK to avoid clashes with inherited tables
     schoolabbreviation = models.CharField(max_length=25, verbose_name='Abreviatura')
     schooldisplayname = models.CharField(max_length=100, verbose_name='Colegio')
     address = models.CharField(max_length=100, verbose_name='Direcci' + mychr('o') + 'n')

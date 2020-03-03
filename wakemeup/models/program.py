@@ -185,7 +185,7 @@ class Contract(MyModel):
 
 class ContractParty(Contract, TeacherClass):
 
-    numparticipants = models.SmallIntegerField(primary_key=True)
+    numparticipants = models.SmallIntegerField(primary_key=True) # Include PK otherwise it will interfere with derived classes
     numwinners = models.SmallIntegerField()
     
     objects = ContractPartyManager()
