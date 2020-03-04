@@ -187,8 +187,7 @@ class UserReputationEventsTable(tables.Table):
 
     class Meta:
         model = UserReputationEvent
-        sequence = ('eventts','pointvalue','eventdisplayname')
-        exclude = ('eventid','userid','sourceeventid','contractid')
+        fields = ('eventts','pointvalue','eventdisplayname')
         empty_text = EMPTY_TEXT
 
         row_attrs = {
@@ -214,7 +213,6 @@ class UserBadgesTable(tables.Table):
 
     class Meta:
         model = UserBadge
-        sequence = ('badgeachievedts', 'mybadge', 'badgedisplayname', 'badgedescription')
-        exclude = ('badgeid','userid','badgeshortname', 'badgelevel', 'profilepictureid', 'profilepicturefilepath', 'profilepicturefilename')
+        fields = ('badgeachievedts', 'mybadge', 'badgedisplayname', 'badgedescription')
         empty_text = EMPTY_TEXT
         row_attrs={"class":"small"}
