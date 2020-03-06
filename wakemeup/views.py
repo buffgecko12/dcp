@@ -52,42 +52,48 @@ def check_authentication(view):
 # Check authorization (logged in & permissions)
 def check_authorization(view):
     
-    # Parse out view info
-    viewname = view.__name__ # i.e. "create_contract"
-    viewname_split = viewname.split("_")
-    view_action = viewname_split[0]
-    view_object = viewname_split[1] if len(viewname_split) > 1 else None
-
-    # Convert to access levels
-    if(view_action == "list"):
-        myrequestedaccesslevel = 1
-    if(view_action == "get"):
-        myrequestedaccesslevel = 4
-    if(view_action == "create"):
-        myrequestedaccesslevel = 8
-    if(view_action == "delete"):
-        myrequestedaccesslevel = 12
-    else:
-        myrequestedaccesslevel = 1
-        
-    # Get object name
-    if(view_action in ('list','get','create','delete')):
-        myobject = Object.objects.get_object_by_name(objectname=view_object) # business object
-    else:
-        myobject = Object.objects.get_object_by_name(objectname=viewname) # view
-
     def view_wrapper(*args, **kwargs):
 
-        # Set objecttype (admin list) # TO-DO: Check this
-        if('objecttype' in kwargs):
-            objecttype = kwargs['objecttype']
+        # Parse out view info
+        viewname = view.__name__ # i.e. "create_contract"
+        viewname_split = viewname.split("_")
+        
+        # Get action & object
+        view_action = viewname_split[0]
+        view_object = viewname_split[1] if len(viewname_split) > 1 else None # Use second index of view name (if specified)
+    
+        # Convert to access levels
+        if(view_action == "list"):
+            myrequestedaccesslevel = 1
+            
+        elif(view_action == "get"):
+            myrequestedaccesslevel = 4
+            
+        elif(view_action == "edit"):
+            if(kwargs.get('objectid') == "new"):
+                myrequestedaccesslevel = 10 # Create
+            else:
+                myrequestedaccesslevel = 8 # Edit
+                
+        elif(view_action == "create"):
+            myrequestedaccesslevel = 10
+            
+        elif(view_action == "delete"):
+            myrequestedaccesslevel = 12
+            
         else:
-            objecttype = 'all'
-
+            myrequestedaccesslevel = 1 # Browse
+        
         myuser = args[0].user
 
         # Check user is logged on
         if myuser.is_authenticated:
+
+            # Get object
+            if(view_action in ('list','get','edit','create','delete')):
+                myobject = Object.objects.get_object_by_name(objectname=kwargs.get('objecttype') or view_object) # business object
+            else:
+                myobject = Object.objects.get_object_by_name(objectname=viewname) # view
 
             # Check valid object
             if(myobject):
@@ -128,6 +134,7 @@ def load_teachers(request):
 
 def load_classes(request):
     contractid = request.GET.get('contractid') # Check for existing contract
+    schoolid = request.GET.get('schoolid') # Check for existing school
     teacheruserid = request.GET.get('teacheruserid') # Check selected teacher
 
     classid = None
@@ -140,13 +147,18 @@ def load_classes(request):
 
         classes = Class.objects.get_classes(classid=classid, teacheruserid = teacheruserid)
         
+    elif(schoolid):
+        classes = Class.objects.get_classes(schoolid=schoolid)
+        
     # Lookup teacher classes
-    elif teacheruserid:
+    elif (teacheruserid):
+        
         # If id = 0, include all teachers (used for add user form)
         if str(teacheruserid) == "0":
             teacheruserid = None
             
-        classes = Class.objects.get_classes(classid=classid, teacheruserid = teacheruserid)
+        classes = Class.objects.get_classes(teacheruserid = teacheruserid)
+        
     else:
         classes = [] # Return empty list (create contract form)
 
@@ -209,7 +221,7 @@ def delete_object(request, objecttype, objectid):
     if(objecttype == 'contract'):        
         myredirect = redirect('wakemeup:list_contract')
     else:
-        myredirect = redirect('wakemeup:admin_list', objecttype = objecttype)
+        myredirect = redirect('wakemeup:list_object', objecttype = objecttype)
         
     if(request.method == 'POST'):
         # Set default redirect
@@ -413,7 +425,7 @@ def addreward(request):
     return render(request, 'wakemeup/contract/edit_contract_goals_addreward.html', {'form': form})
 
 @check_authorization
-def admin_list(request, objecttype):
+def list_object(request, objecttype):
 
     # Get teacheruserid (if teacher is logged on)
     if request.user.usertype == 'TR':
@@ -660,7 +672,7 @@ def edit_object(request, objecttype, objectid):
             myobject.save(**kwargs)
 
             # Return to main page
-            return redirect('wakemeup:admin_list', objecttype=objecttype)
+            return redirect('wakemeup:list_object', objecttype=objecttype)
 
     # CREATE FORM (NEW OBJECT)
     elif(objectid == 'new'):
