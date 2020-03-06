@@ -107,18 +107,14 @@ class LoginForm(AuthenticationForm):
 
 class SignupForm(UserCreationForm):
 
-    # Hidden teacheruserid
-    teacheruserid = forms.IntegerField(required=False, widget=forms.HiddenInput(), initial=0) # value 0 = no teacher
-
     # Define form fields
     username = forms.CharField(label='Nombre de usuario (o correo)', max_length=50)
     firstname = forms.CharField(label='Nombre(s)', max_length=100)
     lastname = forms.CharField(label='Apellido(s)', max_length=100)
     usertype = forms.ChoiceField(label='Tipo de usuario',choices=get_user_model().usertype_choices)
     schoolid = forms.ChoiceField(label='Colegio', widget=forms.Select, required=False)
-    classid = forms.CharField(label='Curso', widget=forms.Select, required=False)
+    classid = forms.CharField(label='Curso', widget=forms.SelectMultiple, required=False)
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
-    userrole = forms.CharField(initial='U', widget=HiddenInput) # Default new users to "User" role
 
     # Define constructor
     def __init__(self, *args, **kwargs):
@@ -126,25 +122,20 @@ class SignupForm(UserCreationForm):
         # Extract "request" parameter
         request = kwargs.pop('request')
         
+        myschoolid=request.user.schoolid or None
+        
         # Call base class constructor (i.e. SignupForm)
         super(SignupForm, self).__init__(*args, **kwargs)
 
-        # Teachers can only add students
-        if(request.user.usertype == "TR"):
-            myschoolid = request.user.schoolid # Can only add students to their own school
-            
-            self.fields['teacheruserid'].initial = request.user.userid
-            self.fields['usertype'] = forms.CharField(max_length=2,widget=HiddenInput,initial='ST')
-            self.fields['schoolid'] = forms.IntegerField(widget=HiddenInput,initial=myschoolid)
-            self.fields['classid'].required=True
-        else:
-            myschoolid = None
-            
         # Set password fields as optional
         self.fields['password1'].required=False
         self.fields['password2'].required=False
-            
-        self.fields['schoolid'].choices = [("0","-- Escoger colegio --")] + School.objects.school_choices(schoolid=myschoolid)
+
+        self.fields['schoolid'].choices = \
+            [("0","-- Escoger colegio --")] + \
+            School.objects.school_choices(schoolid=myschoolid) # Default to user's schoolid
+
+        self.fields['schoolid'].initial=myschoolid
             
         # Set helper properties
         self.helper = FormHelper()
@@ -155,7 +146,6 @@ class SignupForm(UserCreationForm):
         self.helper.layout = Layout(
             Fieldset(
                 'Crear Usuario',
-                'teacheruserid',
                 'username',
                 'usertype',
                 'schoolid',
@@ -165,7 +155,6 @@ class SignupForm(UserCreationForm):
                 'emailaddress',
                 'password1',
                 'password2',
-                'userrole'
             ),
             getAdminFormActions()
         )
@@ -173,7 +162,7 @@ class SignupForm(UserCreationForm):
     # Specify model and which fields to include in form
     class Meta:
         model = get_user_model()
-        fields = ('teacheruserid','username','usertype','schoolid','classid','firstname','lastname','emailaddress','password1','password2','userrole')
+        fields = ('username','usertype','schoolid','classid','firstname','lastname','emailaddress','password1','password2')
 
     # Make sure email address does not already exist
     def clean_emailaddress(self):
@@ -249,7 +238,7 @@ class SchoolForm(forms.Form):
                 'datausepolicyfile',
                 InlineCheckboxes('guardianapprovalpolicy'),
             ),
-            getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="school"')
+            getAdminFormActions(cancel_url = 'wakemeup:list_object', cancel_context='objecttype="school"')
         )
 
     def clean_guardianapprovalpolicy(self):
@@ -317,7 +306,7 @@ class ClassForm(forms.Form):
                 """Grupos de estudiante <span id="add_usergroup"><a href="#"><i class="fas fa-plus-circle" style="font-size:1.125em;vertical-align:middle"></i></a></span>""",
                 HTML("""{% if classid != "new" %} {% load django_tables2 %}{% render_table studentgroups %} {% endif %}"""),
             ),
-            getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="class"') if not request.user.usertype == "TR" else None
+            getAdminFormActions(cancel_url = 'wakemeup:list_object', cancel_context='objecttype="class"') if not request.user.usertype == "TR" else None
         )
 
     # Specify model
@@ -426,7 +415,7 @@ class RewardForm(forms.Form):
                 'rewarddescription',
                 PrependedText('rewardvalue', '$'),
             ),
-            getAdminFormActions(cancel_url = 'wakemeup:admin_list', cancel_context='objecttype="reward"', cancel_type=cancel_type)
+            getAdminFormActions(cancel_url = 'wakemeup:list_object', cancel_context='objecttype="reward"', cancel_type=cancel_type)
         )
 
     # Specify model

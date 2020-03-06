@@ -55,16 +55,23 @@
 		}
 	})
 
+	// VALIDATION: Submit button listener
+	$("#id_schoolid").change(function(event) {
+		update_classes()
+	})
+
 	// DROP-DOWNS: Update classes
 	function update_classes() {
 		// Get values from the form
 	    var url = $("#myform").attr("data-classes-url");
 	    var teacherUserId = $("#id_teacheruserid").val();
+	    var schoolId = $("#id_schoolid").val();
 
 	    $.ajax({
 	      url: url,
 	      data: {
 	        'teacheruserid': teacherUserId,
+	        'schoolid': schoolId,
 	      },
 	      success: function (data) {
 	        $("#id_classid").html(data);
