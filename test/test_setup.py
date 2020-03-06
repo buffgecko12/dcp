@@ -258,17 +258,21 @@ def create_object(objectclass="VW",objectname="download_file"):
     myobject.objectid = myobject.save()
     return myobject
 
-def create_role_ACL(myrole,myobject,accesslevel=4):
+def create_role_ACL(myrole,myobject,accesslevel=4,acllist=None):
     if(get_objectname(myobject) == 'file'):
         myobject.objectclass = 'FL'
         myobject.objectid = myobject.fileid
-        
-    myroleacl = RoleACL(
-        roleid=myrole.roleid,
-        objectid=myobject.objectid,
-        objectclass=myobject.objectclass,
-        accesslevel=accesslevel
-        )
+
+    if(acllist):
+        myroleacl = RoleACL()
+        myroleacl.acllist=acllist
+    else:
+        myroleacl = RoleACL(
+            roleid=myrole.roleid,
+            objectid=myobject.objectid,
+            objectclass=myobject.objectclass,
+            accesslevel=accesslevel,
+            )
 
     myroleacl.save()
     return myroleacl

@@ -11,54 +11,6 @@ import json
 MAX_BUDGET = 400000
 PASSWORD = "adminadmin"
 
-def load_schools_classes():
-
-    global GLV_SCHOOLID
-    global ITIRR_SCHOOLID
-
-    glv_classinfo = [
-        (7,'702'),(7,'704'),(7,'706'),
-        (10,'1002'),(10,'1006'),(10,'1007'),(10,'1008'),(10,'1009'),(10,'1010'),(10,'1011'),
-        (12,'1201'),
-     ]
-    
-    rr_classinfo = [
-        (6,'601'),(6,'602'),(6,'603'),(6,'604'),(6,'605'),
-        (7,'701'),(7,'702'),(7,'703'),(7,'704'),(7,'705'),
-        (8,'801'),(8,'802'),(8,'803'),(8,'804'),
-        (9,'901'),(9,'902'),(9,'903'),(9,'904'),
-        (10,'1001'),(10,'1002'),(10,'1003'),(10,'1004'),(10,'1005'),
-        (12,'1201'),
-    ]
-    
-    school_list = [
-        ('GLV','Guillermo Leon Valencia Colegio (sede integrado)','GLV (Integrado)', 'Calle 15A Nro 7 - 48','Duitama','Boyaca',glv_classinfo),
-        ('ITIRR','Instituto Técnico Industrial Rafael Reyes', 'ITIRR', 'Carrera 18 # 23-116','Duitama','Boyaca',rr_classinfo),
-    ]
-    
-    for school in school_list:
-        myschool = School(
-            schoolid = None, 
-            schooldisplayname = school[1], 
-            schoolabbreviation = school[2], 
-            address = school[3], 
-            city = school[4], 
-            department = school[5]
-        )
-        
-        # Create school
-        myschoolid = myschool.save()[0]
-
-        if(school[0] == "GLV"):
-            GLV_SCHOOLID = myschoolid
-        elif(school[0] == "ITIRR"):
-            ITIRR_SCHOOLID = myschoolid
-
-        # Save classes        
-        for myclass in school[6]:
-            mynewclass = Class(schoolid = myschoolid, classid = None, gradelevel = myclass[0], classdisplayname = myclass[1])
-            mynewclass.save()
-
 def create_users(userlist):
     for myuser in userlist:
         
@@ -93,7 +45,70 @@ def create_users(userlist):
                 schoolid = newuser.schoolid, 
                 maxbudget = MAX_BUDGET
             )
+
+def load_schools_classes():
+
+    global GLV_SCHOOLID
+    global ITIRR_SCHOOLID
+
+    classes_glv = [
+        (7,'702'),(7,'704'),(7,'706'),
+        (10,'1002'),(10,'1006'),(10,'1007'),
+        (12,'1201'),
+     ]
+    
+    classes_rr = [
+        (6,'601'),(6,'602'),(6,'603'),
+        (7,'701'),(7,'702'),(7,'703'),
+        (8,'801'),(8,'802'),(8,'803'),
+        (9,'901'),(9,'902'),(9,'903'),
+        (12,'1201'),
+    ]
+    
+    schools = [
+#         ('GLV','Guillermo Leon Valencia Colegio (sede integrado)','GLV (Integrado)', 'Calle 15A Nro 7 - 48','Duitama','Boyaca',classes_glv),
+#         ('ITIRR','Instituto Técnico Industrial Rafael Reyes', 'ITIRR', 'Carrera 18 # 23-116','Duitama','Boyaca',classes_rr),
+        {
+            "schoolabbreviation":"GLV",
+            "schooldisplayname":"Guillermo Leon Valencia Colegio (sede integrado)",
+            "address":"Calle 15A Nro 7 - 48",
+            "city":"Duitama",
+            "department":"Boyac" + mychr('a'),
+            "classes":classes_glv
+        },
+        {
+            "schoolabbreviation":"ITIRR",
+            "schooldisplayname":"Instituto Técnico Industrial Rafael Reyes",
+            "address":"Carrera 18 # 23-116",
+            "city":"Duitama",
+            "department":"Boyac" + mychr('a'),
+            "classes":classes_rr
+        },
+    ]
+    
+    for school in schools:
+        myschool = School(
+            schoolid = None, 
+            schooldisplayname = school['schooldisplayname'], 
+            schoolabbreviation = school['schoolabbreviation'], 
+            address = school['address'], 
+            city = school['city'], 
+            department = school['department']
+        )
         
+        # Create school
+        myschoolid = myschool.save()[0]
+
+        if(school['schoolabbreviation'] == "GLV"):
+            GLV_SCHOOLID = myschoolid
+        elif(school['schoolabbreviation'] == "ITIRR"):
+            ITIRR_SCHOOLID = myschoolid
+
+        # Save classes        
+        for myclass in school['classes']:
+            mynewclass = Class(schoolid = myschoolid, classid = None, gradelevel = myclass[0], classdisplayname = myclass[1])
+            mynewclass.save()
+
 def load_users():
     user_list = [
         {"usertype":"SU", "schoolid":None, "firstname":"admin","lastname":"admin"},
@@ -117,7 +132,6 @@ def load_rewards():
             vendor = reward['vendor'],
         ).save()
 
-
 def load_authorization():
     
     ''' User types
@@ -130,39 +144,75 @@ def load_authorization():
     OT - other
     '''
     
-    # Default user roles
-    myrole_super = create_role(name='Super users',description='Full access',usertypelist=['SU'])
-    myrole_admin = create_role(name='Program administrators',description='Access to administer site',usertypelist=['SA'])
-    myrole_staff = create_role(name='Staff',description='School staff',usertypelist=['SF'])
-    myrole_teachers = create_role(name='Teachers',description='Teachers',usertypelist=['TR'])
+    # User roles
     myrole_public = create_role(name='Public',description='All users',publicflag=True)
+    myrole_super = create_role(name='Super user',description='Full access',usertypelist=['SU'])
+    myrole_admin = create_role(name='Site administrator',description='Access to administer site',usertypelist=['SA'])
+    myrole_teachers = create_role(name='Teacher',description='Teachers',usertypelist=['TR'])
+    myrole_staff = create_role(name='Staff',description='School staff',usertypelist=['SF'])
+    myrole_program_admin = create_role(name='Program administrator',description='Program administrator (i.e. buyer, coordinator)',usertypelist=['AD'])
+    myrole_program_coordinator = create_role(name='Program coordinator',description='Coordinate program at a school (usually a teacher)')
+    myrole_program_purchaser = create_role(name='Program purchaser',description='Coordinate purchase and delivery of incentives')
+
+    # Object roles
+    myrole_view_program = create_role(name='view_program',description='View access on program objects',usertypelist=['TR']) # Teachers
+    myrole_edit_program = create_role(name='edit_program',description='Edit access on program objects')
+    myrole_delete_program = create_role(name='delete_program',description='Delete access on program objects',usertypelist=['SU','SA']) # Super user, site admin
     
-    # Default object roles
-    myrole_contract_view = create_role(name='Contract - View',description='View contract',usertypelist=['AD','TR'])
-    myrole_contract_edit = create_role(name='Contract - Edit',description='Edit contract',usertypelist=[])
-    myrole_contract_delete = create_role(name='Contract - Delete',description='Delete contract',usertypelist=['SU','SA'])
-
-    myrole_user_view = create_role(name='User - View',description='View user',publicflag=True)
-    myrole_user_edit = create_role(name='User - Edit',description='Edit user',publicflag=True)
-    myrole_user_delete = create_role(name='User - Delete',description='Delete user',usertypelist=['SU','SA'])
-
     # Default business objects
+    myobj_user = create_object(objectclass='BO',objectname='user')
     myobj_contract = create_object(objectclass='BO',objectname='contract')
     myobj_school = create_object(objectclass='BO',objectname='school')
     myobj_class = create_object(objectclass='BO',objectname='class')
-    myobj_user = create_object(objectclass='BO',objectname='user')
     myobj_reward = create_object(objectclass='BO',objectname='reward')
 
-    # Contract ACLs
-    create_role_ACL(myrole_contract_view,myobj_contract,4) # View
-    create_role_ACL(myrole_contract_edit,myobj_contract,8) # Edit
-    create_role_ACL(myrole_contract_delete,myobj_contract,12) # Delete
+    # Default acls - User type
+    myacllist = json.dumps([
+        
+        # Access - Delete program
+        {"roleid":myrole_delete_program.roleid,"aclinfo": 
+            [
+                {"objectid":myobj_school.objectid,"objectclass":myobj_school.objectclass,"accesslevel":12},     # School - delete
+                {"objectid":myobj_class.objectid,"objectclass":myobj_class.objectclass,"accesslevel":12},       # Class - delete
+                {"objectid":myobj_contract.objectid,"objectclass":myobj_contract.objectclass,"accesslevel":12}, # Contract - delete
+                {"objectid":myobj_reward.objectid,"objectclass":myobj_reward.objectclass,"accesslevel":12},     # Reward - delete
+            ],
+        },
+        
+        # Access - View program
+        {"roleid":myrole_view_program.roleid,"aclinfo": 
+            [
+                {"objectid":myobj_school.objectid,"objectclass":myobj_school.objectclass,"accesslevel":4},     # School - view
+                {"objectid":myobj_class.objectid,"objectclass":myobj_class.objectclass,"accesslevel":4},       # Class - view
+                {"objectid":myobj_contract.objectid,"objectclass":myobj_contract.objectclass,"accesslevel":4}, # Contract - view
+                {"objectid":myobj_reward.objectid,"objectclass":myobj_reward.objectclass,"accesslevel":4},     # Reward - view
+            ],
+        },
+        
+        # Access - Public
+        {"roleid":myrole_public.roleid,"aclinfo": 
+            [
+                {"objectid":myobj_user.objectid,"objectclass":myobj_user.objectclass,"accesslevel":8},          # User - edit (own user)
+            ],
+        },
+        
+        # Access - Super
+        {"roleid":myrole_super.roleid,"aclinfo": 
+            [
+                {"objectid":myobj_user.objectid,"objectclass":myobj_user.objectclass,"accesslevel":12},         # User - delete
+            ],
+        },
+        
+        # Access - Admin
+        {"roleid":myrole_admin.roleid,"aclinfo": 
+            [
+                {"objectid":myobj_user.objectid,"objectclass":myobj_user.objectclass,"accesslevel":10},         # User - create
+            ],
+        },
+    ])
 
-    # User ACLs
-    create_role_ACL(myrole_user_view,myobj_user,4) # View
-    create_role_ACL(myrole_user_edit,myobj_user,8) # Edit
-    create_role_ACL(myrole_user_delete,myobj_user,12) # Delete
-
+    # Save acls
+    create_role_ACL(myrole=None,myobject=None,accesslevel=None,acllist=myacllist)
 
 def load_all():
     

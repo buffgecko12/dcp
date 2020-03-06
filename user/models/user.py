@@ -160,10 +160,10 @@ class UserBadgeManager(models.Manager):
 class MyUser(AbstractBaseUser):
 
     usertype_choices = [
-        ('AD','Administrador de programa'),
-        ('SF','Administrador de colegio'),
+        ('SA','Administrador del sitio'),
+        ('AD','Administrador del programa'),
+        ('SF','Administrador del colegio'),
         ('TR','Docente'),
-        ('ST','Estudiante'),
         ('OT','Otro'),
     ]
 

@@ -72,7 +72,8 @@ class RoleACLManager(models.Manager):
             myRoleACL.roleid,
             myRoleACL.objectid,
             myRoleACL.objectclass,
-            myRoleACL.accesslevel
+            myRoleACL.accesslevel,
+            getattr(myRoleACL,'acllist',None) # batch list
             )
         )[0] # Return ID
 

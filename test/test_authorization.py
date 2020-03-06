@@ -2,6 +2,8 @@ import unittest
 from test_setup import *
 from user.models.authorization import *
 
+import json
+
 class testAuthorization(unittest.TestCase):
 
     @classmethod
@@ -137,6 +139,37 @@ class testAuthorization(unittest.TestCase):
         self.assertTrue(refresh(self.myroleacl1))
         self.myroleacl1.delete()
         self.assertFalse(refresh(self.myroleacl1))
+
+    def testCreateRoleACLBatch(self):
+        
+        self.assertFalse(self.myteacher1.check_access(self.myobject1.objectid,self.myobject1.objectclass,8)) # Teacher - no edit access
+        self.assertFalse(self.myadmin.check_access(self.myobject1.objectid,self.myobject1.objectclass,1)) # Admin - no edit access
+        
+        # Grant ACLs on contracts
+        myacllist = json.dumps([
+            # Teachers
+            {"roleid":self.myrole_teachers.roleid, "aclinfo":
+                [
+                    {"objectid":self.myobject1.objectid,"objectclass":self.myobject1.objectclass,"accesslevel":8}, # object1 - edit
+                ]
+            },
+            
+            # Admin
+            {"roleid":self.myrole_admin.roleid, "aclinfo":
+                [
+                    {"objectid":self.myobject1.objectid,"objectclass":self.myobject1.objectclass,"accesslevel":12}, # object1 - delete
+                ]
+            },
+        ])
+
+        # Batch save
+        create_role_ACL(myrole=None,myobject=None,accesslevel=None,acllist=myacllist) # Read access to "Public"
+        
+        self.assertTrue(self.myteacher1.check_access(self.myobject1.objectid,self.myobject1.objectclass,8)) # Teacher - no edit access
+        self.assertTrue(self.myadmin.check_access(self.myobject1.objectid,self.myobject1.objectclass,12)) # Admin - no edit access
+        
+        # Delete ACLs
+        RoleACL(roleid=None,objectid=self.myobject1.objectid,objectclass=self.myobject1.objectclass).delete()
 
     def testCreateObject(self):
         pass
