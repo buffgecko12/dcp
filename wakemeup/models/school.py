@@ -157,8 +157,8 @@ class TeacherClassManager(models.Manager):
 class School(MyModel):
     
     schoolid = models.IntegerField(primary_key=True, verbose_name='ID') # Using PK to avoid clashes with inherited tables
-    schoolabbreviation = models.CharField(max_length=25, verbose_name='Abreviatura')
-    schooldisplayname = models.CharField(max_length=100, verbose_name='Colegio')
+    schoolabbreviation = models.CharField(max_length=25, verbose_name='Colegio')
+    schooldisplayname = models.CharField(max_length=100, verbose_name='Nombre completo')
     address = models.CharField(max_length=100, verbose_name='Direcci' + mychr('o') + 'n')
     city = models.CharField(max_length=100, verbose_name='Ciudad')
     department = models.CharField(max_length=100, verbose_name='Departamento')
