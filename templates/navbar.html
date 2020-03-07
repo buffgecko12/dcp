@@ -42,7 +42,6 @@
 							{% endif %}
 							{% if user.is_admin %}
 								<a class="dropdown-item" href="{% url 'wakemeup:list_object' objecttype='teacher' %}">Docentes</a>
-								<a class="dropdown-item" href="{% url 'wakemeup:list_object' objecttype='student' %}">Estudiantes</a>
 							{% endif %}
 							<a class="dropdown-item" href="{% url 'wakemeup:list_object' objecttype='reward' %}">Premios</a>
 							<div class="dropdown-divider"></div>

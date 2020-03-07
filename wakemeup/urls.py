@@ -13,17 +13,17 @@ urlpatterns = [
     url(r'^contract/(?P<contractid>(\d+|new))$', views.create_contract, name="create_contract"),
 
     # Admin
-    url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward))(/)?$', views.list_object, name="list_object"), # Object list
-    url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward))/(?P<objectid>\d+)$', views.edit_object, name="edit_object"), # Edit object
+    url(r'^admin/(?P<objecttype>(school|class|teacher|reward))(/)?$', views.list_object, name="list_object"), # Object list
+    url(r'^admin/(?P<objecttype>(school|class|teacher|reward))/(?P<objectid>\d+)$', views.edit_object, name="edit_object"), # Edit object
     url(r'^admin/(?P<objecttype>(school|class|reward))/(?P<objectid>new)$', views.edit_object, name="edit_object"), # New object
-    url(r'^admin/(?P<objecttype>(school|class|teacher|student|reward|contract|usergroup))/(?P<objectid>\d+)/delete$', views.delete_object, name="delete_object"), # Delete object    
+    url(r'^admin/(?P<objecttype>(school|class|teacher|reward|contract))/(?P<objectid>\d+)/delete$', views.delete_object, name="delete_object"), # Delete object    
 
     # User 
     url(r'^admin/create_user', views.create_user, name="create_user"),
     url(r'^myaccount', views.myaccount, name="myaccount"),
 
     # Misc
-    url(r'^admin/img/(?P<objecttype>(teacher|student))/(?P<objectid>\d+)/preview$', views.preview_image, name="preview_image"), # Image preview
+    url(r'^admin/img/(?P<objecttype>(teacher))/(?P<objectid>\d+)/preview$', views.preview_image, name="preview_image"), # Image preview
     url(r'^admin/file/(?P<fileid>\d+)$', views.download_file_fromdb, name='download_file_fromdb'), # File download
     url(r'^about$', views.about, name='about'),
 
