@@ -252,22 +252,6 @@ def delete_object(request, objecttype, objectid):
             elif(objecttype == 'class'):
                 myobject = Class.objects.get(objectid)
             
-            elif(objecttype == 'usergroup'):
-
-                # Delete if admin                
-                if(request.user.is_admin()):
-                    myobject = UserGroup.objects.get(objectid)
-
-                # Verify user access
-                elif(request.user.usertype == "TR"):
-                    usergroup = UserGroup.objects.get(groupuserid = objectid)
-                    myteacher = Teacher.objects.get(teacheruserid = request.user.userid)
-
-                    # Allow delete if user group belongs to one of current user's classes
-                    if(usergroup and myteacher):
-                        if(myteacher.get_teacher_classes(classid = usergroup.classid)):
-                            myobject = UserGroup.objects.get(objectid)
-                    
             elif(objecttype == 'teacher'):
                 myobject = Teacher.objects.get(objectid)
             
@@ -375,7 +359,7 @@ def create_contract(request, contractid):
 
         if(mycontract):
             # Populate existing form only for "Draft" contracts and if user is contract's owner or super / admin user
-            if(mycontract.teacheruserid == request.user.userid or request.user.userrole in PERM_ADMIN):
+            if(mycontract.teacheruserid == request.user.userid or request.user.is_admin): # TO-DO: Update to check permissions
 
                 form = ContractForm(request=request, contractid=contractid,
                     initial = {
@@ -409,10 +393,10 @@ def addreward(request):
         if form.is_valid():
             myreward = Reward(
                 rewardid = form.cleaned_data.get('rewardid'),
+                vendor = form.cleaned_data.get('vendor'),
                 rewarddisplayname = form.cleaned_data.get('rewarddisplayname'),
                 rewarddescription = form.cleaned_data.get('rewarddescription'),
                 rewardvalue = form.cleaned_data.get('rewardvalue'),
-                createdbyuserid=request.user.userid
             )
 
             # Save object
@@ -448,12 +432,6 @@ def list_object(request, objecttype):
 
     elif objecttype == 'reward':
 
-        # Only show rewards created by logged on teacher
-        if request.user.usertype == 'TR':
-            createdbyuserid = request.user.userid
-        else:
-            createdbyuserid = None
-
         # Look up rewards
         objectSet = RewardsTable(Reward.objects.get_rewards())
 
@@ -475,13 +453,8 @@ def edit_object(request, objecttype, objectid):
     elif objecttype == 'class':
         objectForm = ClassForm
 
-        myteacherclass = None
-
         # Make sure teacher has access to class
-        myteacher = Teacher.objects.get(teacheruserid = request.user.userid)
-        
-        if(myteacher):
-            myteacherclass = myteacher.get_teacher_classes(classid=objectid)
+        myteacherclass = TeacherClass.objects.get_teacher_classes(teacheruserid=request.user.userid,classid=objectid)
         
         # Teachers can only view their own information
         if not (
@@ -490,14 +463,7 @@ def edit_object(request, objecttype, objectid):
         ):
             return redirect_home()
 
-        if(objectid != "new"):
-            usergroupstable = UserGroupsTable(UserGroup.objects.get_user_groups(classid = objectid))
-            RequestConfig(request).configure(usergroupstable)
-        else:
-            usergroupstable = None
-
         contextkwargs.update({
-            'studentgroups':usergroupstable, 
             'classid':objectid
         })
         
@@ -511,29 +477,11 @@ def edit_object(request, objecttype, objectid):
         ):
             return redirect_home()
 
-    elif objecttype == 'student':
-        objectForm = StudentForm
-
-        # Students can only view their own information
-        if not (
-            (request.user.usertype == 'ST' and request.user.userid == int(objectid)) or
-            request.user.is_admin()
-        ):
-            return redirect_home()
-
     elif objecttype == 'reward':
         objectForm = RewardForm
 
-        # Try to lookup object creator
-        try:
-            myreward = Reward.objects.get(rewardid=int(objectid))
-            createdbyuserid = myreward.createdbyuserid
-        except:
-            createdbyuserid = None
-        
         # Teachers can only view their own rewards
         if not (
-            (request.user.usertype == 'TR' and request.user.userid == createdbyuserid) or
             request.user.is_admin() or
             objectid == 'new' # Used in case of adding a reward
         ):
@@ -559,37 +507,37 @@ def edit_object(request, objecttype, objectid):
             if(objecttype == 'school'):
 
                 # Capture data use policy file info
-                originalpolicyfileid = request.POST.get("datausepolicyfileid") # Read in original fileid
-                
-                mydatausepolicyfileid = originalpolicyfileid or None
-                mydatausepolicyfile = request.FILES.get('datausepolicyfile')
+#                 originalpolicyfileid = request.POST.get("datausepolicyfileid") # Read in original fileid
+#                 
+#                 mydatausepolicyfileid = originalpolicyfileid or None
+#                 mydatausepolicyfile = request.FILES.get('datausepolicyfile')
 
                 # New file was uploaded
-                if(mydatausepolicyfile):
-
-                    # Read in binary data
-                    mydatafile = convert_form_binary_to_db(mydatausepolicyfile)
-                    
-                    # Create new file object
-                    myfile = File(
-                        fileid = None,
-                        filename = get_file_name_info(mydatausepolicyfile.name)['file_name'],
-                        fileextension = get_file_name_info(mydatausepolicyfile.name)['file_extension'],
-                        filesize = mydatausepolicyfile.size,
-                        filetype = mydatausepolicyfile.content_type,
-#                         description = 'File description',
-                        filedata = psycopg2.Binary(mydatafile),
-                    )
-                    
-                    # Save new file and capture fileid
-                    mydatausepolicyfileid = myfile.save()
-                    
-                    # Delete old file (if exists)
-                    if(originalpolicyfileid):
-                        File(fileid=originalpolicyfileid).delete()
+#                 if(mydatausepolicyfile):
+# 
+#                     # Read in binary data
+#                     mydatafile = convert_form_binary_to_db(mydatausepolicyfile)
+#                     
+#                     # Create new file object
+#                     myfile = File(
+#                         fileid = None,
+#                         filename = get_file_name_info(mydatausepolicyfile.name)['file_name'],
+#                         fileextension = get_file_name_info(mydatausepolicyfile.name)['file_extension'],
+#                         filesize = mydatausepolicyfile.size,
+#                         filetype = mydatausepolicyfile.content_type,
+# #                         description = 'File description',
+#                         filedata = psycopg2.Binary(mydatafile),
+#                     )
+#                     
+#                     # Save new file and capture fileid
+#                     mydatausepolicyfileid = myfile.save()
+#                     
+#                     # Delete old file (if exists)
+#                     if(originalpolicyfileid):
+#                         File(fileid=originalpolicyfileid).delete()
                 
                 # Process guardian approval policy
-                guardianapprovalpolicy = json.dumps({'requiredfields':form.cleaned_data.get('guardianapprovalpolicy')})
+#                 guardianapprovalpolicy = json.dumps({'requiredfields':form.cleaned_data.get('guardianapprovalpolicy')})
                 
                 myobject = objectClass(
                     schoolid = form.cleaned_data.get('schoolid'),
@@ -598,8 +546,8 @@ def edit_object(request, objecttype, objectid):
                     address = form.cleaned_data.get('address'),
                     city = form.cleaned_data.get('city'),
                     department = form.cleaned_data.get('department'),
-                    datausepolicyfileid = mydatausepolicyfileid,
-                    guardianapprovalpolicy = guardianapprovalpolicy
+#                     datausepolicyfileid = mydatausepolicyfileid,
+#                     guardianapprovalpolicy = guardianapprovalpolicy
                 )
 
             elif(objecttype == 'class'):
@@ -662,10 +610,10 @@ def edit_object(request, objecttype, objectid):
                 
                 myobject = objectClass(
                     rewardid = form.cleaned_data.get('rewardid'),
+                    vendor = form.cleaned_data.get('vendor'),
                     rewarddisplayname = form.cleaned_data.get('rewarddisplayname'),
                     rewarddescription = form.cleaned_data.get('rewarddescription'),
                     rewardvalue = form.cleaned_data.get('rewardvalue'),
-                    createdbyuserid = request.user.userid,
                 )
 
             # Save object
@@ -700,8 +648,8 @@ def edit_object(request, objecttype, objectid):
                         'address': myobject.address,
                         'city': myobject.city,
                         'department': myobject.department,
-                        'datausepolicyfileid':myobject.datausepolicyfileid,
-                        'guardianapprovalpolicy':myobject.guardianapprovalpolicy.get('requiredfields') if myobject.guardianapprovalpolicy else None
+#                         'datausepolicyfileid':myobject.datausepolicyfileid,
+#                         'guardianapprovalpolicy':myobject.guardianapprovalpolicy.get('requiredfields') if myobject.guardianapprovalpolicy else None
                     }
                 )
             elif(objecttype == 'class'):
@@ -748,6 +696,7 @@ def edit_object(request, objecttype, objectid):
                 form = objectForm(
                     initial = {
                         'rewardid': myobject.rewardid,
+                        'vendor': myobject.vendor,
                         'rewarddisplayname': myobject.rewarddisplayname,
                         'rewarddescription': myobject.rewarddescription,
                         'rewardvalue': myobject.rewardvalue,
@@ -767,7 +716,7 @@ def get_contract(request, contractid):
     # Make sure contract exists
     if(mycontract):
         # Check contract is not a draft and user has access
-        if(mycontract.contractstatus != 'D' and (request.user.userid in (mycontract.get_users()) or request.user.userrole in PERM_ADMIN)):
+        if(mycontract.contractstatus != 'D' and (request.user.userid in (mycontract.get_users())) or request.user.is_admin): # TO-DO: Check permissions 
             mycontract.contractvalidperiod_disp = display_timestamp_range(mycontract.contractvalidperiod) # Format for display
             classinfo = Class.objects.get(classid=mycontract.classid)
             
@@ -791,7 +740,7 @@ def get_contract(request, contractid):
 def list_contract(request):
     
     # Determine which contracts to display
-    if request.user.userrole in PERM_ADMIN:
+    if request.user.is_admin: # TO-DO: Update for permissions check
         myargs = {} # Return all contracts
     elif(request.user.usertype == 'TR'):
         myargs = {'teacheruserid':request.user.userid} # Return only contracts tied to teacher
@@ -867,7 +816,6 @@ def create_user(request):
                 lastname = form.cleaned_data.get('lastname'),
 #                 defaultsignaturescanfile = form.cleaned_data.get('defaultsignaturescanfile'),
                 emailaddress = myemailaddress,
-#                 userrole = form.cleaned_data.get('userrole'),
             )
 
             # Send confirmation / review e-mail (only if e-mail provided)
