@@ -143,7 +143,15 @@ def load_authorization():
     SF - school staff
     OT - other
     '''
-    
+
+    # Default business objects
+    myobj_user = create_object(objectclass='BO',objectname='user')
+    myobj_contract = create_object(objectclass='BO',objectname='contract')
+    myobj_school = create_object(objectclass='BO',objectname='school')
+    myobj_class = create_object(objectclass='BO',objectname='class')
+    myobj_reward = create_object(objectclass='BO',objectname='reward')
+    myobj_teacher = create_object(objectclass='BO',objectname='teacher')
+
     # User roles
     myrole_public = create_role(name='Public',description='All users',publicflag=True)
     myrole_super = create_role(name='Super user',description='Full access',usertypelist=['SU'])
@@ -159,51 +167,48 @@ def load_authorization():
     myrole_edit_program = create_role(name='edit_program',description='Edit access on program objects')
     myrole_delete_program = create_role(name='delete_program',description='Delete access on program objects',usertypelist=['SU','SA']) # Super user, site admin
     
-    # Default business objects
-    myobj_user = create_object(objectclass='BO',objectname='user')
-    myobj_contract = create_object(objectclass='BO',objectname='contract')
-    myobj_school = create_object(objectclass='BO',objectname='school')
-    myobj_class = create_object(objectclass='BO',objectname='class')
-    myobj_reward = create_object(objectclass='BO',objectname='reward')
-
     # Default acls - User type
     myacllist = json.dumps([
-        
-        # Access - Delete program
-        {"roleid":myrole_delete_program.roleid,"aclinfo": 
-            [
-                {"objectid":myobj_school.objectid,"objectclass":myobj_school.objectclass,"accesslevel":12},     # School - delete
-                {"objectid":myobj_class.objectid,"objectclass":myobj_class.objectclass,"accesslevel":12},       # Class - delete
-                {"objectid":myobj_contract.objectid,"objectclass":myobj_contract.objectclass,"accesslevel":12}, # Contract - delete
-                {"objectid":myobj_reward.objectid,"objectclass":myobj_reward.objectclass,"accesslevel":12},     # Reward - delete
-            ],
-        },
-        
-        # Access - View program
+
+        # DEFAULT PERMISSIONS
+        # View program (teacher)
         {"roleid":myrole_view_program.roleid,"aclinfo": 
             [
                 {"objectid":myobj_school.objectid,"objectclass":myobj_school.objectclass,"accesslevel":4},     # School - view
                 {"objectid":myobj_class.objectid,"objectclass":myobj_class.objectclass,"accesslevel":4},       # Class - view
                 {"objectid":myobj_contract.objectid,"objectclass":myobj_contract.objectclass,"accesslevel":4}, # Contract - view
                 {"objectid":myobj_reward.objectid,"objectclass":myobj_reward.objectclass,"accesslevel":4},     # Reward - view
+                {"objectid":myobj_teacher.objectid,"objectclass":myobj_teacher.objectclass,"accesslevel":4},   # Teacher - view
             ],
         },
         
-        # Access - Public
+        # Delete program (super user, site admin)
+        {"roleid":myrole_delete_program.roleid,"aclinfo": 
+            [
+                {"objectid":myobj_school.objectid,"objectclass":myobj_school.objectclass,"accesslevel":12},     # School - delete
+                {"objectid":myobj_class.objectid,"objectclass":myobj_class.objectclass,"accesslevel":12},       # Class - delete
+                {"objectid":myobj_contract.objectid,"objectclass":myobj_contract.objectclass,"accesslevel":12}, # Contract - delete
+                {"objectid":myobj_reward.objectid,"objectclass":myobj_reward.objectclass,"accesslevel":12},     # Reward - delete
+                {"objectid":myobj_teacher.objectid,"objectclass":myobj_teacher.objectclass,"accesslevel":12},   # Teacher - view
+            ],
+        },
+        
+        # CUSTOM PERMISSIONS
+        # Public
         {"roleid":myrole_public.roleid,"aclinfo": 
             [
                 {"objectid":myobj_user.objectid,"objectclass":myobj_user.objectclass,"accesslevel":8},          # User - edit (own user)
             ],
         },
         
-        # Access - Super
+        # Super user
         {"roleid":myrole_super.roleid,"aclinfo": 
             [
                 {"objectid":myobj_user.objectid,"objectclass":myobj_user.objectclass,"accesslevel":12},         # User - delete
             ],
         },
         
-        # Access - Admin
+        # Site admin
         {"roleid":myrole_admin.roleid,"aclinfo": 
             [
                 {"objectid":myobj_user.objectid,"objectclass":myobj_user.objectclass,"accesslevel":10},         # User - create
