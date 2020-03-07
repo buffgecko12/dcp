@@ -113,7 +113,7 @@ class SignupForm(UserCreationForm):
     lastname = forms.CharField(label='Apellido(s)', max_length=100)
     usertype = forms.ChoiceField(label='Tipo de usuario',choices=get_user_model().usertype_choices)
     schoolid = forms.ChoiceField(label='Colegio', widget=forms.Select, required=False)
-    classid = forms.CharField(label='Curso', widget=forms.SelectMultiple, required=False)
+    classid = forms.CharField(label='Curso(s)', widget=forms.SelectMultiple, required=False)
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
 
     # Define constructor
@@ -186,7 +186,7 @@ class SignupForm(UserCreationForm):
 class SchoolForm(forms.Form):
 
     # Store original data use policy fileid
-    datausepolicyfileid = forms.IntegerField(required=False, widget=forms.HiddenInput())
+#     datausepolicyfileid = forms.IntegerField(required=False, widget=forms.HiddenInput())
 
     # Define form fields
     schoolid = forms.IntegerField(label='Codigo de colegio', required=False, widget=forms.HiddenInput())
@@ -196,19 +196,17 @@ class SchoolForm(forms.Form):
     city = forms.CharField(label='Ciudad',max_length=100)
     department = forms.CharField(label='Departamento',max_length=100)
     
-    datausepolicyfile = forms.FileField(label='Politica de uso de datos', required=False)
-
-    # Guardian approval policy
-    guardianapprovalpolicy = forms.MultipleChoiceField(
-        required=False, 
-        label='Politica de aprobaci' + mychr('o') + 'n de tutor',
-        choices = [
-            ("idfullname","Nombre de tutor"),
-            ("idnumber","Numero de cedula"),
-            ("idissuelocation","Lugar de expedici" + mychr('o') + "n"),
-            ("idissuedate","Fecha de expedici" + mychr('o') + "n")
-        ]
-    )
+#     # Guardian approval policy
+#     guardianapprovalpolicy = forms.MultipleChoiceField(
+#         required=False, 
+#         label='Politica de aprobaci' + mychr('o') + 'n de tutor',
+#         choices = [
+#             ("idfullname","Nombre de tutor"),
+#             ("idnumber","Numero de cedula"),
+#             ("idissuelocation","Lugar de expedici" + mychr('o') + "n"),
+#             ("idissuedate","Fecha de expedici" + mychr('o') + "n")
+#         ]
+#     )
 
     # Define constructor
     def __init__ (self, *args, **kwargs):
@@ -228,21 +226,21 @@ class SchoolForm(forms.Form):
         self.helper.layout = Layout(
             Fieldset(
                 'Crear/editar colegio',
-                'datausepolicyfileid',
+#                 'datausepolicyfileid',
                 'schoolid',
                 'schooldisplayname',
                 'schoolabbreviation',
                 'address',
                 'city',
                 'department',
-                'datausepolicyfile',
+#                 'datausepolicyfile',
                 InlineCheckboxes('guardianapprovalpolicy'),
             ),
             getAdminFormActions(cancel_url = 'wakemeup:list_object', cancel_context='objecttype="school"')
         )
 
-    def clean_guardianapprovalpolicy(self):
-        return self.cleaned_data.get('guardianapprovalpolicy')
+#     def clean_guardianapprovalpolicy(self):
+#         return self.cleaned_data.get('guardianapprovalpolicy')
 
     # Specify model
     class Meta:
@@ -296,16 +294,16 @@ class ClassForm(forms.Form):
         # Set form layout
         self.helper.layout = Layout(
             Fieldset(
-                'Crear/editar curso',
+                'Crear / Editar curso',
                 'classid',
                 'schoolid',
                 Field('classdisplayname', css_class='w-50'),
                 Field('gradelevel', css_class='w-50'),
             ),
-            Fieldset(
-                """Grupos de estudiante <span id="add_usergroup"><a href="#"><i class="fas fa-plus-circle" style="font-size:1.125em;vertical-align:middle"></i></a></span>""",
-                HTML("""{% if classid != "new" %} {% load django_tables2 %}{% render_table studentgroups %} {% endif %}"""),
-            ),
+#             Fieldset(
+#                 """Grupos de estudiante <span id="add_usergroup"><a href="#"><i class="fas fa-plus-circle" style="font-size:1.125em;vertical-align:middle"></i></a></span>""",
+#                 HTML("""{% if classid != "new" %} {% load django_tables2 %}{% render_table studentgroups %} {% endif %}"""),
+#             ),
             getAdminFormActions(cancel_url = 'wakemeup:list_object', cancel_context='objecttype="class"') if not request.user.usertype == "TR" else None
         )
 
@@ -388,6 +386,7 @@ class RewardForm(forms.Form):
     # Define form fields
     rewardid = forms.IntegerField(widget=forms.HiddenInput,required=False)
 
+    vendor = forms.CharField(max_length=100,label='Vendedor')
     rewarddisplayname = forms.CharField(max_length=100,label='Premio')
     rewarddescription = forms.CharField(max_length=500,label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}))
     rewardvalue = forms.IntegerField(label='Valor',localize=True)
@@ -409,7 +408,8 @@ class RewardForm(forms.Form):
         # Set form layout
         self.helper.layout = Layout(
             Fieldset(
-                'Editar premio',
+                'Crear / Editar premio',
+                'vendor',
                 'rewardid',
                 'rewarddisplayname',
                 'rewarddescription',
@@ -421,7 +421,7 @@ class RewardForm(forms.Form):
     # Specify model
     class Meta:
         model = Reward
-        fields = ('rewardid','rewarddisplayname','rewarddescription','rewardvalue')
+        fields = ('vendor','rewardid','rewarddisplayname','rewarddescription','rewardvalue')
 
 class ContractForm(forms.Form):
 

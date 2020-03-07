@@ -33,26 +33,26 @@ class SchoolsTable(tables.Table):
 
     objectid = 'schoolid'
 
-    datausepolicyfileid = tables.TemplateColumn(
-        template_name='wakemeup/admin/fields/db_file.html',
-#         extra_context=kwargs,
-        verbose_name='Politica de uso de datos',
-        accessor=A(objectid)
-    )
-
-    guardianapprovalpolicy = tables.TemplateColumn(
-        template_name='wakemeup/admin/fields/guardian_policy.html',
-#         extra_context=kwargs,
-        verbose_name='Politica de aprobaci' + mychr('o') + 'n de tutor',
-        accessor=A(objectid)
-    )
+#     datausepolicyfileid = tables.TemplateColumn(
+#         template_name='wakemeup/admin/fields/db_file.html',
+# #         extra_context=kwargs,
+#         verbose_name='Politica de uso de datos',
+#         accessor=A(objectid)
+#     )
+# 
+#     guardianapprovalpolicy = tables.TemplateColumn(
+#         template_name='wakemeup/admin/fields/guardian_policy.html',
+# #         extra_context=kwargs,
+#         verbose_name='Politica de aprobaci' + mychr('o') + 'n de tutor',
+#         accessor=A(objectid)
+#     )
 
     manage_buttons = getManageButtons(accessor=objectid)
     
     class Meta:
         model = School
         empty_text = EMPTY_TEXT
-        exclude = ('schoolid',)
+        fields = ('schoolabbreviation','schooldisplayname','address','city','department')
         
 class ClassesTable(tables.Table):
 
@@ -60,10 +60,12 @@ class ClassesTable(tables.Table):
 
     manage_buttons = getManageButtons(accessor=objectid)
 
+    teacherdisplayname = tables.Column(verbose_name="Docente")
+
     class Meta:
         model = Class
         empty_text = EMPTY_TEXT
-        exclude = ('schoolid','classid')
+        fields = ('schoolabbreviation','gradelevel','classdisplayname','teacherdisplayname')
 
 class TeachersTable(tables.Table):
 
@@ -74,12 +76,14 @@ class TeachersTable(tables.Table):
         'objectid': A(objectid)
     }
 
-    defaultsignaturescanfile = tables.TemplateColumn(
-        template_name='wakemeup/admin/fields/display_image.html',
-        extra_context=kwargs,
-        verbose_name='Firma',
-        accessor=A(objectid)
-    )
+    userdisplayname = tables.Column(verbose_name="Docente")
+
+#     defaultsignaturescanfile = tables.TemplateColumn(
+#         template_name='wakemeup/admin/fields/display_image.html',
+#         extra_context=kwargs,
+#         verbose_name='Firma',
+#         accessor=A(objectid)
+#     )
 
     classinfo = tables.TemplateColumn(
         template_name='wakemeup/admin/fields/teacher_classes.html',
@@ -93,8 +97,7 @@ class TeachersTable(tables.Table):
     class Meta:
         model = Teacher
         empty_text = EMPTY_TEXT
-        exclude = ('teacheruserid','reputationvalue','schoolid','profilepictureid')
-        sequence = ('firstname','lastname','emailaddress','schooldisplayname','classinfo')
+        fields = ('userdisplayname','emailaddress','schooldisplayname','classinfo')
 
 class RewardsTable(tables.Table):
 
@@ -105,16 +108,11 @@ class RewardsTable(tables.Table):
         verbose_name='Valor',
     )
     
-    globalflag = tables.TemplateColumn(
-        template_name='wakemeup/admin/fields/rewardtype.html',
-        verbose_name='Tipo'
-    )
-    
     manage_buttons = getManageButtons(accessor=objectid)
 
     class Meta:
         model = Reward
-        exclude = ('rewardid','createdbyuserid')
+        fields = ('vendor','rewarddisplayname','rewarddescription','rewardvalue')
         empty_text = EMPTY_TEXT
 
 class ContractsTable(tables.Table):
