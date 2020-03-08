@@ -60,7 +60,8 @@
 			{% if user.is_authenticated %}
 			
 				<!-- REPUTATION -->
-				<li class="nav-item">
+<!--				<li class="nav-item"> TO-DO: Restore when ready --> 
+				<li class="nav-item" style="display:none">
 					<a class="nav-link" href="{% url 'wakemeup:myaccount' %}#reputation" id="ReputationValueLink" title="Reputaci&#243;n">
 						<h4 style="display:inline;vertical-align:middle">{{ user.reputationvalue }}</h4>
 						{% if userinfo.reputationvaluedelta != 0 %}
@@ -72,7 +73,8 @@
 				</li>
 				
 				<!--  NOTIFICATIONS -->
-				<li class="nav-item dropdown" id="NotificationInboxDropdown">
+<!--				<li class="nav-item dropdown" id="NotificationInboxDropdown"> TO-DO: Restore when ready -->
+				<li class="nav-item dropdown" id="NotificationInboxDropdown" style="display:none">
 				
 					<!-- Notifications - Inbox icon -->
 					<a 
