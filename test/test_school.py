@@ -16,8 +16,8 @@ class testSchool(unittest.TestCase):
         self.myschoolcalendar1 = create_school_calendar(schoolid=self.myschool1.schoolid,itemtype='SP',itemdate=date(2020,3,1))
         self.myschoolcalendar2 = create_school_calendar(schoolid=self.myschool1.schoolid,itemtype='EP',itemdate=date(2020,11,1))
 
-        self.myschoolreward1 = create_school_reward(schoolid=self.myschool1.schoolid,rewardid=self.myreward1.rewardid)
-        self.myschoolreward2 = create_school_reward(schoolid=self.myschool1.schoolid,rewardid=self.myreward1.rewardid)
+        self.myschoolreward1 = create_school_reward(schoolid=self.myschool1.schoolid,rewardid=self.myreward1.rewardid,rewardvalue=999)
+        self.myschoolreward2 = create_school_reward(schoolid=self.myschool1.schoolid,rewardid=self.myreward2.rewardid)
     
     def testCreateSchool(self):
         self.assertTrue(self.myschool1.schoolid)
@@ -64,11 +64,17 @@ class testSchool(unittest.TestCase):
         pass
 
     def testGetSchoolReward(self):
+
+        myreward = SchoolReward.objects.get(schoolid=self.myschool1.schoolid,rewardid=self.myreward1.rewardid)
         
-        self.assertTrue(SchoolReward.objects.get(schoolid=self.myschool1.schoolid,rewardid=self.myreward1.rewardid))
+        self.assertTrue(myreward)
         self.assertTrue(SchoolReward.objects.get_school_rewards(rewardid=self.myreward1.rewardid))
         self.assertTrue(SchoolReward.objects.all())
-        
+
+        # Check reward values
+        self.assertEqual(myreward.rewardvalue,999) # User-provided
+        self.assertEqual(SchoolReward.objects.get(schoolid=self.myschool1.schoolid,rewardid=self.myreward2.rewardid).rewardvalue,5000) # Default
+
     def testUpdateSchoolReward(self):
 
         # Delete rewards and verify

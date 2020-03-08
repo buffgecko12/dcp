@@ -115,7 +115,8 @@ class SchoolRewardManager(models.Manager):
                 mySchoolReward.schoolid,
                 mySchoolReward.rewardid,
                 rewardidlist,
-                mySchoolReward.schoolyear or DEFAULT_SCHOOL_YEAR
+                mySchoolReward.schoolyear or DEFAULT_SCHOOL_YEAR,
+                mySchoolReward.rewardvalue
             )
          )
          
@@ -180,6 +181,7 @@ class SchoolReward(School):
      
     rewardid = models.IntegerField(primary_key=True) # Dummy field
     schoolyear = models.SmallIntegerField(verbose_name='School Year')
+    rewardvalue = models.IntegerField(verbose_name='Valor')
  
     objects = SchoolRewardManager()
     

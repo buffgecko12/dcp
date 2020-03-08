@@ -92,9 +92,9 @@ def create_school_calendar(schoolid = None, schoolyear = None, itemdate = date.t
     myschoolcalendar.save()
     return myschoolcalendar
 
-def create_school_reward(schoolid, rewardid, schoolyear = None):
+def create_school_reward(schoolid, rewardid, schoolyear = None, rewardvalue = 5000):
     
-    myschoolreward = SchoolReward(schoolid = schoolid, rewardid = rewardid, schoolyear = schoolyear)
+    myschoolreward = SchoolReward(schoolid=schoolid, rewardid=rewardid, schoolyear=schoolyear, rewardvalue=rewardvalue)
     myschoolreward.save()
     return myschoolreward
 
