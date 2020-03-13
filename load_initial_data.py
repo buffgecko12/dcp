@@ -121,7 +121,7 @@ def load_rewards():
     reward_list = [
         {"rewarddisplayname":"Tiquete al cine", "rewarddescription":"Tiquete al cine.", "rewardvalue":6500, "vendor":"Innovo"},
         {"rewarddisplayname":"Hamburguesa", "rewarddescription":"Hamburguesa y papas y gaseosa.", "rewardvalue":6000,"vendor":"Cowfish"},
-        {"rewarddisplayname":"B" + mychr("a") + "lon de f" + mychr("u") + "tbol", "rewarddescription": "B" + mychr("a") + "lon de f" + mychr("u") + "tbol", "rewardvalue":15000,"vendor":None}
+        {"rewarddisplayname":"B" + mychr("a") + "lon de f" + mychr("u") + "tbol", "rewarddescription": "B" + mychr("a") + "lon de f" + mychr("u") + "tbol", "rewardvalue":15000,"vendor":'Varios'}
     ]
 
     for reward in reward_list:
