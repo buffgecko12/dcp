@@ -109,12 +109,12 @@ class SchoolRewardManager(models.Manager):
     def get(self, schoolid, rewardid):
         return get_data_pk(self, 'SP_DCPGetSchoolReward(%s,%s,%s)', (schoolid, rewardid, None))
      
-    def save(self, mySchoolReward, rewardidlist = None):
+    def save(self, mySchoolReward, rewardinfo = None):
         return save_data('SP_DCPUpsertSchoolReward',
             (
                 mySchoolReward.schoolid,
                 mySchoolReward.rewardid,
-                rewardidlist,
+                rewardinfo,
                 mySchoolReward.schoolyear or DEFAULT_SCHOOL_YEAR,
                 mySchoolReward.rewardvalue
             )
