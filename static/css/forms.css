@@ -1,0 +1,43 @@
+/* Condense table rows */
+.table-condensed>tbody>tr>th, 
+.table-condensed>tbody>tr>td,
+.table-condensed>thead>tr>th, 
+.table-condensed>thead>tr>td
+{
+	padding: 2px;
+}	
+
+/* Centered checkboxes */
+.dcp-admin-form input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin: 0;
+  vertical-align: center;
+  position: relative;
+  top: 10px;
+  *overflow: hidden;
+}
+
+/* Text boxes*/
+.dcp-admin-form input[type="text"] {
+  width: 200px;
+  height: 30px;
+  padding: 5px;
+  vertical-align: bottom;
+  position: relative;
+  top: 5px;
+}
+
+/* Number inputs*/
+.dcp-admin-form input[type="number"] {
+  vertical-align: center;
+  width: 6em;
+  padding: 5px;
+  position: relative;
+}
+
+.dcp-admin-form select {
+    max-width: 13em;
+    min-width: 13em;
+}

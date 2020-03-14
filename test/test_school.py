@@ -1,5 +1,6 @@
 import unittest
 from test_setup import *
+import json
 
 from wakemeup.models.school import School, SchoolReward
 
@@ -83,8 +84,17 @@ class testSchool(unittest.TestCase):
         self.assertFalse(refresh(self.myschoolreward1))
         
         # Add rewards (bulk) and verify
-        myschoolrewards = SchoolReward(schoolid=self.myschool1.schoolid).save(rewardidlist=[self.myreward1.rewardid,self.myreward2.rewardid])
-        self.assertTrue(SchoolReward.objects.get(schoolid=self.myschool1.schoolid,rewardid=self.myreward1.rewardid))
+        myschoolrewards = SchoolReward(schoolid=self.myschool1.schoolid).save(rewardinfo=json.dumps(
+            [
+                {"rewardid":self.myreward1.rewardid,"rewardvalue":self.myreward1.rewardvalue},
+                {"rewardid":self.myreward2.rewardid,"rewardvalue":self.myreward2.rewardvalue},
+            ]
+        )
+        )
+
+        myschoolreward = SchoolReward.objects.get(schoolid=self.myschool1.schoolid,rewardid=self.myreward1.rewardid)
+        self.assertTrue(myschoolreward)
+        self.assertEqual(myschoolreward.rewardvalue,self.myreward1.rewardvalue)
 
     def testDeleteSchoolReward(self):
         

@@ -394,6 +394,7 @@ def addreward(request):
             myreward = Reward(
                 rewardid = form.cleaned_data.get('rewardid'),
                 vendor = form.cleaned_data.get('vendor'),
+                rewardcategory = form.cleaned_data.get('rewardcategory'),
                 rewarddisplayname = form.cleaned_data.get('rewarddisplayname'),
                 rewarddescription = form.cleaned_data.get('rewarddescription'),
                 rewardvalue = form.cleaned_data.get('rewardvalue'),
@@ -444,12 +445,15 @@ def list_object(request, objecttype):
 
 @check_authorization
 def edit_object(request, objecttype, objectid):
+    
     form_template = 'wakemeup/admin/edit_form.html'
-    contextkwargs = {}
+    context = {}
 
     # Retrieve objects
     if objecttype == 'school':
         objectForm = SchoolForm
+        SchoolRewardFormSet = formset_factory(form=SchoolRewardForm, extra=0)
+        
     elif objecttype == 'class':
         objectForm = ClassForm
 
@@ -463,7 +467,7 @@ def edit_object(request, objecttype, objectid):
         ):
             return redirect_home()
 
-        contextkwargs.update({
+        context.update({
             'classid':objectid
         })
         
@@ -493,7 +497,7 @@ def edit_object(request, objecttype, objectid):
     # Lookup form's base class
     objectClass = objectForm.Meta.model
 
-    # PROCESS FORM
+    # SAVE OBJECT
     if request.method == 'POST' and 'submit_other' not in request.POST: # Ignore submits from other forms
 
         # Create form instance (bind data to form)
@@ -539,7 +543,7 @@ def edit_object(request, objecttype, objectid):
                 # Process guardian approval policy
 #                 guardianapprovalpolicy = json.dumps({'requiredfields':form.cleaned_data.get('guardianapprovalpolicy')})
                 
-                myobject = objectClass(
+                myschool = objectClass(
                     schoolid = form.cleaned_data.get('schoolid'),
                     schooldisplayname = form.cleaned_data.get('schooldisplayname'),
                     schoolabbreviation = form.cleaned_data.get('schoolabbreviation'),
@@ -550,13 +554,34 @@ def edit_object(request, objecttype, objectid):
 #                     guardianapprovalpolicy = guardianapprovalpolicy
                 )
 
+                schoolrewardformset = SchoolRewardFormSet(request.POST)
+
+                if(schoolrewardformset.is_valid()):
+                    schoolreward_data = []
+                    
+                    # Loop through formset
+                    for myform in schoolrewardformset:
+
+                        if(myform.cleaned_data.get('selected')):
+                            schoolreward_data.append({
+                                'rewardid': myform.cleaned_data.get('rewardid'),
+                                'rewardvalue': myform.cleaned_data.get('rewardvalue'),
+                            })
+
+                    # Save school info
+                    myschool.save(**kwargs)
+                    SchoolReward(schoolid=myschool.schoolid,rewardid=None).save(rewardinfo=json.dumps(schoolreward_data))
+
             elif(objecttype == 'class'):
-                myobject = objectClass(
+                myclass = objectClass(
                     classid = form.cleaned_data.get('classid'),
                     schoolid = form.cleaned_data.get('schoolid'),
                     classdisplayname = form.cleaned_data.get('classdisplayname'),
                     gradelevel = form.cleaned_data.get('gradelevel'),
                 )
+                
+                # Save object
+                myclass.save(**kwargs)
                 
             elif(objecttype == 'teacher'):
 
@@ -565,10 +590,10 @@ def edit_object(request, objecttype, objectid):
 
                 # Build original class list (values)
                 initial_classes = []
-                myobject = objectClass.objects.get(teacheruserid=form.cleaned_data.get('teacheruserid')) # Lookup teacher info
+                myteacher = objectClass.objects.get(teacheruserid=form.cleaned_data.get('teacheruserid')) # Lookup teacher info
 
-                if(myobject.classinfo):
-                    for myclass in myobject.classinfo:
+                if(myteacher.classinfo):
+                    for myclass in myteacher.classinfo:
                         initial_classes.append(myclass['classid'])
 
                 # Build current class list (dictionaries)
@@ -584,7 +609,7 @@ def edit_object(request, objecttype, objectid):
                     'currentclasses' : current_classes_final
                 })
 
-                myobject = objectClass(
+                myteacher = objectClass(
                     teacheruserid = form.cleaned_data.get('teacheruserid'),
                     schoolid = form.cleaned_data.get('schoolid'),
                     classinfo = classinfo,
@@ -593,45 +618,40 @@ def edit_object(request, objecttype, objectid):
                     emailaddress = form.cleaned_data.get('emailaddress'),
                     profilepictureid = form.cleaned_data.get('profilepictureid'),
                 )
+
+                # Save object
+                myteacher.save(**kwargs)
             
-            elif(objecttype == 'student'):
-
-                myobject = objectClass(
-                    studentuserid = form.cleaned_data.get('studentuserid'),
-                    schoolid = form.cleaned_data.get('schoolid'),
-                    classid = form.cleaned_data.get('classid'),
-                    firstname = form.cleaned_data.get('firstname'),
-                    lastname = form.cleaned_data.get('lastname'),
-                    emailaddress = form.cleaned_data.get('emailaddress'),
-                    profilepictureid = form.cleaned_data.get('profilepictureid'),
-                )
-
             elif(objecttype == 'reward'):
                 
-                myobject = objectClass(
+                myreward = objectClass(
                     rewardid = form.cleaned_data.get('rewardid'),
                     vendor = form.cleaned_data.get('vendor'),
+                    rewardcategory = form.cleaned_data.get('rewardcategory'),
                     rewarddisplayname = form.cleaned_data.get('rewarddisplayname'),
                     rewarddescription = form.cleaned_data.get('rewarddescription'),
                     rewardvalue = form.cleaned_data.get('rewardvalue'),
                 )
 
-            # Save object
-            myobject.save(**kwargs)
+                # Save object
+                myreward.save(**kwargs)
 
             # Return to main page
             return redirect('wakemeup:list_object', objecttype=objecttype)
 
-    # CREATE FORM (NEW OBJECT)
+    # CREATE NEW OBJECT
     elif(objectid == 'new'):
         kwargs = {}
         
         if(objecttype == 'class'):
             kwargs = {'request':request}
+            
+        elif(objecttype == 'school'):
+            kwargs = {'schoolrewardformset':SchoolRewardFormSet(initial=Reward.objects.get_rewards())}
 
         form = objectForm(**kwargs)
 
-    # CREATE FORM (EXISTING OBJECT)
+    # UPDATE EXISTING OBJECT
     else:
         
         # Lookup object
@@ -640,6 +660,9 @@ def edit_object(request, objecttype, objectid):
         # Create form
         if(myobject):
             if(objecttype == 'school'):
+                
+                form_template = 'wakemeup/admin/edit_school.html'
+
                 form = objectForm(
                     initial = {
                         'schoolid': myobject.schoolid,
@@ -652,6 +675,42 @@ def edit_object(request, objecttype, objectid):
 #                         'guardianapprovalpolicy':myobject.guardianapprovalpolicy.get('requiredfields') if myobject.guardianapprovalpolicy else None
                     }
                 )
+
+                # Merge available rewards with current school rewards
+                rewards = Reward.objects.get_rewards()
+                schoolrewards = SchoolReward.objects.get_school_rewards(schoolid=myobject.schoolid)
+    
+                # Build formset's initial data
+                schoolreward_data = []
+                
+                for reward in rewards:
+                    
+                    # Get corresponding school reward
+                    myschoolreward = get_matching_item(schoolrewards,'rewardid',reward.rewardid)
+                    
+                    schoolreward_data.append(
+                        {
+#                             'schoolid':myobject.schoolid,
+                            'selected':True if myschoolreward else False, # Mark as selected if exists corresponding school reward
+                            'rewardid':reward.rewardid,
+                            'vendor':reward.vendor,
+                            'rewardcategorydisplayname':reward.rewardcategorydisplayname,
+                            'rewarddisplayname':reward.rewarddisplayname,
+                            'rewarddescription':reward.rewarddescription,
+                            'rewardvalue': getattr(myschoolreward,'rewardvalue',reward.rewardvalue), # Overwrite with any school-specific values
+                        }
+                    )
+                    
+                # Populate evaluation formset with initial data
+                schoolrewardformset = SchoolRewardFormSet(initial=schoolreward_data)
+
+                context.update({
+                    'value': myobject.schoolid, # Can possibly remove this one
+                    'schoolid': myobject.schoolid,
+                    'form': form, 
+                    'schoolrewardformset': schoolrewardformset
+                })
+
             elif(objecttype == 'class'):
                 form_template = 'wakemeup/admin/edit_class.html'
                 
@@ -679,24 +738,12 @@ def edit_object(request, objecttype, objectid):
                     }
                 )
             
-            elif(objecttype == 'student'):
-                form = objectForm(
-                    initial = {
-                        'studentuserid': myobject.studentuserid,
-                        'schoolid': myobject.schoolid,
-                        'classid': myobject.classid,
-                        'firstname': myobject.firstname,
-                        'lastname': myobject.lastname,
-                        'emailaddress': myobject.emailaddress,
-                        'profilepictureid': myobject.profilepictureid,
-                    }
-                )
-
             elif(objecttype == 'reward'):
                 form = objectForm(
                     initial = {
                         'rewardid': myobject.rewardid,
                         'vendor': myobject.vendor,
+                        'rewardcategory': myobject.rewardcategory,
                         'rewarddisplayname': myobject.rewarddisplayname,
                         'rewarddescription': myobject.rewarddescription,
                         'rewardvalue': myobject.rewardvalue,
@@ -707,7 +754,7 @@ def edit_object(request, objecttype, objectid):
         else:
             return redirect_home()
         
-    return render(request, form_template, {'form': form, 'objecttype':objecttype, **contextkwargs})
+    return render(request, form_template, {'form': form, 'objecttype':objecttype, **context})
 
 @check_authorization
 def get_contract(request, contractid):

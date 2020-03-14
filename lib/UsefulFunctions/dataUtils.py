@@ -56,3 +56,6 @@ def convert_form_binary_to_db(formfieldname):
         mydatafile = None
 
     return mydatafile
+
+def get_matching_item(items, key, value):
+    return next((item for item in items if getattr(item,key,None) == value), None)

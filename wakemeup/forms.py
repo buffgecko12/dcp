@@ -183,6 +183,50 @@ class SignupForm(UserCreationForm):
         
         return username
 
+class RewardForm(forms.Form):
+
+    # Define form fields
+    rewardid = forms.IntegerField(widget=forms.HiddenInput,required=False)
+
+    rewardcategory = forms.CharField(required=True,max_length=2,label='Categor' + mychr('i') + 'a')
+    vendor = forms.CharField(max_length=100,label='Vendedor')
+    rewarddisplayname = forms.CharField(max_length=100,label='Premio')
+    rewarddescription = forms.CharField(max_length=500,label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}))
+    rewardvalue = forms.IntegerField(label='Valor',localize=True)
+
+    def __init__ (self, *args, **kwargs):
+
+        # Extract extra info
+        cancel_type = kwargs.pop('cancel_type', None)
+        request = kwargs.pop("request",None)
+
+        # Call base class constructor (i.e. Teacher Form)
+        super(RewardForm, self).__init__(*args, **kwargs)
+        
+        # Set form helper properties
+        self.helper = FormHelper()
+        setFormHelper(self.helper)
+        self.helper.form_tag = False
+        
+        # Set form layout
+        self.helper.layout = Layout(
+            Fieldset(
+                'Crear / Editar premio',
+                'rewardcategory',
+                'vendor',
+                'rewardid',
+                'rewarddisplayname',
+                'rewarddescription',
+                PrependedText('rewardvalue', '$'),
+            ),
+            getAdminFormActions(cancel_url = 'wakemeup:list_object', cancel_context='objecttype="reward"', cancel_type=cancel_type)
+        )
+
+    # Specify model
+    class Meta:
+        model = Reward
+        fields = ('rewardcategory','vendor','rewardid','rewarddisplayname','rewarddescription','rewardvalue')
+
 class SchoolForm(forms.Form):
 
     # Store original data use policy fileid
@@ -224,8 +268,9 @@ class SchoolForm(forms.Form):
         
         # Set form layout
         self.helper.layout = Layout(
+#             'Crear/editar colegio',
             Fieldset(
-                'Crear/editar colegio',
+                None,
 #                 'datausepolicyfileid',
                 'schoolid',
                 'schooldisplayname',
@@ -234,9 +279,9 @@ class SchoolForm(forms.Form):
                 'city',
                 'department',
 #                 'datausepolicyfile',
-                InlineCheckboxes('guardianapprovalpolicy'),
+#                         InlineCheckboxes('guardianapprovalpolicy'),
             ),
-            getAdminFormActions(cancel_url = 'wakemeup:list_object', cancel_context='objecttype="school"')
+#             getAdminFormActions(cancel_url = 'wakemeup:list_object', cancel_context='objecttype="school"')
         )
 
 #     def clean_guardianapprovalpolicy(self):
@@ -245,6 +290,30 @@ class SchoolForm(forms.Form):
     # Specify model
     class Meta:
         model = School
+
+class SchoolRewardForm(forms.Form):
+
+    # Define form fields
+    rewardid = forms.IntegerField(widget=forms.HiddenInput)
+
+    selected = forms.BooleanField(required=False,label=' ')
+    rewardcategorydisplayname = forms.CharField(required=False,max_length=250,label='Categor' + mychr('i') + 'a')
+    vendor = forms.CharField(required=False,label='Vendedor')
+    rewarddisplayname = forms.CharField(required=False,label='Premio')
+    rewarddescription = forms.CharField(required=False,label='Descripci' + mychr('o') + 'n')
+    rewardvalue = forms.IntegerField(widget=forms.NumberInput,required=True,label='Valor',localize=True)
+
+    def __init__ (self, *args, **kwargs):
+        super(SchoolRewardForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.template = 'wakemeup/admin/edit_schoolreward.html'
+        self.helper.field_template = 'bootstrap3/field.html'
+
+    # Specify model
+    class Meta:
+        model = SchoolReward
 
 class ClassForm(forms.Form):
 
@@ -380,48 +449,6 @@ class MyUserForm(forms.Form):
     class Meta:
         model = get_user_model()
         fields = ('userid','username','schoolid','firstname','lastname','emailaddress','profilepictureid')
-
-class RewardForm(forms.Form):
-
-    # Define form fields
-    rewardid = forms.IntegerField(widget=forms.HiddenInput,required=False)
-
-    vendor = forms.CharField(max_length=100,label='Vendedor')
-    rewarddisplayname = forms.CharField(max_length=100,label='Premio')
-    rewarddescription = forms.CharField(max_length=500,label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}))
-    rewardvalue = forms.IntegerField(label='Valor',localize=True)
-
-    def __init__ (self, *args, **kwargs):
-
-        # Extract extra info
-        cancel_type = kwargs.pop('cancel_type', None)
-        request = kwargs.pop("request",None)
-
-        # Call base class constructor (i.e. Teacher Form)
-        super(RewardForm, self).__init__(*args, **kwargs)
-        
-        # Set form helper properties
-        self.helper = FormHelper()
-        setFormHelper(self.helper)
-        self.helper.form_tag = False
-        
-        # Set form layout
-        self.helper.layout = Layout(
-            Fieldset(
-                'Crear / Editar premio',
-                'vendor',
-                'rewardid',
-                'rewarddisplayname',
-                'rewarddescription',
-                PrependedText('rewardvalue', '$'),
-            ),
-            getAdminFormActions(cancel_url = 'wakemeup:list_object', cancel_context='objecttype="reward"', cancel_type=cancel_type)
-        )
-
-    # Specify model
-    class Meta:
-        model = Reward
-        fields = ('vendor','rewardid','rewarddisplayname','rewarddescription','rewardvalue')
 
 class ContractForm(forms.Form):
 
