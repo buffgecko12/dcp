@@ -40,7 +40,7 @@
 
                 <tr>
                     {% for field in form %}
-                    	{% if field.name in 'vendor,rewardcategorydisplayname,rewarddisplayname,rewarddescription' %}
+                    	{% if field.field.widget.attrs.textonly %}
                     		<div class="form-group">
                     			<td style="vertical-align:middle" nowrap>
                     				<div class="controls">{{ field.value }}</div>
