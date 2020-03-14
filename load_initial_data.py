@@ -194,12 +194,14 @@ def load_rewards():
             "rewarddescription": "", 
             "rewardvalue":25000,
             "rewardcategory": "AC", 
+            "vendor": None
         },
         {
             "rewarddisplayname":"Diccionario", 
             "rewarddescription": "Diccionario espa" + mychr('n') + "ol-ingl" + mychr("e") + "s", 
             "rewardvalue":25000,
             "rewardcategory": "AC", 
+            "vendor": None
         }
     ]
 
