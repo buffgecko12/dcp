@@ -1,7 +1,0 @@
-{% if students %}
-{% for student in students %}
-<option value="{{ student.studentuserid }}" {% if student.selected %}selected="selected"{% endif %}>{{ student.firstname|title }} {{ student.lastname|title }} </option>
-{% endfor %}
-{% else %}
-<option value="" disabled>No hay registros.</option>
-{% endif %}
