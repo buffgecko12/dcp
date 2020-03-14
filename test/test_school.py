@@ -1,5 +1,6 @@
 import unittest
 from test_setup import *
+from datetime import date, timedelta
 import json
 
 from wakemeup.models.school import School, SchoolReward
@@ -50,7 +51,21 @@ class testSchool(unittest.TestCase):
         self.assertTrue(myschoolcalendar)
 
     def testUpdateSchoolCalendar(self):
-        pass
+        
+        # Add rewards (bulk) and verify
+        myschoolcalendar = SchoolCalendar(schoolid=self.myschool1.schoolid).save(calendarinfo=json.dumps(
+            [
+                {"itemdate":str(date.today()),"itemtype":"SP","itemnotes":"Start program notes","round":None},
+                {"itemdate":str(date.today() + timedelta(days=10)),"itemtype":"CTE","itemnotes":"Contract Deadline 1","round":1},
+                {"itemdate":str(date.today() + timedelta(days=70)),"itemtype":"CTE","itemnotes":"Contract Deadline 2","round":2},
+                {"itemdate":str(date.today() + timedelta(days=120)),"itemtype":"EP","itemnotes":"End program notes","round":None},
+            ]
+        )
+        )
+
+        myschoolcalendar = SchoolCalendar.objects.get_school_calendars(schoolid=self.myschool1.schoolid,itemtype='CTE',round=1)[0]
+        self.assertTrue(myschoolcalendar)
+        self.assertEqual(myschoolcalendar.itemnotes,'Contract Deadline 1')
 
     def testDeleteSchoolCalendar(self):
         
@@ -98,12 +113,12 @@ class testSchool(unittest.TestCase):
 
     def testDeleteSchoolReward(self):
         
-        # Check calendar items before
-        self.assertTrue(SchoolCalendar.objects.get_school_calendars(schoolid=self.myschool1.schoolid))
+        # Check reward items before
+        self.assertTrue(SchoolReward.objects.get_school_rewards(schoolid=self.myschool1.schoolid))
 
         # Delete and verify
-        SchoolCalendar(schoolid=self.myschool1.schoolid).delete()
-        self.assertFalse(SchoolCalendar.objects.get_school_calendars(schoolid=self.myschool1.schoolid))
+        SchoolReward(schoolid=self.myschool1.schoolid).delete()
+        self.assertFalse(SchoolReward.objects.get_school_rewards(schoolid=self.myschool1.schoolid))
 
     def tearDown(self):
         

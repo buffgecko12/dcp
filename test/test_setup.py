@@ -19,7 +19,7 @@ from wakemeup.models.program import *
 from user.models.authorization import *
 from django.contrib.auth import get_user_model
 from psycopg2.extras import DateTimeTZRange
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from lib.UsefulFunctions.miscUtils import get_objectname
 
 def refresh(myobject):
@@ -78,14 +78,14 @@ def create_school(schoolabbreviation = 'School 1', schooldisplayname = 'School 1
 
     return myschool
 
-def create_school_calendar(schoolid = None, schoolyear = None, itemdate = date.today(), itemtype = 'CTP', itemdescription = 'Some deadline', round = 1):
+def create_school_calendar(schoolid = None, schoolyear = None, itemdate = date.today(), itemtype = 'CTP', itemnotes = 'Some deadline', round = 1):
     
     myschoolcalendar = SchoolCalendar(
         schoolid = schoolid,
         schoolyear = schoolyear,
         itemdate = itemdate,
         itemtype = itemtype,
-        itemdescription = itemdescription,
+        itemnotes = itemnotes,
         round = round
     )
 

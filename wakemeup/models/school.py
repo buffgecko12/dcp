@@ -78,13 +78,13 @@ class SchoolCalendarManager(models.Manager):
     def all(self):
         return self.get_school_calendars()
      
-    def get_school_calendars(self, calendaritemid = None, schoolid = None, schoolyear = None):
-        return get_data(self, 'SP_DCPGetSchoolCalendar(%s,%s,%s)', (calendaritemid, schoolid, schoolyear))
+    def get_school_calendars(self, calendaritemid = None, schoolid = None, schoolyear = None, itemtype = None, round = None):
+        return get_data(self, 'SP_DCPGetSchoolCalendar(%s,%s,%s,%s,%s)', (calendaritemid, schoolid, schoolyear, itemtype, round))
      
     def get(self, calendaritemid):
-        return get_data_pk(self, 'SP_DCPGetSchoolCalendar(%s,%s,%s)', (calendaritemid, None, None))
+        return get_data_pk(self, 'SP_DCPGetSchoolCalendar(%s,%s,%s,%s,%s)', (calendaritemid, None, None, None, None))
      
-    def save(self, mySchoolCalendar):
+    def save(self, mySchoolCalendar, calendarinfo = None):
         return save_data('SP_DCPUpsertSchoolCalendar',
             (
                 mySchoolCalendar.calendaritemid,
@@ -92,8 +92,9 @@ class SchoolCalendarManager(models.Manager):
                 mySchoolCalendar.schoolyear or DEFAULT_SCHOOL_YEAR,
                 mySchoolCalendar.itemdate,
                 mySchoolCalendar.itemtype,
-                mySchoolCalendar.itemdescription,
-                mySchoolCalendar.round
+                mySchoolCalendar.itemnotes,
+                mySchoolCalendar.round,
+                calendarinfo
             )
          )[0]
          
@@ -172,8 +173,9 @@ class SchoolCalendar(School):
     calendaritemid = models.IntegerField(primary_key=True)
     schoolyear = models.SmallIntegerField(verbose_name='School Year')
     itemdate = models.DateField(verbose_name='Fecha')
-    itemtype = models.CharField(max_length=100)
+    itemtype = models.CharField(max_length=10)
     itemdescription = models.CharField(max_length=500)
+    itemnotes = models.CharField(max_length=500)
     round = models.SmallIntegerField()
  
     objects = SchoolCalendarManager()
