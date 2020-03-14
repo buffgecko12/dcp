@@ -131,7 +131,7 @@ class TeacherProgramManager(models.Manager):
     def get(self, teacheruserid, schoolyear):
         return get_data_pk(self, 'SP_DCPGetTeacherProgram(%s,%s)', (teacheruserid, schoolyear))
     
-    def get_teacher_programs(self, teacheruserid = None, schoolyear = None):
+    def get_teacher_programs(self, teacheruserid = None, schoolyear = DEFAULT_SCHOOL_YEAR):
         return get_data(self, 'SP_DCPGetTeacherProgram(%s,%s)', (teacheruserid, schoolyear))
         
     def save(self, myTeacherProgram):

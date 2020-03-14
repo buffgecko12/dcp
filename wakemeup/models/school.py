@@ -78,7 +78,7 @@ class SchoolCalendarManager(models.Manager):
     def all(self):
         return self.get_school_calendars()
      
-    def get_school_calendars(self, calendaritemid = None, schoolid = None, schoolyear = None, itemtype = None, round = None):
+    def get_school_calendars(self, calendaritemid = None, schoolid = None, schoolyear = DEFAULT_SCHOOL_YEAR, itemtype = None, round = None):
         return get_data(self, 'SP_DCPGetSchoolCalendar(%s,%s,%s,%s,%s)', (calendaritemid, schoolid, schoolyear, itemtype, round))
      
     def get(self, calendaritemid):
@@ -105,7 +105,7 @@ class SchoolRewardManager(models.Manager):
     def all(self):
         return self.get_school_rewards()
      
-    def get_school_rewards(self, schoolid = None, rewardid = None, schoolyear = None):
+    def get_school_rewards(self, schoolid = None, rewardid = None, schoolyear = DEFAULT_SCHOOL_YEAR):
         return get_data(self, 'SP_DCPGetSchoolReward(%s,%s,%s)', (schoolid, rewardid, schoolyear))
      
     def get(self, schoolid, rewardid):
