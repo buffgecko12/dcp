@@ -188,7 +188,7 @@ class RewardForm(forms.Form):
     # Define form fields
     rewardid = forms.IntegerField(widget=forms.HiddenInput,required=False)
 
-    rewardcategory = forms.CharField(required=True,max_length=2,label='Categor' + mychr('i') + 'a')
+    rewardcategory = forms.CharField(required=True,max_length=10,label='Categor' + mychr('i') + 'a')
     vendor = forms.CharField(max_length=100,label='Vendedor')
     rewarddisplayname = forms.CharField(max_length=100,label='Premio')
     rewarddescription = forms.CharField(max_length=500,label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}))
@@ -297,7 +297,7 @@ class SchoolRewardForm(forms.Form):
     rewardid = forms.IntegerField(widget=forms.HiddenInput)
 
     selected = forms.BooleanField(required=False,label=' ')
-    rewardcategorydisplayname = forms.CharField(required=False,max_length=250,label='Categor' + mychr('i') + 'a')
+    rewardcategorydisplayname = forms.CharField(required=False,max_length=100,label='Categor' + mychr('i') + 'a')
     vendor = forms.CharField(required=False,label='Vendedor')
     rewarddisplayname = forms.CharField(required=False,label='Premio')
     rewarddescription = forms.CharField(required=False,label='Descripci' + mychr('o') + 'n')

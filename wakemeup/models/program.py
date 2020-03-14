@@ -156,8 +156,8 @@ class Reward(MyModel):
     rewarddisplayname = models.CharField(max_length=100,verbose_name='Premio')
     rewarddescription = models.CharField(max_length=500,verbose_name='Descripci' + mychr('o') + 'n')
     rewardvalue = models.IntegerField(verbose_name='Valor')
-    rewardcategory = models.CharField(max_length=2, verbose_name='Categor' + mychr('i') + 'a')
-    rewardcategorydisplayname = models.CharField(max_length=250, verbose_name='Categor' + mychr('i') + 'a')
+    rewardcategory = models.CharField(max_length=10, verbose_name='Categor' + mychr('i') + 'a')
+    rewardcategorydisplayname = models.CharField(max_length=100, verbose_name='Categor' + mychr('i') + 'a')
     vendor = models.CharField(max_length=100,verbose_name='Vendedor')
     
     objects = RewardManager()
