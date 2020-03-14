@@ -130,7 +130,7 @@ def load_teachers(request):
     # Lookup teacher classes
     teachers = Teacher.objects.get_teachers(teacheruserid = teacheruserid)
     
-    return render(request, 'wakemeup/admin/js/teacher_dropdown_list_options.html', {'teachers': teachers, 'teacheruserid':teacheruserid})
+    return render(request, 'wakemeup/admin/menus/teacher_dropdown_list_options.html', {'teachers': teachers, 'teacheruserid':teacheruserid})
 
 def load_classes(request):
     contractid = request.GET.get('contractid') # Check for existing contract
@@ -162,7 +162,7 @@ def load_classes(request):
     else:
         classes = [] # Return empty list (create contract form)
 
-    return render(request, 'wakemeup/admin/js/class_dropdown_list_options.html', {'classes': classes, 'classid': classid})
+    return render(request, 'wakemeup/admin/menus/class_dropdown_list_options.html', {'classes': classes, 'classid': classid})
 
 def load_rewards(request):
     contractid = request.GET.get('contractid') # Check if existing contract
@@ -180,7 +180,7 @@ def load_rewards(request):
         'selectedrewards': selectedrewards
     }
     
-    return render(request, 'wakemeup/admin/js/reward_dropdown_list_options.html', context)
+    return render(request, 'wakemeup/admin/menus/reward_dropdown_list_options.html', context)
 
 def manage_user_display(request):
     actiontype = request.GET.get('actiontype') # Check if existing contract
