@@ -112,7 +112,7 @@ class RewardsTable(tables.Table):
 
     class Meta:
         model = Reward
-        fields = ('vendor','rewarddisplayname','rewarddescription','rewardvalue')
+        fields = ('rewardcategorydisplayname','vendor','rewarddisplayname','rewarddescription','rewardvalue')
         empty_text = EMPTY_TEXT
 
 class ContractsTable(tables.Table):

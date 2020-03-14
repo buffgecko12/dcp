@@ -116,6 +116,7 @@ class RewardManager(models.Manager):
                 myReward.rewarddisplayname, 
                 myReward.rewarddescription,
                 myReward.rewardvalue,
+                myReward.rewardcategory,
                 myReward.vendor
             )
         )[0]
@@ -153,8 +154,10 @@ class Reward(MyModel):
     rewardid = models.IntegerField(primary_key=True)
     schoolyear = models.SmallIntegerField()
     rewarddisplayname = models.CharField(max_length=100,verbose_name='Premio')
-    rewarddescription = models.CharField(max_length=500,verbose_name='Descripci' + chr(243) + 'n')
+    rewarddescription = models.CharField(max_length=500,verbose_name='Descripci' + mychr('o') + 'n')
     rewardvalue = models.IntegerField(verbose_name='Valor')
+    rewardcategory = models.CharField(max_length=2, verbose_name='Categor' + mychr('i') + 'a')
+    rewardcategorydisplayname = models.CharField(max_length=250, verbose_name='Categor' + mychr('i') + 'a')
     vendor = models.CharField(max_length=100,verbose_name='Vendedor')
     
     objects = RewardManager()
@@ -167,7 +170,7 @@ class Contract(MyModel):
     round = models.SmallIntegerField(verbose_name="Ronda")
     contractvalidperiod = DateTimeRangeField(verbose_name='Plazo')
     proposalts = models.DateTimeField(verbose_name='Propuesta')
-    evaluationts = models.DateTimeField(verbose_name='Evaluaci' + chr(243) + 'n')
+    evaluationts = models.DateTimeField(verbose_name='Evaluaci' + mychr('o') + 'n')
     evidencets = models.DateTimeField(verbose_name='Evidencias')
     contractstatus = models.CharField(max_length=1,verbose_name='Estado')
     notes = models.CharField(max_length=500,verbose_name="Notas")

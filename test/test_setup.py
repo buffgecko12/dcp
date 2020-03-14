@@ -207,13 +207,14 @@ def create_contract_party_reward(contractid, teacheruserid, classid, rewardid, q
     mycontractpartyreward.save()
     return mycontractpartyreward
 
-def create_reward(schoolyear=None,rewarddisplayname='Some reward',rewardvalue=10000,rewarddescription='Some description',vendor='Vendor 1'):
+def create_reward(schoolyear=None,rewarddisplayname='Some reward',rewardvalue=10000,rewarddescription='Some description',rewardcategory = 'OT', vendor='Vendor 1'):
     myreward = Reward(
         rewardid=None,
         schoolyear=schoolyear,
         rewarddisplayname=rewarddisplayname,
         rewardvalue=rewardvalue,
         rewarddescription=rewarddescription,
+        rewardcategory=rewardcategory,
         vendor=vendor
     )
     
