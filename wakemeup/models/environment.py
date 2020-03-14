@@ -4,9 +4,28 @@ from wakemeup.models.base import MyModel
 from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.miscUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
+from lib.UsefulFunctions.dataUtils import generate_options
 
 DEFAULT_SCHOOL_YEAR = get_school_year()
 
+class CategoryManager(models.Manager):
+    def all(self):
+        return self.get_categories()
+    
+    def get(self, categoryclass, categorytype):
+        return get_data_pk(self, 'SP_DCPGetCategory(%s,%s)', (categoryclass, categorytype))
+    
+    def get_categories(self, categoryclass = None, categorytype = None):
+        return get_data(self, 'SP_DCPGetCategory(%s,%s)', (categoryclass, categorytype))
+    
+    def get_category_options(self, categoryclass = None, categorytype = None):
+
+        return generate_options(
+            items = self.get_categories(categoryclass=categoryclass, categorytype=categorytype), 
+            idfield = "categorytype", 
+            displayfield = "categorydisplayname"
+        )
+        
 class FileManager(models.Manager):
     def all(self):
         return self.get_files()
@@ -59,3 +78,13 @@ class File(MyModel):
 
     # File Manager instance
     objects = FileManager()
+    
+class Category(MyModel):
+    
+    categoryclass = models.CharField(max_length=50)
+    categorytype = models.CharField(max_length=10)
+    categorydisplayname = models.CharField(max_length=100)
+    description = models.CharField(max_length=500)
+    
+    objects = CategoryManager()
+    

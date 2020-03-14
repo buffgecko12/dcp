@@ -160,6 +160,18 @@ def create_file(filename='sampleimg',fileextension='jpg',filesize=5000,filetype=
     myfile.fileid = myfile.save()
     return myfile
 
+def create_category(categoryclass='reward', categorytype='PT',categorydisplayname='Participation',description = None):
+    
+    mycategory = Category(
+        categoryclass = categoryclass,
+        categorytype = categorytype,
+        categorydisplayname = categorydisplayname,
+        description = description,
+    )
+
+#     mycategory.save()
+    return mycategory
+
 def create_contract(schoolyear=None,contractname='My activity',round=1,contractvalidperiod=DateTimeTZRange(datetime(2020,1,1,0,0,0),datetime(2021,1,1,0,0,0)),\
                     proposalts=None,evaluationts=None,evidencets=None,contractstatus=None,notes=None,partyinfo=None,contractvalue=None):
         
