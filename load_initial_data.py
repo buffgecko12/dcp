@@ -70,7 +70,7 @@ def load_schools_classes():
 #         ('ITIRR','Instituto Técnico Industrial Rafael Reyes', 'ITIRR', 'Carrera 18 # 23-116','Duitama','Boyaca',classes_rr),
         {
             "schoolabbreviation":"GLV",
-            "schooldisplayname":"Guillermo Leon Valencia Colegio (sede integrado)",
+            "schooldisplayname":"Guillermo Le" + mychr('o') + "n Valencia Colegio (sede integrado)",
             "address":"Calle 15A Nro 7 - 48",
             "city":"Duitama",
             "department":"Boyac" + mychr('a'),
@@ -119,9 +119,88 @@ def load_users():
 
 def load_rewards():
     reward_list = [
-        {"rewarddisplayname":"Tiquete al cine", "rewarddescription":"Tiquete al cine.", "rewardvalue":6500, "vendor":"Innovo"},
-        {"rewarddisplayname":"Hamburguesa", "rewarddescription":"Hamburguesa y papas y gaseosa.", "rewardvalue":6000,"vendor":"Cowfish"},
-        {"rewarddisplayname":"B" + mychr("a") + "lon de f" + mychr("u") + "tbol", "rewarddescription": "B" + mychr("a") + "lon de f" + mychr("u") + "tbol", "rewardvalue":15000,"vendor":'Varios'}
+        {
+            "rewarddisplayname":"Cine (2D)", 
+            "rewarddescription":"Tiquete al cine (2D).", 
+            "rewardvalue":6500, 
+            "rewardcategory": "ET", 
+            "vendor":"Innovo"
+        },
+        {
+            "rewarddisplayname":"Cine (2D) + Combito", 
+            "rewarddescription":"Incluye crispeta peque" + mychr('n') + "a, jugo en caja y chocolatina.", 
+            "rewardvalue":15000, 
+            "rewardcategory": "ET", 
+            "vendor":"Innovo"
+        },
+        {
+            "rewarddisplayname":"Cine (2D) + Combo 5", 
+            "rewarddescription":"Incluye crispeta mediana, gaseosa y hamburguesa.", 
+            "rewardvalue":24000, 
+            "rewardcategory": "ET", 
+            "vendor":"Innovo"
+        },
+        {
+            "rewarddisplayname":"Hamburguesa (sola)", 
+            "rewarddescription":"Bono para hamburguesa", 
+            "rewardvalue":4000,
+            "rewardcategory": "FD", 
+            "vendor":"Cowfish"
+        },
+        {
+            "rewarddisplayname":"Hamburguesa con bebida", 
+            "rewarddescription":"Bono para hamburguesa y bebida", 
+            "rewardvalue":5000,
+            "rewardcategory": "FD", 
+            "vendor":"Cowfish"
+        },
+        {
+            "rewarddisplayname":"Hamburguesa con bebida y papas", 
+            "rewarddescription":"Bono para hamburguesa, bebida y papas", 
+            "rewardvalue":6000,
+            "rewardcategory": "FD", 
+            "vendor":"Cowfish"
+        },
+        {
+            "rewarddisplayname":"Sopa con ramen y una bebida", 
+            "rewarddescription":"Viene con pollo, vegetales y huevo", 
+            "rewardvalue":7500,
+            "rewardcategory": "FD", 
+            "vendor":"Cowfish"
+        },
+        {
+            "rewarddisplayname":"Helado en cono", 
+            "rewarddescription":"Bono para un helado en cono", 
+            "rewardvalue":3500,
+            "rewardcategory": "FD", 
+            "vendor":"Kikes"
+        },
+        {
+            "rewarddisplayname":"Bal" + mychr("o") + "n", 
+            "rewarddescription": "Bal" + mychr("o") + "n de f" + mychr("u") + "tbol, v" + mychr("o") + "leibol, baloncesto o microfutbol", 
+            "rewardvalue":22500,
+            "rewardcategory": "ET", 
+            "vendor":'Varios'
+        },
+        {
+            "rewarddisplayname":"Chocolatinas (24 unidades)", 
+            "rewarddescription": "Caja por 24 unidades de chocolatina Mini Jumbo con Man" + mychr("i"), 
+            "rewardvalue":12000,
+            "rewardcategory": "PT", 
+            "vendor":'Tulia Ca' + mychr("n") + 'as'
+        },
+        {
+            "rewarddisplayname":"Class Reader", 
+            "rewarddescription": "", 
+            "rewardvalue":25000,
+            "rewardcategory": "AC", 
+        },
+        {
+            "rewarddisplayname":"Diccionario", 
+            "rewarddescription": "Diccionario espa" + mychr('n') + "ol-ingl" + mychr("e") + "s", 
+            "rewardvalue":25000,
+            "rewardcategory": "AC", 
+        }
     ]
 
     for reward in reward_list:
@@ -129,6 +208,7 @@ def load_rewards():
             rewarddisplayname = reward['rewarddisplayname'],
             rewarddescription = reward['rewarddescription'],
             rewardvalue = reward['rewardvalue'],
+            rewardcategory = reward['rewardcategory'],
             vendor = reward['vendor'],
         ).save()
 
