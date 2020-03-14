@@ -302,10 +302,10 @@ class SchoolRewardForm(forms.Form):
     rewardid = forms.IntegerField(widget=forms.HiddenInput)
 
     selected = forms.BooleanField(required=False,label=' ')
-    rewardcategorydisplayname = forms.CharField(required=False,max_length=100,label='Categor' + mychr('i') + 'a')
-    vendor = forms.CharField(required=False,label='Vendedor')
-    rewarddisplayname = forms.CharField(required=False,label='Premio')
-    rewarddescription = forms.CharField(required=False,label='Descripci' + mychr('o') + 'n')
+    rewardcategorydisplayname = forms.CharField(required=False,max_length=100,label='Categor' + mychr('i') + 'a',widget=forms.TextInput(attrs={'textonly':True}))
+    vendor = forms.CharField(required=False,label='Vendedor',widget=forms.TextInput(attrs={'textonly':True}))
+    rewarddisplayname = forms.CharField(required=False,label='Premio',widget=forms.TextInput(attrs={'textonly':True}))
+    rewarddescription = forms.CharField(required=False,label='Descripci' + mychr('o') + 'n',widget=forms.TextInput(attrs={'textonly':True}))
     rewardvalue = forms.IntegerField(widget=forms.NumberInput,required=True,label='Valor',localize=True)
 
     def __init__ (self, *args, **kwargs):
@@ -313,12 +313,36 @@ class SchoolRewardForm(forms.Form):
 
         self.helper = FormHelper()
         self.helper.form_tag = False
-        self.helper.template = 'wakemeup/admin/edit_schoolreward.html'
+        self.helper.template = 'wakemeup/admin/edit_inline_formset.html'
         self.helper.field_template = 'bootstrap3/field.html'
 
     # Specify model
     class Meta:
         model = SchoolReward
+
+class SchoolCalendarForm(forms.Form):
+
+    # Define form fields
+    selected = forms.BooleanField(required=False,label=' ',initial=True)
+    
+    itemdate = forms.DateField(label='Fecha',widget=forms.DateInput(attrs={'class':'dateinputfield','placeholder':'MM/DD/YYYY'}))
+    itemtype = forms.ChoiceField(required=True,label='Categor' + mychr('i') + 'a')
+    itemdescription = forms.CharField(required=False,widget = forms.TextInput(attrs={'textonly':True}))
+    itemnotes = forms.CharField(required=False,max_length=500,label='Notas', widget=forms.Textarea(attrs={'rows':1}))
+
+    def __init__ (self, *args, **kwargs):
+        super(SchoolCalendarForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.template = 'wakemeup/admin/edit_inline_formset.html'
+        self.helper.field_template = 'bootstrap3/field.html'
+
+        self.fields['itemtype'].choices = [("0","-- Escoger --")] + Category.objects.get_category_options(categoryclass = 'calendar')
+        
+    # Specify model
+    class Meta:
+        model = SchoolCalendar
 
 class ClassForm(forms.Form):
 

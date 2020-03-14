@@ -453,6 +453,7 @@ def edit_object(request, objecttype, objectid):
     if objecttype == 'school':
         objectForm = SchoolForm
         SchoolRewardFormSet = formset_factory(form=SchoolRewardForm, extra=0)
+        SchoolCalendarFormSet = formset_factory(form=SchoolCalendarForm, extra=1)
         
     elif objecttype == 'class':
         objectForm = ClassForm
@@ -555,8 +556,14 @@ def edit_object(request, objecttype, objectid):
                 )
 
                 schoolrewardformset = SchoolRewardFormSet(request.POST)
+                schoolcalendarformset = SchoolCalendarFormSet(request.POST)
 
-                if(schoolrewardformset.is_valid()):
+                context.update({ # TO-DO: Not sure if needed?
+                    'schoolrewardformset':schoolrewardformset,
+                    'schoolcalendarformset':schoolcalendarformset
+                })
+                
+                if(schoolrewardformset.is_valid() and schoolcalendarformset.is_valid()):
                     schoolreward_data = []
                     
                     # Loop through formset
@@ -568,9 +575,22 @@ def edit_object(request, objecttype, objectid):
                                 'rewardvalue': myform.cleaned_data.get('rewardvalue'),
                             })
 
+                    schoolcalendar_data = []
+                    
+                    # Loop through formset
+                    for myform in schoolcalendarformset:
+
+                        if(myform.cleaned_data.get('selected')):
+                            schoolcalendar_data.append({
+                                'itemdate': str(myform.cleaned_data.get('itemdate')),
+                                'itemtype': myform.cleaned_data.get('itemtype'),
+                                'itemnotes': myform.cleaned_data.get('itemnotes'),
+                            })
+
                     # Save school info
                     myschool.save(**kwargs)
-                    SchoolReward(schoolid=myschool.schoolid,rewardid=None).save(rewardinfo=json.dumps(schoolreward_data))
+                    SchoolReward(schoolid=myschool.schoolid).save(rewardinfo=json.dumps(schoolreward_data))
+                    SchoolCalendar(schoolid=myschool.schoolid).save(calendarinfo=json.dumps(schoolcalendar_data))
 
             elif(objecttype == 'class'):
                 myclass = objectClass(
@@ -648,6 +668,7 @@ def edit_object(request, objecttype, objectid):
             
         elif(objecttype == 'school'):
             kwargs = {'schoolrewardformset':SchoolRewardFormSet(initial=Reward.objects.get_rewards())}
+            kwargs = {'schoolcalendarformset':SchoolCalendarFormSet()}
 
         form = objectForm(**kwargs)
 
@@ -676,11 +697,9 @@ def edit_object(request, objecttype, objectid):
                     }
                 )
 
-                # Merge available rewards with current school rewards
+                # Reward formset - Merge available rewards with current school rewards
                 rewards = Reward.objects.get_rewards()
                 schoolrewards = SchoolReward.objects.get_school_rewards(schoolid=myobject.schoolid)
-    
-                # Build formset's initial data
                 schoolreward_data = []
                 
                 for reward in rewards:
@@ -690,7 +709,6 @@ def edit_object(request, objecttype, objectid):
                     
                     schoolreward_data.append(
                         {
-#                             'schoolid':myobject.schoolid,
                             'selected':True if myschoolreward else False, # Mark as selected if exists corresponding school reward
                             'rewardid':reward.rewardid,
                             'vendor':reward.vendor,
@@ -700,15 +718,33 @@ def edit_object(request, objecttype, objectid):
                             'rewardvalue': getattr(myschoolreward,'rewardvalue',reward.rewardvalue), # Overwrite with any school-specific values
                         }
                     )
+
+                # Calendar formset
+                schoolcalendar = SchoolCalendar.objects.get_school_calendars(schoolid=myobject.schoolid)
+                schoolcalendar_data = []
+                
+                for calendaritem in schoolcalendar:
+                    
+                    schoolcalendar_data.append(
+                        {
+                            'selected':True,
+                            'itemdate':calendaritem.itemdate,
+                            'itemtype':calendaritem.itemtype,
+                            'itemdescription':calendaritem.itemdescription,
+                            'itemnotes': calendaritem.itemnotes, # Overwrite with any school-specific values
+                        }
+                    )
                     
                 # Populate evaluation formset with initial data
                 schoolrewardformset = SchoolRewardFormSet(initial=schoolreward_data)
+                schoolcalendarformset = SchoolCalendarFormSet(initial=schoolcalendar_data)
 
                 context.update({
                     'value': myobject.schoolid, # Can possibly remove this one
                     'schoolid': myobject.schoolid,
                     'form': form, 
-                    'schoolrewardformset': schoolrewardformset
+                    'schoolrewardformset': schoolrewardformset,
+                    'schoolcalendarformset': schoolcalendarformset
                 })
 
             elif(objecttype == 'class'):
