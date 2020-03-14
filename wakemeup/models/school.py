@@ -4,6 +4,7 @@ from wakemeup.models.base import MyModel
 from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.miscUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
+from lib.UsefulFunctions.dataUtils import generate_options
 
 DEFAULT_SCHOOL_YEAR = get_school_year()
 
@@ -32,13 +33,13 @@ class ClassManager(models.Manager):
     def delete(self, myClass):
         return delete_data('SP_DCPDeleteClass', (myClass.classid,))
     
-    def class_choices(self, schoolid = None, teacheruserid = None):
-        classes = Class.objects.get_classes(schoolid = schoolid, teacheruserid = teacheruserid)
-        class_choices = [
-            (str(myclass.classid), myclass.classdisplayname) for myclass in classes
-        ]
+    def get_class_options(self, schoolid = None, teacheruserid = None):
         
-        return (class_choices)
+        return generate_options(
+            items = self.get_classes(schoolid = schoolid, teacheruserid = teacheruserid), 
+            idfield = "classid", 
+            displayfield = "classdisplayname"
+        )
 
 class SchoolManager(models.Manager):
     def all(self):
@@ -65,13 +66,13 @@ class SchoolManager(models.Manager):
     def delete(self, mySchool):
         return delete_data('SP_DCPDeleteSchool', (mySchool.schoolid,))
 
-    def school_choices(self, schoolid = None):
-        schools = self.get_schools(schoolid=schoolid)
-        school_choices = [
-            (str(myschool.schoolid), str(myschool.schooldisplayname)) for myschool in schools
-        ]
-
-        return(school_choices)
+    def get_school_options(self, schoolid = None):
+        
+        return generate_options(
+            items = self.get_schools(schoolid=schoolid), 
+            idfield = "schoolid", 
+            displayfield = "schooldisplayname"
+        )
 
 class SchoolCalendarManager(models.Manager):
     def all(self):

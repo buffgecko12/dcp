@@ -111,7 +111,7 @@ class SignupForm(UserCreationForm):
     username = forms.CharField(label='Nombre de usuario (o correo)', max_length=50)
     firstname = forms.CharField(label='Nombre(s)', max_length=100)
     lastname = forms.CharField(label='Apellido(s)', max_length=100)
-    usertype = forms.ChoiceField(label='Tipo de usuario',choices=get_user_model().usertype_choices)
+    usertype = forms.ChoiceField(label='Tipo de usuario')
     schoolid = forms.ChoiceField(label='Colegio', widget=forms.Select, required=False)
     classid = forms.CharField(label='Curso(s)', widget=forms.SelectMultiple, required=False)
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
@@ -127,13 +127,16 @@ class SignupForm(UserCreationForm):
         # Call base class constructor (i.e. SignupForm)
         super(SignupForm, self).__init__(*args, **kwargs)
 
+        # Populat usertype drop-down
+        self.fields['usertype'].choices = [("0","-- Escoger --")] + Category.objects.get_category_options(categoryclass = 'usertype')
+
         # Set password fields as optional
         self.fields['password1'].required=False
         self.fields['password2'].required=False
 
         self.fields['schoolid'].choices = \
             [("0","-- Escoger colegio --")] + \
-            School.objects.school_choices(schoolid=myschoolid) # Default to user's schoolid
+            School.objects.get_school_options(schoolid=myschoolid) # Default to user's schoolid
 
         self.fields['schoolid'].initial=myschoolid
             
@@ -188,7 +191,7 @@ class RewardForm(forms.Form):
     # Define form fields
     rewardid = forms.IntegerField(widget=forms.HiddenInput,required=False)
 
-    rewardcategory = forms.CharField(required=True,max_length=10,label='Categor' + mychr('i') + 'a')
+    rewardcategory = forms.ChoiceField(required=True,label='Categor' + mychr('i') + 'a')
     vendor = forms.CharField(max_length=100,label='Vendedor')
     rewarddisplayname = forms.CharField(max_length=100,label='Premio')
     rewarddescription = forms.CharField(max_length=500,label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}))
@@ -207,6 +210,8 @@ class RewardForm(forms.Form):
         self.helper = FormHelper()
         setFormHelper(self.helper)
         self.helper.form_tag = False
+        
+        self.fields['rewardcategory'].choices = [("0","-- Escoger --")] + Category.objects.get_category_options(categoryclass = 'reward')
         
         # Set form layout
         self.helper.layout = Layout(
@@ -346,7 +351,7 @@ class ClassForm(forms.Form):
         super(ClassForm, self).__init__(*args, **kwargs)
         
         # Get dynamic fields
-        self.fields['schoolid'].choices = School.objects.school_choices()
+        self.fields['schoolid'].choices = School.objects.get_school_options()
         
         # Set form helper properties
         self.helper = FormHelper()
@@ -426,8 +431,8 @@ class MyUserForm(forms.Form):
         else:
             myschoolid = None
             
-        self.fields['schoolid'].choices = [("0",'-- Escoger colegio --')] + School.objects.school_choices(schoolid=myschoolid)
-        self.fields['profilepictureid'].choices=get_user_model().objects.get_profile_picture_choices(userid=request.user.userid)
+        self.fields['schoolid'].choices = [("0",'-- Escoger colegio --')] + School.objects.get_school_options(schoolid=myschoolid)
+        self.fields['profilepictureid'].choices=get_user_model().objects.get_profile_picture_options(userid=request.user.userid)
         
         # Set form layout
         self.helper.layout = Layout(

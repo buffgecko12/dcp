@@ -27,7 +27,7 @@ class testSchool(unittest.TestCase):
     def testGetSchool(self):
         self.assertTrue(School.objects.get(self.myschool1.schoolid))
         self.assertTrue(School.objects.all())
-        self.assertTrue(School.objects.school_choices(schoolid = self.myschool1.schoolid))
+        self.assertTrue(School.objects.get_school_options(schoolid = self.myschool1.schoolid))
         
     def testUpdateSchool(self):    
         self.myschool1.schoolabbreviation = 'CMHS'

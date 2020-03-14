@@ -99,7 +99,7 @@ class testUser(unittest.TestCase):
     def testUserMisc(self):
         
         # Test default profile picture inserts
-        self.assertIsNotNone(get_user_model().objects.get_profile_picture_choices(self.myuser.userid))
+        self.assertIsNotNone(get_user_model().objects.get_profile_picture_options(self.myuser.userid))
 
         # Test e-mail
         self.myuser.send_email(email_subject='test',email_body='test body')

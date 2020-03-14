@@ -1,7 +1,7 @@
 import unittest
 from test_setup import *
 
-from wakemeup.models.environment import File
+from wakemeup.models.environment import *
     
 class testFile(unittest.TestCase):
     
@@ -13,6 +13,8 @@ class testFile(unittest.TestCase):
         self.myfile_db = create_file(filestore='DB') # BLOB
         self.myfile_gd = create_file(filestore='GD',filename='contract-1-congrats', fileURL='https://drive.google.com/open?id=0B4E6alUgHua8Qld0d3FrMHV1TUE',contractid=1) # Google drive
         self.myfile_fs = create_file(filestore='FS',schoolyear=2000) # Different school year
+
+        self.mycategory = create_category()
     
     def testCreateFile(self):
         self.assertTrue(self.myfile_db.fileid)
@@ -33,6 +35,12 @@ class testFile(unittest.TestCase):
         self.myfile_db.delete()
         self.assertFalse(refresh(self.myfile_db))
 
+    def testGetCategory(self):
+        self.assertTrue(Category.objects.get(categoryclass=self.mycategory.categoryclass,categorytype=self.mycategory.categorytype))
+        self.assertTrue(Category.objects.all())
+        self.assertTrue(Category.objects.get_categories(categoryclass=self.mycategory.categoryclass))
+        self.assertTrue(Category.objects.get_category_options(categoryclass=self.mycategory.categoryclass))
+        
     def tearDown(self):        
         self.myfile_db.delete()
         self.myfile_gd.delete()

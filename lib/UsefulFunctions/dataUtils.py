@@ -59,3 +59,6 @@ def convert_form_binary_to_db(formfieldname):
 
 def get_matching_item(items, key, value):
     return next((item for item in items if getattr(item,key,None) == value), None)
+
+def generate_options(items, idfield, displayfield):
+    return [(str(getattr(myitem,idfield)),getattr(myitem,displayfield)) for myitem in items]

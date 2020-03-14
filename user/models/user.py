@@ -82,22 +82,22 @@ class MyUserManager(BaseUserManager):
     def add_notification(self, myUser, notificationid, contractid):
         return save_data('SP_DCPUpsertUserNotification', (myUser.userid, notificationid, contractid))
 
-    def get_profile_picture_choices(self, userid):
+    def get_profile_picture_options(self, userid):
         pictures = get_data(self, 'SP_DCPGetUserProfilePicture(%s)', (userid,))
 
         # Add default "N/A" option
-        picture_choices = [(0,None)]
+        picture_options = [(0,None)]
         
         for mypicture in pictures:
-            picture_choices.append(
+            picture_options.append(
                 (
                     str(mypicture.profilepictureid), 
                     str(mypicture.profilepicturefilepath + mypicture.profilepicturefilename)
                 )
             )
         
-        return picture_choices
-    
+        return picture_options
+
     def send_email(self, myUser, email_subject, email_body):
         
         # Send e-mail (if address exists)
@@ -159,19 +159,11 @@ class UserBadgeManager(models.Manager):
 # Don't override default methods (get, all, save, delete) to avoid clashing with Django authentication
 class MyUser(AbstractBaseUser):
 
-    usertype_choices = [
-        ('SA','Administrador del sitio'),
-        ('AD','Administrador del programa'),
-        ('SF','Administrador del colegio'),
-        ('TR','Docente'),
-        ('OT','Otro'),
-    ]
-
     # Define attributes (inherited class includes password + last_login fields)
     userid = models.IntegerField(primary_key=True) # Specify as PK to prevent Django from creating "id" column and for queryset returns (raw)
     schoolid = models.IntegerField()
     username = models.CharField(max_length=50, unique=True)
-    usertype = models.CharField(max_length=2, choices=usertype_choices)
+    usertype = models.CharField(max_length=2)
     firstname = models.CharField(max_length=100)
     lastname = models.CharField(max_length=100)
     emailaddress = models.CharField(max_length=250)

@@ -19,7 +19,7 @@ class testClass(unittest.TestCase):
     def testGetClass(self):
         self.assertTrue(Class.objects.get(self.myclass1.classid)) # one class
         self.assertTrue(Class.objects.all()) # all classes
-        self.assertTrue(Class.objects.class_choices()) # class choices
+        self.assertTrue(Class.objects.get_class_options(schoolid=self.myschool.schoolid)) # class choices
 
     def testUpdateClass(self):
         self.myclass1.classdisplayname = 'NEW NAME'
