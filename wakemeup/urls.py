@@ -22,6 +22,11 @@ urlpatterns = [
     url(r'^admin/create_user', views.create_user, name="create_user"),
     url(r'^myaccount', views.myaccount, name="myaccount"),
 
+
+    # Test
+    url(r'^test/upload', views.create_file, name="upload_file"),
+
+
     # Misc
     url(r'^admin/img/(?P<objecttype>(teacher))/(?P<objectid>\d+)/preview$', views.preview_image, name="preview_image"), # Image preview
     url(r'^admin/file/(?P<fileid>\d+)$', views.download_file_fromdb, name='download_file_fromdb'), # File download

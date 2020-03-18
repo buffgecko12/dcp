@@ -76,6 +76,36 @@ def getAdminFormActions(cancel_url = 'wakemeup:index', cancel_context="", cancel
         Submit('submit_next','Enviar', css_id='next'),
     )
 
+
+class UploadFileForm(forms.Form):
+    
+    filetype = forms.CharField(max_length=10,label='File Type')
+#     file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    
+    def __init__ (self, *args, **kwargs):
+        super(UploadFileForm, self).__init__(*args, **kwargs)
+
+        # Set helper properties
+        self.helper = FormHelper() 
+        setFormHelper(self.helper)
+        self.helper.form_tag = False
+        
+        # Set form layout
+        self.helper.layout = Layout(
+            Fieldset(
+                'Subir archivo',
+                'filetype',
+#                 Div(css_class='dropzone', css_id='id_dropzone'),
+                HTML('<br>'),
+#                 getAdminFormActions(),
+            )
+        )
+
+    # Specify model
+    class Meta:
+        model = File
+
+
 class LoginForm(AuthenticationForm):
 
     # Define form fields

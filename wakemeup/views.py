@@ -324,6 +324,26 @@ def myaccount(request):
 
     return render(request, 'wakemeup/myaccount.html', context)
 
+
+
+def create_file(request):
+
+    if request.method == "POST":
+        form = UploadFileForm(request.POST,request.FILES)
+        
+        if(form.is_valid()):
+            pass
+            
+            for myfile in request.FILES:
+                pass
+    
+    else:
+        form = UploadFileForm()
+        
+    return render(request, 'wakemeup/admin/upload.html',context={'form':form})
+
+
+
 @check_authorization
 def create_contract(request, contractid):
 

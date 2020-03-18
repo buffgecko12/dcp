@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block headimport %}
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/dropzone.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.7.0/dropzone.css"></script>
+	
+    <script type="text/javascript">
+		Dropzone.autoDiscover = false;
+
+		Dropzone.options.mydropzone= { 
+		  autoProcessQueue: false,
+		  uploadMultiple: true,
+		  parallelUploads: 100,
+		  maxFiles: 100,
+
+		  init: function() {}
+		};
+
+	    $(document).ready(function () {
+	        $("#mydropzone").dropzone({
+	            init : function() {
+	                var submitButton = document.querySelector("#submit-all")
+	                myDropzone = this;
+
+	                submitButton.addEventListener("click", function(e) {
+					    e.preventDefault();
+					    e.stopPropagation();
+	                    myDropzone.processQueue(); // post form
+	                });
+
+		            this.on("successmultiple", function (files, response) {
+		                setTimeout(function () {
+							window.location.reload() // reload page
+//							$('.dropzone').submit()
+		                }, 1000);
+		            });
+	 
+	                // Show submit button only when files added
+	                this.on("addedfile", function() {
+						submitButton.style.display = "block";
+	                });
+	            },
+	            success: function (file, response) {
+	            }
+	        });
+		})
+	</script>
+{% endblock %}
+
+{% block title %}Subir archivos{% endblock %}
+
+{% block content %}
+	<form action="{% url 'wakemeup:upload_file' %}"
+		  id="mydropzone" class="dropzone"
+	      enctype="multipart/form-data" 
+	      method="post">
+		{% crispy form %}
+	    <div class="fallback">
+	        <input id="file" name="file" type="file" multiple="multiple"/>
+	        <input type="submit" value="Upload"/>
+	    </div>	
+	</form>
+	
+	<button id="submit-all" style="display:none">Enviar</button>
+{% endblock %}
