@@ -31,10 +31,10 @@ class FileManager(models.Manager):
         return self.get_files()
     
     def get(self, fileid):
-        return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s)', (fileid, None, None, None, None))
+        return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s)', (fileid, None, None, None, None, None))
     
-    def get_files(self, fileid = None, fileclass = None, filecategory = None, contractid = None, schoolyear = None):
-        return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, contractid, schoolyear))
+    def get_files(self, fileid = None, fileclass = None, filecategory = None, contractid = None, schoolid = None, schoolyear = None):
+        return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, contractid, schoolid, schoolyear))
     
     def save(self, myFile):
         return save_data('SP_DCPUpsertFile',
@@ -52,12 +52,13 @@ class FileManager(models.Manager):
                 myFile.fileclass,
                 myFile.filecategory,
                 myFile.contractid,
+                myFile.schoolid,
                 myFile.schoolyear or DEFAULT_SCHOOL_YEAR
             )
          )[0] # Return fileid
         
-    def delete(self, myFile, contractid = None):
-        return delete_data('SP_DCPDeleteFile', (myFile.fileid, contractid))
+    def delete(self, myFile, contractid = None, schoolid = None):
+        return delete_data('SP_DCPDeleteFile', (myFile.fileid, contractid, schoolid))
             
 class File(MyModel):
     
@@ -72,8 +73,9 @@ class File(MyModel):
     fileURL = models.URLField(max_length=500)
     filepath = models.CharField(max_length=256)
     fileclass = models.CharField(max_length=50)
-    filecategory = models.CharField(max_length=2)
+    filecategory = models.CharField(max_length=10)
     contractid = models.IntegerField()
+    schoolid = models.IntegerField()
     schoolyear = models.SmallIntegerField()
 
     # File Manager instance

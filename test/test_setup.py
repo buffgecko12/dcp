@@ -139,7 +139,7 @@ def create_teacher_class(teacheruserid, classid):
     return myteacherclass
 
 def create_file(filename='sampleimg',fileextension='jpg',filesize=5000,filetype=None,filedescription=None,filestore='FS',fileURL=None,\
-                filepath=None,fileclass='General',filecategory='MS',contractid=None,schoolyear=None,srcfilepath='test/img/sampleimg.jpg'):
+                filepath=None,fileclass='General',filecategory='MS',contractid=None,schoolid=None,schoolyear=None,srcfilepath='test/img/sampleimg.jpg'):
     
     myfile = File(
         filename = filename,
@@ -154,6 +154,7 @@ def create_file(filename='sampleimg',fileextension='jpg',filesize=5000,filetype=
         fileclass = fileclass,
         filecategory = filecategory,
         contractid = contractid,
+        schoolid = schoolid,
         schoolyear = schoolyear
     )
 

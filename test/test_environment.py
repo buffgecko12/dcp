@@ -12,7 +12,7 @@ class testFile(unittest.TestCase):
     def setUp(self):
         self.myfile_db = create_file(filestore='DB') # BLOB
         self.myfile_gd = create_file(filestore='GD',filename='contract-1-congrats', fileURL='https://drive.google.com/open?id=0B4E6alUgHua8Qld0d3FrMHV1TUE',contractid=1) # Google drive
-        self.myfile_fs = create_file(filestore='FS',schoolyear=2000) # Different school year
+        self.myfile_fs = create_file(filestore='FS',schoolid=1,schoolyear=2000) # Different school year
 
         self.mycategory = create_category()
     
@@ -23,6 +23,7 @@ class testFile(unittest.TestCase):
         self.assertTrue(File.objects.get(self.myfile_db.fileid))
         self.assertTrue(File.objects.all())
         self.assertTrue(File.objects.get_files(contractid=1))
+        self.assertTrue(File.objects.get_files(schoolid=1))
         self.assertTrue(File.objects.get_files(schoolyear=2000))
         
     def testUpdateFile(self):
