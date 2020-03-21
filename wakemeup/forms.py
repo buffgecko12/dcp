@@ -75,12 +75,14 @@ def getAdminFormActions(cancel_url = 'wakemeup:index', cancel_context="", cancel
         # Submit button
         Submit('submit_next','Enviar', css_id='next'),
     )
-
+    
+def set_dropdown_choices(form, fieldname, categoryclass = None, selectflag = True):
+    form.fields[fieldname].choices = ([("0","-- Escoger --")] if selectflag else []) + \
+                                     Category.objects.get_category_options(categoryclass = categoryclass or fieldname)
 
 class UploadFileForm(forms.Form):
     
-    filetype = forms.CharField(max_length=10,label='File Type')
-#     file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    filetype = forms.ChoiceField(widget=forms.Select,label='File Type')
     
     def __init__ (self, *args, **kwargs):
         super(UploadFileForm, self).__init__(*args, **kwargs)
@@ -89,6 +91,8 @@ class UploadFileForm(forms.Form):
         self.helper = FormHelper() 
         setFormHelper(self.helper)
         self.helper.form_tag = False
+        
+        set_dropdown_choices(self,fieldname='filetype',categoryclass='programfile')
         
         # Set form layout
         self.helper.layout = Layout(
@@ -157,8 +161,8 @@ class SignupForm(UserCreationForm):
         # Call base class constructor (i.e. SignupForm)
         super(SignupForm, self).__init__(*args, **kwargs)
 
-        # Populat usertype drop-down
-        self.fields['usertype'].choices = [("0","-- Escoger --")] + Category.objects.get_category_options(categoryclass = 'usertype')
+        # Populate usertype drop-down
+        set_dropdown_choices(self,fieldname='usertype')
 
         # Set password fields as optional
         self.fields['password1'].required=False
@@ -241,7 +245,8 @@ class RewardForm(forms.Form):
         setFormHelper(self.helper)
         self.helper.form_tag = False
         
-        self.fields['rewardcategory'].choices = [("0","-- Escoger --")] + Category.objects.get_category_options(categoryclass = 'reward')
+        # Set drop-down options
+        set_dropdown_choices(self,fieldname='rewardcategory', categoryclass='reward')
         
         # Set form layout
         self.helper.layout = Layout(
@@ -368,7 +373,7 @@ class SchoolCalendarForm(forms.Form):
         self.helper.template = 'wakemeup/admin/edit_inline_formset.html'
         self.helper.field_template = 'bootstrap3/field.html'
 
-        self.fields['itemtype'].choices = [("0","-- Escoger --")] + Category.objects.get_category_options(categoryclass = 'calendar')
+        set_dropdown_choices(self,fieldname='itemtype',categoryclass='calendar')
         
     # Specify model
     class Meta:
