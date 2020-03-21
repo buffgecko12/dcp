@@ -1,4 +1,5 @@
 import ast
+import collections
 
 def convert_array_string_to_int_old(stringarray):
     try:
@@ -58,7 +59,18 @@ def convert_form_binary_to_db(formfieldname):
     return mydatafile
 
 def get_matching_item(items, key, value):
-    return next((item for item in items if getattr(item,key,None) == value), None)
+
+    # Return if no items
+    if not items:
+        return None
+
+    # Dictionary
+    if(isinstance(items[0], collections.Mapping)):
+        return next((item for item in items if item.get(key) == value), None)
+    
+    # Objects
+    else:
+        return next((item for item in items if getattr(item,key,None) == value), None)
 
 def generate_options(items, idfield, displayfield):
     return [(str(getattr(myitem,idfield)),getattr(myitem,displayfield)) for myitem in items]
