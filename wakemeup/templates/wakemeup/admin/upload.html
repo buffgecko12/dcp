@@ -19,6 +19,10 @@
 
 	    $(document).ready(function () {
 	        $("#mydropzone").dropzone({
+		
+			    maxFilesize: 209715200, // 200MB
+			    timeout: 1200000,
+
 	            init : function() {
 	                var submitButton = document.querySelector("#submit-all")
 	                myDropzone = this;
@@ -30,10 +34,10 @@
 	                });
 
 		            this.on("successmultiple", function (files, response) {
-		                setTimeout(function () {
+//		                setTimeout(function () {
 							window.location.reload() // reload page
 //							$('.dropzone').submit()
-		                }, 1000);
+//		                }, 1000);
 		            });
 	 
 	                // Show submit button only when files added
