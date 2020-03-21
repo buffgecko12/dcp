@@ -12,6 +12,7 @@ from lib.UsefulFunctions.dataUtils import *
 from lib.UsefulFunctions.stringUtils import *
 from lib.UsefulFunctions.httpUtils import *
 from lib.UsefulFunctions.fileUtils import get_file_name_info
+from lib.UsefulFunctions.googleUtils import *
 
 from django_tables2 import RequestConfig
 
@@ -324,9 +325,19 @@ def myaccount(request):
 
     return render(request, 'wakemeup/myaccount.html', context)
 
-
-
 def create_file(request):
+
+    gd_storage = get_google_drive(permissions=['all'])
+
+    results = gd_storage.files().list(pageSize=100, fields="nextPageToken, files(id, name)").execute()
+    items = results.get('files', [])
+
+    if not items:
+        print('No files found.')
+    else:
+        print('Files:')
+        for item in items:
+            print(u'{0} ({1})'.format(item['name'], item['id']))
 
     if request.method == "POST":
         form = UploadFileForm(request.POST,request.FILES)
@@ -334,9 +345,17 @@ def create_file(request):
         if(form.is_valid()):
             pass
             
-            for myfile in request.FILES:
-                pass
-    
+            # Loop through files
+            files = [request.FILES.get('file[%d]' % i)
+                 for i in range(0, len(request.FILES))]
+
+            for myfile in files:
+
+                file_metadata = {'name': 'photo.jpg'}
+                media = get_gd_media_file(myfile, mimetype='image/jpeg')
+                file = gd_storage.files().create(body=file_metadata,media_body=media).execute()
+                print ('File ID: %s', file.get('id'))
+
     else:
         form = UploadFileForm()
         

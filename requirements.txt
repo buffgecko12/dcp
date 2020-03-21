@@ -10,5 +10,7 @@ django-widget-tweaks
 gunicorn
 dj-database-url
 whitenoise
+google-auth
+google-api-python-client
 
 #django-inline-svg

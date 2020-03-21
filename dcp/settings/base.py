@@ -126,6 +126,10 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 
+# Google Application
+GOOGLE_APPLICATION_CREDENTIALS = config('GOOGLE_APPLICATION_CREDENTIALS')
+GOOGLE_DRIVE_USER = config('GOOGLE_DRIVE_USER')
+
 # Templates config
 CRISPY_TEMPLATE_PACK = 'bootstrap4' # Set default template for forms
 DJANGO_TABLES2_TEMPLATE = 'django_tables2/bootstrap-responsive.html' # Set default template for tables
@@ -140,6 +144,7 @@ THOUSAND_SEPARATOR = '.'
 
 SHORT_DATETIME_FORMAT = 'j/n/y' # Used for django-tables2
 
+# Ignore errors on start-up
 SILENCED_SYSTEM_CHECKS = ['models.E005']
 
 # Custom settings

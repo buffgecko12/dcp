@@ -30,5 +30,21 @@ Application (dcp)
 - configure load_initial_data scripts (repository, application)
 - configure SSL: https://devcenter.heroku.com/articles/acquiring-an-ssl-certificate
 
+Configure Google API
+- grant Google Project service account user API access to Google Drive user account (GOOGLE_DRIVE_USER)
+- configure Google Drive Storage key:
+  - local: copy key file specified in .env file (GOOGLE_APPLICATION_CREDENTIALS) to expected location
+  - Heroku: 
+    1) create config variables
+      - GOOGLE_APPLICATION_CREDENTIALS = google-credentials.json
+      - GOOGLE_CREDENTIALS = <past entire service account key json>
+
+    2) add "google-application-credentials" buildpack
+      - https://github.com/gerywahyunugraha/heroku-google-application-credentials-buildpack
+      
+    3) Push a tiny change to re-deploy
+
+	Link: https://stackoverflow.com/questions/47446480/how-to-use-google-api-credentials-json-on-heroku
+
 Links
 https://docs.djangoproject.com/en/3.0/intro/install/
