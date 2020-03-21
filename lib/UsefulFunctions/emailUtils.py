@@ -1,5 +1,5 @@
 from django.core.mail import EmailMessage
-from django.conf import settings
+from lib.UsefulFunctions.miscUtils import get_app_setting
 
 def send_email(subject, body, to_list, bccflag = None, sender = None):
 
@@ -15,7 +15,7 @@ def send_email(subject, body, to_list, bccflag = None, sender = None):
                 subject=subject, 
                 body=body, 
                 from_email=sender,
-                to=to_list if not bccflag else [settings.DEFAULT_FROM_EMAIL,],
+                to=to_list if not bccflag else [get_app_setting('DEFAULT_FROM_EMAIL'),],
                 bcc=to_list if bccflag else None
             )
         
