@@ -72,5 +72,10 @@ def get_matching_item(items, key, value):
     else:
         return next((item for item in items if getattr(item,key,None) == value), None)
 
-def generate_options(items, idfield, displayfield):
-    return [(str(getattr(myitem,idfield)),getattr(myitem,displayfield)) for myitem in items]
+def generate_options(items, idfield, displayfield, removeduplicatesflag=True):
+    
+    seen = set()
+     
+    return [(str(getattr(myitem,idfield)),str(getattr(myitem,displayfield))) for myitem in items
+            if (not (getattr(myitem,idfield) in seen or seen.add(getattr(myitem,idfield)))) and removeduplicatesflag
+            ]
