@@ -66,12 +66,12 @@ class SchoolManager(models.Manager):
     def delete(self, mySchool):
         return delete_data('SP_DCPDeleteSchool', (mySchool.schoolid,))
 
-    def get_school_options(self, schoolid = None):
+    def get_school_options(self, schoolid = None, displayfield = 'schoolabbreviation'):
         
         return generate_options(
             items = self.get_schools(schoolid=schoolid), 
             idfield = "schoolid", 
-            displayfield = "schooldisplayname"
+            displayfield = displayfield
         )
 
 class SchoolCalendarManager(models.Manager):
