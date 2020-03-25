@@ -138,8 +138,9 @@ def create_teacher_class(teacheruserid, classid):
     myteacherclass.save()
     return myteacherclass
 
-def create_file(filename='sampleimg',fileextension='jpg',filesize=5000,filetype=None,filedescription=None,filestore='FS',fileURL=None,\
-                filepath=None,fileclass='General',filecategory='MS',contractid=None,schoolid=None,schoolyear=None,srcfilepath='test/img/sampleimg.jpg'):
+def create_file(filename='sampleimg',fileextension='jpg',filesize=5000,filetype=None,filedescription=None,filesource='FS',fileURL=None,\
+                filepath=None,fileclass='General',filecategory='MS',fileattributes=None,alternatefileid=None,contractid=None,schoolid=None,\
+                schoolyear=None,srcfilepath='test/img/sampleimg.jpg'):
     
     myfile = File(
         filename = filename,
@@ -147,18 +148,20 @@ def create_file(filename='sampleimg',fileextension='jpg',filesize=5000,filetype=
         filesize = filesize,
         filetype = filetype,
         filedescription = filedescription,
-        filestore = filestore,
-        filedata = test_env_setup.readfile(srcfilepath) if filestore == 'DB' else None,
+        filesource = filesource,
+        filedata = test_env_setup.readfile(srcfilepath) if filesource == 'DB' else None,
         fileURL = fileURL,
         filepath = filepath,
         fileclass = fileclass,
         filecategory = filecategory,
+        fileattributes = fileattributes,
+        alternatefileid = alternatefileid,
         contractid = contractid,
         schoolid = schoolid,
         schoolyear = schoolyear
     )
 
-    myfile.fileid = myfile.save()
+    myfile.fileid = myfile.save()['fileid']
     return myfile
 
 def create_category(categoryclass='reward', categorytype='PT',categorydisplayname='Participation',description = None):

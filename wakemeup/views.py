@@ -327,37 +327,80 @@ def myaccount(request):
 
 def create_file(request):
 
-    gd_storage = get_google_drive(permissions=['all'])
-
-    results = gd_storage.files().list(pageSize=100, fields="nextPageToken, files(id, name)").execute()
-    items = results.get('files', [])
-
-    if not items:
-        print('No files found.')
-    else:
-        print('Files:')
-        for item in items:
-            print(u'{0} ({1})'.format(item['name'], item['id']))
-
     if request.method == "POST":
-        form = UploadFileForm(request.POST,request.FILES)
         
+        # Bind form data
+        form = UploadFileForm(request.POST,request.FILES,request=request)
+
         if(form.is_valid()):
-            pass
+
+            gd_storage = get_google_drive(permissions=['all'])
+
             
+            results = gd_storage.files().list(pageSize=100, fields="nextPageToken, files(id, name)").execute()
+            items = results.get('files', [])
+            
+            if not items:
+                print('No files found.')
+            else:
+                print('Files:')
+                for item in items:
+                    print(u'{0} ({1})'.format(item['name'], item['id']))
+
+            
+            filetype = form.cleaned_data.get('filetype')
+
+            contractfiletypes = Category.objects.get_categories(categoryclass='contractfile')
+
+            # Look up default upload directory
+            if(filetype == "contractupload"):
+                pass
+
+                # use teacheruserid / schoolyear (TeacherProgram / File)
+#                 parentdirectory = File.objects.get_files()
+
             # Loop through files
             files = [request.FILES.get('file[%d]' % i)
                  for i in range(0, len(request.FILES))]
 
             for myfile in files:
 
-                file_metadata = {'name': 'photo.jpg'}
-                media = get_gd_media_file(myfile, mimetype='image/jpeg')
-                file = gd_storage.files().create(body=file_metadata,media_body=media).execute()
-                print ('File ID: %s', file.get('id'))
+                myfiletype = get_matching_item(contractfiletypes,'categorytype',filetype).categorydisplayname # In loop in case filetype is applied at this level
+
+                file_metadata = {
+                    'name': myfiletype + ' - ' + myfile.name,
+                    'originalFilename': myfile.name,
+                    'description':'Archivo subido por ' + request.user.userdisplayname,
+                    'parents':['18INeTgh1KIDUHLes92--nBFLdQPW7k-z'], # Upload directory # TO-DO: Update with correct value
+#                     'appProperties':{'drivepath': get_gd_fileid(gd_storage, request, schoolyear, 'contractupload')}
+                }
+
+                # Create file on Google Drive
+                file = gd_storage.files().create(
+                    body = file_metadata,
+                    media_body = get_gd_media_file(myfile, mimetype='application/octet-stream'),
+                    fields = ('id,mimeType,description,fileExtension,size')
+                ).execute()
+
+                # Create file in repository
+                newfile = File(
+                    filename=myfile.name,
+                    fileextension=file.get('fileExtension'),
+                    filesize=file.get('size'),
+                    filetype=file.get('mimeType'),
+                    filedescription=file.get('description'),
+                    filesource='GD',
+                    filedata=None,
+                    filecategory=filetype,
+                    alternatefileid=file.get('id'),
+                    schoolyear=form.cleaned_data.get('schoolyear'),
+                    schoolid=form.cleaned_data.get('schoolid')
+                )
+
+                newfile.fileid = newfile.save()['fileid']
 
     else:
-        form = UploadFileForm()
+        form = UploadFileForm(request=request)
         
     return render(request, 'wakemeup/admin/upload.html',context={'form':form})
 
