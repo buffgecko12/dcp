@@ -5,6 +5,7 @@ from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.miscUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
 from lib.UsefulFunctions.emailUtils import send_email
+from lib.UsefulFunctions.dataUtils import generate_options
 from django.contrib.postgres.fields import JSONField, DateTimeRangeField
 
 DEFAULT_SCHOOL_YEAR = get_school_year()
@@ -129,10 +130,10 @@ class TeacherProgramManager(models.Manager):
         return self.get_teacher_programs()
     
     def get(self, teacheruserid, schoolyear):
-        return get_data_pk(self, 'SP_DCPGetTeacherProgram(%s,%s)', (teacheruserid, schoolyear))
+        return get_data_pk(self, 'SP_DCPGetTeacherProgram(%s,%s,%s)', (teacheruserid, schoolyear, None)) # TO-DO: Check logic in case allowing multiple schools per teacher
     
-    def get_teacher_programs(self, teacheruserid = None, schoolyear = DEFAULT_SCHOOL_YEAR):
-        return get_data(self, 'SP_DCPGetTeacherProgram(%s,%s)', (teacheruserid, schoolyear))
+    def get_teacher_programs(self, teacheruserid = None, schoolyear = DEFAULT_SCHOOL_YEAR, schoolid = None):
+        return get_data(self, 'SP_DCPGetTeacherProgram(%s,%s,%s)', (teacheruserid, schoolyear, schoolid))
         
     def save(self, myTeacherProgram):
         return save_data('SP_DCPUpsertTeacherProgram', (
@@ -148,6 +149,13 @@ class TeacherProgramManager(models.Manager):
         
     def delete(self, myTeacherProgram):
         return delete_data('SP_DCPDeleteTeacherProgram', (myTeacherProgram.teacheruserid, myTeacherProgram.schoolyear))
+
+    def get_programyear_options(self, schoolid=None, schoolyear=None):
+        return generate_options(
+            items = self.get_teacher_programs(schoolid=schoolid,schoolyear=schoolyear), 
+            idfield = "schoolyear", 
+            displayfield = "schoolyear"
+        )
 
 class Reward(MyModel):
 

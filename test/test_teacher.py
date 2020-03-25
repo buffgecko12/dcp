@@ -55,7 +55,9 @@ class testTeacherClass(unittest.TestCase):
     def testGetTeacherProgram(self):
         self.assertTrue(TeacherProgram.objects.get(teacheruserid=self.myteacher1.userid,schoolyear=DEFAULT_SCHOOL_YEAR)) # teacher / year
         self.assertTrue(len(TeacherProgram.objects.get_teacher_programs(schoolyear=DEFAULT_SCHOOL_YEAR)),2) # year
-        self.assertTrue(len(TeacherProgram.objects.get_teacher_programs(teacheruserid=self.myteacher1.userid)),3) # year
+        self.assertTrue(len(TeacherProgram.objects.get_teacher_programs(teacheruserid=self.myteacher1.userid)),3) # teacher
+        self.assertEqual(TeacherProgram.objects.get_programyear_options(schoolyear=DEFAULT_SCHOOL_YEAR)[0][0],DEFAULT_SCHOOL_YEAR) # year
+        self.assertEqual(len(TeacherProgram.objects.get_programyear_options(schoolyear=DEFAULT_SCHOOL_YEAR)),1) # no duplicates
 
     def testDeleteTeacherProgram(self):
         
