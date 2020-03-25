@@ -13,8 +13,12 @@ from wakemeup.models.program import *
 from wakemeup.models.environment import *
 from user.models.user import UserBadge
 
+from lib.UsefulFunctions.miscUtils import *
+
 import datetime
 from lib.UsefulFunctions.stringUtils import *
+
+DEFAULT_SCHOOL_YEAR = get_school_year()
 
 DEFAULT_FORM_CLASS = 'form-horizontal'
 DEFAULT_LABEL_CLASS = 'col-sm-4'
@@ -76,28 +80,56 @@ def getAdminFormActions(cancel_url = 'wakemeup:index', cancel_context="", cancel
         Submit('submit_next','Enviar', css_id='next'),
     )
     
-def set_dropdown_choices(form, fieldname, categoryclass = None, selectflag = True):
-    form.fields[fieldname].choices = ([("0","-- Escoger --")] if selectflag else []) + \
-                                     Category.objects.get_category_options(categoryclass = categoryclass or fieldname)
+def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, objectid=None):
+    choices = [("0","-- Escoger --")] if selectflag else []
+    
+    if(fieldname =='schoolid'):
+        choices += (School.objects.get_school_options(schoolid=objectid)) 
+        
+    if(fieldname =='schoolyear'):
+        choices += (TeacherProgram.objects.get_programyear_options(schoolid=objectid, schoolyear=None)) 
+        
+    elif(fieldname == 'profilepictureid'):
+        choices += get_user_model().objects.get_profile_picture_options(userid=objectid)
+        
+    else:
+        choices += (Category.objects.get_category_options(categoryclass = categoryclass or fieldname))
+
+    form.fields[fieldname].choices = choices
 
 class UploadFileForm(forms.Form):
     
-    filetype = forms.ChoiceField(widget=forms.Select,label='File Type')
+    schoolid = forms.ChoiceField(widget=forms.Select,label='Colegio')
+    schoolyear = forms.ChoiceField(widget=forms.Select,initial=DEFAULT_SCHOOL_YEAR,label='A' + mychr('n') + 'o')
+    filetype = forms.ChoiceField(widget=forms.Select,label='Tipo de archivo')
     
     def __init__ (self, *args, **kwargs):
+
+        # Extract "request" parameter
+        request = kwargs.pop('request', None)
+
         super(UploadFileForm, self).__init__(*args, **kwargs)
+
+        # Populate initial drop-downs
+        set_dropdown_choices(self,fieldname='schoolid')
+        set_dropdown_choices(self,fieldname='schoolyear') # TO-DO Update to use AJAX based on schoolid
+        set_dropdown_choices(self,fieldname='filetype',categoryclass='contractfile')
+        
+        if(not request.user.is_admin):
+            self.fields['schoolid'] = forms.IntegerField(widget=forms.HiddenInput, initial=request.user.schoolid)
+            self.fields['schoolyear'] = forms.IntegerField(widget=forms.HiddenInput)
 
         # Set helper properties
         self.helper = FormHelper() 
         setFormHelper(self.helper)
         self.helper.form_tag = False
         
-        set_dropdown_choices(self,fieldname='filetype',categoryclass='programfile')
-        
         # Set form layout
         self.helper.layout = Layout(
             Fieldset(
-                'Subir archivo',
+                'Subir archivos',
+                'schoolid',
+                'schoolyear',
                 'filetype',
 #                 Div(css_class='dropzone', css_id='id_dropzone'),
                 HTML('<br>'),
@@ -108,7 +140,6 @@ class UploadFileForm(forms.Form):
     # Specify model
     class Meta:
         model = File
-
 
 class LoginForm(AuthenticationForm):
 
@@ -163,14 +194,11 @@ class SignupForm(UserCreationForm):
 
         # Populate usertype drop-down
         set_dropdown_choices(self,fieldname='usertype')
+        set_dropdown_choices(self,fieldname='schoolid')
 
         # Set password fields as optional
         self.fields['password1'].required=False
         self.fields['password2'].required=False
-
-        self.fields['schoolid'].choices = \
-            [("0","-- Escoger colegio --")] + \
-            School.objects.get_school_options(schoolid=myschoolid) # Default to user's schoolid
 
         self.fields['schoolid'].initial=myschoolid
             
@@ -409,8 +437,8 @@ class ClassForm(forms.Form):
         # Call base class constructor (i.e. School Form)
         super(ClassForm, self).__init__(*args, **kwargs)
         
-        # Get dynamic fields
-        self.fields['schoolid'].choices = School.objects.get_school_options()
+        # Set drop-downs
+        set_dropdown_choices(self,fieldname='schoolid',selectflag=False)
         
         # Set form helper properties
         self.helper = FormHelper()
@@ -479,19 +507,12 @@ class MyUserForm(forms.Form):
             self.fields['schoolid'].initial = myschoolid
             self.fields['schoolid'].disabled = True
             self.fields['schoolid'].widget=forms.HiddenInput()
-            
-            # Disable additional fields for students
-            if(request.user.usertype == "ST"):
-                self.fields['firstname'].initial = request.user.firstname
-                self.fields['firstname'].disabled = True
-                
-                self.fields['lastname'].initial = request.user.lastname
-                self.fields['lastname'].disabled = True
         else:
             myschoolid = None
-            
-        self.fields['schoolid'].choices = [("0",'-- Escoger colegio --')] + School.objects.get_school_options(schoolid=myschoolid)
-        self.fields['profilepictureid'].choices=get_user_model().objects.get_profile_picture_options(userid=request.user.userid)
+
+        # Set drop-downs
+        set_dropdown_choices(self,fieldname='schoolid',objectid=myschoolid)
+        set_dropdown_choices(self,fieldname='profilepictureid',objectid=request.user.userid,selectflag=False)
         
         # Set form layout
         self.helper.layout = Layout(
