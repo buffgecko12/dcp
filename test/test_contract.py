@@ -25,7 +25,7 @@ class testContracts(unittest.TestCase):
         TeacherClass(teacheruserid=cls.myteacher2.userid,classid=None).save(classidlist=[cls.myclass2.classid, cls.myclass3.classid])
 
         # Create contract file
-        cls.myfile = create_file(filename='contractscan',fileextension='pdf',filetype='application/pdf',filedescription='Class 1 - Contract',filestore='DB',filecategory='CT')
+        cls.myfile = create_file(filename='contractscan',fileextension='pdf',filetype='application/pdf',filedescription='Class 1 - Contract',filesource='DB',filecategory='CT')
 
         cls.myreward1 = create_reward(rewarddisplayname='My Reward 1')
         cls.myreward2 = create_reward(rewarddisplayname='My Reward 2',rewardvalue=20000)
