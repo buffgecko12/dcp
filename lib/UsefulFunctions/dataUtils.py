@@ -1,5 +1,5 @@
 import ast
-import collections
+import collections.abc
 
 def convert_array_string_to_int_old(stringarray):
     try:
@@ -65,7 +65,7 @@ def get_matching_item(items, key, value):
         return None
 
     # Dictionary
-    if(isinstance(items[0], collections.Mapping)):
+    if(isinstance(items[0], collections.abc.Mapping)):
         return next((item for item in items if item.get(key) == value), None)
     
     # Objects
