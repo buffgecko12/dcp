@@ -104,7 +104,7 @@ def get_google_credentials(service = 'drive', permissions = ['read']):
                 "all": "",
                 "write": ".file",
                 "read": ".readonly",
-                "list": ".metadata"
+                "list": ".metadata.readonly"
                 }
         }
     ]

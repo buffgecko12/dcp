@@ -31,10 +31,21 @@ Application (dcp)
 - configure SSL: https://devcenter.heroku.com/articles/acquiring-an-ssl-certificate
 
 Configure Google API
-- grant Google Project service account user API access to Google Drive user account (GOOGLE_DRIVE_USER)
-- configure Google Drive Storage key:
+1.Grant Google Project service account user API access to Google Drive user account (GOOGLE_DRIVE_USER)
+  - add "all, list, read, write" scopes
+  
+	write	https://www.googleapis.com/auth/drive.file
+	list	https://www.googleapis.com/auth/drive.metadata.readonly
+	all		https://www.googleapis.com/auth/drive
+	read	https://www.googleapis.com/auth/drive.readonly  
+
+  - https://support.google.com/a/answer/162106?hl=en
+  - https://developers.google.com/drive/api/v2/about-auth
+  
+2. Configure Google Drive Storage key:
   - local: copy key file specified in .env file (GOOGLE_APPLICATION_CREDENTIALS) to expected location
   - Heroku: 
+
     1) create config variables
       - GOOGLE_APPLICATION_CREDENTIALS = google-credentials.json
       - GOOGLE_CREDENTIALS = <past entire service account key json>

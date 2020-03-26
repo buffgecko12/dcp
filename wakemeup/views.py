@@ -334,9 +334,10 @@ def create_file(request):
 
         if(form.is_valid()):
 
-            gd = GoogleDrive(permissions=['all']).connection
+            # Connect to Google Drive
+            gd = GoogleDrive(permissions=['write'])
             
-            results = gd.files().list(pageSize=100, fields="nextPageToken, files(id, name)").execute()
+            results = gd.connection.files().list(pageSize=100, fields="nextPageToken, files(id, name)").execute()
             items = results.get('files', [])
             
             if not items:
@@ -375,11 +376,11 @@ def create_file(request):
                 }
 
                 # Create file on Google Drive
-                file = gd.files().create(
-                    body = file_metadata,
-                    media_body = get_gd_media_file(myfile, mimetype='application/octet-stream'),
+                file = gd.create_file(
+                    metadata = file_metadata,
+                    file_data = myfile,
                     fields = ('id,mimeType,description,fileExtension,size')
-                ).execute()
+                )
 
                 # Create file in repository
                 newfile = File(

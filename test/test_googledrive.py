@@ -15,7 +15,7 @@ class testGoogleDrive(unittest.TestCase):
     def testConnection(self):
         
         # Connection
-        gd = GoogleDrive(permissions=['all'])
+        gd = GoogleDrive(permissions=['write'])
         
         # Create file
         gd.create_file(metadata={'name': 'Test directory','parents':['root']},directoryflag=True,)
