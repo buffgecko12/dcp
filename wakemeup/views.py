@@ -12,7 +12,7 @@ from lib.UsefulFunctions.dataUtils import *
 from lib.UsefulFunctions.stringUtils import *
 from lib.UsefulFunctions.httpUtils import *
 from lib.UsefulFunctions.fileUtils import get_file_name_info
-from lib.UsefulFunctions.googleUtils import *
+from lib.UsefulFunctions.googleUtils import GoogleDrive, get_gd_media_file
 
 from django_tables2 import RequestConfig
 
@@ -334,10 +334,9 @@ def create_file(request):
 
         if(form.is_valid()):
 
-            gd_storage = get_google_drive(permissions=['all'])
-
+            gd = GoogleDrive(permissions=['all']).connection
             
-            results = gd_storage.files().list(pageSize=100, fields="nextPageToken, files(id, name)").execute()
+            results = gd.files().list(pageSize=100, fields="nextPageToken, files(id, name)").execute()
             items = results.get('files', [])
             
             if not items:
@@ -376,7 +375,7 @@ def create_file(request):
                 }
 
                 # Create file on Google Drive
-                file = gd_storage.files().create(
+                file = gd.files().create(
                     body = file_metadata,
                     media_body = get_gd_media_file(myfile, mimetype='application/octet-stream'),
                     fields = ('id,mimeType,description,fileExtension,size')

@@ -1,7 +1,7 @@
 import unittest
 from test_setup import *
 
-from UsefulFunctions.googleUtils_new import GoogleDrive
+from UsefulFunctions.googleUtils import GoogleDrive
 
 class testGoogleDrive(unittest.TestCase):
 
@@ -13,9 +13,12 @@ class testGoogleDrive(unittest.TestCase):
         pass
     
     def testConnection(self):
-        mydrive = GoogleDrive()
-        mydrive.connect()
-        conn = mydrive.connection
+        
+        # Connection
+        gd = GoogleDrive(permissions=['all'])
+        
+        # Create file
+        gd.create_file(metadata={'name': 'Test directory','parents':['root']},directoryflag=True,)
         
     def tearDown(self):        
         pass

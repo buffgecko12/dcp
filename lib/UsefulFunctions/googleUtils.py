@@ -1,4 +1,5 @@
  # Import - Useful functions
+import os
 from lib.UsefulFunctions.dataUtils import get_matching_item
 from lib.UsefulFunctions.miscUtils import get_app_setting
 import wakemeup.models.environment as env
@@ -7,7 +8,91 @@ import wakemeup.models.environment as env
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
+import sys
 
+class GoogleDriveManager():
+
+    def connect(self, gd):
+        return get_google_service(service=gd.service,version=gd.version, permissions=gd.permissions)
+
+    def create_structure(self, gd, gd_structure):
+    
+        try:
+            # Create top-level directory if it doesn't exist
+            for parent,child in gd_structure.items():
+                if isinstance(child, dict):
+        
+                    # Create file on Google Drive
+                    gd_file = {
+                        'gd': gd,
+                        'metadata': {
+                            'name': parent,
+                            'parents':[child.get('parentid',{}) or gd_structure.get('parentid',{}) or {}], # Use generated parentid, except for case of top-level
+                        },
+                        'directoryflag':True
+                        }
+        
+                    # Save file and store newly generated id
+                    newfileid = env.File().save(gd_file=gd_file)['gd_file']['id']
+        
+                    # Set parentid values for child directories
+                    for mychild in child:
+                        if(mychild != 'parentid'):
+                            child[mychild]['parentid'] = newfileid
+         
+                    # Call method for children
+                    self.create_structure(gd, child)
+            
+            return 'Success'
+        
+        except:
+            print('Fail - Error creating "' + str(parent) + '"' + str(sys.exc_info()[0]) + ")")
+            return 'Fail'
+
+    # Create directory / file
+    def create_file(self, gd, metadata, file_data, mimetype, fields, directoryflag, *args, **kwargs):
+    
+        # Set file attributes
+        if(directoryflag):
+            metadata['mimeType'] = 'application/vnd.google-apps.folder'
+            media_content = None
+        else:
+            media_content = get_gd_media_file(file_data, mimetype=mimetype)
+        
+        return gd.connection.files().create(
+            body=metadata,
+            media_body = media_content,
+            fields=fields
+        ).execute()
+
+class GoogleDrive():
+
+    connection = None
+
+    def __init__(self, version = 'v3', permissions = ['read'], autoconnect=True, *args, **kwargs):
+        super(GoogleDrive, self).__init__(*args, **kwargs)
+        
+        self.service = 'drive'
+        self.version = version
+        self.permissions = permissions
+
+        # Connect automatically
+        if(autoconnect):
+            self.connect()
+
+    # Instances of class
+    objects = GoogleDriveManager()
+
+    def connect(self):
+        self.connection = self.objects.connect(self)
+        
+    def create_structure(self, gd_structure):
+        return self.objects.create_structure(self, gd_structure)
+    
+    def create_file(self, metadata, file_data=None, mimetype='application/octet-stream', fields=None, directoryflag=False):
+        return self.objects.create_file(self, metadata, file_data, mimetype, fields, directoryflag)
+
+# https://developers.google.com/drive/api/v3/about-auth
 def get_google_credentials(service = 'drive', permissions = ['read']):
 
     service_conf = [
@@ -17,8 +102,9 @@ def get_google_credentials(service = 'drive', permissions = ['read']):
             "url":"https://www.googleapis.com/auth/drive",
             "perm_map": {
                 "all": "",
-                "read": "readonly",
-                "list": "metadata"
+                "write": ".file",
+                "read": ".readonly",
+                "list": ".metadata"
                 }
         }
     ]
@@ -30,9 +116,15 @@ def get_google_credentials(service = 'drive', permissions = ['read']):
         myservice = get_matching_item(service_conf,'service',service)
         scopes.append(myservice['url'] + myservice['perm_map'][mypermission])
     
-    # Return credential
+    # Return credential (must run from same directory as .json key
+    originalcwd = os.getcwd()
+    os.chdir(get_app_setting('BASE_DIR')) # TO-DO: Possibly change this to point to KEYS directory
+    
     credentials = service_account.Credentials.from_service_account_file(
         get_app_setting('GOOGLE_APPLICATION_CREDENTIALS'), scopes=scopes)
+    
+    # Revert to original cwd
+    os.chdir(originalcwd)
 
     # Delegate control to admin Google user account
     credentials = credentials.with_subject(get_app_setting('GOOGLE_DRIVE_USER'))
@@ -42,57 +134,8 @@ def get_google_credentials(service = 'drive', permissions = ['read']):
 def get_google_service(service, version, permissions = ['read'], credentials = None):
     return build(serviceName=service, version=version, credentials=credentials or get_google_credentials(service=service,permissions=permissions))
 
-def get_google_drive(permissions = ['read']):
-    return get_google_service(service='drive', version='v3', permissions=permissions)
-
 def get_gd_media_file(file, mimetype, chunksize = (5*1024*1024), resumable=True):
     return MediaIoBaseUpload(file, mimetype, chunksize, resumable)
-
-def create_gd_structure(gd_structure):
-
-    # Get Google Drive connection
-    gd_storage = get_google_drive(permissions=['all'])
-
-    # Create top-level directory if it doesn't exist
-    for parent,child in gd_structure.items():
-        if isinstance(child, dict):
-
-            # Create file on Google Drive
-            gd_info = {
-                'gd_storage':gd_storage,
-                'metadata': {
-                    'name': parent,
-                    'parents':[child.get('parentid',{}) or gd_structure.get('parentid',{}) or {}], # Use generated parentid, except for case of top-level
-                },
-                'directoryflag':True
-                }
-
-            # Save file and store newly generated id
-            newfileid = env.File().save(gd_file=gd_info)['gd_file']['id']
-
-            # Set parentid values for child directories
-            for mychild in child:
-                if(mychild != 'parentid'):
-                    child[mychild]['parentid'] = newfileid
- 
-            # Call method for children
-            create_gd_structure(child)
-
-# Create directory / file
-def create_gd_file(gd_storage, metadata, file_data=None, mimetype='application/octet-stream', fields=None, directoryflag=False):
-
-    # Set file attributes
-    if(directoryflag):
-        metadata['mimeType'] = 'application/vnd.google-apps.folder'
-        media_content = None
-    else:
-        media_content = get_gd_media_file(file_data, mimetype=mimetype)
-    
-    return gd_storage.files().create(
-        body=metadata,
-        media_body = media_content,
-        fields=fields
-    ).execute()
 
 def get_gd_filepath(user, schoolyear, pathtype = None): # TO-DO: Most likely remove this
     

@@ -25,11 +25,14 @@ class FileManager(models.Manager):
         # Extract gd_file info if it exists
         gd_file = kwargs.get('gd_file')
         
-        # Save file to google drive first if defined
+        # Save file to google drive first (if defined)
         if(gd_file):
-        
+
+            # Extract google drive connection
+            gd = gd_file.pop('gd')
+
             # Save file
-            gd_file = google.create_gd_file(**gd_file)
+            gd_file = gd.create_file(**gd_file)
 
             # Update original File attributes
             myFile.filename = gd_file.get('name')
@@ -40,6 +43,7 @@ class FileManager(models.Manager):
             myFile.filesource = 'GD'
             myFile.alternatefileid = gd_file.get('id')
             
+        # Save to repository
         fileid = save_data('SP_DCPUpsertFile',
             (
                 myFile.fileid,
