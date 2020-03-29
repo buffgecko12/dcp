@@ -1,5 +1,8 @@
- # Import - Useful functions
 import os
+import sys
+import io
+
+ # Import - Useful functions
 from lib.UsefulFunctions.dataUtils import get_matching_item
 from lib.UsefulFunctions.miscUtils import get_app_setting
 import wakemeup.models.environment as env
@@ -7,8 +10,10 @@ import wakemeup.models.environment as env
 # Import - Google
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaIoBaseUpload
-import sys
+from googleapiclient.http import MediaFileUpload, MediaIoBaseUpload, MediaIoBaseDownload
+from googleapiclient.errors import HttpError
+
+from urllib.error import HTTPError
 
 class GoogleDriveManager():
 
@@ -28,6 +33,7 @@ class GoogleDriveManager():
                         'metadata': {
                             'name': parent,
                             'parents':[child.get('parentid',{}) or gd_structure.get('parentid',{}) or {}], # Use generated parentid, except for case of top-level
+                            'properties':[child.get('properties',{}) or gd_structure.get('properties',{}) or {}]
                         },
                         'directoryflag':True
                         }
@@ -49,21 +55,82 @@ class GoogleDriveManager():
             print('Fail - Error creating "' + str(parent) + '"' + str(sys.exc_info()[0]) + ")")
             return 'Fail'
 
+    def get_file(self, gd, fileid, fields):
+        
+        try:
+            return gd.connection.files().get(fileId=fileid,fields=fields).execute()
+        
+        except (HttpError) as error:
+            
+            message = "Error: "
+            status = error.resp.status
+            
+            if(status == 404):
+                message += "File not found"
+            else:
+                message += error
+            
+            message +=  " ({})" .format(fileid)
+            
+            print(message)
+
     # Create directory / file
-    def create_file(self, gd, metadata, file_data, mimetype, fields, directoryflag, *args, **kwargs):
+    def create_file(self, gd, metadata, file_data, mimetype, fields, directoryflag, file_path=None, *args, **kwargs):
     
         # Set file attributes
         if(directoryflag):
             metadata['mimeType'] = 'application/vnd.google-apps.folder'
             media_content = None
         else:
-            media_content = get_gd_media_file(file_data, mimetype=mimetype)
+            media_content = get_gd_media_file(file=file_data, mimetype=mimetype,file_path=file_path)
         
         return gd.connection.files().create(
             body=metadata,
             media_body = media_content,
             fields=fields
         ).execute()
+
+    def download_file(self, gd, fileid):
+
+        request = gd.connection.files().get_media(fileId=fileid)
+        stream = io.BytesIO()
+        downloader = MediaIoBaseDownload(stream, request)
+        done = False
+        
+        # Retry if we received HttpError
+        try:
+            for retry in range(0, 5):
+                try:
+                    while done is False:
+                        status, done = downloader.next_chunk()
+                        print("Download %d%%." % int(status.progress() * 100))
+                        
+                    return stream.getvalue()
+                
+                except (HTTPError) as error:
+                    print('There was an API error: {}. Try # {} failed.'.format(error.response,retry))
+                    
+        except(HttpError) as error:
+            print('There was an API error: {}' .format(error))
+    
+    def update_file(self, gd, fileid, metadata):
+        try:
+            return gd.connection.files().update(fileId=fileid, body=metadata).execute()
+        
+        except(HttpError) as error:
+            print('There was an API error: {}' .format(error))
+
+    def delete_file(self, gd, fileid, repositoryflag, permanentflag):
+
+        # Delete / recycle file
+        if(not permanentflag):
+            return gd.update_file(fileid=fileid,metadata={'trashed':True})
+        else:
+            return gd.connection.files().delete(fileId=fileid).execute()
+        
+        # Delete from repository also
+        if(repositoryflag):
+            env.File(alternatefileid=fileid,filesource='GD').delete()
 
 class GoogleDrive():
 
@@ -89,8 +156,20 @@ class GoogleDrive():
     def create_structure(self, gd_structure):
         return self.objects.create_structure(self, gd_structure)
     
-    def create_file(self, metadata, file_data=None, mimetype='application/octet-stream', fields=None, directoryflag=False):
-        return self.objects.create_file(self, metadata, file_data, mimetype, fields, directoryflag)
+    def create_file(self, metadata, file_data=None, mimetype='application/octet-stream', fields=None, directoryflag=False, file_path=None, *args, **kwargs):
+        return self.objects.create_file(self, metadata, file_data, mimetype, fields, directoryflag, file_path)
+
+    def get_file(self, fileid, fields=None):
+        return self.objects.get_file(self, fileid, fields)
+
+    def download_file(self, fileid):
+        return self.objects.download_file(self, fileid)
+
+    def update_file(self, fileid, metadata):
+        return self.objects.update_file(self, fileid, metadata)
+
+    def delete_file(self, fileid, repositoryflag=False, permanentflag=False):
+        return self.objects.delete_file(self, fileid, repositoryflag, permanentflag)
 
 # https://developers.google.com/drive/api/v3/about-auth
 def get_google_credentials(service = 'drive', permissions = ['read']):
@@ -134,8 +213,15 @@ def get_google_credentials(service = 'drive', permissions = ['read']):
 def get_google_service(service, version, permissions = ['read'], credentials = None):
     return build(serviceName=service, version=version, credentials=credentials or get_google_credentials(service=service,permissions=permissions))
 
-def get_gd_media_file(file, mimetype, chunksize = (5*1024*1024), resumable=True):
-    return MediaIoBaseUpload(file, mimetype, chunksize, resumable)
+def get_gd_media_file(file, mimetype, file_path=None, chunksize = (5*1024*1024), resumable=True):
+    
+    # Prepare file from path
+    if(file_path):
+        return MediaFileUpload(file_path, mimetype, chunksize, resumable)
+    
+    # Prepare file from binary
+    else:
+        return MediaIoBaseUpload(file, mimetype, chunksize, resumable)
 
 def get_gd_filepath(user, schoolyear, pathtype = None): # TO-DO: Most likely remove this
     

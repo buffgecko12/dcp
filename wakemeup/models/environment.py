@@ -42,6 +42,7 @@ class FileManager(models.Manager):
             myFile.filedescription = gd_file.get('description')
             myFile.filesource = 'GD'
             myFile.alternatefileid = gd_file.get('id')
+            myFile.fileattributes = gd_file.get('properties')
             
         # Save to repository
         fileid = save_data('SP_DCPUpsertFile',
@@ -68,8 +69,9 @@ class FileManager(models.Manager):
 
         return {'fileid':fileid,'gd_file':gd_file}
         
-    def delete(self, myFile, contractid = None, schoolid = None):
-        return delete_data('SP_DCPDeleteFile', (myFile.fileid, contractid, schoolid))
+    def delete(self, myFile, contractid = None, schoolid = None, alternatefileid = None, filesource = None):
+        return delete_data('SP_DCPDeleteFile', (myFile.fileid, myFile.contractid, myFile.schoolid, myFile.alternatefileid, myFile.filesource))
+#         return delete_data('SP_DCPDeleteFile', (myFile.fileid, contractid, schoolid, alternatefileid, filesource))
             
 class CategoryManager(models.Manager):
     def all(self):
