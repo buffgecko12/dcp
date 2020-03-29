@@ -12,7 +12,7 @@ from lib.UsefulFunctions.dataUtils import *
 from lib.UsefulFunctions.stringUtils import *
 from lib.UsefulFunctions.httpUtils import *
 from lib.UsefulFunctions.fileUtils import get_file_name_info
-from lib.UsefulFunctions.googleUtils import GoogleDrive, get_gd_media_file
+from lib.UsefulFunctions.googleUtils import GoogleDrive
 
 from django_tables2 import RequestConfig
 
