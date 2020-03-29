@@ -17,7 +17,6 @@ from lib.UsefulFunctions.googleUtils import GoogleDrive
 from django_tables2 import RequestConfig
 
 import psycopg2
-import json
 
 from wakemeup.tables import *
 from wakemeup.forms import *
@@ -671,8 +670,8 @@ def edit_object(request, objecttype, objectid):
 
                     # Save school info
                     myschool.save(**kwargs)
-                    SchoolReward(schoolid=myschool.schoolid).save(rewardinfo=json.dumps(schoolreward_data))
-                    SchoolCalendar(schoolid=myschool.schoolid).save(calendarinfo=json.dumps(schoolcalendar_data))
+                    SchoolReward(schoolid=myschool.schoolid).save(rewardinfo=to_json(schoolreward_data))
+                    SchoolCalendar(schoolid=myschool.schoolid).save(calendarinfo=to_json(schoolcalendar_data))
 
             elif(objecttype == 'class'):
                 myclass = objectClass(
@@ -706,7 +705,7 @@ def edit_object(request, objecttype, objectid):
                     current_classes_final.append({'classid':myclass})
                 
                 # Generate class info field
-                classinfo = json.dumps({
+                classinfo = to_json({
                     'deletedclasses' : subtract_arrays(initial_classes, current_classes_form),
                     'currentclasses' : current_classes_final
                 })

@@ -3,8 +3,7 @@ from test_setup import *
 from wakemeup.models.program import *
 from wakemeup.models.environment import *
 from lib.UsefulFunctions.miscUtils import get_school_year
-
-import json
+from lib.UsefulFunctions.dataUtils import * 
 
 DEFAULT_SCHOOL_YEAR = get_school_year()
 
@@ -34,7 +33,7 @@ class testContracts(unittest.TestCase):
     def setUp(self):
 
         # Contract party info
-        partyinfo = json.dumps([
+        partyinfo = to_json([
             {"teacheruserid":self.myteacher1.userid,"classid":self.myclass1.classid,"numparticipants":10,"numwinners":5},
             {"teacheruserid":self.myteacher2.userid,"classid":self.myclass2.classid,"numparticipants":20,"numwinners":7}
         ])

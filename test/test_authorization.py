@@ -1,8 +1,7 @@
 import unittest
 from test_setup import *
 from user.models.authorization import *
-
-import json
+from lib.UsefulFunctions.dataUtils import * 
 
 class testAuthorization(unittest.TestCase):
 
@@ -146,7 +145,7 @@ class testAuthorization(unittest.TestCase):
         self.assertFalse(self.myadmin.check_access(self.myobject1.objectid,self.myobject1.objectclass,1)) # Admin - no edit access
         
         # Grant ACLs on contracts
-        myacllist = json.dumps([
+        myacllist = to_json([
             # Teachers
             {"roleid":self.myrole_teachers.roleid, "aclinfo":
                 [

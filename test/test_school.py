@@ -1,7 +1,7 @@
 import unittest
 from test_setup import *
 from datetime import date, timedelta
-import json
+from lib.UsefulFunctions.dataUtils import * 
 
 from wakemeup.models.school import School, SchoolReward
 
@@ -53,7 +53,7 @@ class testSchool(unittest.TestCase):
     def testUpdateSchoolCalendar(self):
         
         # Add rewards (bulk) and verify
-        myschoolcalendar = SchoolCalendar(schoolid=self.myschool1.schoolid).save(calendarinfo=json.dumps(
+        myschoolcalendar = SchoolCalendar(schoolid=self.myschool1.schoolid).save(calendarinfo=to_json(
             [
                 {"itemdate":str(date.today()),"itemtype":"SP","itemnotes":"Start program notes","round":None},
                 {"itemdate":str(date.today() + timedelta(days=10)),"itemtype":"CTE","itemnotes":"Contract Deadline 1","round":1},
@@ -99,7 +99,7 @@ class testSchool(unittest.TestCase):
         self.assertFalse(refresh(self.myschoolreward1))
         
         # Add rewards (bulk) and verify
-        myschoolrewards = SchoolReward(schoolid=self.myschool1.schoolid).save(rewardinfo=json.dumps(
+        myschoolrewards = SchoolReward(schoolid=self.myschool1.schoolid).save(rewardinfo=to_json(
             [
                 {"rewardid":self.myreward1.rewardid,"rewardvalue":self.myreward1.rewardvalue},
                 {"rewardid":self.myreward2.rewardid,"rewardvalue":self.myreward2.rewardvalue},

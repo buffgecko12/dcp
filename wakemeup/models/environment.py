@@ -4,7 +4,7 @@ from wakemeup.models.base import MyModel
 from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.miscUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
-from lib.UsefulFunctions.dataUtils import generate_options
+from lib.UsefulFunctions.dataUtils import generate_options, to_json
 import lib.UsefulFunctions.googleUtils as google
 from django.contrib.postgres.fields import JSONField
 
@@ -42,7 +42,7 @@ class FileManager(models.Manager):
             myFile.filedescription = gd_file.get('description')
             myFile.filesource = 'GD'
             myFile.alternatefileid = gd_file.get('id')
-            myFile.fileattributes = gd_file.get('properties')
+            myFile.fileattributes = to_json(gd_file.get('properties'))
             
         # Save to repository
         fileid = save_data('SP_DCPUpsertFile',

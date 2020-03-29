@@ -1,6 +1,6 @@
 import unittest
-import json
 from test_setup import *
+from lib.UsefulFunctions.dataUtils import * 
 
 from wakemeup.models.environment import *
     
@@ -12,7 +12,7 @@ class testFile(unittest.TestCase):
     
     def setUp(self):
         self.myfile_db = create_file(filesource='DB') # Database
-        self.myfile_gd = create_file(filesource='GD',alternatefileid='ID1234',fileattributes=json.dumps({'userid':10})) # Google Drive
+        self.myfile_gd = create_file(filesource='GD',alternatefileid='ID1234',fileattributes=to_json({'userid':10})) # Google Drive
         self.myfile_ul = create_file(filesource='UL',filename='contract-1-congrats', fileURL='https://drive.google.com/open?id=0B4E6alUgHua8Qld0d3FrMHV1TUE',contractid=1) # URL
         self.myfile_fs = create_file(filesource='FS',schoolid=1,schoolyear=2000) # File system, different school year
 
@@ -30,8 +30,8 @@ class testFile(unittest.TestCase):
 
         # Google drive
         self.assertTrue(File.objects.get_files(alternatefileid='ID1234'))
-        self.assertTrue(File.objects.get_files(attributefilter=json.dumps({'userid':10})))
-        self.assertFalse(File.objects.get_files(attributefilter=json.dumps({'userid':11})))
+        self.assertTrue(File.objects.get_files(attributefilter=to_json({'userid':10})))
+        self.assertFalse(File.objects.get_files(attributefilter=to_json({'userid':11})))
         
     def testUpdateFile(self):
         self.myfile_db.filename = 'NEW NAME'

@@ -1,5 +1,6 @@
 import ast
 import collections.abc
+import json
 
 def convert_array_string_to_int_old(stringarray):
     try:
@@ -79,3 +80,6 @@ def generate_options(items, idfield, displayfield, removeduplicatesflag=True):
     return [(str(getattr(myitem,idfield)),str(getattr(myitem,displayfield))) for myitem in items
             if (not (getattr(myitem,idfield) in seen or seen.add(getattr(myitem,idfield)))) and removeduplicatesflag
             ]
+    
+def to_json(mydict):
+    return json.dumps(mydict)
