@@ -6,13 +6,12 @@ from psycopg2 import Binary
 def get_basedir():
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-def readfile(myfilepath):
-    # Read in "signature" file
-    BASE_DIR = get_basedir()
-    
-    filepath = os.path.join(BASE_DIR,myfilepath)
+def get_abs_path(file_path):
+    return os.path.join(get_basedir(), file_path)
 
-    itemfile = open(filepath,'rb')
+def readfile(file_path):
+    
+    itemfile = open(get_abs_path(file_path),'rb')
     mydatafile = itemfile.read()
     myfile = Binary(mydatafile)
     itemfile.close()
