@@ -21,19 +21,18 @@ class GoogleDriveManager():
         return get_google_service(service=gd.service,version=gd.version, permissions=gd.permissions)
 
     def create_structure(self, gd, gd_structure):
-    
         try:
             # Create top-level directory if it doesn't exist
-            for parent,child in gd_structure.items():
-                if isinstance(child, dict):
+            for parent,children in gd_structure.items():
+                if isinstance(children, dict) and parent != 'metadata':
         
-                    # Create file on Google Drive
+                    # Create parent file
                     gd_file = {
                         'gd': gd,
                         'metadata': {
                             'name': parent,
-                            'parents':[child.get('parentid',{}) or gd_structure.get('parentid',{}) or {}], # Use generated parentid, except for case of top-level
-                            'properties':[child.get('properties',{}) or gd_structure.get('properties',{}) or {}]
+                            'parents':[children.get('metadata',{}).get('parentid',{}) or gd_structure.get('metadata',{}).get('parentid',{}) or {}], # Use generated parentid, except for case of top-level
+                            'properties':[children.get('metadata',{}) or gd_structure.get('metadata',{}) or {}]
                         },
                         'directoryflag':True
                         }
@@ -42,16 +41,24 @@ class GoogleDriveManager():
                     newfileid = env.File().save(gd_file=gd_file)['gd_file']['id']
         
                     # Set parentid values for child directories
-                    for mychild in child:
-                        if(mychild != 'parentid'):
-                            child[mychild]['parentid'] = newfileid
+                    for mychild in children:
+                        if(mychild != 'metadata'):
+
+                            currentchild = children[mychild]
+                            
+                            # Create metadata key if doesn't exist
+                            if(not currentchild.get('metadata')):
+                                currentchild['metadata'] = {}
+                                
+                            # Set parentid
+                            currentchild['metadata']['parentid'] = newfileid
          
                     # Call method for children
-                    self.create_structure(gd, child)
+                    self.create_structure(gd, children)
             
             return 'Success'
         
-        except:
+        except HttpError:
             print('Fail - Error creating "' + str(parent) + '"' + str(sys.exc_info()[0]) + ")")
             return 'Fail'
 
@@ -156,7 +163,14 @@ class GoogleDrive():
     def create_structure(self, gd_structure):
         return self.objects.create_structure(self, gd_structure)
     
-    def create_file(self, metadata, file_data=None, mimetype='application/octet-stream', fields=None, directoryflag=False, file_path=None, *args, **kwargs):
+    def create_file(self, 
+                    metadata, 
+                    file_data = None, 
+                    mimetype = 'application/octet-stream', 
+                    fields = ('name,fileExtension,size,mimeType,description,id,properties'), 
+                    directoryflag = False, 
+                    file_path = None, 
+                    *args, **kwargs):
         return self.objects.create_file(self, metadata, file_data, mimetype, fields, directoryflag, file_path)
 
     def get_file(self, fileid, fields=None):

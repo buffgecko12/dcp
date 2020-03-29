@@ -61,18 +61,22 @@ class testGoogleDrive(unittest.TestCase):
         
     def testCreateStructure(self):
 
-        # Recycle file
-        self.gd_write.delete_file(fileid=self.myfile['id'])
-        
-        # Permanently delete file
-        self.gd_write.delete_file(fileid=self.myfile['id'], permanentflag=True)
-        
         gd_structure = {
             'Directory 1':{
-                'Sub-Directory 1a':{},
+                'Sub-Directory 1a':{
+                    'Sub-Directory 1b':{},
+                    'metadata':{'gd_locator':'dir_1b'}
+                },
+                'metadata':{'gd_locator':'dir_1a'}
             },
-            'parentid':'root' # Optional (can use value "None" or remove key entirely)
+            'metadata':{'parentid':'root','gd_locator':'dir_1'},
+#             'parentid':'root' # Optional (can use value "None" or remove key entirely)
         }
+
+        self.gd_write.create_structure(gd_structure)
+
+        # TO-DO: Check directory created
+        # Check lookup via gd_locator
 
     def testGetFile(self):
 
