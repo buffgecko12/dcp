@@ -30,8 +30,8 @@ class testFile(unittest.TestCase):
 
         # Google drive
         self.assertTrue(File.objects.get_files(alternatefileid='ID1234'))
-        self.assertTrue(File.objects.get_files(attributefilter=to_json({'userid':10})))
-        self.assertFalse(File.objects.get_files(attributefilter=to_json({'userid':11})))
+        self.assertTrue(File.objects.get_files(fileattributes=to_json({'userid':10})))
+        self.assertFalse(File.objects.get_files(fileattributes=to_json({'userid':11})))
         
     def testUpdateFile(self):
         self.myfile_db.filename = 'NEW NAME'

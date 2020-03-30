@@ -15,10 +15,10 @@ class FileManager(models.Manager):
         return self.get_files()
     
     def get(self, fileid):
-        return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, None, None, None, None, None, None, None))
+        return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, None, None, None, None, None, None, None, None))
     
-    def get_files(self, fileid=None, fileclass=None, filecategory=None, alternatefileid=None, contractid=None, schoolid=None, schoolyear=None, attributefilter=None):
-        return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, attributefilter))
+    def get_files(self, fileid=None, fileclass=None, filecategory=None, alternatefileid=None, contractid=None, schoolid=None, schoolyear=None, fileattributes=None, filesource=None):
+        return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource))
     
     def save(self, myFile, *args, **kwargs):
         
