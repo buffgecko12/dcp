@@ -31,8 +31,8 @@ class GoogleDriveManager():
                         'gd': gd,
                         'metadata': {
                             'name': parent,
-                            'parents':[children.get('metadata',{}).get('parentid',{}) or gd_structure.get('metadata',{}).get('parentid',{}) or {}], # Use generated parentid, except for case of top-level
-                            'properties':[children.get('metadata',{}) or gd_structure.get('metadata',{}) or {}]
+                            'parents':[children.get('metadata',{}).get('parentid') or {}],
+                            'properties':[children.get('metadata') or {}]
                         },
                         'directoryflag':True
                         }
@@ -185,6 +185,12 @@ class GoogleDrive():
     def delete_file(self, fileid, repositoryflag=False, permanentflag=False):
         return self.objects.delete_file(self, fileid, repositoryflag, permanentflag)
 
+    def lookup_fileid(self, **kwargs):
+        myfile = env.File.objects.get_files(filesource='GD',**kwargs)
+        
+        if(myfile):
+            return myfile[0].alternatefileid # Return alternate id for first result
+    
 # https://developers.google.com/drive/api/v3/about-auth
 def get_google_credentials(service = 'drive', permissions = ['read']):
 
@@ -236,36 +242,3 @@ def get_gd_media_file(file, mimetype, file_path=None, chunksize = (5*1024*1024),
     # Prepare file from binary
     else:
         return MediaIoBaseUpload(file, mimetype, chunksize, resumable)
-
-def get_gd_filepath(user, schoolyear, pathtype = None): # TO-DO: Most likely remove this
-    
-    user_dir = user.schoolabbreviation or '' + ' - ' + user.firstname + str(user.userid) # i.e. RBHS - Chris12
-
-    base_path = '/'                                         # /
-    schoolyear_path = base_path + str(schoolyear) + '/'     # /2020/
-    contracts_path = schoolyear_path + 'Contratos/'         # /2020/Contratos/
-    user_path = contracts_path + user_dir + '/'             # /2020/Contratos/RBHS - Chris12/
-    contractupload_path = user_path + "Uploads/"            # /2020/Contratos/RBHS - Chris12/Uploads/
-
-    file_paths = {
-        "base":"/",
-        "schoolyear":schoolyear_path,
-        "contracts":contracts_path,
-        "user":user_path,
-        "contractupload":contractupload_path
-        }
-    
-    if(pathtype):
-        return file_paths[pathtype]
-    else:
-        return file_paths
-    
-# get GoogleDriveId for new file uploads (contenttype, user)
-def get_gd_fileid(gd_storage, request, schoolyear, pathtype = 'base'):
-
-    path = get_gd_filepath(user=request.user, schoolyear=schoolyear, pathtype=pathtype)
-
-    if(pathtype == 'base'):
-        return 'root' # Special ID for root
-    else:
-        return gd_storage.files().list(pageSize=1,q="appProperties has { key='drivepath' and value='" + path + "' }",fields='files(id)').execute() # Get first match

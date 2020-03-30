@@ -45,7 +45,7 @@ class testGoogleDrive(unittest.TestCase):
         self.assertTrue(newfile_gdid) # google drive
         
         # Delete file
-        self.gd_write.delete_file(newfile_gdid)
+        self.gd_write.delete_file(fileid=newfile_gdid)
 
     def testDeleteFile(self):
 
@@ -64,19 +64,24 @@ class testGoogleDrive(unittest.TestCase):
         gd_structure = {
             'Directory 1':{
                 'Sub-Directory 1a':{
-                    'Sub-Directory 1b':{},
-                    'metadata':{'gd_locator':'dir_1b'}
+                    'Sub-Directory 1b':{
+                        'metadata':{'gd_locator':'dir_1b'}
+                        },
+                    'metadata':{'gd_locator':'dir_1a'}
                 },
-                'metadata':{'gd_locator':'dir_1a'}
+                'metadata':{'parentid':'root','gd_locator':'dir_1'},
             },
-            'metadata':{'parentid':'root','gd_locator':'dir_1'},
-#             'parentid':'root' # Optional (can use value "None" or remove key entirely)
         }
 
         self.gd_write.create_structure(gd_structure)
 
-        # TO-DO: Check directory created
-        # Check lookup via gd_locator
+        # Lookup file and verify it exists on GD
+        myfileid = self.gd_read.lookup_fileid(fileattributes=to_json({'gd_locator':'dir_1'})) # Move gd_locator to separate field in File
+        self.assertTrue(myfileid)
+        self.assertTrue(self.gd_read.get_file(fileid=myfileid))
+        
+        # Delete directory structure
+        self.gd_write.delete_file(fileid=myfileid)
 
     def testGetFile(self):
 
@@ -95,7 +100,11 @@ class testGoogleDrive(unittest.TestCase):
             self.gd_read.create_file(metadata=self.metadata,directoryflag=True)
         
         # Create file with "write" authorization
-        self.assertTrue(self.gd_write.create_file(metadata=self.metadata,directoryflag=True)['id'])
+        newfile = self.gd_write.create_file(metadata=self.metadata,directoryflag=True)
+        self.assertTrue(newfile['id'])
+        
+        # Delete file
+        self.gd_write.delete_file(fileid=newfile['id'])
         
     def tearDown(self):        
         self.gd_write.delete_file(fileid=self.myfile['id'])
