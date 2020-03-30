@@ -3,7 +3,7 @@ import sys
 import io
 
  # Import - Useful functions
-from lib.UsefulFunctions.dataUtils import get_matching_item
+from lib.UsefulFunctions.dataUtils import get_matching_item, to_json
 from lib.UsefulFunctions.miscUtils import get_app_setting
 import wakemeup.models.environment as env
 
@@ -185,8 +185,8 @@ class GoogleDrive():
     def delete_file(self, fileid, repositoryflag=False, permanentflag=False):
         return self.objects.delete_file(self, fileid, repositoryflag, permanentflag)
 
-    def lookup_fileid(self, **kwargs):
-        myfile = env.File.objects.get_files(filesource='GD',**kwargs)
+    def lookup_fileid(self, fileattributes=None, **kwargs):
+        myfile = env.File.objects.get_files(filesource='GD',fileattributes=to_json(fileattributes),**kwargs)
         
         if(myfile):
             return myfile[0].alternatefileid # Return alternate id for first result
