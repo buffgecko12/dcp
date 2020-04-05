@@ -123,7 +123,7 @@ class testAuthorization(unittest.TestCase):
     
     def testGetRoleACL(self):
         self.assertIsNotNone(refresh(self.myroleacl1))
-        self.assertFalse(RoleACL.objects.get_role_acls(objectid=self.myfile1.fileid))
+        self.assertFalse(RoleACL.objects.get_role_acls(objectid=self.myfile1.fileid,objectclass='FL'))
         self.assertTrue(RoleACL.objects.get_role_acls(objectid=self.myfile2.fileid,objectclass='FL',accesslevel=8))
         self.assertTrue(RoleACL.objects.all())
         
