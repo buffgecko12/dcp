@@ -1,14 +1,19 @@
 from django.db import models
 from wakemeup.models.base import MyModel
 from wakemeup.models.school import *
+from wakemeup.models.environment import File
 from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.miscUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
 from lib.UsefulFunctions.emailUtils import send_email
+from lib.UsefulFunctions.googleUtils import GoogleDrive
 from lib.UsefulFunctions.dataUtils import generate_options
 from django.contrib.postgres.fields import JSONField, DateTimeRangeField
 
 DEFAULT_SCHOOL_YEAR = get_school_year()
+PROGRAMS = {
+    'incentive program':{'name':'Programa de incentivos','gd_locator':'incentive_program_base'},
+    }
 
 # Data model managers
 class ContractManager(models.Manager):
@@ -220,3 +225,41 @@ class TeacherProgram(Teacher):
     notes = models.CharField(max_length=500,verbose_name='Notas')
     
     objects = TeacherProgramManager()
+
+class Program(MyModel):
+
+    schoolyear = models.SmallIntegerField(primary_key=True,verbose_name='A' + mychr('n') + 'o escolar')
+    name = models.CharField(max_length=256)
+    
+    def __init__(self,schoolyear,name,*args,**kwargs):
+        
+        # Extract "gd" if defined
+        self.gd = kwargs.pop('gd',None)
+        
+        super(Program, self).__init__(*args,**kwargs)
+        
+        # Set gd_locator value
+        self.gd_locator = PROGRAMS['incentive program']['gd_locator']
+        self.name = name
+        self.schoolyear = schoolyear
+
+    def save(self, *args, **kwargs):
+
+        # Get GD connection
+        gd = self.gd or GoogleDrive(permissions=['write'])
+
+        # Define directory structure
+        gd_structure = {
+            str(self.schoolyear):{
+                'Subidas':{'metadata':{'gd_locator':'incentive_program_uploads','schoolyear':self.schoolyear}},
+                'metadata':{
+                    'parentid':gd.lookup_fileid(gd_locator=self.gd_locator),
+                    'description':'Google Drive - ' + self.name + ' base directory (' + str(self.schoolyear) + ')',
+                    'gd_locator':'incentive_program',
+                    'schoolyear':self.schoolyear
+                }
+            }
+        }
+        
+        # Build structure
+        gd.create_structure(gd_structure)

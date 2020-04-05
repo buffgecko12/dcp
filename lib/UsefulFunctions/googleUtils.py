@@ -185,8 +185,16 @@ class GoogleDrive():
     def delete_file(self, fileid, repositoryflag=False, permanentflag=False):
         return self.objects.delete_file(self, fileid, repositoryflag, permanentflag)
 
-    def lookup_fileid(self, fileattributes=None, **kwargs):
-        myfile = env.File.objects.get_files(filesource='GD',fileattributes=to_json(fileattributes),**kwargs)
+    def lookup_fileid(self, gd_locator=None, fileattributes=None, **kwargs):
+        
+        # Prepare value to pass in
+        if(gd_locator):
+            if(not fileattributes):
+                fileattributes = {}
+                
+            fileattributes['gd_locator'] = gd_locator
+        
+        myfile = env.File.objects.get_files(filesource='GD', fileattributes=to_json(fileattributes), **kwargs)
         
         if(myfile):
             return myfile[0].alternatefileid # Return alternate id for first result

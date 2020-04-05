@@ -78,6 +78,11 @@ class testGoogleDrive(unittest.TestCase):
         # Lookup file and verify it exists on GD
         myfileid = self.gd_read.lookup_fileid(fileattributes={'gd_locator':'dir_1'}) # Move gd_locator to separate field in File
         self.assertTrue(myfileid)
+
+        # Test lookup using alternate argument
+        myfileid = self.gd_read.lookup_fileid(gd_locator='dir_1') # Move gd_locator to separate field in File
+        self.assertTrue(myfileid)
+        
         self.assertTrue(self.gd_read.get_file(fileid=myfileid))
         
         # Delete directory structure
