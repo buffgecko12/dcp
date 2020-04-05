@@ -2,13 +2,10 @@
 from django.db import models
 from wakemeup.models.base import MyModel
 from lib.UsefulFunctions.dbUtils import *
-from lib.UsefulFunctions.miscUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
 from lib.UsefulFunctions.dataUtils import generate_options, to_json
 import lib.UsefulFunctions.googleUtils as google
 from django.contrib.postgres.fields import JSONField
-
-DEFAULT_SCHOOL_YEAR = get_school_year()
 
 class FileManager(models.Manager):
     def all(self):
@@ -34,6 +31,8 @@ class FileManager(models.Manager):
             # Save file
             gd_file = gd.create_file(**gd_file)
 
+            fileattributes = gd_file.get('properties')
+
             # Update original File attributes
             myFile.filename = gd_file.get('name')
             myFile.fileextension = gd_file.get('fileExtension')
@@ -42,7 +41,8 @@ class FileManager(models.Manager):
             myFile.filedescription = gd_file.get('description')
             myFile.filesource = 'GD'
             myFile.alternatefileid = gd_file.get('id')
-            myFile.fileattributes = to_json(gd_file.get('properties'))
+            myFile.fileattributes = to_json(fileattributes)
+            myFile.schoolyear = myFile.schoolyear or fileattributes.get('schoolyear') # Give priority to original value
             
         # Save to repository
         fileid = save_data('SP_DCPUpsertFile',
@@ -63,7 +63,7 @@ class FileManager(models.Manager):
                 myFile.alternatefileid,
                 myFile.contractid,
                 myFile.schoolid,
-                myFile.schoolyear or DEFAULT_SCHOOL_YEAR
+                myFile.schoolyear
             )
          )[0]
 
