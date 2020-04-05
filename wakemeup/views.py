@@ -345,18 +345,12 @@ def create_file(request):
                 print('Files:')
                 for item in items:
                     print(u'{0} ({1})'.format(item['name'], item['id']))
-
             
             filetype = form.cleaned_data.get('filetype')
 
             contractfiletypes = Category.objects.get_categories(categoryclass='contractfile')
 
-            # Look up default upload directory
-            if(filetype == "contractupload"):
-                pass
-
-                # use teacheruserid / schoolyear (TeacherProgram / File)
-#                 parentdirectory = File.objects.get_files()
+            # Check if user has upload directory
 
             # Loop through files
             files = [request.FILES.get('file[%d]' % i)
@@ -364,46 +358,37 @@ def create_file(request):
 
             for myfile in files:
 
+                myschoolyear = form.cleaned_data.get('schoolyear')
                 myfiletype = get_matching_item(contractfiletypes,'categorytype',filetype).categorydisplayname # In loop in case filetype is applied at this level
+
+                # Get default upload directory
+                uploaddir = gd.lookup_fileid(gd_locator='incentive_program_uploads',schoolyear=myschoolyear)
 
                 file_metadata = {
                     'name': myfiletype + ' - ' + myfile.name,
                     'originalFilename': myfile.name,
                     'description':'Archivo subido por ' + request.user.userdisplayname,
-                    'parents':['18INeTgh1KIDUHLes92--nBFLdQPW7k-z'], # Upload directory # TO-DO: Update with correct value
-#                     'appProperties':{'drivepath': get_gd_fileid(gd_storage, request, schoolyear, 'contractupload')}
+                    'parents':[uploaddir]
                 }
 
-                # Create file on Google Drive
-                file = gd.create_file(
-                    metadata = file_metadata,
-                    file_data = myfile,
-                    fields = ('id,mimeType,description,fileExtension,size')
-                )
+                # Build GD file
+                gd_file = {
+                    'gd': gd,
+                    'metadata':file_metadata,
+                    'file_data':myfile,
+                }
 
                 # Create file in repository
                 newfile = File(
-                    filename=myfile.name,
-                    fileextension=file.get('fileExtension'),
-                    filesize=file.get('size'),
-                    filetype=file.get('mimeType'),
-                    filedescription=file.get('description'),
-                    filesource='GD',
-                    filedata=None,
                     filecategory=filetype,
-                    alternatefileid=file.get('id'),
-                    schoolyear=form.cleaned_data.get('schoolyear'),
-                    schoolid=form.cleaned_data.get('schoolid')
-                )
-
-                newfile.fileid = newfile.save()['fileid']
+                    schoolyear=myschoolyear,
+                    schoolid=form.cleaned_data.get('schoolid'),
+                ).save(gd_file=gd_file)
 
     else:
         form = UploadFileForm(request=request)
         
     return render(request, 'wakemeup/admin/upload.html',context={'form':form})
-
-
 
 @check_authorization
 def create_contract(request, contractid):
