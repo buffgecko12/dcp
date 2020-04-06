@@ -251,6 +251,7 @@ class Program(MyModel):
         # Define directory structure
         gd_structure = {
             str(self.schoolyear):{
+                'Contratos':{'metadata':{'gd_locator':'incentive_program_contracts','schoolyear':self.schoolyear}},
                 'Subidas':{'metadata':{'gd_locator':'incentive_program_uploads','schoolyear':self.schoolyear}},
                 'metadata':{
                     'parentid':gd.lookup_fileid(gd_locator=self.gd_locator),
