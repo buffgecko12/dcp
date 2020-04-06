@@ -80,14 +80,14 @@ def getAdminFormActions(cancel_url = 'wakemeup:index', cancel_context="", cancel
         Submit('submit_next','Enviar', css_id='next'),
     )
     
-def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, objectid=None):
+def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, objectid=None, programname=None):
     choices = [("0","-- Escoger --")] if selectflag else []
     
     if(fieldname =='schoolid'):
         choices += (School.objects.get_school_options(schoolid=objectid)) 
         
     if(fieldname =='schoolyear'):
-        choices += (TeacherProgram.objects.get_programyear_options(schoolid=objectid, schoolyear=None)) 
+        choices += (UserProgram.objects.get_programyear_options(programname=programname, schoolid=objectid, schoolyear=None)) 
         
     elif(fieldname == 'profilepictureid'):
         choices += get_user_model().objects.get_profile_picture_options(userid=objectid)
@@ -107,12 +107,13 @@ class UploadFileForm(forms.Form):
 
         # Extract "request" parameter
         request = kwargs.pop('request', None)
+        programname = kwargs.pop('request', None)
 
         super(UploadFileForm, self).__init__(*args, **kwargs)
 
         # Populate initial drop-downs
-        set_dropdown_choices(self,fieldname='schoolid')
-        set_dropdown_choices(self,fieldname='schoolyear') # TO-DO Update to use AJAX based on schoolid
+        set_dropdown_choices(self,fieldname='schoolid',programname=programname)
+        set_dropdown_choices(self,fieldname='schoolyear',programname=programname) # TO-DO Update to use AJAX based on schoolid
         set_dropdown_choices(self,fieldname='filetype',categoryclass='contractfile')
         
         if(not request.user.is_admin):
@@ -586,11 +587,11 @@ class ContractForm(forms.Form):
         
         if(contractid != "new"):
             mycontractinfo = ContractInfo.objects.get(contractid)
-            mybudget = TeacherProgram.objects.get(mycontractinfo.teacheruserid).availablebudget
+            mybudget = UserProgram.objects.get(userid=mycontractinfo.teacheruserid,programname='incentives').availablebudget # TO-DO: Pass in correct schoolid
             myinitialcontractvalue = mycontractinfo.contractvalue
         else:
             mycontractinfo = None
-            myteacherbudget = TeacherProgram.objects.get(teacheruserid = request.user.userid)
+            myteacherbudget = UserProgram.objects.get(userid=request.user.userid,programname='incentives') # TO-DO: Pass in correct schoolid
             myinitialcontractvalue = 0
 
             # Lookup default budget for teacher

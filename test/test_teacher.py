@@ -17,6 +17,8 @@ class testTeacherClass(unittest.TestCase):
         cls.myclass2 = create_class(schoolid=cls.myschool.schoolid, schoolyear=2011)
         cls.myteacher1 = create_user(usertype='TR',schoolid=cls.myschool.schoolid)
         cls.myteacher2 = create_user(usertype='TR',schoolid=cls.myschool.schoolid)
+        
+        cls.programname = 'incentives'
     
     def setUp(self):
         self.myteacherclass1 = create_teacher_class(self.myteacher1.userid, self.myclass1.classid)
@@ -26,7 +28,7 @@ class testTeacherClass(unittest.TestCase):
         
         # Teacher program
         for (myteacher, myschoolyear) in itertools.product([self.myteacher1,self.myteacher2],[2018,2019,DEFAULT_SCHOOL_YEAR]):
-            create_teacher_program(teacheruserid=myteacher.userid,schoolyear=myschoolyear,schoolid=myteacher.userid)
+            create_user_program(userid=myteacher.userid,schoolyear=myschoolyear,schoolid=myteacher.schoolid,programname=self.programname) # TO-DO: Update for multiple schoolid values
         
     def testCreateTeacherClass(self):
         self.assertTrue(self.myteacherclass1.teacheruserid)
@@ -52,28 +54,28 @@ class testTeacherClass(unittest.TestCase):
     def testCreateTeacherProgram(self):
         pass
 
-    def testGetTeacherProgram(self):
-        self.assertTrue(TeacherProgram.objects.get(teacheruserid=self.myteacher1.userid,schoolyear=DEFAULT_SCHOOL_YEAR)) # teacher / year
-        self.assertTrue(len(TeacherProgram.objects.get_teacher_programs(schoolyear=DEFAULT_SCHOOL_YEAR)),2) # year
-        self.assertTrue(len(TeacherProgram.objects.get_teacher_programs(teacheruserid=self.myteacher1.userid)),3) # teacher
-        self.assertEqual(TeacherProgram.objects.get_programyear_options(schoolyear=DEFAULT_SCHOOL_YEAR)[0][0],DEFAULT_SCHOOL_YEAR) # year
-        self.assertEqual(len(TeacherProgram.objects.get_programyear_options(schoolyear=DEFAULT_SCHOOL_YEAR)),1) # no duplicates
+    def testGetTeacherProgram(self): # TO-DO: Move "TeacherProgram" to "User" test and update to handle multiple schoolid values
+        self.assertTrue(UserProgram.objects.get(userid=self.myteacher1.userid,schoolid=self.myteacher1.schoolid,schoolyear=DEFAULT_SCHOOL_YEAR,programname=self.programname)) # teacher / year
+        self.assertTrue(len(UserProgram.objects.get_user_programs(schoolyear=DEFAULT_SCHOOL_YEAR)),2) # year
+        self.assertTrue(len(UserProgram.objects.get_user_programs(userid=self.myteacher1.userid)),3) # teacher
+        self.assertEqual(UserProgram.objects.get_programyear_options(schoolyear=DEFAULT_SCHOOL_YEAR)[0][0],DEFAULT_SCHOOL_YEAR) # year
+        self.assertEqual(len(UserProgram.objects.get_programyear_options(schoolyear=DEFAULT_SCHOOL_YEAR)),1) # no duplicates
 
     def testDeleteTeacherProgram(self):
         
         # CHeck object exists before delete
-        self.assertTrue(TeacherProgram.objects.get_teacher_programs(teacheruserid=self.myteacher1.userid))
+        self.assertTrue(UserProgram.objects.get_user_programs(userid=self.myteacher1.userid))
         
         # Delete and verify
-        TeacherProgram(teacheruserid=self.myteacher1.userid).delete()
-        self.assertFalse(TeacherProgram.objects.get_teacher_programs(teacheruserid=self.myteacher1.userid))
-        self.assertTrue(TeacherProgram.objects.get_teacher_programs(teacheruserid=self.myteacher2.userid))
+        UserProgram(userid=self.myteacher1.userid,programname=self.programname).delete()
+        self.assertFalse(UserProgram.objects.get_user_programs(userid=self.myteacher1.userid))
+        self.assertTrue(UserProgram.objects.get_user_programs(userid=self.myteacher2.userid))
 
     def tearDown(self):        
         self.myteacherclass1.delete()
         self.myteacherclass2.delete()
-        TeacherProgram(teacheruserid=self.myteacher1.userid).delete()
-        TeacherProgram(teacheruserid=self.myteacher2.userid).delete()
+        UserProgram(userid=self.myteacher1.userid,programname=self.programname).delete()
+        UserProgram(userid=self.myteacher2.userid,programname=self.programname).delete()
         
     @classmethod
     def tearDownClass(cls):

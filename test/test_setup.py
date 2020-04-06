@@ -47,8 +47,8 @@ def refresh(myobject):
         kwargs = {"classid":myobject.classid}
     if(objectname == 'teacherclass'):
         kwargs = {"teacheruserid":myobject.teacheruserid,"classid":myobject.classid}
-    if(objectname == 'teacherprogram'):
-        kwargs = {"teacheruserid":myobject.teacheruserid,"schoolyear":myobject.schoolyear}
+    if(objectname == 'userprogram'):
+        kwargs = {"userid":myobject.userid,"schoolyear":myobject.schoolyear,"programname":myobject.programname, "schoolid":myobject.schoolid}
     if(objectname == 'role'):
         kwargs = {"roleid":myobject.roleid}
     if(objectname == 'object'):
@@ -237,19 +237,19 @@ def create_reward(schoolyear=None,rewarddisplayname='Some reward',rewardvalue=10
     myreward.rewardid=myreward.save()
     return myreward
 
-def create_teacher_program(teacheruserid,schoolyear,schoolid,maxbudget=400000,teachersurveyts=None,studentsurveyurl=None,notes=None):
-    myteacherprogram = TeacherProgram(
-        teacheruserid=teacheruserid,
-        schoolyear=schoolyear,
+def create_user_program(userid,programname,schoolid,schoolyear,maxbudget=400000,uploaddirectoryid=None,details=None):
+    myuserprogram = UserProgram(
+        userid=userid,
+        programname=programname,
         schoolid=schoolid,
+        schoolyear=schoolyear,
         maxbudget=maxbudget,
-        teachersurveyts=teachersurveyts,
-        studentsurveyurl=studentsurveyurl,
-        notes=notes
+        uploaddirectoryid=uploaddirectoryid,
+        details=details
     )
     
-    myteacherprogram.save()
-    return myteacherprogram
+    myuserprogram.save()
+    return myuserprogram
 
 def create_role(name="New role",description="Some description",publicflag=None,schoollist=None,usertypelist=None,userlist=None):
     myrole = Role(

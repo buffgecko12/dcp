@@ -130,34 +130,34 @@ class RewardManager(models.Manager):
     def delete(self, myReward):
         return delete_data('SP_DCPDeleteReward', (myReward.rewardid,))
 
-class TeacherProgramManager(models.Manager):
+class UserProgramManager(models.Manager):
     def all(self):
-        return self.get_teacher_programs()
+        return self.get_user_programs()
     
-    def get(self, teacheruserid, schoolyear):
-        return get_data_pk(self, 'SP_DCPGetTeacherProgram(%s,%s,%s)', (teacheruserid, schoolyear, None)) # TO-DO: Check logic in case allowing multiple schools per teacher
+    def get(self, userid, programname, schoolid, schoolyear):
+        return get_data_pk(self, 'SP_DCPGetUserProgram(%s,%s,%s,%s)', (userid, programname, schoolid, schoolyear))
     
-    def get_teacher_programs(self, teacheruserid = None, schoolyear = DEFAULT_SCHOOL_YEAR, schoolid = None):
-        return get_data(self, 'SP_DCPGetTeacherProgram(%s,%s,%s)', (teacheruserid, schoolyear, schoolid))
+    def get_user_programs(self, userid=None, programname=None, schoolid=None, schoolyear=DEFAULT_SCHOOL_YEAR):
+        return get_data(self, 'SP_DCPGetUserProgram(%s,%s,%s,%s)', (userid, programname, schoolid, schoolyear))
         
-    def save(self, myTeacherProgram):
-        return save_data('SP_DCPUpsertTeacherProgram', (
-            myTeacherProgram.teacheruserid,
-            myTeacherProgram.schoolyear or DEFAULT_SCHOOL_YEAR,
-            myTeacherProgram.schoolid,
-            myTeacherProgram.maxbudget,
-            myTeacherProgram.teachersurveyts,
-            myTeacherProgram.studentsurveyurl,
-            myTeacherProgram.notes,
+    def save(self, myUserProgram):
+        return save_data('SP_DCPUpsertUserProgram', (
+            myUserProgram.userid,
+            myUserProgram.programname,
+            myUserProgram.schoolid,
+            myUserProgram.schoolyear or DEFAULT_SCHOOL_YEAR,
+            myUserProgram.maxbudget,
+            myUserProgram.uploaddirectoryid,
+            myUserProgram.details,
             )
         )
         
-    def delete(self, myTeacherProgram):
-        return delete_data('SP_DCPDeleteTeacherProgram', (myTeacherProgram.teacheruserid, myTeacherProgram.schoolyear))
+    def delete(self, myUserProgram):
+        return delete_data('SP_DCPDeleteUserProgram', (myUserProgram.userid, myUserProgram.programname, myUserProgram.schoolid, myUserProgram.schoolyear))
 
-    def get_programyear_options(self, schoolid=None, schoolyear=None):
+    def get_programyear_options(self, programname=None, schoolid=None, schoolyear=None):
         return generate_options(
-            items = self.get_teacher_programs(schoolid=schoolid,schoolyear=schoolyear), 
+            items = self.get_user_programs(programname=programname,schoolid=schoolid,schoolyear=schoolyear), 
             idfield = "schoolyear", 
             displayfield = "schoolyear"
         )
@@ -214,17 +214,22 @@ class ContractPartyReward(ContractParty, Reward):
 
     objects = ContractPartyRewardManager()
 
-class TeacherProgram(Teacher):
+class UserProgram(MyModel, get_user_model()):
 
-    schoolyear = models.SmallIntegerField(primary_key=True,verbose_name='A' + mychr('n') + 'o escolar')
+    programname = models.CharField(max_length=50,primary_key=True)
+    schoolyear = models.SmallIntegerField(verbose_name='A' + mychr('n') + 'o escolar')
     maxbudget = models.IntegerField(verbose_name='Prespuesto m' + mychr('a') + 'ximo')
+    uploaddirectoryid = models.IntegerField()
+    details = JSONField()
+    
+    # Derived fields
     budgetspent = models.IntegerField(verbose_name='Gastos')
     availablebudget = models.IntegerField(verbose_name='Saldo')
-    teachersurveyts = models.DateTimeField(verbose_name='Encuesta de docente')
-    studentsurveyurl = models.URLField(max_length=500)
-    notes = models.CharField(max_length=500,verbose_name='Notas')
+#     teachersurveyts = models.DateTimeField(verbose_name='Encuesta de docente')
+#     studentsurveyurl = models.URLField(max_length=500)
+#     notes = models.CharField(max_length=500,verbose_name='Notas')
     
-    objects = TeacherProgramManager()
+    objects = UserProgramManager()
 
 class Program(MyModel):
 
