@@ -324,7 +324,7 @@ def myaccount(request):
 
     return render(request, 'wakemeup/myaccount.html', context)
 
-def create_file(request):
+def create_file(request, programname=None):
 
     if request.method == "POST":
         
@@ -346,26 +346,27 @@ def create_file(request):
                 for item in items:
                     print(u'{0} ({1})'.format(item['name'], item['id']))
             
-            filetype = form.cleaned_data.get('filetype')
-
+            myfiletype = form.cleaned_data.get('filetype')
+            myschoolyear = form.cleaned_data.get('schoolyear')
+            myschoolid = form.cleaned_data.get('schoolid')
+            
             contractfiletypes = Category.objects.get_categories(categoryclass='contractfile')
-
-            # Check if user has upload directory
-
+            
+            # Get user upload directory or use default (programname, school year); otherwise GD will default to "root"
+            myuserprogram = UserProgram.objects.get(userid=request.user.userid,programname=programname,schoolyear=myschoolyear,schoolid=myschoolid,uploaddirflag=True) # Create upload dir
+            uploaddir = getattr(myuserprogram,'uploaddirectoryid',None) or \
+                        gd.lookup_fileid(gd_locator='program_uploads_base',schoolyear=myschoolyear,fileattributes={'programname':programname})
+                        
             # Loop through files
             files = [request.FILES.get('file[%d]' % i)
                  for i in range(0, len(request.FILES))]
 
             for myfile in files:
 
-                myschoolyear = form.cleaned_data.get('schoolyear')
-                myfiletype = get_matching_item(contractfiletypes,'categorytype',filetype).categorydisplayname # In loop in case filetype is applied at this level
-
-                # Get default upload directory
-                uploaddir = gd.lookup_fileid(gd_locator='incentive_program_uploads',schoolyear=myschoolyear)
+                filetype = get_matching_item(contractfiletypes,'categorytype',myfiletype).categorydisplayname # In loop in case filetype is applied at this level
 
                 file_metadata = {
-                    'name': myfiletype + ' - ' + myfile.name,
+                    'name': filetype + ' - ' + myfile.name,
                     'originalFilename': myfile.name,
                     'description':'Archivo subido por ' + request.user.userdisplayname,
                     'parents':[uploaddir]
@@ -380,15 +381,15 @@ def create_file(request):
 
                 # Create file in repository
                 newfile = File(
-                    filecategory=filetype,
+                    filecategory=myfiletype,
                     schoolyear=myschoolyear,
-                    schoolid=form.cleaned_data.get('schoolid'),
+                    schoolid=myschoolid,
                 ).save(gd_file=gd_file)
 
     else:
         form = UploadFileForm(request=request)
         
-    return render(request, 'wakemeup/admin/upload.html',context={'form':form})
+    return render(request, 'wakemeup/admin/upload.html',context={'form':form,'programname':programname})
 
 @check_authorization
 def create_contract(request, contractid):

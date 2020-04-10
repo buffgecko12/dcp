@@ -1,19 +1,18 @@
 from django.db import models
-from wakemeup.models.base import MyModel
+from django.contrib.postgres.fields import JSONField, DateTimeRangeField
+
 from wakemeup.models.school import *
+from wakemeup.models.base import MyModel
 from wakemeup.models.environment import File
+
 from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.miscUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
 from lib.UsefulFunctions.emailUtils import send_email
 from lib.UsefulFunctions.googleUtils import GoogleDrive
 from lib.UsefulFunctions.dataUtils import generate_options
-from django.contrib.postgres.fields import JSONField, DateTimeRangeField
 
 DEFAULT_SCHOOL_YEAR = get_school_year()
-PROGRAMS = {
-    'incentive program':{'name':'Programa de incentivos','gd_locator':'incentive_program_base'},
-    }
 
 # Data model managers
 class ContractManager(models.Manager):
@@ -134,8 +133,16 @@ class UserProgramManager(models.Manager):
     def all(self):
         return self.get_user_programs()
     
-    def get(self, userid, programname, schoolid, schoolyear):
-        return get_data_pk(self, 'SP_DCPGetUserProgram(%s,%s,%s,%s)', (userid, programname, schoolid, schoolyear))
+    def get(self, userid, programname, schoolid, schoolyear, uploaddirflag=False, gd=None):
+        
+        myuserprogram = get_data_pk(self, 'SP_DCPGetUserProgram(%s,%s,%s,%s)', (userid, programname, schoolid, schoolyear))
+    
+        # Create upload directory if user program exists and no uploaddirectory exists
+        if(uploaddirflag and not getattr(myuserprogram,'uploaddirectoryid',True)):
+            myuserprogram.gd = myuserprogram.gd or GoogleDrive(permissions=['write'])
+            myuserprogram.uploaddirectoryid = self.create_directory(myuserprogram,'upload')['gd_file']['id']
+        
+        return myuserprogram
     
     def get_user_programs(self, userid=None, programname=None, schoolid=None, schoolyear=DEFAULT_SCHOOL_YEAR):
         return get_data(self, 'SP_DCPGetUserProgram(%s,%s,%s,%s)', (userid, programname, schoolid, schoolyear))
@@ -147,7 +154,7 @@ class UserProgramManager(models.Manager):
             myUserProgram.schoolid,
             myUserProgram.schoolyear or DEFAULT_SCHOOL_YEAR,
             myUserProgram.maxbudget,
-            myUserProgram.uploaddirectoryid,
+            None if myUserProgram.uploaddirectoryid == '' else myUserProgram.uploaddirectoryid, # Handle case of empty string
             myUserProgram.details,
             )
         )
@@ -161,6 +168,41 @@ class UserProgramManager(models.Manager):
             idfield = "schoolyear", 
             displayfield = "schoolyear"
         )
+        
+    def create_directory(self, myUserProgram, directorytype):
+
+        gd = myUserProgram.gd
+        
+        # Check directory doesn't already exist in GD
+        if(directorytype == 'upload'):
+            mydir = gd.get_gd_file(gd_locator='program_uploads_user', fileattributes={'userid':myUserProgram.userid,'programname':myUserProgram.programname}, schoolyear=myUserProgram.schoolyear)
+        
+        if(not mydir):
+            dirname = myUserProgram.schoolabbreviation + ' - ' + myUserProgram.userdisplayname
+            
+            # Define directory structure
+            gd_structure = {
+                dirname:{
+                    'metadata':{
+                        'parentid':gd.lookup_fileid(gd_locator='program_uploads_base',schoolyear=myUserProgram.schoolyear, fileattributes={'programname':myUserProgram.programname}),
+                        'description':'Google Drive - User Upload directory (' + str(myUserProgram.programname) + ' - ' + str(myUserProgram.schoolyear) + ')',
+                        'gd_locator':'program_uploads_user',
+                        'schoolyear':myUserProgram.schoolyear,
+                        'programname':myUserProgram.programname,
+                        'userid':myUserProgram.userid
+                    }
+                }
+            }
+            
+        # Build structure
+        newfile = gd.create_structure(gd_structure)
+        
+        # Update program with file id
+        myUserProgram.uploaddirectoryid = newfile['fileid']
+        myUserProgram.save()
+        
+        # Return newly created GoogleId
+        return newfile
 
 class Reward(MyModel):
 
@@ -219,7 +261,7 @@ class UserProgram(MyModel, get_user_model()):
     programname = models.CharField(max_length=50,primary_key=True)
     schoolyear = models.SmallIntegerField(verbose_name='A' + mychr('n') + 'o escolar')
     maxbudget = models.IntegerField(verbose_name='Prespuesto m' + mychr('a') + 'ximo')
-    uploaddirectoryid = models.IntegerField()
+    uploaddirectoryid = models.CharField(max_length=256) # Database "get" returns GoogleId string
     details = JSONField()
     
     # Derived fields
@@ -228,44 +270,72 @@ class UserProgram(MyModel, get_user_model()):
 #     teachersurveyts = models.DateTimeField(verbose_name='Encuesta de docente')
 #     studentsurveyurl = models.URLField(max_length=500)
 #     notes = models.CharField(max_length=500,verbose_name='Notas')
+
+    def __init__(self,*args,**kwargs):
+         
+        # Extract "gd" if defined (otherwise get connection)
+        self.gd = kwargs.pop('gd',None)
+        
+        # Extract "gd" if defined
+        if(self.gd == "default"):
+            self.gd = GoogleDrive(permissions=['write']) # Use GD if provided, otherwise get default
+            
+        super().__init__(*args,**kwargs)
     
     objects = UserProgramManager()
+
+    def create_directory(self, directorytype='upload'):
+        return UserProgram.objects.create_directory(self, directorytype)
 
 class Program(MyModel):
 
     schoolyear = models.SmallIntegerField(primary_key=True,verbose_name='A' + mychr('n') + 'o escolar')
-    name = models.CharField(max_length=256)
+    programname = models.CharField(max_length=50)
+    gd_locator = 'program_base_year'
     
-    def __init__(self,schoolyear,name,*args,**kwargs):
+    def __init__(self,schoolyear,programname,gdflag=False,*args,**kwargs):
         
-        # Extract "gd" if defined
+        # Extract extra parameters (if any)
+        createflag = kwargs.pop('createflag',None)
         self.gd = kwargs.pop('gd',None)
         
+        # Extract "gd" if defined
+        if(self.gd == "default"):
+            self.gd = GoogleDrive(permissions=['write']) # Use GD if provided, otherwise get default
+            
         super(Program, self).__init__(*args,**kwargs)
         
-        # Set gd_locator value
-        self.gd_locator = PROGRAMS['incentive program']['gd_locator']
-        self.name = name
+        self.programname = programname
         self.schoolyear = schoolyear
 
-    def save(self, *args, **kwargs):
+        if(createflag):
+            self.create()
 
-        # Get GD connection
-        gd = self.gd or GoogleDrive(permissions=['write'])
+    def create(self, *args, **kwargs):
 
         # Define directory structure
         gd_structure = {
             str(self.schoolyear):{
-                'Contratos':{'metadata':{'gd_locator':'incentive_program_contracts','schoolyear':self.schoolyear}},
-                'Subidas':{'metadata':{'gd_locator':'incentive_program_uploads','schoolyear':self.schoolyear}},
+                'Contratos':{'metadata':{'gd_locator':'contracts_base','schoolyear':self.schoolyear,'programname':self.programname}},
+                'Subidas':{'metadata':{'gd_locator':'program_uploads_base','schoolyear':self.schoolyear,'programname':self.programname}},
                 'metadata':{
-                    'parentid':gd.lookup_fileid(gd_locator=self.gd_locator),
-                    'description':'Google Drive - ' + self.name + ' base directory (' + str(self.schoolyear) + ')',
-                    'gd_locator':'incentive_program',
-                    'schoolyear':self.schoolyear
+                    'parentid':self.gd.lookup_fileid(gd_locator='program_base',fileattributes={'programname':self.programname}),
+                    'description':'Google Drive - ' + self.programname + ' base directory (' + str(self.schoolyear) + ')',
+                    'gd_locator':self.gd_locator,
+                    'schoolyear':self.schoolyear,
+                    'programname':self.programname
                 }
             }
         }
         
         # Build structure
-        gd.create_structure(gd_structure)
+        return self.gd.create_structure(gd_structure)
+        
+    def delete(self, repositoryflag=True, permanentflag=False, *args, **kwargs):
+        return self.gd.delete_file(
+            fileid=self.gd.lookup_fileid(
+                gd_locator=self.gd_locator,schoolyear=self.schoolyear,fileattributes={'programname':self.programname}
+                ),
+            repositoryflag=repositoryflag, # Delete from repository?
+            permanentflag=permanentflag # Permanently delete from GD?
+            )

@@ -22,6 +22,9 @@ class GoogleDriveManager():
 
     def create_structure(self, gd, gd_structure):
         try:
+            
+            newfile = None
+            
             # Create top-level directory if it doesn't exist
             for parent,children in gd_structure.items():
                 if isinstance(children, dict) and parent != 'metadata':
@@ -38,7 +41,7 @@ class GoogleDriveManager():
                         }
         
                     # Save file and store newly generated id
-                    newfileid = env.File().save(gd_file=gd_file)['gd_file']['id']
+                    newfile = env.File().save(gd_file=gd_file)
         
                     # Set parentid values for child directories
                     for mychild in children:
@@ -51,12 +54,12 @@ class GoogleDriveManager():
                                 currentchild['metadata'] = {}
                                 
                             # Set parentid
-                            currentchild['metadata']['parentid'] = newfileid
+                            currentchild['metadata']['parentid'] = newfile['gd_file']['id']
          
                     # Call method for children
                     self.create_structure(gd, children)
             
-            return 'Success'
+            return newfile
         
         except HttpError:
             print('Fail - Error creating "' + str(parent) + '"' + str(sys.exc_info()[0]) + ")")
@@ -129,15 +132,23 @@ class GoogleDriveManager():
 
     def delete_file(self, gd, fileid, repositoryflag, permanentflag):
 
+        myresult = None
+
         # Delete / recycle file
         if(not permanentflag):
-            return gd.update_file(fileid=fileid,metadata={'trashed':True})
+            myresult = gd.update_file(fileid=fileid,metadata={'trashed':True})
         else:
-            return gd.connection.files().delete(fileId=fileid).execute()
+            try:
+                # Handle case where file does not exist
+                myresult = gd.connection.files().delete(fileId=fileid).execute()
+            except:
+                pass
         
         # Delete from repository also
         if(repositoryflag):
             env.File(alternatefileid=fileid,filesource='GD').delete()
+            
+        return myresult
 
 class GoogleDrive():
 
@@ -198,6 +209,14 @@ class GoogleDrive():
         
         if(myfile):
             return myfile[0].alternatefileid # Return alternate id for first result
+
+    def get_gd_file(self, gd_locator=None, fileattributes=None, **kwargs):
+        myfileid = self.lookup_fileid(gd_locator, fileattributes, **kwargs) # Get Google File ID
+        
+        if(myfileid):
+            return self.get_file(self.lookup_fileid(gd_locator, fileattributes, **kwargs))
+        else:
+            return None
     
 # https://developers.google.com/drive/api/v3/about-auth
 def get_google_credentials(service = 'drive', permissions = ['read']):

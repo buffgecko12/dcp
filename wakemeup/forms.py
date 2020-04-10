@@ -587,11 +587,11 @@ class ContractForm(forms.Form):
         
         if(contractid != "new"):
             mycontractinfo = ContractInfo.objects.get(contractid)
-            mybudget = UserProgram.objects.get(userid=mycontractinfo.teacheruserid,programname='incentives').availablebudget # TO-DO: Pass in correct schoolid
+            mybudget = UserProgram.objects.get(userid=mycontractinfo.teacheruserid,programname='incentive').availablebudget # TO-DO: Pass in correct schoolid
             myinitialcontractvalue = mycontractinfo.contractvalue
         else:
             mycontractinfo = None
-            myteacherbudget = UserProgram.objects.get(userid=request.user.userid,programname='incentives') # TO-DO: Pass in correct schoolid
+            myteacherbudget = UserProgram.objects.get(userid=request.user.userid,programname='incentive') # TO-DO: Pass in correct schoolid
             myinitialcontractvalue = 0
 
             # Lookup default budget for teacher

@@ -24,7 +24,7 @@ urlpatterns = [
 
 
     # Test
-    url(r'^test/upload', views.create_file, name="upload_file"),
+    url(r'^test/upload/(?P<programname>\w+)$', views.create_file, name="upload_file"),
 
 
     # Misc

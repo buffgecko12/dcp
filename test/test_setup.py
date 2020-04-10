@@ -47,6 +47,8 @@ def refresh(myobject):
         kwargs = {"classid":myobject.classid}
     if(objectname == 'teacherclass'):
         kwargs = {"teacheruserid":myobject.teacheruserid,"classid":myobject.classid}
+    if(objectname == 'program'):
+        kwargs = {"programname":myobject.programname,"schoolyear":myobject.schoolyear}
     if(objectname == 'userprogram'):
         kwargs = {"userid":myobject.userid,"schoolyear":myobject.schoolyear,"programname":myobject.programname, "schoolid":myobject.schoolid}
     if(objectname == 'role'):
@@ -237,7 +239,17 @@ def create_reward(schoolyear=None,rewarddisplayname='Some reward',rewardvalue=10
     myreward.rewardid=myreward.save()
     return myreward
 
-def create_user_program(userid,programname,schoolid,schoolyear,maxbudget=400000,uploaddirectoryid=None,details=None):
+def create_program(schoolyear,programname='test_program',gd=None,createflag=True):
+    myprogram = Program(
+        programname=programname,
+        schoolyear=schoolyear,
+        gd=gd,
+        createflag=createflag
+    )
+    
+    return myprogram
+
+def create_user_program(userid,programname,schoolid,schoolyear,maxbudget=400000,uploaddirectoryid=None,details=None,uploaddirflag=False):
     myuserprogram = UserProgram(
         userid=userid,
         programname=programname,
@@ -249,7 +261,9 @@ def create_user_program(userid,programname,schoolid,schoolyear,maxbudget=400000,
     )
     
     myuserprogram.save()
-    return myuserprogram
+    
+    # Refresh with extra data
+    return UserProgram.objects.get(userid=userid,programname=programname,schoolid=schoolid,schoolyear=schoolyear,uploaddirflag=uploaddirflag)
 
 def create_role(name="New role",description="Some description",publicflag=None,schoollist=None,usertypelist=None,userlist=None):
     myrole = Role(
