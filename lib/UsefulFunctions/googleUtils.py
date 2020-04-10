@@ -196,25 +196,25 @@ class GoogleDrive():
     def delete_file(self, fileid, repositoryflag=False, permanentflag=False):
         return self.objects.delete_file(self, fileid, repositoryflag, permanentflag)
 
-    def lookup_fileid(self, gd_locator=None, fileattributes=None, **kwargs):
+    def lookup_fileid(self, gd_locator=None, programname=None, userid=None, schoolyear=None, fileattributes={}, **kwargs):
         
-        # Prepare value to pass in
-        if(gd_locator):
-            if(not fileattributes):
-                fileattributes = {}
-                
-            fileattributes['gd_locator'] = gd_locator
+        # Initialize new attributes
+        newattributes = {}
+
+        for myvar in ('gd_locator','programname','userid'):
+            if(eval(myvar)):
+                newattributes[myvar] = eval(myvar)
         
-        myfile = env.File.objects.get_files(filesource='GD', fileattributes=to_json(fileattributes), **kwargs)
+        myfile = env.File.objects.get_files(filesource='GD', fileattributes=to_json(newattributes), **kwargs)
         
         if(myfile):
             return myfile[0].alternatefileid # Return alternate id for first result
 
-    def get_gd_file(self, gd_locator=None, fileattributes=None, **kwargs):
-        myfileid = self.lookup_fileid(gd_locator, fileattributes, **kwargs) # Get Google File ID
+    def get_gd_file(self, **kwargs):
+        myfileid = self.lookup_fileid(**kwargs) # Get Google File ID
         
         if(myfileid):
-            return self.get_file(self.lookup_fileid(gd_locator, fileattributes, **kwargs))
+            return self.get_file(self.lookup_fileid(**kwargs))
         else:
             return None
     

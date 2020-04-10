@@ -355,8 +355,8 @@ def create_file(request, programname=None):
             # Get user upload directory or use default (programname, school year); otherwise GD will default to "root"
             myuserprogram = UserProgram.objects.get(userid=request.user.userid,programname=programname,schoolyear=myschoolyear,schoolid=myschoolid,uploaddirflag=True) # Create upload dir
             uploaddir = getattr(myuserprogram,'uploaddirectoryid',None) or \
-                        gd.lookup_fileid(gd_locator='program_uploads_base',schoolyear=myschoolyear,fileattributes={'programname':programname})
-                        
+                        gd.lookup_fileid(gd_locator='program_uploads_base',schoolyear=myschoolyear,programname=programname)
+
             # Loop through files
             files = [request.FILES.get('file[%d]' % i)
                  for i in range(0, len(request.FILES))]

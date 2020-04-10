@@ -175,16 +175,16 @@ class UserProgramManager(models.Manager):
         
         # Check directory doesn't already exist in GD
         if(directorytype == 'upload'):
-            mydir = gd.get_gd_file(gd_locator='program_uploads_user', fileattributes={'userid':myUserProgram.userid,'programname':myUserProgram.programname}, schoolyear=myUserProgram.schoolyear)
+            mydir = gd.get_gd_file(gd_locator='program_uploads_user', programname=myUserProgram.programname, userid=myUserProgram.userid, schoolyear=myUserProgram.schoolyear)
         
         if(not mydir):
             dirname = myUserProgram.schoolabbreviation + ' - ' + myUserProgram.userdisplayname
-            
+
             # Define directory structure
             gd_structure = {
                 dirname:{
                     'metadata':{
-                        'parentid':gd.lookup_fileid(gd_locator='program_uploads_base',schoolyear=myUserProgram.schoolyear, fileattributes={'programname':myUserProgram.programname}),
+                        'parentid':gd.lookup_fileid(gd_locator='program_uploads_base',schoolyear=myUserProgram.schoolyear, programname=myUserProgram.programname),
                         'description':'Google Drive - User Upload directory (' + str(myUserProgram.programname) + ' - ' + str(myUserProgram.schoolyear) + ')',
                         'gd_locator':'program_uploads_user',
                         'schoolyear':myUserProgram.schoolyear,
@@ -319,7 +319,7 @@ class Program(MyModel):
                 'Contratos':{'metadata':{'gd_locator':'contracts_base','schoolyear':self.schoolyear,'programname':self.programname}},
                 'Subidas':{'metadata':{'gd_locator':'program_uploads_base','schoolyear':self.schoolyear,'programname':self.programname}},
                 'metadata':{
-                    'parentid':self.gd.lookup_fileid(gd_locator='program_base',fileattributes={'programname':self.programname}),
+                    'parentid':self.gd.lookup_fileid(gd_locator='program_base',programname=self.programname),
                     'description':'Google Drive - ' + self.programname + ' base directory (' + str(self.schoolyear) + ')',
                     'gd_locator':self.gd_locator,
                     'schoolyear':self.schoolyear,
@@ -334,7 +334,7 @@ class Program(MyModel):
     def delete(self, repositoryflag=True, permanentflag=False, *args, **kwargs):
         return self.gd.delete_file(
             fileid=self.gd.lookup_fileid(
-                gd_locator=self.gd_locator,schoolyear=self.schoolyear,fileattributes={'programname':self.programname}
+                gd_locator=self.gd_locator,schoolyear=self.schoolyear,programname=self.programname
                 ),
             repositoryflag=repositoryflag, # Delete from repository?
             permanentflag=permanentflag # Permanently delete from GD?

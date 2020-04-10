@@ -34,14 +34,14 @@ class testProgram(unittest.TestCase):
         
         # Check directories are created
         for myprogram in (self.myprogram1,self.myprogram2):
-            gdfile = myprogram.gd.get_gd_file(gd_locator='program_base_year',schoolyear=myprogram.schoolyear,fileattributes={'programname':myprogram.programname})
+            gdfile = myprogram.gd.get_gd_file(gd_locator='program_base_year',schoolyear=myprogram.schoolyear,programname=myprogram.programname)
             self.assertTrue(gdfile)
 
     def testDeleteProgram(self):
 
         newprogram = create_program(programname='new_program',schoolyear=2018,gd="default") # Default GD
         newprogram.delete(permanentflag=True) # Permanently delete from GD
-        self.assertFalse(newprogram.gd.get_gd_file(gd_locator='program_base_year',schoolyear=newprogram.schoolyear,fileattributes={'programname':newprogram.programname}))
+        self.assertFalse(newprogram.gd.get_gd_file(gd_locator='program_base_year',schoolyear=newprogram.schoolyear,programname=newprogram.programname))
 
     def testCreateUserProgram(self):
         pass
