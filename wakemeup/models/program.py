@@ -140,7 +140,7 @@ class UserProgramManager(models.Manager):
         # Create upload directory if user program exists and no uploaddirectory exists
         if(uploaddirflag and not getattr(myuserprogram,'uploaddirectoryid',True)):
             myuserprogram.gd = myuserprogram.gd or GoogleDrive(permissions=['write'])
-            myuserprogram.uploaddirectoryid = self.create_directory(myuserprogram,'upload')['gd_file']['id']
+            myuserprogram.uploaddirectoryid = self.create(myuserprogram,'upload')['gd_file']['id']
         
         return myuserprogram
     
@@ -169,7 +169,7 @@ class UserProgramManager(models.Manager):
             displayfield = "schoolyear"
         )
         
-    def create_directory(self, myUserProgram, directorytype):
+    def create(self, myUserProgram, directorytype):
 
         gd = myUserProgram.gd
         
@@ -256,44 +256,13 @@ class ContractPartyReward(ContractParty, Reward):
 
     objects = ContractPartyRewardManager()
 
-class UserProgram(MyModel, get_user_model()):
-
-    programname = models.CharField(max_length=50,primary_key=True)
-    schoolyear = models.SmallIntegerField(verbose_name='A' + mychr('n') + 'o escolar')
-    maxbudget = models.IntegerField(verbose_name='Prespuesto m' + mychr('a') + 'ximo')
-    uploaddirectoryid = models.CharField(max_length=256) # Database "get" returns GoogleId string
-    details = JSONField()
-    
-    # Derived fields
-    budgetspent = models.IntegerField(verbose_name='Gastos')
-    availablebudget = models.IntegerField(verbose_name='Saldo')
-#     teachersurveyts = models.DateTimeField(verbose_name='Encuesta de docente')
-#     studentsurveyurl = models.URLField(max_length=500)
-#     notes = models.CharField(max_length=500,verbose_name='Notas')
-
-    def __init__(self,*args,**kwargs):
-         
-        # Extract "gd" if defined (otherwise get connection)
-        self.gd = kwargs.pop('gd',None)
-        
-        # Extract "gd" if defined
-        if(self.gd == "default"):
-            self.gd = GoogleDrive(permissions=['write']) # Use GD if provided, otherwise get default
-            
-        super().__init__(*args,**kwargs)
-    
-    objects = UserProgramManager()
-
-    def create_directory(self, directorytype='upload'):
-        return UserProgram.objects.create_directory(self, directorytype)
-
 class Program(MyModel):
 
     schoolyear = models.SmallIntegerField(primary_key=True,verbose_name='A' + mychr('n') + 'o escolar')
     programname = models.CharField(max_length=50)
     gd_locator = 'program_base_year'
     
-    def __init__(self,schoolyear,programname,gdflag=False,*args,**kwargs):
+    def __init__(self,*args,**kwargs):
         
         # Extract extra parameters (if any)
         createflag = kwargs.pop('createflag',None)
@@ -305,9 +274,7 @@ class Program(MyModel):
             
         super(Program, self).__init__(*args,**kwargs)
         
-        self.programname = programname
-        self.schoolyear = schoolyear
-
+        # Create google directory
         if(createflag):
             self.create()
 
@@ -333,9 +300,32 @@ class Program(MyModel):
         
     def delete(self, repositoryflag=True, permanentflag=False, *args, **kwargs):
         return self.gd.delete_file(
-            fileid=self.gd.lookup_fileid(
-                gd_locator=self.gd_locator,schoolyear=self.schoolyear,programname=self.programname
-                ),
-            repositoryflag=repositoryflag, # Delete from repository?
-            permanentflag=permanentflag # Permanently delete from GD?
+            fileid=self.gd.lookup_fileid(gd_locator=self.gd_locator,schoolyear=self.schoolyear,programname=self.programname),
+            repositoryflag=repositoryflag, # Delete from repository
+            permanentflag=permanentflag # Permanently delete from GD
             )
+        
+class UserProgram(Program, get_user_model()):
+
+    maxbudget = models.IntegerField(primary_key=True,verbose_name='Prespuesto m' + mychr('a') + 'ximo')
+    uploaddirectoryid = models.CharField(max_length=256) # Database "get" returns GoogleId string
+    details = JSONField()
+    
+    # Derived fields
+    budgetspent = models.IntegerField(verbose_name='Gastos')
+    availablebudget = models.IntegerField(verbose_name='Saldo')
+
+    def __init__(self,*args,**kwargs):
+
+        super(UserProgram, self).__init__(*args,**kwargs)
+         
+        # Clear inherited value
+        self.gd_locator = None
+
+    objects = UserProgramManager()
+
+    def create(self, directorytype='upload'):
+        return UserProgram.objects.create(self, directorytype)
+    
+    def delete(self, *args, **kwargs):
+        return UserProgram.objects.delete(self, *args, **kwargs)
