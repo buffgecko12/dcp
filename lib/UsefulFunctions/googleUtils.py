@@ -1,6 +1,7 @@
 import os
 import sys
 import io
+import copy
 
  # Import - Useful functions
 from lib.UsefulFunctions.dataUtils import get_matching_item, to_json
@@ -198,8 +199,8 @@ class GoogleDrive():
 
     def lookup_fileid(self, gd_locator=None, programname=None, userid=None, schoolyear=None, fileattributes={}, **kwargs):
         
-        # Initialize new attributes
-        newattributes = {}
+        # Initialize new dictionary
+        newattributes = copy.deepcopy(fileattributes)
 
         for myvar in ('gd_locator','programname','userid'):
             if(eval(myvar)):
