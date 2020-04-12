@@ -4,6 +4,7 @@ Development Environment
 jre SE
 eclipse - javascript developer
   pyDev
+  Configure pylint
 postgres
 python (32-bit win)
   pip (may already be included in python install)
@@ -11,6 +12,8 @@ python (32-bit win)
   psycopg2 (Postgres)
   Django
   heroku
+  pylint
+    --disable=C0114,C0115,C0116,bare-except,no-else-return
 GitBash
 SQL Data Modeler / Developer
   - Postgres DSN: https://stackoverflow.com/questions/7592519/oracle-sql-developer-and-postgresql
