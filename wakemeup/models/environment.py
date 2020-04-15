@@ -10,20 +10,20 @@ from django.contrib.postgres.fields import JSONField
 class FileManager(models.Manager):
     def all(self):
         return self.get_files()
-    
+
     def get(self, fileid):
         return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, None, None, None, None, None, None, None, None))
-    
+
     def get_files(self, fileid=None, fileclass=None, filecategory=None, alternatefileid=None, contractid=None, schoolid=None, schoolyear=None, fileattributes=None, filesource=None):
         return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource))
-    
+
     def save(self, myFile, *args, **kwargs):
-        
+
         # Extract gd_file info if it exists
         gd_file = kwargs.get('gd_file')
-        
+
         # Save file to google drive first (if defined)
-        if(gd_file):
+        if gd_file:
 
             # Extract google drive connection
             gd = gd_file.pop('gd')
@@ -43,7 +43,7 @@ class FileManager(models.Manager):
             myFile.alternatefileid = gd_file.get('id')
             myFile.fileattributes = to_json(fileattributes)
             myFile.schoolyear = myFile.schoolyear or fileattributes.get('schoolyear') # Give priority to original value
-            
+
         # Save to repository
         fileid = save_data('SP_DCPUpsertFile',
             (
