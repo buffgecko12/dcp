@@ -24,12 +24,12 @@ urlpatterns = [
 
 
     # Test
-    url(r'^test/upload/(?P<programname>\w+)$', views.create_file, name="upload_file"),
-
-
+    url(r'^files/create$', views.create_file, name="create_file"),
+    url(r'^files/list$', views.list_file, name="list_file"),
+    url(r'^files/download/(?P<fileid>\d+)$', views.download_file, name='download_file'), # File download
+    
     # Misc
     url(r'^admin/img/(?P<objecttype>(teacher))/(?P<objectid>\d+)/preview$', views.preview_image, name="preview_image"), # Image preview
-    url(r'^admin/file/(?P<fileid>\d+)$', views.download_file_fromdb, name='download_file_fromdb'), # File download
     url(r'^about$', views.about, name='about'),
 
     # Ajax
