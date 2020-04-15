@@ -26,15 +26,6 @@ from wakemeup.models.environment import *
 from user.models.user import UserReputationEvent, UserBadge, UserNotification
 from user.models.authorization import Object
 
-def download_file_fromdb(request, fileid):
-    myfile = File.objects.get(fileid)
-
-    # Allow access for "public" files (TO-DO: Update to be more inclusive)
-    if(myfile.accessrules == "PB"):
-        return getFileResponse(filedata = myfile.filedata, filename = myfile.filename + myfile.fileextension, filesize = myfile.filesize, contenttype = myfile.filetype)
-    else:
-        return redirect_home()
-
 # Check authentication (logged in)
 def check_authentication(view):
     
@@ -61,12 +52,12 @@ def check_authorization(view):
         # Get action & object
         view_action = viewname_split[0]
         view_object = viewname_split[1] if len(viewname_split) > 1 else None # Use second index of view name (if specified)
-    
+
         # Convert to access levels
         if(view_action == "list"):
             myrequestedaccesslevel = 1
             
-        elif(view_action == "get"):
+        elif(view_action in ("get","download")):
             myrequestedaccesslevel = 4
             
         elif(view_action == "edit"):
@@ -90,7 +81,7 @@ def check_authorization(view):
         if myuser.is_authenticated:
 
             # Get object
-            if(view_action in ('list','get','edit','create','delete')):
+            if(view_action in ('list','get','download','edit','create','delete')):
                 myobject = Object.objects.get_object_by_name(objectname=kwargs.get('objecttype') or view_object) # business object
             else:
                 myobject = Object.objects.get_object_by_name(objectname=viewname) # view
@@ -99,7 +90,7 @@ def check_authorization(view):
             if(myobject):
 
                 # Check user has requested access to object
-                if (myuser.check_access(objectid=myobject.objectid,objectclass=myobject.objectclass,requestedaccesslevel=myrequestedaccesslevel)):
+                if (myuser.check_access(objectid=myobject.objectid, objectclass=myobject.objectclass, requestedaccesslevel=myrequestedaccesslevel)):
                     
                     # Valid permission - continue
                     return view(*args, **kwargs)
@@ -107,9 +98,10 @@ def check_authorization(view):
             # Not authenticated - redirect to login page
             return redirect('login')
         
-        # Not authorized - redirect to homepage (TO-DO: Create "not authorized" page
+        # Not authorized - redirect to homepage (TO-DO: Create "not authorized" page)
         return redirect_home()
 
+    # Return view
     return view_wrapper
 
 # AJAX Request handler
@@ -324,7 +316,19 @@ def myaccount(request):
 
     return render(request, 'wakemeup/myaccount.html', context)
 
-def create_file(request, programname=None):
+@check_authorization
+def list_file(request):
+
+    files = File.objects.get_files(filecategory='CT')
+
+    context = {'files':files}
+    
+    return render(request, 'wakemeup/files/list_file.html', context)
+
+@check_authorization
+def create_file(request):
+
+    programname='incentive' # TO-DO: get this from form
 
     if request.method == "POST":
         
@@ -389,7 +393,36 @@ def create_file(request, programname=None):
     else:
         form = UploadFileForm(request=request)
         
-    return render(request, 'wakemeup/admin/upload.html',context={'form':form,'programname':programname})
+    return render(request, 'wakemeup/files/create_file.html',context={'form':form,'programname':programname})
+
+@check_authorization
+def download_file(request, fileid):
+    
+    myfile = File.objects.get(fileid)
+    myuser = request.user
+
+    if myfile:
+        
+        # Check if user has download access to this file
+        hasfileaccess = myuser.check_access(objectid=myfile.fileid, objectclass='FL', requestedaccesslevel=4)
+        
+        if hasfileaccess:
+            if myfile.filesource == 'GD':
+                gd = GoogleDrive()
+                
+                filedata = gd.download_file(myfile.alternatefileid)
+                return getFileResponse(filedata=filedata, filename=myfile.filename, filesize=myfile.filesize, contenttype=myfile.filetype)
+
+#                 myfileurl = gd.get_file_weblink(fileid=myfile.alternatefileid)
+#                 print(myfileurl)
+#                 return redirect(myfileurl)
+
+            elif myfile.filesource == 'DB':
+                return getFileResponse(filedata = myfile.filedata, filename = myfile.filename + myfile.fileextension, filesize = myfile.filesize, contenttype = myfile.filetype)
+        
+    # File does not exist or user has no access
+    else:
+        return redirect_home()
 
 @check_authorization
 def create_contract(request, contractid):
