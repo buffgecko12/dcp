@@ -13,7 +13,8 @@ from googleapiclient.errors import HttpError
  # Import - Useful functions
 from lib.UsefulFunctions.dataUtils import get_matching_item, to_json
 from lib.UsefulFunctions.miscUtils import get_app_setting
-import wakemeup.models.environment as env
+# import wakemeup.models.environment as env
+from wakemeup import models
 
 class GoogleDriveManager():
 
@@ -41,7 +42,7 @@ class GoogleDriveManager():
                         }
 
                     # Save file and store newly generated id
-                    newfile = env.File().save(gd_file=gd_file)
+                    newfile = models.environment.File().save(gd_file=gd_file)
 
                     # Set parentid values for child directories
                     for mychild in children:
@@ -146,7 +147,7 @@ class GoogleDriveManager():
 
         # Delete from repository also
         if repositoryflag:
-            env.File(alternatefileid=fileid, filesource='GD').delete()
+            models.environment.File(alternatefileid=fileid, filesource='GD').delete()
 
         return myresult
 
@@ -208,7 +209,7 @@ class GoogleDrive():
             if eval(myvar):
                 newattributes[myvar] = eval(myvar)
 
-        myfile = env.File.objects.get_files(filesource='GD', fileattributes=to_json(newattributes), **kwargs)
+        myfile = models.environment.File.objects.get_files(filesource='GD', fileattributes=to_json(newattributes), **kwargs)
 
         if myfile:
             return myfile[0].alternatefileid # Return alternate id for first result
