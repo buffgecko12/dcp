@@ -408,17 +408,17 @@ def download_file(request, fileid):
         
         if hasfileaccess:
             if myfile.filesource == 'GD':
-                gd = GoogleDrive()
                 
-                filedata = gd.download_file(myfile.alternatefileid)
-                return getFileResponse(filedata=filedata, filename=myfile.filename, filesize=myfile.filesize, contenttype=myfile.filetype)
+                gd = GoogleDrive()
+                myfile.filedata = gd.download_file(myfile.alternatefileid)
 
 #                 myfileurl = gd.get_file_weblink(fileid=myfile.alternatefileid)
-#                 print(myfileurl)
 #                 return redirect(myfileurl)
 
             elif myfile.filesource == 'DB':
-                return getFileResponse(filedata = myfile.filedata, filename = myfile.filename + myfile.fileextension, filesize = myfile.filesize, contenttype = myfile.filetype)
+                myfile.filename = myfile.filename + myfile.fileextension
+
+            return getFileResponse(filedata=myfile.filedata, filename=myfile.filename, filesize=myfile.filesize, contenttype=myfile.filetype)
         
     # File does not exist or user has no access
     else:
