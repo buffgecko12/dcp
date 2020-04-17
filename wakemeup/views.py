@@ -410,10 +410,10 @@ def download_file(request, fileid):
             if myfile.filesource == 'GD':
                 
                 gd = GoogleDrive()
-                myfile.filedata = gd.download_file(myfile.alternatefileid)
+#                 myfile.filedata = gd.download_file(myfile.alternatefileid)
 
-#                 myfileurl = gd.get_file_weblink(fileid=myfile.alternatefileid)
-#                 return redirect(myfileurl)
+                myfileurl = gd.get_file_weblink(fileid=myfile.alternatefileid)
+                return redirect(myfileurl)
 
             elif myfile.filesource == 'DB':
                 myfile.filename = myfile.filename + myfile.fileextension
