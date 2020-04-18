@@ -16,7 +16,7 @@ from lib.UsefulFunctions.miscUtils import get_app_setting
 # import wakemeup.models.environment as env
 from wakemeup import models
 
-class GoogleDriveManager():
+class GoogleDriveManager(object):
 
     def connect(self, gd):
         return get_google_service(service=gd.service, version=gd.version, permissions=gd.permissions)
@@ -151,7 +151,7 @@ class GoogleDriveManager():
 
         return myresult
 
-class GoogleDrive():
+class GoogleDrive(object):
 
     connection = None
 
