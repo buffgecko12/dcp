@@ -11,7 +11,7 @@ from crispy_forms.bootstrap import FormActions, TabHolder, Tab, PrependedText, I
 from wakemeup.models.school import *
 from wakemeup.models.program import *
 from wakemeup.models.environment import *
-from user.models.user import UserBadge
+from user.models.authorization import Role
 
 from lib.UsefulFunctions.miscUtils import *
 
@@ -89,6 +89,10 @@ def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, o
     if(fieldname =='schoolyear'):
         choices += (UserProgram.objects.get_programyear_options(programname=programname, schoolid=objectid, schoolyear=None)) 
         
+    elif(fieldname == 'accessroles'):
+        choices += Role.objects.get_role_options(roleid=objectid)
+        print(choices)
+        
     elif(fieldname == 'profilepictureid'):
         choices += get_user_model().objects.get_profile_picture_options(userid=objectid)
         
@@ -102,6 +106,7 @@ class UploadFileForm(forms.Form):
     schoolid = forms.ChoiceField(widget=forms.Select,label='Colegio')
     schoolyear = forms.ChoiceField(widget=forms.Select,initial=DEFAULT_SCHOOL_YEAR,label='A' + mychr('n') + 'o')
     filetype = forms.ChoiceField(widget=forms.Select,label='Tipo de archivo')
+    accessroles = forms.MultipleChoiceField(label='Acceso', widget=forms.SelectMultiple(attrs={'size':'10'}))
     
     def __init__ (self, *args, **kwargs):
 
@@ -115,6 +120,7 @@ class UploadFileForm(forms.Form):
         set_dropdown_choices(self,fieldname='schoolid',programname=programname)
         set_dropdown_choices(self,fieldname='schoolyear',programname=programname) # TO-DO Update to use AJAX based on schoolid
         set_dropdown_choices(self,fieldname='filetype',categoryclass='contractfile')
+        set_dropdown_choices(self,fieldname='accessroles',selectflag=False)
         
         if(not request.user.is_admin):
             self.fields['schoolid'] = forms.IntegerField(widget=forms.HiddenInput, initial=request.user.schoolid)
@@ -132,6 +138,7 @@ class UploadFileForm(forms.Form):
                 'schoolid',
                 'schoolyear',
                 'filetype',
+                'accessroles',
 #                 Div(css_class='dropzone', css_id='id_dropzone'),
                 HTML('<br>'),
 #                 getAdminFormActions(),
