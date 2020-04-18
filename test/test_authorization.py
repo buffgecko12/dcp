@@ -227,6 +227,7 @@ class testAuthorization(unittest.TestCase):
         self.assertIsNotNone(refresh(self.myrole_twousers)) # single role
         self.assertTrue(Role.objects.get_roles(rolename='Teachers_test'))
         self.assertTrue(Role.objects.all()) # all roles
+        self.assertTrue(Role.objects.get_role_options()) # drop-down
 
     def testUpdateRole(self):
 

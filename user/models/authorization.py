@@ -3,6 +3,7 @@ from django.contrib.postgres.fields import ArrayField
 from user.models.base import MyModel
 from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
+from lib.UsefulFunctions.dataUtils import generate_options
 
 ### MODEL MANAGERS ###
 class ObjectManager(models.Manager):
@@ -56,6 +57,13 @@ class RoleManager(models.Manager):
 
     def modify_role_item(self, myRole, userid, schoolid, usertype, changetype = 'A'):
         return save_data('SP_DCPModifyRoleItem', (myRole.roleid, userid, schoolid, usertype, changetype))
+
+    def get_role_options(self, roleid=None):
+        return generate_options(
+            items = self.get_roles(roleid=roleid), 
+            idfield = "roleid", 
+            displayfield = "name"
+        )
 
 class RoleACLManager(models.Manager):
     def all(self):
