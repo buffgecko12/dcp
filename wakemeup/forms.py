@@ -80,7 +80,7 @@ def getAdminFormActions(cancel_url = 'wakemeup:index', cancel_context="", cancel
         Submit('submit_next','Enviar', css_id='next'),
     )
     
-def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, objectid=None, programname=None):
+def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, objectid=None, programname=None, extraargs=None):
     choices = [("0","-- Escoger --")] if selectflag else []
     
     if(fieldname =='schoolid'):
@@ -90,8 +90,7 @@ def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, o
         choices += (UserProgram.objects.get_programyear_options(programname=programname, schoolid=objectid, schoolyear=None)) 
         
     elif(fieldname == 'accessroles'):
-        choices += Role.objects.get_role_options(roleid=objectid)
-        print(choices)
+        choices += Role.objects.get_role_options(roleid=objectid, **extraargs)
         
     elif(fieldname == 'profilepictureid'):
         choices += get_user_model().objects.get_profile_picture_options(userid=objectid)
@@ -120,11 +119,13 @@ class UploadFileForm(forms.Form):
         set_dropdown_choices(self,fieldname='schoolid',programname=programname)
         set_dropdown_choices(self,fieldname='schoolyear',programname=programname) # TO-DO Update to use AJAX based on schoolid
         set_dropdown_choices(self,fieldname='filetype',categoryclass='contractfile')
-        set_dropdown_choices(self,fieldname='accessroles',selectflag=False)
+        set_dropdown_choices(self,fieldname='accessroles',selectflag=False, extraargs={'roleclass':['US']})
         
         if(not request.user.is_admin):
             self.fields['schoolid'] = forms.IntegerField(widget=forms.HiddenInput, initial=request.user.schoolid)
             self.fields['schoolyear'] = forms.IntegerField(widget=forms.HiddenInput)
+
+        self.fields['accessroles'].initial = Role.objects.get(name='Public').roleid
 
         # Set helper properties
         self.helper = FormHelper() 

@@ -24,7 +24,7 @@ from wakemeup.models.school import *
 from wakemeup.models.program import *
 from wakemeup.models.environment import *
 from user.models.user import UserReputationEvent, UserBadge, UserNotification
-from user.models.authorization import Object
+from user.models.authorization import *
 
 # Check authentication (logged in)
 def check_authentication(view):
@@ -207,6 +207,9 @@ def preview_image(request, objecttype, objectid):
 def redirect_home():
     return redirect('wakemeup:index')        
 
+def redirect_referer(request):
+    return redirect(request.META['HTTP_REFERER']) if request.META['HTTP_REFERER'] else redirect_home()
+
 @check_authorization
 def delete_object(request, objecttype, objectid):
     
@@ -340,26 +343,17 @@ def create_file(request):
             # Connect to Google Drive
             gd = GoogleDrive(permissions=['write'])
             
-            results = gd.connection.files().list(pageSize=100, fields="nextPageToken, files(id, name)").execute()
-            items = results.get('files', [])
-            
-            if not items:
-                print('No files found.')
-            else:
-                print('Files:')
-                for item in items:
-                    print(u'{0} ({1})'.format(item['name'], item['id']))
-            
             myfiletype = form.cleaned_data.get('filetype')
             myschoolyear = form.cleaned_data.get('schoolyear')
             myschoolid = form.cleaned_data.get('schoolid')
-            
+            myaccessroles = form.cleaned_data.get('accessroles')
+
             contractfiletypes = Category.objects.get_categories(categoryclass='contractfile')
             
             # Get user upload directory or use default (programname, school year); otherwise GD will default to "root"
-            myuserprogram = UserProgram.objects.get(userid=request.user.userid,programname=programname,schoolyear=myschoolyear,schoolid=myschoolid,uploaddirflag=True) # Create upload dir
-            uploaddir = getattr(myuserprogram,'uploaddirectoryid',None) or \
-                        gd.lookup_fileid(gd_locator='program_uploads_base',schoolyear=myschoolyear,programname=programname)
+            myuserprogram = UserProgram.objects.get(userid=request.user.userid, programname=programname, schoolyear=myschoolyear, schoolid=myschoolid, uploaddirflag=True) # Create upload dir
+            uploaddir = getattr(myuserprogram, 'uploaddirectoryid', None) or \
+                        gd.lookup_fileid(gd_locator='program_uploads_base', schoolyear=myschoolyear, programname=programname)
 
             # Loop through files
             files = [request.FILES.get('file[%d]' % i)
@@ -389,6 +383,11 @@ def create_file(request):
                     schoolyear=myschoolyear,
                     schoolid=myschoolid,
                 ).save(gd_file=gd_file)
+                
+                # Save ACLs for file
+                RoleACL().save(
+                    acllist=to_json([{"roleid":myrole, "aclinfo":[{"objectid":newfile['fileid'], "objectclass":'FL', "accesslevel":4}]} for myrole in myaccessroles])
+                )
 
     else:
         form = UploadFileForm(request=request)
@@ -420,9 +419,8 @@ def download_file(request, fileid):
 
             return getFileResponse(filedata=myfile.filedata, filename=myfile.filename, filesize=myfile.filesize, contenttype=myfile.filetype)
         
-    # File does not exist or user has no access
-    else:
-        return redirect_home()
+    # File does not exist or user has no access - return to refering page
+    return redirect_referer(request)
 
 @check_authorization
 def create_contract(request, contractid):
