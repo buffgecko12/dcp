@@ -265,15 +265,17 @@ def create_user_program(userid,programname,schoolid,schoolyear,maxbudget=400000,
     # Refresh with extra data
     return UserProgram.objects.get(userid=userid,programname=programname,schoolid=schoolid,schoolyear=schoolyear,uploaddirflag=uploaddirflag)
 
-def create_role(name="New role",description="Some description",publicflag=None,schoollist=None,usertypelist=None,userlist=None):
+def create_role(roleclass=None, name="New role",description="Some description",publicflag=None,schoollist=None,usertypelist=None,userlist=None,internalflag=None):
     myrole = Role(
         roleid=None,
+        roleclass=roleclass,
         name=name,
         description=description,
         publicflag=publicflag,
         schoollist=schoollist,
         usertypelist=usertypelist,
-        userlist=userlist
+        userlist=userlist,
+        internalflag=internalflag
         )
     
     myrole.roleid = myrole.save()
@@ -295,8 +297,7 @@ def create_role_ACL(myrole,myobject,accesslevel=4,acllist=None):
         myobject.objectid = myobject.fileid
 
     if(acllist):
-        myroleacl = RoleACL()
-        myroleacl.acllist=acllist
+        myroleacl = RoleACL().save(acllist)
     else:
         myroleacl = RoleACL(
             roleid=myrole.roleid,
@@ -305,7 +306,8 @@ def create_role_ACL(myrole,myobject,accesslevel=4,acllist=None):
             accesslevel=accesslevel,
             )
 
-    myroleacl.save()
+        myroleacl.save()
+        
     return myroleacl
 
 def delete_school(myschool):

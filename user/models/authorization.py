@@ -3,7 +3,7 @@ from django.contrib.postgres.fields import ArrayField
 from user.models.base import MyModel
 from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
-from lib.UsefulFunctions.dataUtils import generate_options
+from lib.UsefulFunctions.dataUtils import *
 
 ### MODEL MANAGERS ###
 class ObjectManager(models.Manager):
@@ -34,33 +34,35 @@ class RoleManager(models.Manager):
     def all(self):
         return self.get_roles()
     
-    def get(self, roleid, rolename = None):
-        return get_data_pk(self, 'SP_DCPGetRole(%s,%s)', (roleid, rolename))
+    def get(self, roleid=None, name=None): # Can lookup by either roleid or name
+        return get_data_pk(self, 'SP_DCPGetRole(%s,%s,%s,%s)', (roleid, None, name, None))
 
-    def get_roles(self, roleid = None, rolename = None):
-        return get_data(self, 'SP_DCPGetRole(%s,%s)', (roleid, rolename))
+    def get_roles(self, roleid=None, roleclass=None, name=None, internalflag=None):
+        return get_data(self, 'SP_DCPGetRole(%s,%s,%s,%s)', (roleid, convert_to_array(roleclass), name, internalflag))
     
     def save(self, myRole):
         return save_data('SP_DCPUpsertRole', (
             myRole.roleid,
+            myRole.roleclass,
             myRole.name,
             myRole.description,
             myRole.publicflag,
             myRole.schoollist,
             myRole.usertypelist,
-            myRole.userlist
+            myRole.userlist,
+            myRole.internalflag
             )
         )[0] # Return ID
     
     def delete(self, myRole):
-        return delete_data('SP_DCPDeleteRole', (myRole.roleid,))
+        return delete_data('SP_DCPDeleteRole', (myRole.roleid, myRole.internalflag))
 
     def modify_role_item(self, myRole, userid, schoolid, usertype, changetype = 'A'):
         return save_data('SP_DCPModifyRoleItem', (myRole.roleid, userid, schoolid, usertype, changetype))
 
-    def get_role_options(self, roleid=None):
+    def get_role_options(self, **kwargs):
         return generate_options(
-            items = self.get_roles(roleid=roleid), 
+            items = self.get_roles(**kwargs), 
             idfield = "roleid", 
             displayfield = "name"
         )
@@ -75,13 +77,13 @@ class RoleACLManager(models.Manager):
     def get_role_acls(self, roleid = None, objectid = None, objectclass = None, accesslevel = None):
         return get_data(self, 'SP_DCPGetRoleACL(%s,%s,%s,%s)', (roleid, objectid, objectclass, accesslevel))
     
-    def save(self, myRoleACL):
+    def save(self, myRoleACL, acllist=None):
         return save_data('SP_DCPUpsertRoleACL', (
             myRoleACL.roleid,
             myRoleACL.objectid,
             myRoleACL.objectclass,
             myRoleACL.accesslevel,
-            getattr(myRoleACL,'acllist',None) # batch list
+            acllist
             )
         )[0] # Return ID
 
@@ -99,12 +101,14 @@ class Object(MyModel):
 class Role(MyModel):
     
     roleid = models.IntegerField(primary_key=True, verbose_name='ID')
+    roleclass = models.CharField(max_length=50, verbose_name='Clase')
     name = models.CharField(max_length=100, verbose_name='Nombre')
     description = models.CharField(max_length=500, verbose_name='Descripci' + mychr('o') + 'n')
     publicflag = models.BooleanField(verbose_name='General')
     schoollist = ArrayField(models.IntegerField())
     usertypelist = ArrayField(models.CharField(max_length=2))
     userlist = ArrayField(models.IntegerField())
+    internalflag = models.BooleanField(verbose_name='Internal')
 
     objects = RoleManager()
     
