@@ -57,7 +57,7 @@ def check_authorization(view):
         if(view_action == "list"):
             myrequestedaccesslevel = 1
             
-        elif(view_action in ("get","download")):
+        elif(view_action in ("get", "download")):
             myrequestedaccesslevel = 4
             
         elif(view_action == "edit"):
@@ -66,7 +66,7 @@ def check_authorization(view):
             else:
                 myrequestedaccesslevel = 8 # Edit
                 
-        elif(view_action == "create"):
+        elif(view_action in ("create", "upload")):
             myrequestedaccesslevel = 10
             
         elif(view_action == "delete"):
@@ -81,7 +81,7 @@ def check_authorization(view):
         if myuser.is_authenticated:
 
             # Get object
-            if(view_action in ('list','get','download','edit','create','delete')):
+            if(view_action in ('list','get','download','upload','edit','create','delete')):
                 myobject = Object.objects.get_object_by_name(objectname=kwargs.get('objecttype') or view_object) # business object
             else:
                 myobject = Object.objects.get_object_by_name(objectname=viewname) # view
@@ -329,31 +329,32 @@ def list_file(request):
     return render(request, 'wakemeup/files/list_file.html', context)
 
 @check_authorization
-def create_file(request):
-
-    programname='incentive' # TO-DO: get this from form
+def upload_file(request):
 
     if request.method == "POST":
         
         # Bind form data
-        form = UploadFileForm(request.POST,request.FILES,request=request)
+        form = UploadFileForm(request.POST, request.FILES, request=request)
 
         if(form.is_valid()):
 
             # Connect to Google Drive
             gd = GoogleDrive(permissions=['write'])
             
-            myfiletype = form.cleaned_data.get('filetype')
+            myprogramname = form.cleaned_data.get('programname')
+            myuserid = form.cleaned_data.get('userid')
             myschoolyear = form.cleaned_data.get('schoolyear')
             myschoolid = form.cleaned_data.get('schoolid')
+
+            myfiletype = form.cleaned_data.get('filetype')
             myaccessroles = form.cleaned_data.get('accessroles')
 
             contractfiletypes = Category.objects.get_categories(categoryclass='contractfile')
             
             # Get user upload directory or use default (programname, school year); otherwise GD will default to "root"
-            myuserprogram = UserProgram.objects.get(userid=request.user.userid, programname=programname, schoolyear=myschoolyear, schoolid=myschoolid, uploaddirflag=True) # Create upload dir
+            myuserprogram = UserProgram.objects.get(userid=myuserid, programname=myprogramname, schoolyear=myschoolyear, schoolid=myschoolid, uploaddirflag=True) # Create upload dir
             uploaddir = getattr(myuserprogram, 'uploaddirectoryid', None) or \
-                        gd.lookup_fileid(gd_locator='program_uploads_base', schoolyear=myschoolyear, programname=programname)
+                        gd.lookup_fileid(gd_locator='program_uploads_base', schoolyear=myschoolyear, programname=myprogramname)
 
             # Loop through files
             files = [request.FILES.get('file[%d]' % i)
@@ -367,7 +368,13 @@ def create_file(request):
                     'name': filetype + ' - ' + myfile.name,
                     'originalFilename': myfile.name,
                     'description':'Archivo subido por ' + request.user.userdisplayname,
-                    'parents':[uploaddir]
+                    'parents':[uploaddir],
+                    'properties':{
+                        'userid':myuserid,
+                        'uploaduserdisplayname': request.user.userdisplayname,
+                        'uploaduserid':request.user.userid,
+                        'programname':myprogramname
+                    }
                 }
 
                 # Build GD file
@@ -379,20 +386,24 @@ def create_file(request):
 
                 # Create file in repository
                 newfile = File(
-                    filecategory=myfiletype,
-                    schoolyear=myschoolyear,
-                    schoolid=myschoolid,
+                    fileclass = form.cleaned_data.get('fileclass'),
+                    filecategory = myfiletype,
+                    schoolyear = myschoolyear,
+                    schoolid = myschoolid,
+                    fileURL=form.cleaned_data.get('url'),
+                    contractid = form.cleaned_data.get('contractid'),
+                    filedescription = form.cleaned_data.get('description')
                 ).save(gd_file=gd_file)
                 
                 # Save ACLs for file
                 RoleACL().save(
                     acllist=to_json([{"roleid":myrole, "aclinfo":[{"objectid":newfile['fileid'], "objectclass":'FL', "accesslevel":4}]} for myrole in myaccessroles])
                 )
-
+                
     else:
-        form = UploadFileForm(request=request)
+        form = UploadFileForm(request=request, initial={'programname':'incentive'})
         
-    return render(request, 'wakemeup/files/create_file.html',context={'form':form,'programname':programname})
+    return render(request, 'wakemeup/files/upload_file.html', context={'form':form})
 
 @check_authorization
 def download_file(request, fileid):
@@ -457,7 +468,7 @@ def create_contract(request, contractid):
 
         if(mycontract):
             # Populate existing form only for "Draft" contracts and if user is contract's owner or super / admin user
-            if(mycontract.teacheruserid == request.user.userid or request.user.is_admin): # TO-DO: Update to check permissions
+            if(mycontract.teacheruserid == request.user.userid or request.user.is_admin()): # TO-DO: Update to check permissions
 
                 form = ContractForm(request=request, contractid=contractid,
                     initial = {
@@ -897,7 +908,7 @@ def get_contract(request, contractid):
     # Make sure contract exists
     if(mycontract):
         # Check contract is not a draft and user has access
-        if(mycontract.contractstatus != 'D' and (request.user.userid in (mycontract.get_users())) or request.user.is_admin): # TO-DO: Check permissions 
+        if(mycontract.contractstatus != 'D' and (request.user.userid in (mycontract.get_users())) or request.user.is_admin()): # TO-DO: Check permissions 
             mycontract.contractvalidperiod_disp = display_timestamp_range(mycontract.contractvalidperiod) # Format for display
             classinfo = Class.objects.get(classid=mycontract.classid)
             
@@ -921,7 +932,7 @@ def get_contract(request, contractid):
 def list_contract(request):
     
     # Determine which contracts to display
-    if request.user.is_admin: # TO-DO: Update for permissions check
+    if request.user.is_admin(): # TO-DO: Update for permissions check
         myargs = {} # Return all contracts
     elif(request.user.usertype == 'TR'):
         myargs = {'teacheruserid':request.user.userid} # Return only contracts tied to teacher

@@ -179,7 +179,7 @@ class GoogleDrive(object):
                     metadata, 
                     file_data = None, 
                     mimetype = 'application/octet-stream', 
-                    fields = ('name,fileExtension,size,mimeType,description,id,properties'), 
+                    fields = ('name,fileExtension,size,mimeType,description,id,properties,webContentLink'), 
                     directoryflag = False, 
                     file_path = None, 
                     *args, **kwargs):

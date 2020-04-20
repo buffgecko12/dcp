@@ -24,7 +24,7 @@ urlpatterns = [
 
 
     # Test
-    url(r'^files/create$', views.create_file, name="create_file"),
+    url(r'^files/upload$', views.upload_file, name="upload_file"),
     url(r'^files/list$', views.list_file, name="list_file"),
     url(r'^files/download/(?P<fileid>\d+)$', views.download_file, name='download_file'), # File download
     

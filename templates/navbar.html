@@ -32,7 +32,7 @@
 					<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Archivos</a>
 					<div class="dropdown-menu">
 						<a class="dropdown-item {% if url_name == 'list_file' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}">Descargar</a>
-						<a class="dropdown-item {% if url_name == 'create_file' %} active {% endif %}" href="{% url 'wakemeup:create_file' %}">Subir</a>
+						<a class="dropdown-item {% if url_name == 'upload_file' %} active {% endif %}" href="{% url 'wakemeup:upload_file' %}">Subir</a>
 					</div>
 				</li>
 				{% if user.is_admin or user.usertype == "TR" %}

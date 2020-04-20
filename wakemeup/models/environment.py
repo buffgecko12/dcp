@@ -38,10 +38,11 @@ class FileManager(models.Manager):
             myFile.fileextension = gd_file.get('fileExtension')
             myFile.filesize = gd_file.get('size')
             myFile.filetype = gd_file.get('mimeType')
-            myFile.filedescription = gd_file.get('description')
+            myFile.filedescription = myFile.filedescription or gd_file.get('description') # Give priority to original value
             myFile.filesource = 'GD'
             myFile.alternatefileid = gd_file.get('id')
             myFile.fileattributes = to_json(fileattributes)
+            myFile.fileURL = myFile.fileURL or gd_file.get('webContentLink')
             myFile.schoolyear = myFile.schoolyear or fileattributes.get('schoolyear') # Give priority to original value
 
         # Save to repository

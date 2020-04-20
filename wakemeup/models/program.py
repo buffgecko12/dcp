@@ -162,11 +162,11 @@ class UserProgramManager(models.Manager):
     def delete(self, myUserProgram):
         return delete_data('SP_DCPDeleteUserProgram', (myUserProgram.userid, myUserProgram.programname, myUserProgram.schoolid, myUserProgram.schoolyear))
 
-    def get_programyear_options(self, programname=None, schoolid=None, schoolyear=None):
+    def get_program_options(self, idfield, displayfield=None, **kwargs):
         return generate_options(
-            items = self.get_user_programs(programname=programname,schoolid=schoolid,schoolyear=schoolyear), 
-            idfield = "schoolyear", 
-            displayfield = "schoolyear"
+            items = self.get_user_programs(**kwargs),
+            idfield = idfield,
+            displayfield = displayfield or idfield
         )
         
     def create(self, myUserProgram, directorytype):

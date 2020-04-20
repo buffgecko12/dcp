@@ -80,52 +80,91 @@ def getAdminFormActions(cancel_url = 'wakemeup:index', cancel_context="", cancel
         Submit('submit_next','Enviar', css_id='next'),
     )
     
-def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, objectid=None, programname=None, extraargs=None):
+def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, lookupargs={}):
     choices = [("0","-- Escoger --")] if selectflag else []
-    
+
+    if(fieldname =='userid'):
+        choices += (UserProgram.objects.get_program_options(idfield=fieldname, displayfield='userdisplayname', **lookupargs))
+        
     if(fieldname =='schoolid'):
-        choices += (School.objects.get_school_options(schoolid=objectid)) 
-        
+        choices += (UserProgram.objects.get_program_options(idfield=fieldname, displayfield='schoolabbreviation', **lookupargs)) 
+
     if(fieldname =='schoolyear'):
-        choices += (UserProgram.objects.get_programyear_options(programname=programname, schoolid=objectid, schoolyear=None)) 
-        
+        choices += (UserProgram.objects.get_program_options(idfield=fieldname, **lookupargs))
+
     elif(fieldname == 'accessroles'):
-        choices += Role.objects.get_role_options(roleid=objectid, **extraargs)
+        choices += Role.objects.get_role_options(**lookupargs)
         
     elif(fieldname == 'profilepictureid'):
-        choices += get_user_model().objects.get_profile_picture_options(userid=objectid)
+        choices += get_user_model().objects.get_profile_picture_options(**lookupargs)
         
     else:
         choices += (Category.objects.get_category_options(categoryclass = categoryclass or fieldname))
 
     form.fields[fieldname].choices = choices
 
+def set_field_size(field, size=''):
+    fieldclass = ' form-control' + ('-' + size) if size else ()
+
+    if not isinstance(field, Field):
+        myfield = Field(field, css_class=fieldclass)
+    else:
+        myfield = field.css_class + fieldclass
+
+    return myfield
+
 class UploadFileForm(forms.Form):
+
+    # Program info
+    userid = forms.ChoiceField(required=True, label='Usuario')
+    programname = forms.ChoiceField(required=True, label='Programa')
+    schoolid = forms.ChoiceField(label='Colegio')
+    schoolyear = forms.ChoiceField(label='A' + mychr('n') + 'o')
     
-    schoolid = forms.ChoiceField(widget=forms.Select,label='Colegio')
-    schoolyear = forms.ChoiceField(widget=forms.Select,initial=DEFAULT_SCHOOL_YEAR,label='A' + mychr('n') + 'o')
-    filetype = forms.ChoiceField(widget=forms.Select,label='Tipo de archivo')
-    accessroles = forms.MultipleChoiceField(label='Acceso', widget=forms.SelectMultiple(attrs={'size':'10'}))
+    # File info
+    fileclass = forms.ChoiceField(label='Clase')
+    contractid = forms.TypedChoiceField(label='Contrato', required=False, empty_value=None)
+    filetype = forms.ChoiceField(label='Tipo de archivo')
+    description = forms.CharField(max_length=500, label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}), required=False)
+    accessroles = forms.MultipleChoiceField(label='Acceso', widget=forms.SelectMultiple(attrs={'size':'8'}), required=False)
+    url = forms.URLField(label='URL', required=False)
     
     def __init__ (self, *args, **kwargs):
 
         # Extract "request" parameter
         request = kwargs.pop('request', None)
-        programname = kwargs.pop('request', None)
+        initialvalues = kwargs.get('initial', None)
+        programname = None
+        
+        # Extract initial values for re-use
+        if(initialvalues):
+            programname = initialvalues.get('programname')
 
         super(UploadFileForm, self).__init__(*args, **kwargs)
 
-        # Populate initial drop-downs
-        set_dropdown_choices(self,fieldname='schoolid',programname=programname)
-        set_dropdown_choices(self,fieldname='schoolyear',programname=programname) # TO-DO Update to use AJAX based on schoolid
-        set_dropdown_choices(self,fieldname='filetype',categoryclass='contractfile')
-        set_dropdown_choices(self,fieldname='accessroles',selectflag=False, extraargs={'roleclass':['US']})
-        
-        if(not request.user.is_admin):
-            self.fields['schoolid'] = forms.IntegerField(widget=forms.HiddenInput, initial=request.user.schoolid)
-            self.fields['schoolyear'] = forms.IntegerField(widget=forms.HiddenInput)
+        # Populate initial drop-downs (TO-DO: Update to use AJAX based on schoolid)
+        set_dropdown_choices(self, fieldname='programname', categoryclass='program')
+        set_dropdown_choices(self, fieldname='userid', lookupargs={'programname':programname})
+        set_dropdown_choices(self, fieldname='schoolid', lookupargs={'programname':programname})
+        set_dropdown_choices(self, fieldname='schoolyear', lookupargs={'programname':programname})
+        set_dropdown_choices(self, fieldname='filetype', categoryclass='contractfile')
+        set_dropdown_choices(self, fieldname='fileclass')
+        set_dropdown_choices(self, fieldname='accessroles', lookupargs={'roleclass':['US']}, selectflag=False)
 
-        self.fields['accessroles'].initial = Role.objects.get(name='Public').roleid
+        # Set initial values
+        self.fields['programname'].initial = programname
+        self.fields['userid'].initial = request.user.userid
+        self.fields['schoolid'].initial = request.user.schoolid
+        self.fields['schoolyear'].initial=DEFAULT_SCHOOL_YEAR
+        self.fields['accessroles'].initial = Role.objects.get(name='Public').roleid if request.user.is_admin() else '' # Default to "public" only if admin
+
+        # Hide admin fields
+        if not request.user.is_admin():
+            self.fields['userid'] = forms.IntegerField(widget=forms.HiddenInput)
+            self.fields['programname'] = forms.CharField(widget=forms.HiddenInput)
+            self.fields['schoolid'] = forms.IntegerField(widget=forms.HiddenInput)
+            self.fields['schoolyear'] = forms.IntegerField(widget=forms.HiddenInput)
+            self.fields['accessroles'] = forms.CharField(widget=forms.HiddenInput, required=False)
 
         # Set helper properties
         self.helper = FormHelper() 
@@ -135,14 +174,34 @@ class UploadFileForm(forms.Form):
         # Set form layout
         self.helper.layout = Layout(
             Fieldset(
-                'Subir archivos',
-                'schoolid',
-                'schoolyear',
+                'Programa',
+                Div(
+                    Div(set_field_size('programname','sm'), css_class='col-sm-6'),
+                    Div(set_field_size('schoolyear','sm'), css_class='col-sm-6'),
+                    css_class='row'
+                ),
+                Div(
+                    Div(set_field_size('schoolid','sm'), css_class='col-sm-6'),
+                    Div(set_field_size('userid','sm'), css_class='col-sm-6'),
+                    css_class='row'
+                ),
+            HTML('<hr class="separator">'),
+            ) if request.user.is_admin() else Div('programname','schoolyear','schoolid','userid'), # Only show for admin
+            Fieldset(
+                'General',
+                'fileclass',
+                'contractid',
                 'filetype',
+                'description',
                 'accessroles',
 #                 Div(css_class='dropzone', css_id='id_dropzone'),
-                HTML('<br>'),
-#                 getAdminFormActions(),
+                HTML('<hr class="separator">'),
+                Fieldset(
+                    'Archivos',
+                    'url',
+                    HTML('<br>'),
+    #                 getAdminFormActions(),
+                )
             )
         )
 
@@ -520,8 +579,8 @@ class MyUserForm(forms.Form):
             myschoolid = None
 
         # Set drop-downs
-        set_dropdown_choices(self,fieldname='schoolid',objectid=myschoolid)
-        set_dropdown_choices(self,fieldname='profilepictureid',objectid=request.user.userid,selectflag=False)
+        set_dropdown_choices(self,fieldname='schoolid', lookupargs={'schoolid':myschoolid})
+        set_dropdown_choices(self,fieldname='profilepictureid', lookupargs={'userid':request.user.userid}, selectflag=False)
         
         # Set form layout
         self.helper.layout = Layout(

@@ -62,8 +62,8 @@ class testProgram(unittest.TestCase):
         
         self.assertTrue(len(UserProgram.objects.get_user_programs(schoolyear=DEFAULT_SCHOOL_YEAR)),2) # year
         self.assertTrue(len(UserProgram.objects.get_user_programs(userid=self.myuser_teacher.userid)),2) # user
-        self.assertEqual(UserProgram.objects.get_programyear_options(schoolyear=DEFAULT_SCHOOL_YEAR)[0][0],DEFAULT_SCHOOL_YEAR) # year options
-        self.assertEqual(len(UserProgram.objects.get_programyear_options(schoolyear=DEFAULT_SCHOOL_YEAR)),1) # no duplicates
+        self.assertEqual(UserProgram.objects.get_program_options(idfield='schoolyear',schoolyear=DEFAULT_SCHOOL_YEAR)[0][0],DEFAULT_SCHOOL_YEAR) # year options
+        self.assertEqual(len(UserProgram.objects.get_program_options(idfield='schoolyear',schoolyear=DEFAULT_SCHOOL_YEAR)),1) # no duplicates
 
     def testDeleteUserProgram(self):
 
