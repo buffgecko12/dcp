@@ -142,6 +142,14 @@ class UploadFileForm(forms.Form):
 
         super(UploadFileForm, self).__init__(*args, **kwargs)
 
+        # Hide admin fields
+        if not request.user.is_admin():
+            self.fields['userid'] = forms.IntegerField(widget=forms.HiddenInput)
+            self.fields['programname'] = forms.CharField(widget=forms.HiddenInput)
+            self.fields['schoolid'] = forms.IntegerField(widget=forms.HiddenInput)
+            self.fields['schoolyear'] = forms.IntegerField(widget=forms.HiddenInput)
+            self.fields['accessroles'] = forms.CharField(widget=forms.HiddenInput, required=False)
+
         # Populate initial drop-downs (TO-DO: Update to use AJAX based on schoolid)
         set_dropdown_choices(self, fieldname='programname', categoryclass='program')
         set_dropdown_choices(self, fieldname='userid', lookupargs={'programname':programname})
@@ -157,14 +165,6 @@ class UploadFileForm(forms.Form):
         self.fields['schoolid'].initial = request.user.schoolid
         self.fields['schoolyear'].initial=DEFAULT_SCHOOL_YEAR
         self.fields['accessroles'].initial = Role.objects.get(name='Public').roleid if request.user.is_admin() else '' # Default to "public" only if admin
-
-        # Hide admin fields
-        if not request.user.is_admin():
-            self.fields['userid'] = forms.IntegerField(widget=forms.HiddenInput)
-            self.fields['programname'] = forms.CharField(widget=forms.HiddenInput)
-            self.fields['schoolid'] = forms.IntegerField(widget=forms.HiddenInput)
-            self.fields['schoolyear'] = forms.IntegerField(widget=forms.HiddenInput)
-            self.fields['accessroles'] = forms.CharField(widget=forms.HiddenInput, required=False)
 
         # Set helper properties
         self.helper = FormHelper() 
