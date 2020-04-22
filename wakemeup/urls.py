@@ -22,8 +22,10 @@ urlpatterns = [
     url(r'^admin/create_user', views.create_user, name="create_user"),
     url(r'^myaccount', views.myaccount, name="myaccount"),
 
+    # Calendar
+    url(r'^calendar/', views.list_calendar, name='list_calendar'),
 
-    # Test
+    # Files
     url(r'^files/upload$', views.upload_file, name="upload_file"),
     url(r'^files/list$', views.list_file, name="list_file"),
     url(r'^files/download/(?P<fileid>\d+)$', views.download_file, name='download_file'), # File download

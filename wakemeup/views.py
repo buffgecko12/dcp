@@ -319,6 +319,9 @@ def myaccount(request):
 
     return render(request, 'wakemeup/myaccount.html', context)
 
+def list_calendar(request):
+    return render(request, 'wakemeup/calendar/index.html', {})
+
 @check_authorization
 def list_file(request):
 

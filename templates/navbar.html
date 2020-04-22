@@ -28,12 +28,19 @@
 						<a class="dropdown-item {% if url_name == 'list_contract' %} active {% endif %}" href="{% url 'wakemeup:list_contract' %}">Mis contratos</a>
 					</div>
 				</li>
+				
+				<!-- FILES -->
 				<li class="nav-item dropdown">				
 					<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Archivos</a>
 					<div class="dropdown-menu">
 						<a class="dropdown-item {% if url_name == 'list_file' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}">Descargar</a>
 						<a class="dropdown-item {% if url_name == 'upload_file' %} active {% endif %}" href="{% url 'wakemeup:upload_file' %}">Subir</a>
 					</div>
+				</li>
+				
+				<!-- CALENDAR -->
+				<li class="nav-item dropdown">				
+					<a class="nav-link" href="{% url 'wakemeup:list_calendar' %}">Calendario</a>
 				</li>
 				{% if user.is_admin or user.usertype == "TR" %}
 				

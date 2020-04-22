@@ -129,6 +129,35 @@ class RewardManager(models.Manager):
     def delete(self, myReward):
         return delete_data('SP_DCPDeleteReward', (myReward.rewardid,))
 
+class ProgramManager(models.Manager):
+
+    def delete(self, myProgram, repositoryflag, permanentflag, *args, **kwargs):
+        return myProgram.gd.delete_file(
+            fileid=myProgram.gd.lookup_fileid(gd_locator=myProgram.gd_locator,schoolyear=myProgram.schoolyear,programname=myProgram.programname),
+            repositoryflag=repositoryflag, # Delete from repository
+            permanentflag=permanentflag # Permanently delete from GD
+            )
+
+    def create(self, myProgram, *args, **kwargs):
+        
+        # Define directory structure
+        gd_structure = {
+            str(myProgram.schoolyear):{
+                'Contratos':{'metadata':{'gd_locator':'contracts_base','schoolyear':myProgram.schoolyear,'programname':myProgram.programname}},
+                'Subidas':{'metadata':{'gd_locator':'program_uploads_base','schoolyear':myProgram.schoolyear,'programname':myProgram.programname}},
+                'metadata':{
+                    'parentid':myProgram.gd.lookup_fileid(gd_locator='program_base',programname=myProgram.programname),
+                    'description':'Google Drive - ' + myProgram.programname + ' base directory (' + str(myProgram.schoolyear) + ')',
+                    'gd_locator':myProgram.gd_locator,
+                    'schoolyear':myProgram.schoolyear,
+                    'programname':myProgram.programname
+                }
+            }
+        }
+        
+        # Build structure
+        return myProgram.gd.create_structure(gd_structure)
+
 class UserProgramManager(models.Manager):
     def all(self):
         return self.get_user_programs()
@@ -278,33 +307,14 @@ class Program(MyModel):
         if(createflag):
             self.create()
 
-    def create(self, *args, **kwargs):
+    objects = ProgramManager()
 
-        # Define directory structure
-        gd_structure = {
-            str(self.schoolyear):{
-                'Contratos':{'metadata':{'gd_locator':'contracts_base','schoolyear':self.schoolyear,'programname':self.programname}},
-                'Subidas':{'metadata':{'gd_locator':'program_uploads_base','schoolyear':self.schoolyear,'programname':self.programname}},
-                'metadata':{
-                    'parentid':self.gd.lookup_fileid(gd_locator='program_base',programname=self.programname),
-                    'description':'Google Drive - ' + self.programname + ' base directory (' + str(self.schoolyear) + ')',
-                    'gd_locator':self.gd_locator,
-                    'schoolyear':self.schoolyear,
-                    'programname':self.programname
-                }
-            }
-        }
-        
-        # Build structure
-        return self.gd.create_structure(gd_structure)
-        
+    def create(self, *args, **kwargs):
+        return Program.objects.create(self, *args, **kwargs)
+    
     def delete(self, repositoryflag=True, permanentflag=False, *args, **kwargs):
-        return self.gd.delete_file(
-            fileid=self.gd.lookup_fileid(gd_locator=self.gd_locator,schoolyear=self.schoolyear,programname=self.programname),
-            repositoryflag=repositoryflag, # Delete from repository
-            permanentflag=permanentflag # Permanently delete from GD
-            )
-        
+        return Program.objects.delete(self, repositoryflag, permanentflag, *args, **kwargs)
+
 class UserProgram(Program, get_user_model()):
 
     maxbudget = models.IntegerField(primary_key=True,verbose_name='Prespuesto m' + mychr('a') + 'ximo')
