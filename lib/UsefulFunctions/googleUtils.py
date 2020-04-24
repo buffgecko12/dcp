@@ -64,7 +64,7 @@ class GoogleDriveManager(object):
 
         except HttpError:
             print('Fail - Error creating "' + str(parent) + '"' + str(sys.exc_info()[0]) + ")")
-            return 'Fail'
+            return {'fileid':None,'gd_file':None}
 
     def get_file(self, gd, fileid, fields):
 
@@ -200,14 +200,14 @@ class GoogleDrive(object):
     def delete_file(self, fileid, repositoryflag=False, permanentflag=False):
         return self.objects.delete_file(self, fileid, repositoryflag, permanentflag)
 
-    def lookup_fileid(self, gd_locator=None, programname=None, userid=None, schoolyear=None, fileattributes={}, **kwargs):
+    def lookup_fileid(self, gd_locator=None, programname=None, userid=None, fileattributes={}, **kwargs):
 
         # Initialize new dictionary
         newattributes = copy.deepcopy(fileattributes)
 
         for myvar in ('gd_locator','programname','userid'):
             if eval(myvar):
-                newattributes[myvar] = eval(myvar)
+                newattributes[myvar] = str(eval(myvar)) # GD returns properties as string
 
         myfile = models.environment.File.objects.get_files(filesource='GD', fileattributes=to_json(newattributes), **kwargs)
 
