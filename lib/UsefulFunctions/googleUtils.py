@@ -151,6 +151,38 @@ class GoogleDriveManager(object):
 
         return myresult
 
+class GoogleService(object):
+
+    connection = None
+
+    def __init__(self, service='drive', version='v3', permissions=['read'], autoconnect=True, *args, **kwargs):
+        super(GoogleService, self).__init__()
+
+        self.service = service
+        self.version = version
+        self.permissions = permissions
+
+        # Connect automatically
+        if autoconnect:
+            self.connect()
+
+    def connect(self):
+        self.connection = get_google_service(service=self.service, version=self.version, permissions=self.permissions)
+
+class GoogleCalendar(GoogleService):
+
+    def __init__(self, service='calendar', version='v3', calendarid='primary', *args, **kwargs):
+    
+        super(GoogleCalendar, self).__init__(service, version, *args, **kwargs)
+    
+        self.service = service
+        self.version = version
+        self.calendarid = calendarid
+
+    def get_events(self):
+        events = self.connection.events().list(calendarId=self.calendarid).execute()
+        return events.get('items', [])
+
 class GoogleDrive(object):
 
     connection = None
@@ -235,6 +267,18 @@ def get_google_credentials(service = 'drive', permissions = ['read']):
                 "write": ".file",
                 "read": ".readonly",
                 "list": ".metadata.readonly"
+                }
+        },
+        {
+            "service":"calendar",
+            "url":"https://www.googleapis.com/auth/calendar",
+            "perm_map": {
+                "all": "", # Read/write access to Calendars
+                "read": ".readonly", # Read access to Calendars
+                "events": ".file", # Read/write access to Events
+                "events.readonly": ".events.readonly", # Read access to Events
+                "settings.readonly": ".settings.readonly", # Read access to Settings
+                "addons.execute": ".addon.execute" # Run as a Calendar add-on
                 }
         }
     ]
