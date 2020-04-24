@@ -29,7 +29,7 @@ class FileManager(models.Manager):
             gd = gd_file.pop('gd')
 
             # Save file
-            gd_file = gd.create_file(**gd_file)
+            gd_file = gd.create_file(**gd_file) # Returns data as string
 
             fileattributes = gd_file.get('properties')
 
