@@ -131,6 +131,29 @@ class RewardManager(models.Manager):
 
 class ProgramManager(models.Manager):
 
+    def all(self):
+        return self.get_programs()
+    
+    def get(self, programname, schoolyear):
+        return get_data_pk(self, 'SP_DCPGetProgram(%s,%s,%s)', (programname, schoolyear, None))
+
+    def get_programs(self, programname=None, schoolyear=DEFAULT_SCHOOL_YEAR, programdetails=None):
+        return get_data(self, 'SP_DCPGetProgram(%s,%s,%s)', (programname, schoolyear, programdetails))
+
+    def save(self, myProgram, createflag=False):
+
+        # Create directory
+        if(createflag):
+            self.create(myProgram)
+
+        # Save data
+        return save_data('SP_DCPUpsertProgram', (
+            myProgram.programname,
+            myProgram.schoolyear,
+            myProgram.programdetails
+            )
+        )
+
     def delete(self, myProgram, repositoryflag, permanentflag, *args, **kwargs):
         return myProgram.gd.delete_file(
             fileid=myProgram.gd.lookup_fileid(gd_locator=myProgram.gd_locator,schoolyear=myProgram.schoolyear,programname=myProgram.programname),
@@ -169,15 +192,16 @@ class UserProgramManager(models.Manager):
         # Create upload directory if user program exists and no uploaddirectory exists
         if(uploaddirflag and not getattr(myuserprogram,'uploaddirectoryid',True)):
             myuserprogram.gd = myuserprogram.gd or GoogleDrive(permissions=['write'])
-            myuserprogram.uploaddirectoryid = self.create(myuserprogram,'upload')['gd_file']['id']
+            myuserprogram.uploaddirectoryid_gd = self.create(myuserprogram,'upload')['gd_file']['id']
         
         return myuserprogram
     
     def get_user_programs(self, userid=None, programname=None, schoolid=None, schoolyear=DEFAULT_SCHOOL_YEAR):
         return get_data(self, 'SP_DCPGetUserProgram(%s,%s,%s,%s)', (userid, programname, schoolid, schoolyear))
         
-    def save(self, myUserProgram):
-        return save_data('SP_DCPUpsertUserProgram', (
+    def save(self, myUserProgram, createflag=False):
+
+        myuserprogram = save_data('SP_DCPUpsertUserProgram', (
             myUserProgram.userid,
             myUserProgram.programname,
             myUserProgram.schoolid,
@@ -187,6 +211,17 @@ class UserProgramManager(models.Manager):
             myUserProgram.details,
             )
         )
+
+        # Create directory
+        if(createflag):
+            
+            # Get user program again (w/extra info)
+            myprogram = self.get(userid=myUserProgram.userid, programname=myUserProgram.programname, schoolid=myUserProgram.schoolid, schoolyear=myUserProgram.schoolyear)
+            myprogram.gd = myUserProgram.gd
+            
+            myprogram.create()
+            
+        return myuserprogram
         
     def delete(self, myUserProgram):
         return delete_data('SP_DCPDeleteUserProgram', (myUserProgram.userid, myUserProgram.programname, myUserProgram.schoolid, myUserProgram.schoolyear))
@@ -223,15 +258,17 @@ class UserProgramManager(models.Manager):
                 }
             }
             
-        # Build structure
-        newfile = gd.create_structure(gd_structure)
+            # Build structure
+            newfile = gd.create_structure(gd_structure)
         
-        # Update program with file id
-        myUserProgram.uploaddirectoryid = newfile['fileid']
-        myUserProgram.save()
+            # Update program with file id
+            myUserProgram.uploaddirectoryid = newfile['fileid']
+            myUserProgram.save()
+            
+            # Return newly created GoogleId
+            return newfile
         
-        # Return newly created GoogleId
-        return newfile
+        # TO-DO: Possibly check here for return value
 
 class Reward(MyModel):
 
@@ -289,6 +326,8 @@ class Program(MyModel):
 
     schoolyear = models.SmallIntegerField(primary_key=True,verbose_name='A' + mychr('n') + 'o escolar')
     programname = models.CharField(max_length=50)
+    programdetails = JSONField()
+    calendarid = models.CharField(max_length=250)
     gd_locator = 'program_base_year'
     
     def __init__(self,*args,**kwargs):
@@ -318,7 +357,7 @@ class Program(MyModel):
 class UserProgram(Program, get_user_model()):
 
     maxbudget = models.IntegerField(primary_key=True,verbose_name='Prespuesto m' + mychr('a') + 'ximo')
-    uploaddirectoryid = models.CharField(max_length=256) # Database "get" returns GoogleId string
+    uploaddirectoryid = models.IntegerField() # GoogleId returned from get()
     details = JSONField()
     
     # Derived fields
