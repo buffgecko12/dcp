@@ -44,6 +44,13 @@ class GoogleCalendar(GoogleService):
     def get_events(self):
         events = self.connection.events().list(calendarId=self.calendarid).execute()
         return events.get('items', [])
+    
+    def create_calendar(self, title, **kwargs): # available fields: description
+        calendar = {'summary':title, **kwargs}
+        self.connection.calendars().insert(body=calendar)
+
+    def get_calendar(self, calendarid='primary'):
+        self.connection.calendars().get(calendarId=calendarid)
 
 class GoogleDrive(GoogleService):
 
@@ -232,6 +239,7 @@ def get_google_credentials(service = 'drive', permissions = ['read']):
             "url":"https://www.googleapis.com/auth/calendar",
             "perm_map": {
                 "all": "", # Read/write access to Calendars
+                "write": "", # Same as "all" - read/write
                 "read": ".readonly", # Read access to Calendars
                 "events": ".file", # Read/write access to Events
                 "events.readonly": ".events.readonly", # Read access to Events
