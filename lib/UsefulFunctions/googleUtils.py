@@ -13,143 +13,7 @@ from googleapiclient.errors import HttpError
  # Import - Useful functions
 from lib.UsefulFunctions.dataUtils import get_matching_item, to_json
 from lib.UsefulFunctions.miscUtils import get_app_setting
-# import wakemeup.models.environment as env
 from wakemeup import models
-
-class GoogleDriveManager(object):
-
-    def connect(self, gd):
-        return get_google_service(service=gd.service, version=gd.version, permissions=gd.permissions)
-
-    def create_structure(self, gd, gd_structure):
-        try:
-
-            newfile = None
-
-            # Create top-level directory if it doesn't exist
-            for parent, children in gd_structure.items():
-                if isinstance(children, dict) and parent != 'metadata':
-        
-                    # Create parent file
-                    gd_file = {
-                        'gd': gd,
-                        'metadata': {
-                            'name': parent,
-                            'parents':[children.get('metadata', {}).get('parentid') or {}],
-                            'properties':[children.get('metadata') or {}]
-                        },
-                        'directoryflag':True
-                        }
-
-                    # Save file and store newly generated id
-                    newfile = models.environment.File().save(gd_file=gd_file)
-
-                    # Set parentid values for child directories
-                    for mychild in children:
-                        if mychild != 'metadata':
-
-                            currentchild = children[mychild]
-
-                            # Create metadata key if doesn't exist
-                            if not currentchild.get('metadata'):
-                                currentchild['metadata'] = {}
-
-                            # Set parentid
-                            currentchild['metadata']['parentid'] = newfile['gd_file']['id']
-
-                    # Call method for children
-                    self.create_structure(gd, children)
-
-            return newfile
-
-        except HttpError:
-            print('Fail - Error creating "' + str(parent) + '"' + str(sys.exc_info()[0]) + ")")
-            return {'fileid':None,'gd_file':None}
-
-    def get_file(self, gd, fileid, fields):
-
-        try:
-            return gd.connection.files().get(fileId=fileid, fields=fields).execute()
-
-        except (HttpError) as error:
-
-            message = "Error: "
-            status = error.resp.status
-
-            if status == 404:
-                message += "File not found"
-            else:
-                message += error
-
-            message +=  " ({})" .format(fileid)
-
-            print(message)
-
-    # Create directory / file
-    def create_file(self, gd, metadata, file_data, mimetype, fields, directoryflag, file_path=None, *args, **kwargs):
-
-        # Set file attributes
-        if directoryflag:
-            metadata['mimeType'] = 'application/vnd.google-apps.folder'
-            media_content = None
-        else:
-            media_content = get_gd_media_file(file=file_data, mimetype=mimetype, file_path=file_path)
-
-        return gd.connection.files().create(
-            body=metadata,
-            media_body = media_content,
-            fields=fields
-        ).execute()
-
-    def download_file(self, gd, fileid):
-
-        request = gd.connection.files().get_media(fileId=fileid)
-        stream = io.BytesIO()
-        downloader = MediaIoBaseDownload(stream, request)
-        done = False
-
-        # Retry if we received HttpError
-        try:
-            for retry in range(0, 5):
-                try:
-                    while done is False:
-                        status, done = downloader.next_chunk()
-                        print("Download %d%%." % int(status.progress() * 100))
-
-                    return stream.getvalue()
-
-                except (HTTPError) as error:
-                    return ('There was an API error: {}. Try # {} failed.'.format(error.response, retry))
-
-        except(HttpError) as error:
-            return ('There was an API error: {}' .format(error))
-
-    def update_file(self, gd, fileid, metadata):
-        try:
-            return gd.connection.files().update(fileId=fileid, body=metadata).execute()
-
-        except(HttpError) as error:
-            print('There was an API error: {}' .format(error))
-
-    def delete_file(self, gd, fileid, repositoryflag, permanentflag):
-
-        myresult = None
-
-        # Delete / recycle file
-        if not permanentflag:
-            myresult = gd.update_file(fileid=fileid, metadata={'trashed':True})
-        else:
-            try:
-                # Handle case where file does not exist
-                myresult = gd.connection.files().delete(fileId=fileid).execute()
-            except:
-                pass
-
-        # Delete from repository also
-        if repositoryflag:
-            models.environment.File(alternatefileid=fileid, filesource='GD').delete()
-
-        return myresult
 
 class GoogleService(object):
 
@@ -175,62 +39,156 @@ class GoogleCalendar(GoogleService):
     
         super(GoogleCalendar, self).__init__(service, version, *args, **kwargs)
     
-        self.service = service
-        self.version = version
         self.calendarid = calendarid
 
     def get_events(self):
         events = self.connection.events().list(calendarId=self.calendarid).execute()
         return events.get('items', [])
 
-class GoogleDrive(object):
+class GoogleDrive(GoogleService):
 
-    connection = None
-
-    def __init__(self, version = 'v3', permissions = ['read'], autoconnect=True, *args, **kwargs):
-        super(GoogleDrive, self).__init__(*args, **kwargs)
-
-        self.service = 'drive'
-        self.version = version
-        self.permissions = permissions
-
-        # Connect automatically
-        if autoconnect:
-            self.connect()
-
-    # Instances of class
-    objects = GoogleDriveManager()
-
-    def connect(self):
-        self.connection = self.objects.connect(self)
+    def __init__(self, service='drive', version='v3', *args, **kwargs):
+        super(GoogleDrive, self).__init__(service, version, *args, **kwargs)
 
     def create_structure(self, gd_structure):
-        return self.objects.create_structure(self, gd_structure)
+        
+        try:
+            newfile = None
 
+            # Create top-level directory if it doesn't exist
+            for parent, children in gd_structure.items():
+                if isinstance(children, dict) and parent != 'metadata':
+        
+                    # Create parent file
+                    gd_file = {
+                        'gd': self,
+                        'metadata': {
+                            'name': parent,
+                            'parents':[children.get('metadata', {}).get('parentid') or {}],
+                            'properties':[children.get('metadata') or {}]
+                        },
+                        'directoryflag':True
+                        }
+
+                    # Save file and store newly generated id
+                    newfile = models.environment.File().save(gd_file=gd_file)
+
+                    # Set parentid values for child directories
+                    for mychild in children:
+                        if mychild != 'metadata':
+
+                            currentchild = children[mychild]
+
+                            # Create metadata key if doesn't exist
+                            if not currentchild.get('metadata'):
+                                currentchild['metadata'] = {}
+
+                            # Set parentid
+                            currentchild['metadata']['parentid'] = newfile['gd_file']['id']
+
+                    # Call method for children
+                    self.create_structure(children)
+
+            return newfile
+
+        except HttpError:
+            print('Fail - Error creating "' + str(parent) + '"' + str(sys.exc_info()[0]) + ")")
+            return {'fileid':None,'gd_file':None}
+
+    # Create directory / file
     def create_file(self, 
                     metadata, 
                     file_data = None, 
                     mimetype = 'application/octet-stream', 
                     fields = ('name,fileExtension,size,mimeType,description,id,properties,webContentLink'), 
                     directoryflag = False, 
-                    file_path = None, 
-                    *args, **kwargs):
-        return self.objects.create_file(self, metadata, file_data, mimetype, fields, directoryflag, file_path)
+                    file_path = None):
+
+        # Set file attributes
+        if directoryflag:
+            metadata['mimeType'] = 'application/vnd.google-apps.folder'
+            media_content = None
+        else:
+            media_content = get_gd_media_file(file=file_data, mimetype=mimetype, file_path=file_path)
+
+        return self.connection.files().create(
+            body=metadata,
+            media_body=media_content,
+            fields=fields
+        ).execute()
 
     def get_file(self, fileid, fields=None):
-        return self.objects.get_file(self, fileid, fields)
+        
+        try:
+            return self.connection.files().get(fileId=fileid, fields=fields).execute()
+
+        except (HttpError) as error:
+
+            message = "Error: "
+            status = error.resp.status
+
+            if status == 404:
+                message += "File not found"
+            else:
+                message += error
+
+            message +=  " ({})" .format(fileid)
+
+            print(message)
 
     def get_file_weblink(self, fileid):
         return self.objects.get_file(self, fileid, fields='webContentLink')['webContentLink']
 
     def download_file(self, fileid):
-        return self.objects.download_file(self, fileid)
+
+        request = self.connection.files().get_media(fileId=fileid)
+        stream = io.BytesIO()
+        downloader = MediaIoBaseDownload(stream, request)
+        done = False
+
+        # Retry if we received HttpError
+        try:
+            for retry in range(0, 5):
+                try:
+                    while done is False:
+                        status, done = downloader.next_chunk()
+                        print("Download %d%%." % int(status.progress() * 100))
+
+                    return stream.getvalue()
+
+                except (HTTPError) as error:
+                    return ('There was an API error: {}. Try # {} failed.'.format(error.response, retry))
+
+        except(HttpError) as error:
+            return ('There was an API error: {}' .format(error))
 
     def update_file(self, fileid, metadata):
-        return self.objects.update_file(self, fileid, metadata)
+        
+        try:
+            return self.connection.files().update(fileId=fileid, body=metadata).execute()
+
+        except(HttpError) as error:
+            print('There was an API error: {}' .format(error))
 
     def delete_file(self, fileid, repositoryflag=False, permanentflag=False):
-        return self.objects.delete_file(self, fileid, repositoryflag, permanentflag)
+        
+        myresult = None
+
+        # Delete / recycle file
+        if not permanentflag:
+            myresult = self.update_file(fileid=fileid, metadata={'trashed':True})
+        else:
+            try:
+                # Handle case where file does not exist
+                myresult = self.connection.files().delete(fileId=fileid).execute()
+            except:
+                pass
+
+        # Delete from repository also
+        if repositoryflag:
+            models.environment.File(alternatefileid=fileid, filesource='GD').delete()
+
+        return myresult
 
     def lookup_fileid(self, gd_locator=None, programname=None, userid=None, fileattributes={}, **kwargs):
 
