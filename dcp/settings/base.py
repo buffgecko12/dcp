@@ -128,7 +128,7 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 
 # Google Application
 GOOGLE_APPLICATION_CREDENTIALS = config('GOOGLE_APPLICATION_CREDENTIALS')
-GOOGLE_DRIVE_USER = config('GOOGLE_DRIVE_USER')
+GOOGLE_ADMIN_USER = config('GOOGLE_ADMIN_USER')
 
 # Templates config
 CRISPY_TEMPLATE_PACK = 'bootstrap4' # Set default template for forms

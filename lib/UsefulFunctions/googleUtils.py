@@ -50,7 +50,8 @@ class GoogleCalendar(GoogleService):
         self.connection.calendars().insert(body=calendar)
 
     def get_calendar(self, calendarid='primary'):
-        self.connection.calendars().get(calendarId=calendarid)
+        return self.connection.calendarList().get(calendarId=calendarid).execute()
+#         return self.connection.calendars().get(calendarId=calendarid)
 
 class GoogleDrive(GoogleService):
 
@@ -267,7 +268,7 @@ def get_google_credentials(service = 'drive', permissions = ['read']):
     os.chdir(originalcwd)
 
     # Delegate control to admin Google user account
-    credentials = credentials.with_subject(get_app_setting('GOOGLE_DRIVE_USER'))
+    credentials = credentials.with_subject(get_app_setting('GOOGLE_ADMIN_USER'))
 
     return credentials
 
