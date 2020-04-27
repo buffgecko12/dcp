@@ -10,10 +10,37 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload, MediaIoBaseUpload, MediaIoBaseDownload
 from googleapiclient.errors import HttpError
 
- # Import - Useful functions
-from lib.UsefulFunctions.dataUtils import get_matching_item, to_json
+# Import - Useful functions
+from lib.UsefulFunctions.dataUtils import get_matching_item, to_json, convert_json_to_dict
 from lib.UsefulFunctions.miscUtils import get_app_setting
 from wakemeup import models
+
+# Wrapper function to handle API errors
+def google_api_safe_run(func):
+
+    def func_wrapper(*args, **kwargs):
+
+        try:
+            return func(*args, **kwargs)
+
+        except HttpError as error:
+
+            try:
+                errordetail = convert_json_to_dict(error.content)['error']
+            except:
+                errordetail = {}
+            
+            status = error.resp.status
+
+            if status == 404:
+                message = "Resource not found"
+            else:
+                message = errordetail.get('message') or error
+
+            print("API Error: {}".format(message))
+            return None
+
+    return func_wrapper
 
 class GoogleService(object):
 
@@ -35,24 +62,73 @@ class GoogleService(object):
 
 class GoogleCalendar(GoogleService):
 
-    def __init__(self, service='calendar', version='v3', calendarid='primary', *args, **kwargs):
-    
-        super(GoogleCalendar, self).__init__(service, version, *args, **kwargs)
-    
-        self.calendarid = calendarid
+    defaultcalendarid = 'primary'
 
+    def __init__(self, service='calendar', version='v3', *args, **kwargs):
+        super(GoogleCalendar, self).__init__(service, version, *args, **kwargs)
+
+    # CALENDAR METHODS
+    # Creates calendar and adds it to creating user's list
+    @google_api_safe_run
+    def create_calendar(self, title, **kwargs):
+        calendar = {'summary':title, **kwargs}
+        return self.connection.calendars().insert(body=calendar).execute()
+
+    # Add existing calendar to users's list
+    @google_api_safe_run
+    def add_calendar(self, calendarid, **kwargs):
+        calendar = {'id':calendarid, **kwargs}
+        return self.connection.calendarList().insert(body=calendar).execute()
+
+    # Get base calendar data including user-fields
+    @google_api_safe_run
+    def get_calendar(self, calendarid=defaultcalendarid, baseflag=False):
+
+        # Get user calendar
+        if not baseflag:
+            return self.connection.calendarList().get(calendarId=calendarid).execute()
+        
+        # Get base calendar
+        else:
+            return self.connection.calendars().get(calendarId=calendarid).execute()
+
+    @google_api_safe_run
+    def update_calendar(self, calendarid=defaultcalendarid, baseflag=False, **kwargs):
+        
+        # Update user calendar
+        if not baseflag:
+            return self.connection.calendarList().update(calendarId=calendarid, **kwargs).execute()
+        
+        # Update base calendar
+        else:
+            return self.connection.calendars().update(calendarId=calendarid, **kwargs).execute()
+
+    # Get calendar's on user's calendar list
+    @google_api_safe_run
+    def get_calendar_list(self, **kwargs):
+        return self.connection.calendarList().list(**kwargs).execute()
+
+    # Clear all calendar events
+    @google_api_safe_run
+    def clear_calendar(self, calendarid):
+        return self.connection.calendars().clear(calendarId=calendarid).execute()
+
+    @google_api_safe_run
+    def delete_calendar(self, calendarid, baseflag=False):
+        
+        # Delete calendar from user's list
+        if not baseflag:
+            return self.connection.calendarList().delete(calendarId=calendarid).execute()
+        
+        # Delete secondary calendar
+        else:
+            return self.connection.calendars().delete(calendarId=calendarid).execute()
+
+    # EVENT METHODS
     def get_events(self):
         events = self.connection.events().list(calendarId=self.calendarid).execute()
         return events.get('items', [])
     
-    def create_calendar(self, title, **kwargs): # available fields: description
-        calendar = {'summary':title, **kwargs}
-        self.connection.calendars().insert(body=calendar)
-
-    def get_calendar(self, calendarid='primary'):
-        return self.connection.calendarList().get(calendarId=calendarid).execute()
-#         return self.connection.calendars().get(calendarId=calendarid)
-
 class GoogleDrive(GoogleService):
 
     def __init__(self, service='drive', version='v3', *args, **kwargs):
@@ -125,28 +201,14 @@ class GoogleDrive(GoogleService):
             fields=fields
         ).execute()
 
+    @google_api_safe_run
     def get_file(self, fileid, fields=None):
-        
-        try:
-            return self.connection.files().get(fileId=fileid, fields=fields).execute()
-
-        except (HttpError) as error:
-
-            message = "Error: "
-            status = error.resp.status
-
-            if status == 404:
-                message += "File not found"
-            else:
-                message += error
-
-            message +=  " ({})" .format(fileid)
-
-            print(message)
+        return self.connection.files().get(fileId=fileid, fields=fields).execute()
 
     def get_file_weblink(self, fileid):
         return self.objects.get_file(self, fileid, fields='webContentLink')['webContentLink']
 
+    @google_api_safe_run
     def download_file(self, fileid):
 
         request = self.connection.files().get_media(fileId=fileid)
@@ -154,29 +216,21 @@ class GoogleDrive(GoogleService):
         downloader = MediaIoBaseDownload(stream, request)
         done = False
 
-        # Retry if we received HttpError
-        try:
-            for retry in range(0, 5):
-                try:
-                    while done is False:
-                        status, done = downloader.next_chunk()
-                        print("Download %d%%." % int(status.progress() * 100))
+        # Retry if we received HTTPError
+        for retry in range(0, 5):
+            try:
+                while done is False:
+                    status, done = downloader.next_chunk()
+                    print("Download %d%%." % int(status.progress() * 100))
 
-                    return stream.getvalue()
+                return stream.getvalue()
 
-                except (HTTPError) as error:
-                    return ('There was an API error: {}. Try # {} failed.'.format(error.response, retry))
+            except (HTTPError) as error:
+                return ('API error: {}. Try # {} failed.'.format(error.response, retry))
 
-        except(HttpError) as error:
-            return ('There was an API error: {}' .format(error))
-
+    @google_api_safe_run
     def update_file(self, fileid, metadata):
-        
-        try:
-            return self.connection.files().update(fileId=fileid, body=metadata).execute()
-
-        except(HttpError) as error:
-            print('There was an API error: {}' .format(error))
+        return self.connection.files().update(fileId=fileid, body=metadata).execute()
 
     def delete_file(self, fileid, repositoryflag=False, permanentflag=False):
         
