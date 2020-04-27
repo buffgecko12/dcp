@@ -39,7 +39,7 @@ class testProgram(unittest.TestCase):
             self.assertTrue(gdfile)
 
     def testGetProgram(self):
-        self.assertTrue(Program.objects.get(programname=self.myprogram1.programname, schoolyear=self.myprogram1.schoolyear))
+        self.assertTrue(Program.objects.get(programname=self.myprogram1.programname, schoolid=self.myprogram1.schoolid, schoolyear=self.myprogram1.schoolyear))
         self.assertTrue(Program.objects.get_programs())
         self.assertTrue(Program.objects.all())
 
@@ -50,7 +50,7 @@ class testProgram(unittest.TestCase):
         self.myprogram1.save()
 
         # Verify        
-        self.assertEqual(Program.objects.get(programname=self.myprogram1.programname, schoolyear=self.myprogram1.schoolyear).calendarid, 'someid')
+        self.assertEqual(Program.objects.get(programname=self.myprogram1.programname, schoolid=self.myprogram1.schoolid, schoolyear=self.myprogram1.schoolyear).calendarid, 'someid')
 
     def testDeleteProgram(self):
 
@@ -101,8 +101,8 @@ class testProgram(unittest.TestCase):
         self.assertTrue(UserProgram.objects.get_user_programs(userid=self.myuser_teacher.userid, programname=programname))
         
         # Delete and verify
-        UserProgram(userid=self.myuser_teacher.userid, programname=programname).delete()
-        self.assertFalse(UserProgram.objects.get_user_programs(userid=self.myuser_teacher.userid, programname=programname)) # New program should be gone
+        UserProgram(userid=self.myuser_teacher.userid, schoolid=self.myuser_teacher.schoolid, programname=programname).delete()
+        self.assertFalse(UserProgram.objects.get_user_programs(userid=self.myuser_teacher.userid, schoolid=self.myuser_teacher.schoolid, programname=programname)) # New program should be gone
         self.assertTrue(UserProgram.objects.get_user_programs(userid=self.myuser_teacher.userid)) # Other programs should still remain
 
     def tearDown(self):

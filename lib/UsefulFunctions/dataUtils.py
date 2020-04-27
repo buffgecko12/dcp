@@ -89,3 +89,15 @@ def generate_options(items, idfield, displayfield, removeduplicatesflag=True):
 
 def to_json(mydict):
     return json.dumps(mydict)
+
+def read_json(myjson, stringflag=True):
+    if not stringflag:
+        return json.load(myjson)
+    else:
+        return json.loads(myjson)
+
+def convert_bytes_to_string(mybytes):
+    return mybytes.decode('utf8').replace("'", "\"")
+
+def convert_json_to_dict(myjson):
+    return read_json(convert_bytes_to_string(myjson))

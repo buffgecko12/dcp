@@ -239,10 +239,11 @@ def create_reward(schoolyear=None,rewarddisplayname='Some reward',rewardvalue=10
     myreward.rewardid=myreward.save()
     return myreward
 
-def create_program(schoolyear, programname='test_program', programdetails=None, gd=None, createflag=True):
+def create_program(schoolyear, schoolid=0, programname='test_program', programdetails=None, gd=None, createflag=True):
     myprogram = Program(
         programname=programname,
         schoolyear=schoolyear,
+        schoolid=schoolid,
         programdetails=programdetails,
         gd=gd,
         createflag=createflag

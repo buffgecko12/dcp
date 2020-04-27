@@ -43,6 +43,7 @@ class FileManager(models.Manager):
             myFile.alternatefileid = gd_file.get('id')
             myFile.fileattributes = to_json(fileattributes)
             myFile.fileURL = myFile.fileURL or gd_file.get('webContentLink')
+            myFile.schoolid = myFile.schoolid or fileattributes.get('schoolid') # Give priority to original value
             myFile.schoolyear = myFile.schoolyear or fileattributes.get('schoolyear') # Give priority to original value
 
         # Save to repository

@@ -134,11 +134,11 @@ class ProgramManager(models.Manager):
     def all(self):
         return self.get_programs()
     
-    def get(self, programname, schoolyear):
-        return get_data_pk(self, 'SP_DCPGetProgram(%s,%s,%s)', (programname, schoolyear, None))
+    def get(self, programname, schoolid, schoolyear):
+        return get_data_pk(self, 'SP_DCPGetProgram(%s,%s,%s,%s)', (programname, schoolid, schoolyear, None))
 
-    def get_programs(self, programname=None, schoolyear=DEFAULT_SCHOOL_YEAR, programdetails=None):
-        return get_data(self, 'SP_DCPGetProgram(%s,%s,%s)', (programname, schoolyear, programdetails))
+    def get_programs(self, programname=None, schoolid=None, schoolyear=DEFAULT_SCHOOL_YEAR, programdetails=None):
+        return get_data(self, 'SP_DCPGetProgram(%s,%s,%s,%s)', (programname, schoolid, schoolyear, programdetails))
 
     def save(self, myProgram, createflag=False):
 
@@ -149,6 +149,7 @@ class ProgramManager(models.Manager):
         # Save data
         return save_data('SP_DCPUpsertProgram', (
             myProgram.programname,
+            myProgram.schoolid,
             myProgram.schoolyear,
             myProgram.programdetails
             )
@@ -156,9 +157,9 @@ class ProgramManager(models.Manager):
 
     def delete(self, myProgram, repositoryflag, permanentflag, *args, **kwargs):
         return myProgram.gd.delete_file(
-            fileid=myProgram.gd.lookup_fileid(gd_locator=myProgram.gd_locator,schoolyear=myProgram.schoolyear,programname=myProgram.programname),
-            repositoryflag=repositoryflag, # Delete from repository
-            permanentflag=permanentflag # Permanently delete from GD
+            fileid = myProgram.gd.lookup_fileid(gd_locator=myProgram.gd_locator, schoolid=myProgram.schoolid, schoolyear=myProgram.schoolyear, programname=myProgram.programname),
+            repositoryflag = repositoryflag, # Delete from repository
+            permanentflag = permanentflag # Permanently delete from GD
             )
 
     def create(self, myProgram, *args, **kwargs):
@@ -172,6 +173,7 @@ class ProgramManager(models.Manager):
                     'parentid':myProgram.gd.lookup_fileid(gd_locator='program_base',programname=myProgram.programname),
                     'description':'Google Drive - ' + myProgram.programname + ' base directory (' + str(myProgram.schoolyear) + ')',
                     'gd_locator':myProgram.gd_locator,
+                    'schoolid':myProgram.schoolid,
                     'schoolyear':myProgram.schoolyear,
                     'programname':myProgram.programname
                 }
@@ -325,6 +327,7 @@ class ContractPartyReward(ContractParty, Reward):
 class Program(MyModel):
 
     schoolyear = models.SmallIntegerField(primary_key=True,verbose_name='A' + mychr('n') + 'o escolar')
+    schoolid = models.IntegerField()
     programname = models.CharField(max_length=50)
     programdetails = JSONField()
     calendarid = models.CharField(max_length=250)
@@ -342,6 +345,9 @@ class Program(MyModel):
             
         super(Program, self).__init__(*args,**kwargs)
         
+        # Default to 0 (program-level) if not specified
+        self.schoolid = self.schoolid or kwargs.get('schoolid') or 0
+        
         # Create google directory
         if(createflag):
             self.create()
@@ -357,7 +363,7 @@ class Program(MyModel):
 class UserProgram(Program, get_user_model()):
 
     maxbudget = models.IntegerField(primary_key=True,verbose_name='Prespuesto m' + mychr('a') + 'ximo')
-    uploaddirectoryid = models.IntegerField() # GoogleId returned from get()
+    uploaddirectoryid = models.IntegerField()
     details = JSONField()
     
     # Derived fields
