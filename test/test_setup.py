@@ -239,32 +239,33 @@ def create_reward(schoolyear=None,rewarddisplayname='Some reward',rewardvalue=10
     myreward.rewardid=myreward.save()
     return myreward
 
-def create_program(schoolyear, schoolid=0, programname='test_program', programdetails=None, gd=None, createflag=True):
+def create_program(schoolyear, schoolid=0, programname='test_program', programdetails=None, gd=None, createoptions={'calendar':True,'drive':True}):
     myprogram = Program(
         programname=programname,
-        schoolyear=schoolyear,
         schoolid=schoolid,
+        schoolyear=schoolyear,
         programdetails=programdetails,
         gd=gd,
-        createflag=createflag
+        createoptions=createoptions
     )
     
     myprogram.save()
     return myprogram
 
-def create_user_program(userid,programname,schoolid,schoolyear,maxbudget=400000,uploaddirectoryid=None,details=None,uploaddirflag=False,createflag=True,gd=None):
+def create_user_program(userid,programname,schoolid,schoolyear,maxbudget=400000,uploaddirectoryid=None,details=None,uploaddirflag=False,createoptions=None,gd=None):
     myuserprogram = UserProgram(
-        gd=gd,
         userid=userid,
         programname=programname,
         schoolid=schoolid,
         schoolyear=schoolyear,
         maxbudget=maxbudget,
         uploaddirectoryid=uploaddirectoryid,
-        details=details
+        details=details,
+        gd=gd,
+        createoptions=createoptions
     )
     
-    myuserprogram.save(createflag=createflag)
+    myuserprogram.save()
     
     # Refresh with extra data
     return UserProgram.objects.get(userid=userid,programname=programname,schoolid=schoolid,schoolyear=schoolyear,uploaddirflag=uploaddirflag)

@@ -140,11 +140,15 @@ class ProgramManager(models.Manager):
     def get_programs(self, programname=None, schoolid=None, schoolyear=DEFAULT_SCHOOL_YEAR, programdetails=None):
         return get_data(self, 'SP_DCPGetProgram(%s,%s,%s,%s)', (programname, schoolid, schoolyear, programdetails))
 
-    def save(self, myProgram, createflag=False):
+    def save(self, myProgram):
 
-        # Create directory
-        if(createflag):
-            self.create(myProgram)
+#         # Create structures
+#         if(createoptions):
+#             if(createoptions.get('drive')):
+#                 self.create_drive(myProgram)
+# 
+#             if(createoptions.get('calendar')):
+#                 self.create_calendar(myProgram)
 
         # Save data
         return save_data('SP_DCPUpsertProgram', (
@@ -162,7 +166,7 @@ class ProgramManager(models.Manager):
             permanentflag = permanentflag # Permanently delete from GD
             )
 
-    def create(self, myProgram, *args, **kwargs):
+    def create_drive(self, myProgram, *args, **kwargs):
         
         # Define directory structure
         gd_structure = {
@@ -183,6 +187,20 @@ class ProgramManager(models.Manager):
         # Build structure
         return myProgram.gd.create_structure(gd_structure)
 
+    def create_calendar(self, myProgram, *args, **kwargs):
+
+        myschool = School.objects.get(schoolid=myProgram.schoolid)
+
+        # schoolyear, schoolid, programname
+        calendarname = "{0}{1}{2}".format(
+            str(myProgram.schoolyear) + ' ' if myProgram.schoolyear else '',
+            myProgram.programname,
+            ' (' + myschool.schoolabreviation + ')' if (myschool.schoolabbreviation and myschool.schoolid) else ''
+        )
+        
+        return None
+        return myProgram.gd.create_calendar(title=calendarname, description='Some description')
+
 class UserProgramManager(models.Manager):
     def all(self):
         return self.get_user_programs()
@@ -194,14 +212,14 @@ class UserProgramManager(models.Manager):
         # Create upload directory if user program exists and no uploaddirectory exists
         if(uploaddirflag and not getattr(myuserprogram,'uploaddirectoryid',True)):
             myuserprogram.gd = myuserprogram.gd or GoogleDrive(permissions=['write'])
-            myuserprogram.uploaddirectoryid_gd = self.create(myuserprogram,'upload')['gd_file']['id']
+            myuserprogram.uploaddirectoryid_gd = self.create_drive(myuserprogram,'upload')['gd_file']['id']
         
         return myuserprogram
     
     def get_user_programs(self, userid=None, programname=None, schoolid=None, schoolyear=DEFAULT_SCHOOL_YEAR):
         return get_data(self, 'SP_DCPGetUserProgram(%s,%s,%s,%s)', (userid, programname, schoolid, schoolyear))
         
-    def save(self, myUserProgram, createflag=False):
+    def save(self, myUserProgram):
 
         myuserprogram = save_data('SP_DCPUpsertUserProgram', (
             myUserProgram.userid,
@@ -214,14 +232,18 @@ class UserProgramManager(models.Manager):
             )
         )
 
-        # Create directory
-        if(createflag):
-            
-            # Get user program again (w/extra info)
-            myprogram = self.get(userid=myUserProgram.userid, programname=myUserProgram.programname, schoolid=myUserProgram.schoolid, schoolyear=myUserProgram.schoolyear)
-            myprogram.gd = myUserProgram.gd
-            
-            myprogram.create()
+#         # Create structures
+#         if(createoptions):
+#             if(createoptions.get('drive')):
+#                 
+#                 # Get user program again (w/extra info)
+#                 myprogram = self.get(userid=myUserProgram.userid, programname=myUserProgram.programname, schoolid=myUserProgram.schoolid, schoolyear=myUserProgram.schoolyear)
+#                 myprogram.gd = myUserProgram.gd
+#                 
+#                 myprogram.create_drive()
+# 
+#             if(createoptions.get('calendar')):
+#                 myprogram.create_calendar()
             
         return myuserprogram
         
@@ -235,7 +257,7 @@ class UserProgramManager(models.Manager):
             displayfield = displayfield or idfield
         )
         
-    def create(self, myUserProgram, directorytype):
+    def create_drive(self, myUserProgram, directorytype):
 
         gd = myUserProgram.gd
         
@@ -244,7 +266,9 @@ class UserProgramManager(models.Manager):
             mydir = gd.get_gd_file(gd_locator='program_uploads_user', programname=myUserProgram.programname, userid=myUserProgram.userid, schoolyear=myUserProgram.schoolyear)
         
         if(not mydir):
-            dirname = myUserProgram.schoolabbreviation + ' - ' + myUserProgram.userdisplayname
+            # Get user info
+            myuser = get_user_model().objects.get_user(userid=myUserProgram.userid)
+            dirname = myuser.schoolabbreviation + ' - ' + myuser.userdisplayname
 
             # Define directory structure
             gd_structure = {
@@ -336,7 +360,7 @@ class Program(MyModel):
     def __init__(self,*args,**kwargs):
         
         # Extract extra parameters (if any)
-        createflag = kwargs.pop('createflag',None)
+        createoptions = kwargs.pop('createoptions',None) #or {'drive':True, 'calendar':True}
         self.gd = kwargs.pop('gd',None)
         
         # Extract "gd" if defined
@@ -349,13 +373,21 @@ class Program(MyModel):
         self.schoolid = self.schoolid or kwargs.get('schoolid') or 0
         
         # Create google directory
-        if(createflag):
-            self.create()
+        if(createoptions):
+            if(createoptions.get('drive')):
+                self.create_drive()
+                
+            if(createoptions.get('calendar')):
+                self.create_calendar()
 
     objects = ProgramManager()
 
-    def create(self, *args, **kwargs):
-        return Program.objects.create(self, *args, **kwargs)
+    def create_drive(self, *args, **kwargs):
+        return Program.objects.create_drive(self, *args, **kwargs)
+    
+    def create_calendar(self, *args, **kwargs):
+        return None
+        return Program.objects.create_calendar(self, *args, **kwargs)
     
     def delete(self, repositoryflag=True, permanentflag=False, *args, **kwargs):
         return Program.objects.delete(self, repositoryflag, permanentflag, *args, **kwargs)
@@ -379,8 +411,8 @@ class UserProgram(Program, get_user_model()):
 
     objects = UserProgramManager()
 
-    def create(self, directorytype='upload'):
-        return UserProgram.objects.create(self, directorytype)
+    def create_drive(self, directorytype='upload'):
+        return UserProgram.objects.create_drive(self, directorytype)
     
     def delete(self, *args, **kwargs):
         return UserProgram.objects.delete(self, *args, **kwargs)

@@ -24,9 +24,8 @@ class testProgram(unittest.TestCase):
         cls.myuser_other = create_user(username='user2', usertype='OT',schoolid=cls.myschool.schoolid)
         
         # Create user programs
-#         for (myuser, myschoolyear) in itertools.product([cls.myuser_other], [2019]):
         for (myuser, myschoolyear) in itertools.product([cls.myuser_teacher, cls.myuser_other], [2019, DEFAULT_SCHOOL_YEAR]):
-            create_user_program(gd=cls.gd, userid=myuser.userid, schoolyear=myschoolyear, schoolid=myuser.schoolid, programname=cls.myprogram1.programname, createflag=True) # TO-DO: Update for multiple schoolid values
+            create_user_program(gd=cls.gd, userid=myuser.userid, schoolyear=myschoolyear, schoolid=myuser.schoolid, programname=cls.myprogram1.programname, createoptions={'drive':True}) # TO-DO: Update for multiple schoolid values
         
     def setUp(self):
         pass
