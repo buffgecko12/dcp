@@ -48,7 +48,7 @@ def refresh(myobject):
     if(objectname == 'teacherclass'):
         kwargs = {"teacheruserid":myobject.teacheruserid,"classid":myobject.classid}
     if(objectname == 'program'):
-        kwargs = {"programname":myobject.programname,"schoolyear":myobject.schoolyear}
+        kwargs = {"programname":myobject.programname,"schoolyear":myobject.schoolyear,"schoolid":myobject.schoolid}
     if(objectname == 'userprogram'):
         kwargs = {"userid":myobject.userid,"schoolyear":myobject.schoolyear,"programname":myobject.programname, "schoolid":myobject.schoolid}
     if(objectname == 'role'):
@@ -239,13 +239,14 @@ def create_reward(schoolyear=None,rewarddisplayname='Some reward',rewardvalue=10
     myreward.rewardid=myreward.save()
     return myreward
 
-def create_program(schoolyear, schoolid=0, programname='test_program', programdetails=None, gd=None, createoptions={'calendar':True,'drive':True}):
+def create_program(schoolyear, schoolid=0, programname='test_program', programdetails=None, gd=None, gc=None, createoptions={'calendar':True,'drive':True}):
     myprogram = Program(
         programname=programname,
         schoolid=schoolid,
         schoolyear=schoolyear,
         programdetails=programdetails,
         gd=gd,
+        gc=gc,
         createoptions=createoptions
     )
     

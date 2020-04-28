@@ -12,26 +12,28 @@ class testProgram(unittest.TestCase):
 
         # Google Drive
         cls.gd = GoogleDrive(permissions=['write'])
+        cls.gc = GoogleCalendar(permissions=['write'])
 
+        # Create school
         cls.myschool = create_school()
-        
-        # Create program
-        cls.myprogram1 = create_program(schoolyear=DEFAULT_SCHOOL_YEAR, gd=GoogleDrive(permissions=['write']))
-        cls.myprogram2 = create_program(schoolyear=2019, gd="default")
-        
+
+        # Define programs at each school
+        cls.myprogram1 = create_program(schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=cls.myschool.schoolid, gd=cls.gd, gc=cls.gc)
+        cls.myprogram2 = create_program(schoolyear=2019, schoolid=cls.myschool.schoolid, gd="default", gc="default")
+ 
         # Create users
         cls.myuser_teacher = create_user(usertype='TR', schoolid=cls.myschool.schoolid)
         cls.myuser_other = create_user(username='user2', usertype='OT',schoolid=cls.myschool.schoolid)
-        
+
         # Create user programs
         for (myuser, myschoolyear) in itertools.product([cls.myuser_teacher, cls.myuser_other], [2019, DEFAULT_SCHOOL_YEAR]):
             create_user_program(gd=cls.gd, userid=myuser.userid, schoolyear=myschoolyear, schoolid=myuser.schoolid, programname=cls.myprogram1.programname, createoptions={'drive':True}) # TO-DO: Update for multiple schoolid values
-        
+
     def setUp(self):
         pass
     
     def testCreateProgram(self):
-        
+
         # Check directories are created
         for myprogram in (self.myprogram1, self.myprogram2):
             gdfile = myprogram.gd.get_gd_file(gd_locator='program_base_year', schoolyear=myprogram.schoolyear, programname=myprogram.programname)
@@ -45,7 +47,7 @@ class testProgram(unittest.TestCase):
     def testUpdateProgram(self):
         
         # Save new values
-        self.myprogram1.programdetails = to_json({'google':{'calendar':{'id':'someid'}}})
+        self.myprogram1.programdetails = {'google':{'calendar':{'id':'someid'}}}
         self.myprogram1.save()
 
         # Verify        
@@ -53,9 +55,15 @@ class testProgram(unittest.TestCase):
 
     def testDeleteProgram(self):
 
-        newprogram = create_program(programname='new_program', schoolyear=2018, gd="default") # Default GD
-        newprogram.delete(permanentflag=True) # Permanently delete from GD
-        self.assertFalse(newprogram.gd.get_gd_file(gd_locator='program_base_year', schoolyear=newprogram.schoolyear, programname=newprogram.programname))
+        newprogram = create_program(programname='new_program', schoolyear=2018, schoolid=self.myschool.schoolid, gd=self.gd, gc=self.gc) # Default GD
+        newcalendarid = refresh(newprogram).programdetails['google']['calendar']['id']
+        
+        newprogram.delete(deleteoptions={'repository':True,'drive':True,'calendar':True}) # Permanently delete from GD
+        
+        # Verify files / objects are gone (program, drive, calendar)
+        self.assertFalse(Program.objects.get(programname='new_program', schoolyear=2018, schoolid=newprogram.schoolid))
+        self.assertFalse(newprogram.gd.get_gd_file(gd_locator='program_base_year', schoolyear=newprogram.schoolyear, programname=newprogram.programname, schoolid=newprogram.schoolid))
+        self.assertFalse(newprogram.gc.get_calendar(calendarid=newcalendarid))
 
     def testCreateUserProgram(self):
         gdfile = self.myprogram1.gd.get_gd_file(gd_locator='program_uploads_user', schoolyear=self.myprogram1.schoolyear, programname=self.myprogram1.programname, userid=self.myuser_teacher.userid)
@@ -112,12 +120,12 @@ class testProgram(unittest.TestCase):
         
         UserProgram(userid=cls.myuser_teacher.userid, programname=cls.myprogram1.programname).delete()
         UserProgram(userid=cls.myuser_other.userid, programname=cls.myprogram1.programname).delete()
-
+ 
         cls.myuser_teacher.delete()
         cls.myuser_other.delete()
-
-        cls.myprogram1.delete(permanentflag=True)
-        cls.myprogram2.delete(permanentflag=True)
+ 
+        cls.myprogram1.delete(deleteoptions={'repository':True,'drive':True,'calendar':True})
+        cls.myprogram2.delete(deleteoptions={'repository':True,'drive':True,'calendar':True})
 
         delete_school(cls.myschool)
         

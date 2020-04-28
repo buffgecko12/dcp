@@ -9,8 +9,8 @@ from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.miscUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
 from lib.UsefulFunctions.emailUtils import send_email
-from lib.UsefulFunctions.googleUtils import GoogleDrive
-from lib.UsefulFunctions.dataUtils import generate_options
+from lib.UsefulFunctions.googleUtils import GoogleDrive, GoogleCalendar
+from lib.UsefulFunctions.dataUtils import generate_options, to_json
 
 DEFAULT_SCHOOL_YEAR = get_school_year()
 
@@ -155,16 +155,32 @@ class ProgramManager(models.Manager):
             myProgram.programname,
             myProgram.schoolid,
             myProgram.schoolyear,
-            myProgram.programdetails
+            to_json(myProgram.programdetails)
             )
         )
 
-    def delete(self, myProgram, repositoryflag, permanentflag, *args, **kwargs):
-        return myProgram.gd.delete_file(
-            fileid = myProgram.gd.lookup_fileid(gd_locator=myProgram.gd_locator, schoolid=myProgram.schoolid, schoolyear=myProgram.schoolyear, programname=myProgram.programname),
-            repositoryflag = repositoryflag, # Delete from repository
-            permanentflag = permanentflag # Permanently delete from GD
+    def delete(self, myProgram, deleteoptions, *args, **kwargs):
+        
+        # Delete Calendar
+        if(deleteoptions.get('calendar')):
+            if not myProgram.programdetails:
+                myprogram = myProgram.objects.get(programname=myProgram.programname, schoolid=myProgram.schoolid, schoolyear=myProgram.schoolyear)
+            else:
+                myprogram = myProgram
+
+            myProgram.gc.delete_calendar(
+                calendarid=myprogram.programdetails['google']['calendar']['id'],
+                baseflag=True
             )
+
+        # Delete files
+        myProgram.gd.delete_file(
+            fileid = myProgram.gd.lookup_fileid(gd_locator=myProgram.gd_locator, schoolid=myProgram.schoolid, schoolyear=myProgram.schoolyear, programname=myProgram.programname),
+            deleteoptions=deleteoptions
+        )
+
+        # Delete program
+        return delete_data('SP_DCPDeleteProgram', (myProgram.programname, myProgram.schoolid, myProgram.schoolyear))
 
     def create_drive(self, myProgram, *args, **kwargs):
         
@@ -193,13 +209,12 @@ class ProgramManager(models.Manager):
 
         # schoolyear, schoolid, programname
         calendarname = "{0}{1}{2}".format(
-            str(myProgram.schoolyear) + ' ' if myProgram.schoolyear else '',
+            str(myProgram.schoolyear) + ' - ' if myProgram.schoolyear else '',
             myProgram.programname,
-            ' (' + myschool.schoolabreviation + ')' if (myschool.schoolabbreviation and myschool.schoolid) else ''
+            ' (' + myschool.schoolabbreviation + ')' if (myschool.schoolabbreviation and myschool.schoolid) else ''
         )
-        
-        return None
-        return myProgram.gd.create_calendar(title=calendarname, description='Some description')
+
+        return myProgram.gc.create_calendar(title=calendarname, description='')
 
 class UserProgramManager(models.Manager):
     def all(self):
@@ -360,12 +375,17 @@ class Program(MyModel):
     def __init__(self,*args,**kwargs):
         
         # Extract extra parameters (if any)
-        createoptions = kwargs.pop('createoptions',None) #or {'drive':True, 'calendar':True}
-        self.gd = kwargs.pop('gd',None)
+        createoptions = kwargs.pop('createoptions', None)
+        self.gd = kwargs.pop('gd', None)
+        self.gc = kwargs.pop('gc', None)
         
         # Extract "gd" if defined
         if(self.gd == "default"):
             self.gd = GoogleDrive(permissions=['write']) # Use GD if provided, otherwise get default
+            
+        # Extract "gc" if defined
+        if(self.gc == "default"):
+            self.gc = GoogleCalendar(permissions=['write']) # Use GC if provided, otherwise get default
             
         super(Program, self).__init__(*args,**kwargs)
         
@@ -374,11 +394,17 @@ class Program(MyModel):
         
         # Create google directory
         if(createoptions):
+            self.result = {}
+            
             if(createoptions.get('drive')):
-                self.create_drive()
+                self.result['drive'] = self.create_drive()
                 
             if(createoptions.get('calendar')):
-                self.create_calendar()
+                mycalendar = self.create_calendar()
+
+                # Store / return calendar info                
+                self.result['calendar'] = mycalendar
+                self.programdetails = {'google':{'calendar':{'id':mycalendar['id']}}} # TO-DO: Watch out here, in case overwriting provided programdetails
 
     objects = ProgramManager()
 
@@ -386,11 +412,10 @@ class Program(MyModel):
         return Program.objects.create_drive(self, *args, **kwargs)
     
     def create_calendar(self, *args, **kwargs):
-        return None
         return Program.objects.create_calendar(self, *args, **kwargs)
     
-    def delete(self, repositoryflag=True, permanentflag=False, *args, **kwargs):
-        return Program.objects.delete(self, repositoryflag, permanentflag, *args, **kwargs)
+    def delete(self, deleteoptions={'repository':True, 'drive':False, 'calendar':False}, *args, **kwargs):
+        return Program.objects.delete(self, deleteoptions, *args, **kwargs)
 
 class UserProgram(Program, get_user_model()):
 
