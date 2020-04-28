@@ -232,12 +232,12 @@ class GoogleDrive(GoogleService):
     def update_file(self, fileid, metadata):
         return self.connection.files().update(fileId=fileid, body=metadata).execute()
 
-    def delete_file(self, fileid, repositoryflag=False, permanentflag=False):
+    def delete_file(self, fileid, deleteoptions={'repository':False, 'drive':False}):
         
         myresult = None
 
         # Delete / recycle file
-        if not permanentflag:
+        if not deleteoptions.get('drive'):
             myresult = self.update_file(fileid=fileid, metadata={'trashed':True})
         else:
             try:
@@ -247,7 +247,7 @@ class GoogleDrive(GoogleService):
                 pass
 
         # Delete from repository also
-        if repositoryflag:
+        if deleteoptions.get('repository'):
             models.environment.File(alternatefileid=fileid, filesource='GD').delete()
 
         return myresult

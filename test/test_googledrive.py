@@ -56,7 +56,7 @@ class testGoogleDrive(unittest.TestCase):
         self.assertTrue(self.gd_write.get_file(fileid=myfileid,fields=('trashed'))['trashed'])
         
         # Permanently delete file and verify
-        self.gd_write.delete_file(fileid=myfileid, permanentflag=True)
+        self.gd_write.delete_file(fileid=myfileid, deleteoptions={'repository':True, 'drive':True})
         self.assertFalse(self.gd_write.get_file(fileid=myfileid))
         
     def testCreateStructure(self):

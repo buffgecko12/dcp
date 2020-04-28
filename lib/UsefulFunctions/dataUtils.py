@@ -1,6 +1,7 @@
 import ast
 import collections.abc
 import json
+import itertools
 
 def convert_array_string_to_int_old(stringarray):
     try:
@@ -101,3 +102,6 @@ def convert_bytes_to_string(mybytes):
 
 def convert_json_to_dict(myjson):
     return read_json(convert_bytes_to_string(myjson))
+
+def multiply_lists(*args):
+    return itertools.product(*args)
