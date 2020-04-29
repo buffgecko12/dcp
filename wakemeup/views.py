@@ -9,8 +9,9 @@ from django.forms.models import formset_factory
 from lib.UsefulFunctions.imgUtils import renderImageFromDb
 from lib.UsefulFunctions.dateUtils import *
 from lib.UsefulFunctions.dataUtils import *
-from lib.UsefulFunctions.stringUtils import *
 from lib.UsefulFunctions.httpUtils import *
+from lib.UsefulFunctions.miscUtils import get_school_year
+from lib.UsefulFunctions.stringUtils import *
 from lib.UsefulFunctions.fileUtils import get_file_name_info
 from lib.UsefulFunctions.googleUtils import GoogleDrive
 
@@ -25,6 +26,8 @@ from wakemeup.models.program import *
 from wakemeup.models.environment import *
 from user.models.user import UserReputationEvent, UserBadge, UserNotification
 from user.models.authorization import *
+
+DEFAULT_SCHOOL_YEAR = get_school_year()
 
 # Check authentication (logged in)
 def check_authentication(view):
@@ -320,7 +323,9 @@ def myaccount(request):
     return render(request, 'wakemeup/myaccount.html', context)
 
 def list_calendar(request):
-    return render(request, 'wakemeup/calendar/index.html', {})
+    
+    userprogram = UserProgram.objects.get(programname='incentive', userid=request.user.userid, schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=request.user.schoolid) # TO-DO: Fix for variables (schoolid, schoolyear, programname)
+    return render(request, 'wakemeup/calendar/index.html', {'userprogram':userprogram})
 
 @check_authorization
 def list_file(request):

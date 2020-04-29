@@ -42,6 +42,27 @@ def google_api_safe_run(func):
 
     return func_wrapper
 
+def get_google_role(service, role):
+    rolemap = {
+        'drive': {
+            'comment':'commenter',
+            'fileorganize':'fileOrganizer',
+            'organize':'organizer',
+            'owner':'owner',
+            'read':'reader',
+            'write':'writer'
+            },
+        'calendar': {
+            'availability':'freeBusyReader',
+            'none':'none',
+            'owner':'owner',
+            'read':'reader',
+            'write':'writer'
+            }
+        }
+    
+    return rolemap[service][role]
+    
 class GoogleService(object):
 
     connection = None
@@ -67,12 +88,21 @@ class GoogleCalendar(GoogleService):
     def __init__(self, service='calendar', version='v3', *args, **kwargs):
         super(GoogleCalendar, self).__init__(service, version, *args, **kwargs)
 
-    # CALENDAR METHODS
+    # CALENDAR
     # Creates calendar and adds it to creating user's list
     @google_api_safe_run
-    def create_calendar(self, title, **kwargs):
+    def create_calendar(self, title, publicflag=False, acl=None, **kwargs):
         calendar = {'summary':title, **kwargs}
-        return self.connection.calendars().insert(body=calendar).execute()
+        mycalendar = self.connection.calendars().insert(body=calendar).execute()
+        
+        # Assign public acl
+        if(publicflag):
+            acl = {'scope': {'type':'default'},'role':'read'}
+
+        if(acl):
+            self.create_acl(calendarid=mycalendar['id'], **acl)
+        
+        return mycalendar
 
     # Add existing calendar to users's list
     @google_api_safe_run
@@ -124,10 +154,16 @@ class GoogleCalendar(GoogleService):
         else:
             return self.connection.calendars().delete(calendarId=calendarid).execute()
 
-    # EVENT METHODS
+    # EVENTS
     def get_events(self):
         events = self.connection.events().list(calendarId=self.calendarid).execute()
         return events.get('items', [])
+
+    # ACLs
+    @google_api_safe_run
+    def create_acl(self, calendarid, scope, role='read', **kwargs):
+        body = {'scope':scope, 'role':get_google_role('calendar', role)}
+        return self.connection.acl().insert(calendarId=calendarid, body=body, **kwargs).execute()
     
 class GoogleDrive(GoogleService):
 

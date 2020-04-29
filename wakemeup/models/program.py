@@ -206,7 +206,7 @@ class ProgramManager(models.Manager):
         # Build structure
         return myProgram.gd.create_structure(gd_structure)
 
-    def create_calendar(self, myProgram, *args, **kwargs):
+    def create_calendar(self, myProgram, publicflag=False, *args, **kwargs):
 
         myschool = School.objects.get(schoolid=myProgram.schoolid)
 
@@ -217,7 +217,7 @@ class ProgramManager(models.Manager):
             ' (' + myschool.schoolabbreviation + ')' if (myschool.schoolabbreviation and myschool.schoolid) else ''
         )
 
-        return myProgram.gc.create_calendar(title=calendarname, description='')
+        return myProgram.gc.create_calendar(title=calendarname, description='', publicflag=publicflag)
 
     def get_program_options(self, idfield, displayfield=None, userflag=False, **kwargs):
         return generate_options(
@@ -403,7 +403,7 @@ class Program(MyModel):
                 self.result['drive'] = self.create_drive()
                 
             if(createoptions.get('calendar')):
-                mycalendar = self.create_calendar()
+                mycalendar = self.create_calendar(publicflag=True)
 
                 # Store / return calendar info                
                 self.result['calendar'] = mycalendar
