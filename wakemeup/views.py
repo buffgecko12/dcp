@@ -975,6 +975,9 @@ def create_user(request):
             # Store variables to reuse
             username = form.cleaned_data.get('username')
             mypassword = form.cleaned_data.get('password1')
+            myschoolid = form.cleaned_data.get('schoolid')
+            myprogramname = form.cleaned_data.get('programname')
+            myschoolyear = form.cleaned_data.get('schoolyear')
 
             # Generate password (if not provided)
             if(not mypassword):
@@ -1004,7 +1007,7 @@ def create_user(request):
             # Create new user
             newuser = get_user_model().objects.create_user(
                 password = raw_password, 
-                schoolid = form.cleaned_data.get('schoolid'),
+                schoolid = myschoolid,
                 username = username,
                 usertype = form.cleaned_data.get('usertype'),
                 firstname = form.cleaned_data.get('firstname'),
@@ -1030,6 +1033,12 @@ def create_user(request):
                              'Bienvenidos!' + '\n\n' + \
                              'Duitama Colegio Project'
             )
+
+            if(myschoolid and myprogramname and myschoolyear):
+                
+                # Register user for programs
+                for year in myschoolyear:
+                    UserProgram(userid=newuser.userid, programname=myprogramname, schoolid=myschoolid, schoolyear=year).save()
 
             # Go back to index page
             return render(request, 'wakemeup/admin/create_user_confirmation.html', {'userinfo':newuser, 'conf_password_display':conf_password_display})

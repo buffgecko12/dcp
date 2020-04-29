@@ -18,8 +18,8 @@ class testProgram(unittest.TestCase):
         cls.myschool = create_school()
 
         # Define programs at each school
-        cls.myprogram1 = create_program(schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=cls.myschool.schoolid, gd=cls.gd, gc=cls.gc)
-        cls.myprogram2 = create_program(schoolyear=2019, schoolid=cls.myschool.schoolid, gd="default", gc="default")
+        cls.myprogram1 = create_program(schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=cls.myschool.schoolid, gd=cls.gd, gc=cls.gc, createoptions={'calendar':False,'drive':True})
+        cls.myprogram2 = create_program(schoolyear=2019, schoolid=cls.myschool.schoolid, gd="default", gc="default", createoptions={'calendar':False,'drive':True})
  
         # Create users
         cls.myuser_teacher = create_user(usertype='TR', schoolid=cls.myschool.schoolid)
@@ -85,8 +85,8 @@ class testProgram(unittest.TestCase):
         
         self.assertTrue(len(UserProgram.objects.get_user_programs(schoolyear=DEFAULT_SCHOOL_YEAR)), 2) # year
         self.assertTrue(len(UserProgram.objects.get_user_programs(userid=self.myuser_teacher.userid)), 2) # user
-        self.assertEqual(UserProgram.objects.get_program_options(idfield='schoolyear', schoolyear=DEFAULT_SCHOOL_YEAR)[0][0], DEFAULT_SCHOOL_YEAR) # year options
-        self.assertEqual(len(UserProgram.objects.get_program_options(idfield='schoolyear', schoolyear=DEFAULT_SCHOOL_YEAR)), 1) # no duplicates
+        self.assertEqual(Program.objects.get_program_options(idfield='schoolyear', schoolyear=DEFAULT_SCHOOL_YEAR, userflag=True)[0][0], DEFAULT_SCHOOL_YEAR) # year options
+        self.assertEqual(len(Program.objects.get_program_options(idfield='schoolyear', schoolyear=DEFAULT_SCHOOL_YEAR, userflag=True)), 1) # no duplicates
 
     def testUpdateUserProgram(self):
         
@@ -102,7 +102,9 @@ class testProgram(unittest.TestCase):
     def testDeleteUserProgram(self):
 
         programname = 'new_program'
-        myuserprogram = create_user_program(gd=self.gd, userid=self.myuser_teacher.userid, schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=self.myuser_teacher.schoolid, programname=programname) # TO-DO: Update for multiple schoolid values
+        
+        myprogram = create_program(programname=programname, schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=self.myschool.schoolid, createoptions=None)
+        myuserprogram = create_user_program(userid=self.myuser_teacher.userid, schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=self.myuser_teacher.schoolid, programname=programname, gd=self.gd) # TO-DO: Update for multiple schoolid values
         
         # Check object exists before delete
         self.assertTrue(UserProgram.objects.get_user_programs(userid=self.myuser_teacher.userid, programname=programname))
@@ -124,8 +126,8 @@ class testProgram(unittest.TestCase):
         cls.myuser_teacher.delete()
         cls.myuser_other.delete()
  
-        cls.myprogram1.delete(deleteoptions={'repository':True,'drive':True,'calendar':True})
-        cls.myprogram2.delete(deleteoptions={'repository':True,'drive':True,'calendar':True})
+        cls.myprogram1.delete(deleteoptions={'repository':True,'drive':True,'calendar':False})
+        cls.myprogram2.delete(deleteoptions={'repository':True,'drive':True,'calendar':False})
 
         delete_school(cls.myschool)
         

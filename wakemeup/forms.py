@@ -80,26 +80,36 @@ def getAdminFormActions(cancel_url = 'wakemeup:index', cancel_context="", cancel
         Submit('submit_next','Enviar', css_id='next'),
     )
     
-def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, lookupargs={}):
+def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, lookupargs={}, ignoredefaultsflag=False, sortflag=True):
     choices = [("0","-- Escoger --")] if selectflag else []
 
+    if ignoredefaultsflag:
+        lookupargs['schoolyear'] = lookupargs.get('schoolyear') or None
+
     if(fieldname =='userid'):
-        choices += (UserProgram.objects.get_program_options(idfield=fieldname, displayfield='userdisplayname', **lookupargs))
+        choices += (Program.objects.get_program_options(idfield=fieldname, displayfield='userdisplayname', **lookupargs))
         
     if(fieldname =='schoolid'):
-        choices += (UserProgram.objects.get_program_options(idfield=fieldname, displayfield='schoolabbreviation', **lookupargs)) 
+        choices += (Program.objects.get_program_options(idfield=fieldname, displayfield='schoolabbreviation', **lookupargs))
 
     if(fieldname =='schoolyear'):
-        choices += (UserProgram.objects.get_program_options(idfield=fieldname, **lookupargs))
+        choices += (Program.objects.get_program_options(idfield=fieldname, **lookupargs))
 
     elif(fieldname == 'accessroles'):
         choices += Role.objects.get_role_options(**lookupargs)
         
     elif(fieldname == 'profilepictureid'):
         choices += get_user_model().objects.get_profile_picture_options(**lookupargs)
-        
+
+    elif(fieldname == 'programname'):
+        choices += (Program.objects.get_program_options(idfield=fieldname, **lookupargs))
+
     else:
         choices += (Category.objects.get_category_options(categoryclass = categoryclass or fieldname))
+
+    # Sort
+    if sortflag:
+        choices = sorted(choices.copy(), key=lambda x: x[1]) # Sort using second element in tuple
 
     form.fields[fieldname].choices = choices
 
@@ -151,10 +161,10 @@ class UploadFileForm(forms.Form):
             self.fields['accessroles'] = forms.CharField(widget=forms.HiddenInput, required=False)
 
         # Populate initial drop-downs (TO-DO: Update to use AJAX based on schoolid)
-        set_dropdown_choices(self, fieldname='programname', categoryclass='program')
-        set_dropdown_choices(self, fieldname='userid', lookupargs={'programname':programname})
-        set_dropdown_choices(self, fieldname='schoolid', lookupargs={'programname':programname})
-        set_dropdown_choices(self, fieldname='schoolyear', lookupargs={'programname':programname})
+        set_dropdown_choices(self, fieldname='programname', categoryclass='program', lookupargs={'userflag':True})
+        set_dropdown_choices(self, fieldname='userid', lookupargs={'programname':programname,'userflag':True})
+        set_dropdown_choices(self, fieldname='schoolid', lookupargs={'programname':programname,'userflag':True})
+        set_dropdown_choices(self, fieldname='schoolyear', lookupargs={'programname':programname,'userflag':True})
         set_dropdown_choices(self, fieldname='filetype', categoryclass='contractfile')
         set_dropdown_choices(self, fieldname='fileclass')
         set_dropdown_choices(self, fieldname='accessroles', lookupargs={'roleclass':['US']}, selectflag=False)
@@ -249,6 +259,10 @@ class SignupForm(UserCreationForm):
     classid = forms.CharField(label='Curso(s)', widget=forms.SelectMultiple, required=False)
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
 
+    # Program info
+    programname = forms.ChoiceField(label='Programa', widget=forms.Select, required=False)
+    schoolyear = forms.MultipleChoiceField(label='A' + mychr('n') + 'o', widget=forms.SelectMultiple, required=False)
+
     # Define constructor
     def __init__(self, *args, **kwargs):
         
@@ -262,7 +276,9 @@ class SignupForm(UserCreationForm):
 
         # Populate usertype drop-down
         set_dropdown_choices(self,fieldname='usertype')
-        set_dropdown_choices(self,fieldname='schoolid')
+        set_dropdown_choices(self,fieldname='schoolid', ignoredefaultsflag=True)
+        set_dropdown_choices(self,fieldname='programname',lookupargs={'schoolid':0}, ignoredefaultsflag=True)
+        set_dropdown_choices(self,fieldname='schoolyear', selectflag=False, ignoredefaultsflag=True)
 
         # Set password fields as optional
         self.fields['password1'].required=False
@@ -286,6 +302,8 @@ class SignupForm(UserCreationForm):
                 'firstname',
                 'lastname',
                 'emailaddress',
+                'programname',
+                'schoolyear',
                 'password1',
                 'password2',
             ),
@@ -579,7 +597,7 @@ class MyUserForm(forms.Form):
             myschoolid = None
 
         # Set drop-downs
-        set_dropdown_choices(self,fieldname='schoolid', lookupargs={'schoolid':myschoolid})
+        set_dropdown_choices(self,fieldname='schoolid', lookupargs={'schoolid':myschoolid, 'userflag':True})
         set_dropdown_choices(self,fieldname='profilepictureid', lookupargs={'userid':request.user.userid}, selectflag=False)
         
         # Set form layout

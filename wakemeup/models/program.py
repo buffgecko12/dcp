@@ -164,14 +164,17 @@ class ProgramManager(models.Manager):
         # Delete Calendar
         if(deleteoptions.get('calendar')):
             if not myProgram.programdetails:
-                myprogram = myProgram.objects.get(programname=myProgram.programname, schoolid=myProgram.schoolid, schoolyear=myProgram.schoolyear)
+                myprogram = Program.objects.get(programname=myProgram.programname, schoolid=myProgram.schoolid, schoolyear=myProgram.schoolyear)
             else:
                 myprogram = myProgram
 
-            myProgram.gc.delete_calendar(
-                calendarid=myprogram.programdetails['google']['calendar']['id'],
-                baseflag=True
-            )
+            try:
+                myProgram.gc.delete_calendar(
+                    calendarid=myprogram.programdetails['google']['calendar']['id'],
+                    baseflag=True
+                )
+            except:
+                print("API Error: Could not delete calendar")
 
         # Delete files
         myProgram.gd.delete_file(
@@ -215,6 +218,13 @@ class ProgramManager(models.Manager):
         )
 
         return myProgram.gc.create_calendar(title=calendarname, description='')
+
+    def get_program_options(self, idfield, displayfield=None, userflag=False, **kwargs):
+        return generate_options(
+            items = self.get_programs(**kwargs) if not userflag else UserProgram.objects.get_user_programs(**kwargs),
+            idfield = idfield,
+            displayfield = displayfield or idfield,
+        )
 
 class UserProgramManager(models.Manager):
     def all(self):
@@ -265,13 +275,6 @@ class UserProgramManager(models.Manager):
     def delete(self, myUserProgram):
         return delete_data('SP_DCPDeleteUserProgram', (myUserProgram.userid, myUserProgram.programname, myUserProgram.schoolid, myUserProgram.schoolyear))
 
-    def get_program_options(self, idfield, displayfield=None, **kwargs):
-        return generate_options(
-            items = self.get_user_programs(**kwargs),
-            idfield = idfield,
-            displayfield = displayfield or idfield
-        )
-        
     def create_drive(self, myUserProgram, directorytype):
 
         gd = myUserProgram.gd
@@ -417,8 +420,9 @@ class Program(MyModel):
     def delete(self, deleteoptions={'repository':True, 'drive':False, 'calendar':False}, *args, **kwargs):
         return Program.objects.delete(self, deleteoptions, *args, **kwargs)
 
-class UserProgram(Program, get_user_model()):
+class UserProgram(Program):
 
+    userid = models.IntegerField()
     maxbudget = models.IntegerField(primary_key=True,verbose_name='Prespuesto m' + mychr('a') + 'ximo')
     uploaddirectoryid = models.IntegerField()
     details = JSONField()
