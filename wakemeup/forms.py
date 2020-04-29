@@ -598,7 +598,7 @@ class MyUserForm(forms.Form):
 
         # Set drop-downs
         set_dropdown_choices(self,fieldname='schoolid', lookupargs={'schoolid':myschoolid, 'userflag':True})
-        set_dropdown_choices(self,fieldname='profilepictureid', lookupargs={'userid':request.user.userid}, selectflag=False)
+        set_dropdown_choices(self,fieldname='profilepictureid', lookupargs={'userid':request.user.userid}, selectflag=False, sortflag=False)
         
         # Set form layout
         self.helper.layout = Layout(
