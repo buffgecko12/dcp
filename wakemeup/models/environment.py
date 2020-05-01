@@ -12,10 +12,10 @@ class FileManager(models.Manager):
         return self.get_files()
 
     def get(self, fileid):
-        return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, None, None, None, None, None, None, None, None))
+        return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, None, None, None, None, None, None, None, None, None))
 
-    def get_files(self, fileid=None, fileclass=None, filecategory=None, alternatefileid=None, contractid=None, schoolid=None, schoolyear=None, fileattributes=None, filesource=None):
-        return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource))
+    def get_files(self, fileid=None, fileclass=None, filecategory=None, alternatefileid=None, contractid=None, schoolid=None, schoolyear=None, fileattributes=None, filesource=None, accessinfo=None):
+        return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo)))
 
     def save(self, myFile, *args, **kwargs):
 
@@ -73,7 +73,6 @@ class FileManager(models.Manager):
         
     def delete(self, myFile, contractid = None, schoolid = None, alternatefileid = None, filesource = None):
         return delete_data('SP_DCPDeleteFile', (myFile.fileid, myFile.contractid, myFile.schoolid, myFile.alternatefileid, myFile.filesource))
-#         return delete_data('SP_DCPDeleteFile', (myFile.fileid, contractid, schoolid, alternatefileid, filesource))
             
 class CategoryManager(models.Manager):
     def all(self):

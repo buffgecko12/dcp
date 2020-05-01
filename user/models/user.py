@@ -9,6 +9,8 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 
 from user.models.base import MyModel
 
+from wakemeup.models.environment import File
+
 # Don't override default methods (get, all, save, delete) to avoid clashing with Django authentication
 class MyUserManager(BaseUserManager):
 
@@ -74,7 +76,7 @@ class MyUserManager(BaseUserManager):
         })
 
     def check_access(self, myUser, objectid, objectclass, requestedaccesslevel):
-        return get_data(self, 'SP_DCPCheckUserObjectAccess(%s,%s,%s,%s)', (myUser.userid, objectid, objectclass, requestedaccesslevel))[0].hasaccess
+        return get_data(self, 'SP_DCPCheckUserObjectAccess(%s,%s,%s,%s)', (myUser.userid, objectid, objectclass, requestedaccesslevel))
 
     def add_event(self, myUser, eventid, contractid):
         return save_data('SP_DCPProcessUserEvent', (myUser.userid, eventid, contractid,))
@@ -199,7 +201,7 @@ class MyUser(AbstractBaseUser):
     def manage_display_info(self, actiontype, notificationtype = None):
         return MyUser.objects.manage_display_info(self, actiontype, notificationtype)
         
-    def check_access(self, objectid, objectclass, requestedaccesslevel = 4):
+    def check_access(self, objectid, objectclass, requestedaccesslevel=4):
         return MyUser.objects.check_access(self, objectid, objectclass, requestedaccesslevel)
     
     def add_event(self, eventid, contractid = None):
@@ -210,7 +212,10 @@ class MyUser(AbstractBaseUser):
         
     def send_email(self, email_subject = None, email_body = None):
         return MyUser.objects.send_email(self, email_subject, email_body)
-        
+
+    def get_files(self, accesslevel=4, **kwargs):
+        return File.objects.get_files(accessinfo={'userid':self.userid, 'requestedaccesslevel':accesslevel}, **kwargs)
+
     def is_admin(self):
         if(self.usertype == 'AD' or self.usertype == 'SU'):
             return True

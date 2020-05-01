@@ -330,10 +330,7 @@ def list_calendar(request):
 @check_authorization
 def list_file(request):
 
-    files = File.objects.get_files(filecategory='CT')
-
-    context = {'files':files}
-    
+    context = {'files':request.user.get_files()}
     return render(request, 'wakemeup/files/list_file.html', context)
 
 @check_authorization
