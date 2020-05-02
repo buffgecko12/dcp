@@ -7,9 +7,13 @@
 
 	<br>
 	{% for file in files %}
+		{% ifchanged file.fileclass %}
+			<br><b>{{ file.fileclass }}</b><br>
+		{% endifchanged %}
+		
 		<a href="{% url 'wakemeup:download_file' file.fileid %}">
-			Contrato - Archivo {{ forloop.counter }}
+			<img height="24" src="{{file.fileattributes.gd.iconLink}}"/>
+			{{file.filename|truncatechars:30}}
 		</a><br>
 	{% endfor %}
-
 {% endblock %}
