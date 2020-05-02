@@ -2,7 +2,7 @@
 from django.db import models
 from wakemeup.models.base import MyModel
 from lib.UsefulFunctions.dbUtils import *
-from lib.UsefulFunctions.stringUtils import mychr
+from lib.UsefulFunctions.stringUtils import mychr, split_filename
 from lib.UsefulFunctions.dataUtils import generate_options, to_json
 import lib.UsefulFunctions.googleUtils as google
 from django.contrib.postgres.fields import JSONField
@@ -29,12 +29,14 @@ class FileManager(models.Manager):
             gd = gd_file.pop('gd')
 
             # Save file
-            gd_file = gd.create_file(**gd_file) # Returns data as string
+            gd_file = gd.create_file(**gd_file)
 
-            fileattributes = gd_file.get('properties')
+            # Prepare file attributes
+            gd_file['iconLink'] = gd_file.get('iconLink','').replace("16","128")
+            fileattributes = {'gd':gd_file, **gd_file.pop('properties', {})}
 
             # Update original File attributes
-            myFile.filename = gd_file.get('name')
+            myFile.filename = split_filename(gd_file.get('name'))['name']
             myFile.fileextension = gd_file.get('fileExtension')
             myFile.filesize = gd_file.get('size')
             myFile.filetype = gd_file.get('mimeType')

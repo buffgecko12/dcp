@@ -353,10 +353,11 @@ def upload_file(request):
             myschoolyear = form.cleaned_data.get('schoolyear')
             myschoolid = form.cleaned_data.get('schoolid')
 
+            myfileclass = form.cleaned_data.get('fileclass')
             myfiletype = form.cleaned_data.get('filetype')
             myaccessroles = form.cleaned_data.get('accessroles')
-
-            contractfiletypes = Category.objects.get_categories(categoryclass='contractfile')
+            
+            filetypes = Category.objects.get_categories(categoryclass='contractfile' if myfileclass == "CT" else "programfile" if myfileclass == "PG" else "")
             
             # Get user upload directory or use default (programname, school year); otherwise GD will default to "root"
             myuserprogram = UserProgram.objects.get(userid=myuserid, programname=myprogramname, schoolyear=myschoolyear, schoolid=myschoolid, uploaddirflag=True) # Create upload dir
@@ -368,11 +369,8 @@ def upload_file(request):
                  for i in range(0, len(request.FILES))]
 
             for myfile in files:
-
-                filetype = get_matching_item(contractfiletypes,'categorytype',myfiletype).categorydisplayname # In loop in case filetype is applied at this level
-
                 file_metadata = {
-                    'name': filetype + ' - ' + myfile.name,
+                    'name': myfile.name,
                     'originalFilename': myfile.name,
                     'description':'Archivo subido por ' + request.user.userdisplayname,
                     'parents':[uploaddir],
@@ -428,6 +426,7 @@ def download_file(request, fileid):
                 
                 gd = GoogleDrive()
                 myfile.filedata = gd.download_file(myfile.alternatefileid)
+                myfile.filename = myfile.filename + '.' + myfile.fileextension
 
 #                 myfileurl = gd.get_file_weblink(fileid=myfile.alternatefileid)
 #                 return redirect(myfileurl)

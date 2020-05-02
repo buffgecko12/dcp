@@ -22,3 +22,16 @@ def mychr(string):
         mystring = chr(191)
         
     return mystring
+
+def split_filename(filename):
+    
+    name = filename
+    extension = None
+    
+    if(name and "." in name):
+        name, extension = filename.rsplit(".", 1)
+    
+    return {
+        'name': name,
+        'extension':extension
+    }
