@@ -60,6 +60,7 @@
 	      enctype="multipart/form-data" 
 	      method="post">
 		{% crispy form %}
+		<div class="dz-message" data-dz-message><span><i>Arrastrar y soltar los archivos para subir</i></span></div>		
 	    <div class="fallback">
 	        <input id="file" name="file" type="file" multiple="multiple"/>
 	        <input type="submit" value="Upload"/>
