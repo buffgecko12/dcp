@@ -143,12 +143,10 @@ class UploadFileForm(forms.Form):
 
         # Extract "request" parameter
         request = kwargs.pop('request', None)
-        initialvalues = kwargs.get('initial', None)
-        programname = None
-        
-        # Extract initial values for re-use
-        if(initialvalues):
-            programname = initialvalues.get('programname')
+
+        # Extract programname (if specified)
+        initialvalues = kwargs.get('initial', {})
+        programname = initialvalues.get('programname')
 
         super(UploadFileForm, self).__init__(*args, **kwargs)
 
