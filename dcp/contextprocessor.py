@@ -28,7 +28,7 @@ def dcp(request):
                         'source':'navbar',
                         'schoolyear':get_school_year(),
                         'programname':'incentive',
-                        'fileclass':'CT'
+                        'fileclass':'contractfile'
                     }
                 }
             }

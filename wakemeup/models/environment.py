@@ -120,7 +120,7 @@ class File(MyModel):
 class Category(MyModel):
     
     categoryclass = models.CharField(max_length=50)
-    categorytype = models.CharField(max_length=10)
+    categorytype = models.CharField(max_length=25)
     categorydisplayname = models.CharField(max_length=100)
     description = models.CharField(max_length=500)
     
