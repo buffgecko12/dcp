@@ -336,7 +336,8 @@ def list_file(request):
 @check_authorization
 def upload_file(request):
 
-    if request.method == "POST":
+    # Process form
+    if request.method == "POST" and not request.POST.get('source'):
         
         # Bind form data
         form = UploadFileForm(request.POST, request.FILES, request=request)
@@ -406,8 +407,8 @@ def upload_file(request):
                 )
                 
     else:
-        form = UploadFileForm(request=request, initial={'programname':'incentive'})
-        
+        form = UploadFileForm(initial=request.POST, request=request) # Pass any post data (i.e. from links)
+
     return render(request, 'wakemeup/files/upload_file.html', context={'form':form})
 
 @check_authorization

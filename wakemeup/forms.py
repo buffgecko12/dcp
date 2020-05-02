@@ -113,6 +113,19 @@ def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, l
 
     form.fields[fieldname].choices = choices
 
+def set_initial_value(form, fieldname, default=None):
+    form.fields[fieldname].initial = form.fields[fieldname].initial or default
+
+def setup_field(form, fieldname, dropdown=None, default=None):
+    if(dropdown):
+        set_dropdown_choices(form=form, fieldname=fieldname, **dropdown if not dropdown == "default" else {})
+        
+    set_initial_value(form=form, fieldname=fieldname, default=default)
+
+def setup_fields(form, fieldinfo):
+    for fieldname, fieldinfo in fieldinfo.items():
+        setup_field(form=form, fieldname=fieldname, dropdown=fieldinfo.get('dropdown'), default=fieldinfo.get('default'))
+
 def set_field_size(field, size=''):
     fieldclass = ' form-control' + ('-' + size) if size else ()
 
@@ -158,22 +171,19 @@ class UploadFileForm(forms.Form):
             self.fields['schoolyear'] = forms.IntegerField(widget=forms.HiddenInput)
             self.fields['accessroles'] = forms.CharField(widget=forms.HiddenInput, required=False)
 
-        # Populate initial drop-downs (TO-DO: Update to use AJAX based on schoolid)
-        set_dropdown_choices(self, fieldname='programname', categoryclass='program', lookupargs={'userflag':True})
-        set_dropdown_choices(self, fieldname='userid', lookupargs={'programname':programname,'userflag':True})
-        set_dropdown_choices(self, fieldname='schoolid', lookupargs={'programname':programname,'userflag':True})
-        set_dropdown_choices(self, fieldname='schoolyear', lookupargs={'programname':programname,'userflag':True})
-        set_dropdown_choices(self, fieldname='filetype', categoryclass='contractfile')
-        set_dropdown_choices(self, fieldname='fileclass')
-        set_dropdown_choices(self, fieldname='accessroles', lookupargs={'roleclass':['US']}, selectflag=False)
-
-        # Set initial values
-        self.fields['programname'].initial = programname
-        self.fields['userid'].initial = request.user.userid
-        self.fields['schoolid'].initial = request.user.schoolid
-        self.fields['schoolyear'].initial=DEFAULT_SCHOOL_YEAR
-        self.fields['accessroles'].initial = Role.objects.get(name='Public').roleid if request.user.is_admin() else '' # Default to "public" only if admin
-
+        # Initialize fields (TO-DO: Update to use AJAX based on schoolid)
+        fieldinfo = {
+            'schoolid':     {'dropdown':{'lookupargs':{'programname':programname, 'userflag':True}}, 'default':request.user.schoolid},
+            'schoolyear':   {'dropdown':{'lookupargs':{'programname':programname, 'userflag':True}}, 'default':DEFAULT_SCHOOL_YEAR},
+            'programname':  {'dropdown':{'categoryclass':'program', 'lookupargs':{'userflag':True}}},
+            'userid':       {'dropdown':{'lookupargs':{'programname':programname, 'userflag':True}}, 'default':request.user.userid},
+            'filetype':     {'dropdown':{'categoryclass':'contractfile'}},
+            'fileclass':    {'dropdown':'default'},
+            'accessroles':  {'dropdown':{'lookupargs':{'roleclass':['US']}, 'selectflag':False}, 'default':Role.objects.get(name='Public').roleid if request.user.is_admin() else ''},
+        }
+        
+        setup_fields(self, fieldinfo)
+        
         # Set helper properties
         self.helper = FormHelper() 
         setFormHelper(self.helper)
