@@ -347,6 +347,7 @@ def upload_file(request):
             # Connect to Google Drive
             gd = GoogleDrive(permissions=['write'])
             
+            # Get program info
             myprogramname = form.cleaned_data.get('programname')
             myuserid = form.cleaned_data.get('userid')
             myschoolyear = form.cleaned_data.get('schoolyear')
