@@ -1,0 +1,7 @@
+<form id="{{formname}}" method="post" action="{{actionurl}}">{% csrf_token %}
+	{% for key, value in navigation.uploadfilepost.fields.items %}
+		<input type="hidden" name="{{key}}" value="{{value}}"/>
+	{% endfor %}
+	
+	<a {% if displaytype == "navbar" %}class="dropdown-item {% if url_name == formurlname %} active {% endif %}" {% endif %} onclick="document.forms['{{formname}}'].submit();" style="cursor: pointer;">{{linktext}}</a>
+</form>

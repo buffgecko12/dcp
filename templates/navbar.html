@@ -30,11 +30,14 @@
 				</li>
 				
 				<!-- FILES -->
-				<li class="nav-item dropdown">				
+				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Archivos</a>
 					<div class="dropdown-menu">
 						<a class="dropdown-item {% if url_name == 'list_file' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}">Descargar</a>
-						<a class="dropdown-item {% if url_name == 'upload_file' %} active {% endif %}" href="{% url 'wakemeup:upload_file' %}">Subir</a>
+					{% url 'wakemeup:upload_file' as actionurl %}
+					{% include 'link_post.html' with linktext="Subir" actionurl=actionurl formname="upload_file" formurlname="upload_file" displaytype="navbar" %}
+						
+						
 					</div>
 				</li>
 				
