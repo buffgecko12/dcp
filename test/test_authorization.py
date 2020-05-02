@@ -67,7 +67,7 @@ class testAuthorization(unittest.TestCase):
         self.assertTrue(self.myteacher1.get_files(fileid=self.myfile2.fileid, accesslevel=4)) # Positive
         self.assertFalse(self.myteacher1.get_files(fileid=self.myfile2.fileid, accesslevel=12)) # Nnegative
 
-    def ztestCheckAuthorization(self):
+    def testCheckAuthorization(self):
         
         self.assertFalse(self.myteacher1.check_access(-1,'FL',1)) # Invalid file 
         
@@ -106,7 +106,7 @@ class testAuthorization(unittest.TestCase):
         self.assertFalse(self.myteacher2.check_access(self.myfile7.fileid,'FL',1))
         self.assertFalse(self.mystudent.check_access(self.myfile7.fileid,'FL',1))
 
-    def ztestRevokedAuthorization(self):
+    def testRevokedAuthorization(self):
         
         # Check before
         self.assertTrue(self.mystudent.check_access(self.myfile3.fileid,'FL',1))
@@ -116,7 +116,7 @@ class testAuthorization(unittest.TestCase):
         self.myroleacl7.save()
         self.assertFalse(self.mystudent.check_access(self.myfile3.fileid,'FL',1)) # No access
     
-    def ztestUndefinedAuthorization(self):
+    def testUndefinedAuthorization(self):
         
         # Check before
         self.assertTrue(self.mystudent.check_access(self.myfile3.fileid,'FL',1))
@@ -125,28 +125,28 @@ class testAuthorization(unittest.TestCase):
         self.myroleacl7.delete()
         self.assertFalse(self.mystudent.check_access(self.myfile3.fileid,'FL',1))
     
-    def ztestcreateRoleACL(self):
+    def testcreateRoleACL(self):
         pass
     
-    def ztestGetRoleACL(self):
+    def testGetRoleACL(self):
         self.assertIsNotNone(refresh(self.myroleacl1))
         self.assertFalse(RoleACL.objects.get_role_acls(objectid=self.myfile1.fileid,objectclass='FL'))
         self.assertTrue(RoleACL.objects.get_role_acls(objectid=self.myfile2.fileid,objectclass='FL',accesslevel=8))
         self.assertTrue(RoleACL.objects.all())
         
-    def ztestUpdateRoleACL(self):
+    def testUpdateRoleACL(self):
         self.assertTrue(self.myroleacl1.accesslevel,4)
         self.myroleacl1.accesslevel=8
         self.myroleacl1.save()
         self.myroleacl1 = refresh(self.myroleacl1)
         self.assertTrue(self.myroleacl1.accesslevel,8)
         
-    def ztestDeleteRoleACL(self):
+    def testDeleteRoleACL(self):
         self.assertTrue(refresh(self.myroleacl1))
         self.myroleacl1.delete()
         self.assertFalse(refresh(self.myroleacl1))
 
-    def ztestCreateRoleACLBatch(self):
+    def testCreateRoleACLBatch(self):
         
         self.assertFalse(self.myteacher1.check_access(self.myobject1.objectid,self.myobject1.objectclass,8)) # Teacher - no edit access
         self.assertFalse(self.myadmin.check_access(self.myobject1.objectid,self.myobject1.objectclass,1)) # Admin - no edit access
@@ -177,33 +177,33 @@ class testAuthorization(unittest.TestCase):
         # Delete ACLs
         RoleACL(roleid=None,objectid=self.myobject1.objectid,objectclass=self.myobject1.objectclass).delete()
 
-    def ztestCreateObject(self):
+    def testCreateObject(self):
         pass
     
-    def ztestGetObject(self):
+    def testGetObject(self):
         self.assertIsNotNone(refresh(self.myobject1))
         self.assertTrue(Object.objects.get_objects(objectclass='BO')) # Files
         self.assertTrue(Object.objects.get_object_by_name(objectname='contract_test')) # Files
         self.assertFalse(Object.objects.get_object_by_name(objectname='homero')) # Files
         self.assertTrue(Object.objects.all()) # All
         
-    def ztestUpdateObject(self):
+    def testUpdateObject(self):
         self.assertTrue(self.myobject1.objectname,'contract_test')
         self.myobject1.objectname='contracts'
         self.myobject1.save()
         self.myobject1 = refresh(self.myobject1)
         self.assertTrue(self.myobject1.objectname,'contracts') 
         
-    def ztestDeleteObject(self):
+    def testDeleteObject(self):
         
         self.assertTrue(refresh(self.myobject1))
         self.myobject1.delete()
         self.assertIsNone(refresh(self.myobject1))
         
-    def ztestCreateRole(self):
+    def testCreateRole(self):
         pass
 
-    def ztestModifyRoleItem(self):
+    def testModifyRoleItem(self):
         
         # Add specific student to Teachers role
         self.myrole_teachers.modify_role_item(userid=self.mystudent.userid)
@@ -213,7 +213,7 @@ class testAuthorization(unittest.TestCase):
         self.myrole_teachers.modify_role_item(usertype='AD')
         self.myrole_teachers.modify_role_item(usertype='AD',changetype='D') # Delete
         
-    def ztestModifyRoleItemDuplicate(self):
+    def testModifyRoleItemDuplicate(self):
         
         # Check initial access (read, but not edit)
         self.assertTrue(self.mystudent.check_access(objectid=self.myfile2.fileid,objectclass='FL',requestedaccesslevel=4))
@@ -230,13 +230,13 @@ class testAuthorization(unittest.TestCase):
         self.assertTrue(self.mystudent.check_access(objectid=self.myfile2.fileid,objectclass='FL',requestedaccesslevel=4))
         self.assertFalse(self.mystudent.check_access(objectid=self.myfile2.fileid,objectclass='FL',requestedaccesslevel=8))
         
-    def ztestGetRole(self):
+    def testGetRole(self):
         self.assertIsNotNone(refresh(self.myrole_twousers)) # single role
         self.assertTrue(Role.objects.get_roles(name='Teachers_test'))
         self.assertTrue(Role.objects.all()) # all roles
         self.assertTrue(Role.objects.get_role_options()) # drop-down
 
-    def ztestUpdateRole(self):
+    def testUpdateRole(self):
 
         # Check before updates
         self.assertTrue(self.myrole_all.publicflag)
@@ -257,7 +257,7 @@ class testAuthorization(unittest.TestCase):
         self.assertFalse(('SF' in (self.myrole_all.usertypelist)))
         self.assertFalse((self.myteacher1.userid in (self.myrole_all.userlist)))
 
-    def ztestDeleteRole(self):
+    def testDeleteRole(self):
         
         # Check user exists
         self.assertTrue(refresh(self.myrole_oneuser))
