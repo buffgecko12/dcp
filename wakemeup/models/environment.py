@@ -17,6 +17,12 @@ class FileManager(models.Manager):
     def get_files(self, fileid=None, fileclass=None, filecategory=None, alternatefileid=None, contractid=None, schoolid=None, schoolyear=None, fileattributes=None, filesource=None, accessinfo=None):
         return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo)))
 
+    def get_file_alt(self, fileid, filesource='GD'):
+        result = self.get_files(alternatefileid=fileid, filesource=filesource)
+        
+        return result[0] if result else None
+            
+
     def save(self, myFile, *args, **kwargs):
 
         # Extract gd_file info if it exists
@@ -27,6 +33,17 @@ class FileManager(models.Manager):
 
             # Extract google drive connection
             gd = gd_file.pop('gd')
+
+            # Save additional properties
+            gd_file['metadata'].setdefault('properties', {}).setdefault('repository', {})
+
+            gd_file['metadata']['properties']['repository'].update({
+                'description':myFile.filedescription,
+                'filecategory':myFile.filecategory,
+                'contractid':myFile.contractid,
+                'schoolid':myFile.schoolid,
+                'schoolyear':myFile.schoolyear
+            })
 
             # Save file
             gd_file = gd.create_file(**gd_file)
@@ -72,8 +89,11 @@ class FileManager(models.Manager):
          )[0]
 
         return {'fileid':fileid,'gd_file':gd_file}
-        
-    def delete(self, myFile, contractid = None, schoolid = None, alternatefileid = None, filesource = None):
+    
+    def save_batch(self, fileinfo, filesource=None):
+        return save_data('SP_DCPUpsertFileBatch', (to_json(fileinfo), filesource), returnall=True)
+    
+    def delete(self, myFile, contractid=None, schoolid=None, alternatefileid=None, filesource=None):
         return delete_data('SP_DCPDeleteFile', (myFile.fileid, myFile.contractid, myFile.schoolid, myFile.alternatefileid, myFile.filesource))
             
 class CategoryManager(models.Manager):

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import unittest
 from test_setup import *
 from test_env_setup import *
@@ -6,24 +7,25 @@ from googleapiclient.errors import HttpError
 
 from UsefulFunctions.googleUtils import GoogleDrive
 
+
 class testGoogleDrive(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         
         # Create service connections
-        cls.gd_list = GoogleDrive(permissions=['list'])
         cls.gd_read = GoogleDrive(permissions=['read'])
         cls.gd_write = GoogleDrive(permissions=['write'])
 
-        cls.metadata = {'name': 'Test directory','parents':['root'],'properties':{'key1':'val1'}}
-
+        cls.metadata = {'name': 'Test directory', 'parents':['root'], 'properties':{'key1':'val1'}}
         cls.mymediafile = cls.gd_write.create_file(metadata={'name':'testpic.jpg'},file_path=get_abs_path('test/img/sampleimg.jpg'))
+
+        cls.newname = 'newname'
     
     def setUp(self):
         
         # Create file
-        self.myfile = self.gd_write.create_file(metadata=self.metadata,directoryflag=True)
+        self.myfile = self.gd_write.create_file(metadata=self.metadata, directoryflag=True)
     
     def testConnection(self):
         pass
@@ -34,18 +36,24 @@ class testGoogleDrive(unittest.TestCase):
         self.assertTrue(self.myfile['id'])
 
         # Create file (GD and repository)
-        gd_file = {'gd': self.gd_write,'metadata': self.metadata,'directoryflag':True}
+        gd_file = {'gd': self.gd_write, 'metadata': self.metadata, 'directoryflag':True}
         newfile = File().save(gd_file=gd_file)
 
         # Store gd fileid        
         newfile_gdid = newfile['gd_file']['id']
         
         # Verify new fileids 
-        self.assertTrue(newfile['fileid']) # repository
-        self.assertTrue(newfile_gdid) # google drive
+        self.assertTrue(newfile['fileid'])  # repository
+        self.assertTrue(newfile_gdid)  # google drive
         
         # Delete file
         self.gd_write.delete_file(fileid=newfile_gdid)
+
+    def testUpdateFile(self):
+
+        # Change file name and verify
+        myfile = self.gd_write.update_file(fileid=self.myfile['id'], metadata={'name':self.newname})
+        self.assertTrue(myfile['name'], self.newname)
 
     def testDeleteFile(self):
 
@@ -53,7 +61,7 @@ class testGoogleDrive(unittest.TestCase):
         
         # Recycle file and verify
         self.gd_write.delete_file(fileid=myfileid)
-        self.assertTrue(self.gd_write.get_file(fileid=myfileid,fields=('trashed'))['trashed'])
+        self.assertTrue(self.gd_write.get_file(fileid=myfileid, fields=('trashed'))['trashed'])
         
         # Permanently delete file and verify
         self.gd_write.delete_file(fileid=myfileid, deleteoptions={'repository':True, 'drive':True})
@@ -69,7 +77,7 @@ class testGoogleDrive(unittest.TestCase):
                         },
                     'metadata':{'gd_locator':'dir_1a'}
                 },
-                'metadata':{'parentid':'root','gd_locator':'dir_1'},
+                'metadata':{'parentid':'root', 'gd_locator':'dir_1'},
             },
         }
 
@@ -98,20 +106,43 @@ class testGoogleDrive(unittest.TestCase):
         myfile = self.gd_read.download_file(fileid=self.mymediafile['id'])
         self.assertTrue(myfile)
 
+        myfiles = self.gd_read.get_files()
+        self.assertTrue(myfiles)
+
     def testAuthorization(self):
         
         # Try to create file with "read" authorization
         with self.assertRaises(HttpError):
-            self.gd_read.create_file(metadata=self.metadata,directoryflag=True)
+            self.gd_read.create_file(metadata=self.metadata, directoryflag=True)
         
         # Create file with "write" authorization
-        newfile = self.gd_write.create_file(metadata=self.metadata,directoryflag=True)
+        newfile = self.gd_write.create_file(metadata=self.metadata, directoryflag=True)
         self.assertTrue(newfile['id'])
         
         # Delete file
         self.gd_write.delete_file(fileid=newfile['id'])
+
+    def testSync(self):
+
+        newfile = File().save(gd_file={'gd':self.gd_write,'metadata':{'name':'test_file'}, 'directoryflag':True})
+        newfile_gdid = newfile['gd_file']['id']
         
-    def tearDown(self):        
+        myrepofile = File.objects.get_file_alt(fileid=newfile_gdid)
+        mygdfile = self.gd_read.get_file(fileid=newfile_gdid)
+
+        # Verify file names are in sync
+        self.assertEqual(myrepofile.filename, mygdfile['name'])
+        
+        # Change file name in GD and run sync
+        myfile = self.gd_write.update_file(fileid=newfile_gdid, metadata={'name':self.newname})
+        self.gd_read.sync(fileid=newfile_gdid)
+        
+        # Verify file names are in sync
+        self.assertEqual(File.objects.get_file_alt(fileid=newfile_gdid).filename, self.gd_read.get_file(fileid=newfile_gdid)['name'])
+
+        self.gd_write.delete_file(fileid=newfile_gdid, deleteoptions={'repository':True})
+
+    def tearDown(self):
         self.gd_write.delete_file(fileid=self.myfile['id'])
     
     @classmethod
@@ -119,4 +150,4 @@ class testGoogleDrive(unittest.TestCase):
         cls.mymediafile = cls.gd_write.delete_file(fileid=cls.mymediafile['id'])
     
 if __name__ == '__main__':
-    unittest.main() # Run all tests
+    unittest.main()  # Run all tests

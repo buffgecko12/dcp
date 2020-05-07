@@ -13,6 +13,7 @@ from googleapiclient.errors import HttpError
 # Import - Useful functions
 from lib.UsefulFunctions.dataUtils import get_matching_item, to_json, convert_json_to_dict
 from lib.UsefulFunctions.miscUtils import get_app_setting
+from lib.UsefulFunctions.stringUtils import split_filename
 from wakemeup import models
 
 # Wrapper function to handle API errors
@@ -185,7 +186,7 @@ class GoogleDrive(GoogleService):
                         'metadata': {
                             'name': parent,
                             'parents':[children.get('metadata', {}).get('parentid') or {}],
-                            'properties':[children.get('metadata') or {}]
+                            'properties':children.get('metadata') or {}
                         },
                         'directoryflag':True
                         }
@@ -240,6 +241,41 @@ class GoogleDrive(GoogleService):
     @google_api_safe_run
     def get_file(self, fileid, fields=None):
         return self.connection.files().get(fileId=fileid, fields=fields).execute()
+
+    @google_api_safe_run
+    def get_files(self, scope="user", driveid=None, fields='files(name,fileExtension,size,mimeType,description,id,properties,webContentLink,iconLink)', spaces="drive", paginateflag=False, ignoredirectoryflag=True, searchquery='', **kwargs):
+
+        if ignoredirectoryflag:
+            searchquery += ' and ' if searchquery else '' + "(mimeType != 'application/vnd.google-apps.folder')"
+
+        # Map parameters to Google API
+        params = {'driveId':driveid, 'corpora':scope, 'fields':fields, 'spaces':spaces, 'q':searchquery, **kwargs}
+
+        # Return all results at once
+        if not paginateflag:
+            result = []
+            pagetoken = None
+
+            while True:
+                
+                # Use pagetoken from previous iteration
+                if pagetoken:
+                    params['pageToken'] = pagetoken
+
+                # Retrieve / store next file batch
+                files = self.connection.files().list(**params).execute()
+                result.extend(files['files'])
+                
+                pagetoken = files.get('nextPageToken')
+                
+                if not pagetoken:
+                    break
+            
+            return result
+
+        # Paginate
+        else:
+            return self.connection.files().list(**params)
 
     def get_file_weblink(self, fileid):
         return self.objects.get_file(self, fileid, fields='webContentLink')['webContentLink']
@@ -309,6 +345,51 @@ class GoogleDrive(GoogleService):
             return self.get_file(self.lookup_fileid(**kwargs))
         else:
             return None
+
+    def prepare_gd_file(self, gd_file, actions={'updatefields':True,'setproperties':True}):
+
+        result = {}
+
+        # Update icon link        
+        if actions.get('updatefields'):
+            gd_file['iconLink'] = gd_file.get('iconLink','').replace("16","128")
+            gd_file['name'] = split_filename(gd_file.get('name'))['name']
+
+        # Set attributes field
+        if actions.get('setproperties'):
+            result['properties'] = {'gd':gd_file, **gd_file.pop('properties', {})}
+
+        return result
+
+    def sync(self, fileid=None, **kwargs):
+        
+        myfilelist = []
+        
+        # Get files
+        if not fileid:
+            myfiles = self.get_files(**kwargs)
+        else:
+            myfiles = [self.get_file(fileid=fileid)]
+
+        # Create batch file list        
+        for myfile in myfiles:
+
+            myfilelist.append({
+                'filename':myfile.get('name'),
+                'fileextension':myfile.get('fileExtension'),
+                'alternatefileid':myfile.get('id'),
+                'filetype':myfile.get('mimeType'),
+                'filesize':myfile.get('size'),
+                'filedescription':myfile.get('description'),
+                'fileurl':myfile.get('webContentLink'),
+                'fileattributes':self.prepare_gd_file(myfile).get('properties'),
+                'filesource':'GD'
+            })
+        
+        # Call batch upsert
+        result = models.environment.File.objects.save_batch(myfilelist, 'GD')
+        
+        return result
 
 # https://developers.google.com/drive/api/v3/about-auth
 def get_google_credentials(service = 'drive', permissions = ['read']):
