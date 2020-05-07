@@ -48,22 +48,21 @@ class FileManager(models.Manager):
             # Save file
             gd_file = gd.create_file(**gd_file)
 
-            # Prepare file attributes
-            gd_file['iconLink'] = gd_file.get('iconLink','').replace("16","128")
-            fileattributes = {'gd':gd_file, **gd_file.pop('properties', {})}
+            # Prepare file
+            gd.prepare_gd_file(gd_file)
 
             # Update original File attributes
-            myFile.filename = split_filename(gd_file.get('name'))['name']
+            myFile.filename = gd_file.get('name')
             myFile.fileextension = gd_file.get('fileExtension')
             myFile.filesize = gd_file.get('size')
             myFile.filetype = gd_file.get('mimeType')
             myFile.filedescription = myFile.filedescription or gd_file.get('description') # Give priority to original value
             myFile.filesource = 'GD'
             myFile.alternatefileid = gd_file.get('id')
-            myFile.fileattributes = to_json(fileattributes)
+            myFile.fileattributes = to_json(gd_file['properties'])
             myFile.fileURL = myFile.fileURL or gd_file.get('webContentLink')
-            myFile.schoolid = myFile.schoolid or fileattributes.get('schoolid') # Give priority to original value
-            myFile.schoolyear = myFile.schoolyear or fileattributes.get('schoolyear') # Give priority to original value
+            myFile.schoolid = myFile.schoolid or gd_file['properties'].get('schoolid') # Give priority to original value
+            myFile.schoolyear = myFile.schoolyear or gd_file['properties'].get('schoolyear') # Give priority to original value
 
         # Save to repository
         fileid = save_data('SP_DCPUpsertFile',

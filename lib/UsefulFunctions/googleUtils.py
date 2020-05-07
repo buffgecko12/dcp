@@ -348,8 +348,6 @@ class GoogleDrive(GoogleService):
 
     def prepare_gd_file(self, gd_file, actions={'updatefields':True,'setproperties':True}):
 
-        result = {}
-
         # Update icon link        
         if actions.get('updatefields'):
             gd_file['iconLink'] = gd_file.get('iconLink','').replace("16","128")
@@ -357,9 +355,8 @@ class GoogleDrive(GoogleService):
 
         # Set attributes field
         if actions.get('setproperties'):
-            result['properties'] = {'gd':gd_file, **gd_file.pop('properties', {})}
-
-        return result
+            myfile = copy.deepcopy(gd_file)
+            gd_file['properties'] = {'gd':myfile, **myfile.pop('properties', {})}
 
     def sync(self, fileid=None, **kwargs):
         
@@ -374,6 +371,9 @@ class GoogleDrive(GoogleService):
         # Create batch file list        
         for myfile in myfiles:
 
+            # Prep gd file
+            self.prepare_gd_file(myfile)
+
             myfilelist.append({
                 'filename':myfile.get('name'),
                 'fileextension':myfile.get('fileExtension'),
@@ -382,7 +382,7 @@ class GoogleDrive(GoogleService):
                 'filesize':myfile.get('size'),
                 'filedescription':myfile.get('description'),
                 'fileurl':myfile.get('webContentLink'),
-                'fileattributes':self.prepare_gd_file(myfile).get('properties'),
+                'fileattributes':myfile.get('properties'),
                 'filesource':'GD'
             })
         
