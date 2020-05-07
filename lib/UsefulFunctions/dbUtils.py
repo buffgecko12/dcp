@@ -57,10 +57,10 @@ def get_data_raw(sp_name, params):
          
     return return_data
 
-def save_data(sp_name, params):
+def save_data(sp_name, params, returnall=False):
     with connection.cursor() as cursor:        
         cursor.callproc(sp_name, params)
-        return_data = cursor.fetchone() # Store any output
+        return_data = cursor.fetchone() if not returnall else cursor.fetchall() # Return single result set row unless specified otherwise
         cursor.close()
         
     return return_data
