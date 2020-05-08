@@ -45,24 +45,19 @@
 				<li class="nav-item dropdown">				
 					<a class="nav-link" href="{% url 'wakemeup:list_calendar' %}">Calendario</a>
 				</li>
-				{% if user.is_admin or user.usertype == "TR" %}
+				{% if user.is_admin %}
 				
 					<!-- ADMIN -->
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Admin</a>
 						<div class="dropdown-menu">
-							{% if user.is_admin %}
-								<a class="dropdown-item" href="{% url 'wakemeup:list_object' objecttype='school' %}">Colegios</a>
-							{% endif %}
-							{% if user.is_admin or user.usertype == "TR" %}
-								<a class="dropdown-item" href="{% url 'wakemeup:list_object' objecttype='class' %}">Cursos</a>
-							{% endif %}
-							{% if user.is_admin %}
-								<a class="dropdown-item" href="{% url 'wakemeup:list_object' objecttype='teacher' %}">Docentes</a>
-							{% endif %}
+							<a class="dropdown-item" href="{% url 'wakemeup:list_object' objecttype='school' %}">Colegios</a>
+							<a class="dropdown-item" href="{% url 'wakemeup:list_object' objecttype='class' %}">Cursos</a>
+							<a class="dropdown-item" href="{% url 'wakemeup:list_object' objecttype='teacher' %}">Docentes</a>
 							<a class="dropdown-item" href="{% url 'wakemeup:list_object' objecttype='reward' %}">Premios</a>
 							<div class="dropdown-divider"></div>
 							<a class="dropdown-item {% if url_name == 'create_user' %} active {% endif %}" href="{% url 'wakemeup:create_user' %}">Crear usuario</a>
+							<a class="dropdown-item {% if url_name == 'execute_admintools' %} active {% endif %}" href="{% url 'wakemeup:execute_admintools' %}">Sincronizar con Google Drive</a>
 						</div>
 					</li>
 				{% endif %}
