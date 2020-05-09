@@ -177,6 +177,18 @@ def load_rewards(request):
     
     return render(request, 'wakemeup/admin//reward_options.html', context)
 
+def execute_admintools(request):
+
+    # Handle link redirect
+    if request.method == "POST" and not request.POST.get('source'):
+        action = request.POST.get('action')
+        
+        if action == "drivesync":
+            gd = GoogleDrive()
+            gd.sync()
+            
+    return HttpResponse("Success")
+
 def manage_user_display(request):
     actiontype = request.GET.get('actiontype') # Check if existing contract
 

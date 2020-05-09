@@ -18,6 +18,8 @@ urlpatterns = [
     url(r'^admin/(?P<objecttype>(school|class|reward))/(?P<objectid>new)$', views.edit_object, name="edit_object"), # New object
     url(r'^admin/(?P<objecttype>(school|class|teacher|reward|contract))/(?P<objectid>\d+)/delete$', views.delete_object, name="delete_object"), # Delete object    
 
+    url(r'^admin/tools$', views.execute_admintools, name="execute_admintools"),
+
     # User 
     url(r'^admin/create_user', views.create_user, name="create_user"),
     url(r'^myaccount', views.myaccount, name="myaccount"),
