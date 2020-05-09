@@ -23,12 +23,14 @@ def dcp(request):
             }
 
             navigation = {
-                'uploadfilepost': {
-                    "fields": {
-                        'source':'navbar',
-                        'schoolyear':get_school_year(),
-                        'programname':'incentive',
-                        'fileclass':'contractfile'
+                'link_post': {
+                    'upload_file': {
+                        "fields": {
+                            'source':'navbar',
+                            'schoolyear':get_school_year(),
+                            'programname':'incentive',
+                            'fileclass':'contractfile'
+                        }
                     }
                 }
             }

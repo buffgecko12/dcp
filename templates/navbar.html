@@ -1,4 +1,5 @@
 {% load static %}
+{% load navigation %}
 {% with url_name=request.resolver_match.url_name %}
 
 <nav class="navbar navbar-expand-sm bg-light navbar-light sticky-top">
@@ -34,10 +35,8 @@
 					<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Archivos</a>
 					<div class="dropdown-menu">
 						<a class="dropdown-item {% if url_name == 'list_file' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}">Descargar</a>
-					{% url 'wakemeup:upload_file' as actionurl %}
-					{% include 'link_post.html' with linktext="Subir" actionurl=actionurl formname="upload_file" formurlname="upload_file" displaytype="navbar" %}
-						
-						
+						{% url 'wakemeup:upload_file' as actionurl %}
+						{% link_post navcontext=navigation formname="upload_file" actionurl=actionurl displaytype="navbar" urlname=url_name linktext="Subir" %}
 					</div>
 				</li>
 				
@@ -57,7 +56,8 @@
 							<a class="dropdown-item" href="{% url 'wakemeup:list_object' objecttype='reward' %}">Premios</a>
 							<div class="dropdown-divider"></div>
 							<a class="dropdown-item {% if url_name == 'create_user' %} active {% endif %}" href="{% url 'wakemeup:create_user' %}">Crear usuario</a>
-							<a class="dropdown-item {% if url_name == 'execute_admintools' %} active {% endif %}" href="{% url 'wakemeup:execute_admintools' %}">Sincronizar con Google Drive</a>
+							{% url 'wakemeup:execute_admintools' as actionurl %}
+							{% link_post navcontext=navigation formname="execute_admintools" actionurl=actionurl displaytype="navbar" urlname=url_name linktext="Sincronizar con Google Drive" %}
 						</div>
 					</li>
 				{% endif %}
