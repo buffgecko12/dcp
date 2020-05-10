@@ -18,16 +18,36 @@
 {% block title %}Calendario{% endblock %}
 
 {% block content %}
-	<div class="container">
-		<br>
-	    <div class="responsive-iframe-container">
-			{% if userprogram.googlecalendarid %}
-			<iframe src="https://calendar.google.com/calendar/embed?height=600&amp;wkst=2&amp;bgcolor=%23ffffff&amp;ctz=America%2FBogota&amp;src={{ userprogram.googlecalendarid }}&amp;color=%23B39DDB&amp;showTitle=0&amp;showNav=1&amp;showDate=1&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;hl=es_419"
-					style="border-width:0" width="800" height="600" frameborder="0" scrolling="no">
-			</iframe>
-			{% else %}
-				No hay calendario.
-			{% endif %}
-	    </div>
+	<div class="container"><br>
+		{% if userprogram.calendarid %}
+			<div class="row">
+				<div class="col">
+					<div align="center"><h2>Calendario para {{userprogram.schoolyear|stringformat:"i"}}</h2></div><br>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-4">
+					<b>Eventos</b><br>
+					{% if events %}
+						{% for event in events %}
+							<a href="{{event.htmlLink}}" target="_blank">{{event.end.date}} - {{event.summary}}</a><br>
+						{% endfor %}
+					{% else %}
+						No hay registros.
+					{% endif %}
+				</div>
+				<div class="col-8">
+				    <div class="responsive-iframe-container">
+						<iframe src="https://calendar.google.com/calendar/embed?height=600&amp;wkst=2&amp;bgcolor=%23ffffff&amp;ctz=America%2FBogota&amp;src={{ userprogram.calendarid }}&amp;color=%23B39DDB&amp;showTitle=0&amp;showNav=1&amp;showDate=1&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;hl=es_419"
+								style="border-width:0" width="800" height="600" frameborder="0" scrolling="no">
+						</iframe>
+				    </div>
+				</div>
+			</div>
+		{% else %}
+			<div class="row">
+				<div class="col" align="center">No hay calendario.</div>
+			</div>
+		{% endif %}
     </div>
 {% endblock %}

@@ -156,9 +156,25 @@ class GoogleCalendar(GoogleService):
             return self.connection.calendars().delete(calendarId=calendarid).execute()
 
     # EVENTS
-    def get_events(self):
-        events = self.connection.events().list(calendarId=self.calendarid).execute()
+    @google_api_safe_run
+    def get_events(self, calendarid, starttime=None, endtime=None, **kwargs):
+        events = self.connection.events().list(calendarId=calendarid, timeMin=starttime, timeMax=endtime, **kwargs).execute()
         return events.get('items', [])
+    
+    @google_api_safe_run
+    def get_event(self, calendarid, eventid, **kwargs):
+        return self.connection.events().get(calendarId=calendarid, eventId=eventid, **kwargs).execute()
+
+    @google_api_safe_run
+    def create_event(self, calendarid, event, **kwargs):
+        return self.connection.events().insert(calendarId=calendarid, body=event, **kwargs).execute()
+
+    def format_event(self, starttime, endtime, description, timezone='America/Bogota', dateformat="%Y-%m-%dT%H:%M:%S%z"):
+        return {
+            'start':{'dateTime':starttime.strftime(dateformat),'timeZone':timezone}, 
+            'end':{'dateTime':endtime.strftime(dateformat),'timeZone':timezone}, 
+            'description':description
+        }
 
     # ACLs
     @google_api_safe_run

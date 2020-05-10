@@ -13,7 +13,7 @@ from lib.UsefulFunctions.httpUtils import *
 from lib.UsefulFunctions.miscUtils import get_school_year
 from lib.UsefulFunctions.stringUtils import *
 from lib.UsefulFunctions.fileUtils import get_file_name_info
-from lib.UsefulFunctions.googleUtils import GoogleDrive
+from lib.UsefulFunctions.googleUtils import GoogleDrive, GoogleCalendar
 
 from django_tables2 import RequestConfig
 
@@ -334,10 +334,18 @@ def myaccount(request):
 
     return render(request, 'wakemeup/myaccount.html', context)
 
+@check_authentication
 def list_calendar(request):
-    
+
     userprogram = UserProgram.objects.get(programname='incentive', userid=request.user.userid, schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=request.user.schoolid) # TO-DO: Fix for variables (schoolid, schoolyear, programname)
-    return render(request, 'wakemeup/calendar/index.html', {'userprogram':userprogram})
+    events = GoogleCalendar().get_events(calendarid=userprogram.calendarid) if userprogram.calendarid else None
+    
+    context = {
+        'userprogram':userprogram,
+        'events':events
+    }
+    
+    return render(request, 'wakemeup/calendar/index.html', context)
 
 @check_authorization
 def list_file(request):

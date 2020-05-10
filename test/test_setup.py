@@ -1,5 +1,6 @@
 # Hack to get around import issues
 import sys
+from datetime import datetime
 
 testflag = False
 
@@ -315,6 +316,11 @@ def create_role_ACL(myrole,myobject,accesslevel=4,acllist=None):
         myroleacl.save()
         
     return myroleacl
+
+def create_calendar_event(gc, calendarid, starttime=datetime(2020,5,17), endtime=datetime(2020,5,17), description='Test description'):
+
+    event = gc.format_event(starttime=starttime, endtime=endtime, description=description)
+    return gc.create_event(calendarid=calendarid, event=event)
 
 def delete_school(myschool):
     
