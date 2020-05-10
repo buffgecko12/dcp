@@ -334,8 +334,8 @@ def myaccount(request):
 
     return render(request, 'wakemeup/myaccount.html', context)
 
-@check_authentication
-def list_calendar(request):
+@check_authorization
+def get_calendar(request):
 
     userprogram = UserProgram.objects.get(programname='incentive', userid=request.user.userid, schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=request.user.schoolid) # TO-DO: Fix for variables (schoolid, schoolyear, programname)
     events = GoogleCalendar().get_events(calendarid=userprogram.calendarid) if userprogram.calendarid else None

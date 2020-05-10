@@ -25,7 +25,7 @@ urlpatterns = [
     url(r'^myaccount', views.myaccount, name="myaccount"),
 
     # Calendar
-    url(r'^calendar/', views.list_calendar, name='list_calendar'),
+    url(r'^calendar/', views.get_calendar, name='get_calendar'),
 
     # Files
     url(r'^files/upload$', views.upload_file, name="upload_file"),
