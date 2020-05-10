@@ -15,16 +15,17 @@ from wakemeup.models.environment import File
 class MyUserManager(BaseUserManager):
 
     # Create new user
-    def create_user(self, password, schoolid = None, username = None, usertype = None, firstname = None, lastname = None, emailaddress = None):
+    def create_user(self, password, schoolid=None, username=None, usertype=None, firstname=None, lastname=None, emailaddress=None, sharedaccountflag=False):
  
         user = self.model(
-            userid=None,
-            schoolid=schoolid,
-            username=username,
-            usertype=usertype,
-            firstname=firstname,
-            lastname=lastname,
-            emailaddress=emailaddress,
+            userid = None,
+            schoolid = schoolid,
+            username = username,
+            usertype = usertype,
+            firstname = firstname,
+            lastname = lastname,
+            emailaddress = emailaddress,
+            sharedaccountflag = sharedaccountflag
         )
 
         # Save hashed password
@@ -59,6 +60,7 @@ class MyUserManager(BaseUserManager):
                 self.normalize_email(myUser.emailaddress),
                 myUser.password,
                 myUser.profilepictureid,
+                myUser.sharedaccountflag,
                 myUser.last_login,
             )
          )[0] # Return userid
@@ -172,6 +174,7 @@ class MyUser(AbstractBaseUser):
     profilepictureid = models.IntegerField()
     reputationvalue = models.IntegerField()
     reputationvaluelastseents = models.DateTimeField()
+    sharedaccountflag = models.BooleanField()
     is_active = models.BooleanField()
 
     # Define data manager

@@ -296,6 +296,7 @@ def myaccount(request):
                 lastname = form.cleaned_data.get('lastname'),
                 emailaddress = form.cleaned_data.get('emailaddress'),
                 profilepictureid = form.cleaned_data.get('profilepictureid'),
+                sharedaccountflag = form.cleaned_data.get('sharedaccountflag'),
             )
 
             # Save user
@@ -304,16 +305,8 @@ def myaccount(request):
         myuser = get_user_model().objects.get(userid=request.user.userid)
         
         if(myuser):
-            form=MyUserForm(request=request,
-                initial={
-                    'userid':myuser.userid,
-                    'schoolid':myuser.schoolid,
-                    'firstname':myuser.firstname,
-                    'lastname':myuser.lastname,
-                    'emailaddress':myuser.emailaddress,
-                    'profilepictureid':myuser.profilepictureid,
-                }
-            )
+            form=MyUserForm(request=request, initial=vars(myuser))
+            
         # Return empty form
         else:
             form=MyUserForm(request=request)
@@ -1037,6 +1030,7 @@ def create_user(request):
                 lastname = form.cleaned_data.get('lastname'),
 #                 defaultsignaturescanfile = form.cleaned_data.get('defaultsignaturescanfile'),
                 emailaddress = myemailaddress,
+                sharedaccountflag = form.cleaned_data.get('sharedaccountflag')
             )
 
             # Send confirmation / review e-mail (only if e-mail provided)

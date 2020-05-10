@@ -18,6 +18,7 @@ from lib.UsefulFunctions.miscUtils import *
 import datetime
 from lib.UsefulFunctions.stringUtils import *
 
+BOOLEAN_CHOICES = ((True, 'S' + mychr('i')), (False, 'No'))
 DEFAULT_SCHOOL_YEAR = get_school_year()
 
 DEFAULT_FORM_CLASS = 'form-horizontal'
@@ -266,6 +267,7 @@ class SignupForm(UserCreationForm):
     schoolid = forms.ChoiceField(label='Colegio', widget=forms.Select, required=False)
     classid = forms.CharField(label='Curso(s)', widget=forms.SelectMultiple, required=False)
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
+    sharedaccountflag = forms.ChoiceField(label='Cuenta compartida', required=True, choices=BOOLEAN_CHOICES, initial=False)
 
     # Program info
     programname = forms.ChoiceField(label='Programa', widget=forms.Select, required=False)
@@ -314,6 +316,7 @@ class SignupForm(UserCreationForm):
                 'schoolyear',
                 'password1',
                 'password2',
+                'sharedaccountflag'
             ),
             getAdminFormActions()
         )
@@ -321,7 +324,7 @@ class SignupForm(UserCreationForm):
     # Specify model and which fields to include in form
     class Meta:
         model = get_user_model()
-        fields = ('username','usertype','schoolid','classid','firstname','lastname','emailaddress','password1','password2')
+        fields = ('username','usertype','schoolid','classid','firstname','lastname','emailaddress','password1','password2','sharedaccountflag')
 
     # Make sure email address does not already exist
     def clean_emailaddress(self):
@@ -578,6 +581,8 @@ class MyUserForm(forms.Form):
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     profilepictureid = forms.IntegerField(label='Avatar', required=False)
 
+    sharedaccountflag = forms.ChoiceField(label='Cuenta compartida', required=True, choices=BOOLEAN_CHOICES, initial=False)
+
     def __init__ (self, *args, **kwargs):
 
         # Extract request info
@@ -616,6 +621,7 @@ class MyUserForm(forms.Form):
             'firstname',
             'lastname',
             'emailaddress',
+            'sharedaccountflag',
             InlineRadios('profilepictureid', template = 'wakemeup/admin/profilepicture.html'),
             getAdminFormActions()
         )
@@ -627,7 +633,7 @@ class MyUserForm(forms.Form):
     # Specify model
     class Meta:
         model = get_user_model()
-        fields = ('userid','username','schoolid','firstname','lastname','emailaddress','profilepictureid')
+        fields = ('userid','username','schoolid','firstname','lastname','emailaddress','sharedaccountflag','profilepictureid')
 
 class ContractForm(forms.Form):
 

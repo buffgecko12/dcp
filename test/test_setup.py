@@ -114,7 +114,7 @@ def create_class(schoolid, schoolyear = None, classdisplayname = '901', gradelev
     return myclass
 
 ### USER ###
-def create_user(usertype='TR', firstname='Joe', lastname='Smith', emailaddress='test@email.com', password='password', username='user1', schoolid=None):
+def create_user(usertype='TR', firstname='Joe', lastname='Smith', emailaddress='test@email.com', password='password', username='user1', schoolid=None, sharedaccountflag=False):
 
     # Delete user if exists
     try:
@@ -132,6 +132,7 @@ def create_user(usertype='TR', firstname='Joe', lastname='Smith', emailaddress='
         username = username,
         emailaddress = emailaddress,
         schoolid = schoolid,
+        sharedaccountflag = sharedaccountflag
     )
 
     return newuser
