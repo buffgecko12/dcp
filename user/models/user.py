@@ -207,6 +207,18 @@ class MyUser(AbstractBaseUser):
     def check_access(self, objectid, objectclass, requestedaccesslevel=4, businessobjectpermissionsflag=False):
         return MyUser.objects.check_access(self, objectid, objectclass, requestedaccesslevel, businessobjectpermissionsflag)
     
+    def get_object_auth(self):
+        myobjects = self.check_access(objectid=None, objectclass='BO', requestedaccesslevel=None)
+        
+        result = {}
+        
+        for myobject in myobjects:
+            result.update({
+                myobject.objectname: {'accesslevel': myobject.accesslevel}
+            })
+
+        return result
+    
     def add_event(self, eventid, contractid = None):
         return MyUser.objects.add_event(self, eventid, contractid)
         

@@ -106,6 +106,9 @@ class testAuthorization(unittest.TestCase):
         self.assertFalse(self.myteacher2.check_access(self.myfile7.fileid,'FL',1))
         self.assertFalse(self.mystudent.check_access(self.myfile7.fileid,'FL',1))
 
+        # Get all object auth
+        self.assertTrue(self.myteacher1.get_object_auth())
+
     def testRevokedAuthorization(self):
         
         # Check before

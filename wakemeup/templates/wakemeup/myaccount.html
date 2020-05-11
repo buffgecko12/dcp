@@ -14,17 +14,21 @@
 		  <li class="nav-item">
 		    <a class="nav-link active" data-toggle="tab" href="#profile">Perfil</a>
 		  </li>
-<!--		  <li class="nav-item"> TO-DO: Restore when ready -->
-		  <li class="nav-item" style="display:none">
-		    <a class="nav-link" data-toggle="tab" href="#reputation">Reputaci&#243;n</a>
-		  </li>
-<!--		  <li class="nav-item"> TO-DO: Restore when ready -->
-		  <li class="nav-item" style="display:none">
-		    <a class="nav-link" data-toggle="tab" href="#badges">Medallas</a>
-		  </li>
-		  <li class="nav-item">
-		    <a class="nav-link" data-toggle="tab" href="#tools">Herramientas</a>
-		  </li>
+			{% if not auth.myaccount.reputation.disable %}
+			  <li class="nav-item">
+			    <a class="nav-link" data-toggle="tab" href="#reputation">Reputaci&#243;n</a>
+			  </li>
+			{% endif %}
+			{% if not auth.myaccount.badges.disable %}
+			  <li class="nav-item" {% if auth.myaccount.badges.disable %}style="display:none"{% endif %}
+			    <a class="nav-link" data-toggle="tab" href="#badges">Medallas</a>
+			  </li>
+			{% endif %}
+			{% if not auth.myaccount.tools.disable %}
+			  <li class="nav-item">
+			    <a class="nav-link" data-toggle="tab" href="#tools">Herramientas</a>
+			  </li>
+			{% endif %}
 		</ul>
 		
 		<!-- Tab panes -->
@@ -36,15 +40,21 @@
 				{% crispy form %}
 			</form>
 		  </div>
+			{% if not auth.myaccount.reputation.disable %}
 		  <div class="tab-pane fade" id="reputation">
 			{% render_table reputationevents %}
 		  </div>
+			{% endif %}
+			{% if not auth.myaccount.badges.disable %}
 		  <div class="tab-pane fade" id="badges">
 			{% render_table badges %}
 		  </div>
+			{% endif %}
+			{% if not auth.myaccount.tools.disable %}
 		  <div class="tab-pane fade" id="tools">
 			<a href="{% url 'password_reset' %}">Restablecer contrase&#241;a</a>
 		  </div>
+			{% endif %}
 		</div>
     </div>
 {% endblock %}

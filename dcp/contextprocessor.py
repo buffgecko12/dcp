@@ -1,6 +1,6 @@
 # Define custom context processor to add context to all pages
-from django.contrib.auth import get_user_model
 from lib.UsefulFunctions.miscUtils import get_school_year
+from dcp.extendedauth import extended_permissions
 
 # Access via userinfo.keyname
 def dcp(request):
@@ -8,34 +8,34 @@ def dcp(request):
     context = {}
     
     if(request.user.is_authenticated):
-        myuser = get_user_model().objects.get_user(userid=request.user.userid)
-        mydisplayinfo = myuser.manage_display_info(actiontype='getuserdisplayinfo')
+        mydisplayinfo = request.user.manage_display_info(actiontype='getuserdisplayinfo')
 
-        if(myuser):
-            userinfo = {
-                'reputationvaluedelta':mydisplayinfo['reputationvaluedelta'],
-                'opennotificationsflag':mydisplayinfo['opennotificationsflag'],
-                'profilepicturefile':mydisplayinfo['profilepicturefile'],
-            }
-            
-            programinfo = {
-                'currentschoolyear':get_school_year()
-            }
+        userinfo = {
+            'reputationvaluedelta':mydisplayinfo['reputationvaluedelta'],
+            'opennotificationsflag':mydisplayinfo['opennotificationsflag'],
+            'profilepicturefile':mydisplayinfo['profilepicturefile'],
+        }
+        
+        programinfo = {
+            'currentschoolyear':get_school_year()
+        }
 
-            navigation = {
-                'link_post': {
-                    'upload_file': {
-                        "fields": {
-                            'source':'navbar',
-                            'schoolyear':get_school_year(),
-                            'programname':'incentive',
-                            'fileclass':'contractfile'
-                        }
+        auth = extended_permissions(request)
+
+        navigation = {
+            'link_post': {
+                'upload_file': {
+                    "fields": {
+                        'source':'navbar',
+                        'schoolyear':get_school_year(),
+                        'programname':'incentive',
+                        'fileclass':'contractfile'
                     }
                 }
             }
+        }
 
-            context.update({'userinfo':userinfo, 'programinfo':programinfo, 'navigation':navigation})
+        context.update({'userinfo':userinfo, 'programinfo':programinfo, 'navigation':navigation, 'auth':auth})
             
     return context
 
