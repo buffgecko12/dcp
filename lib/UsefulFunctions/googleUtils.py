@@ -157,8 +157,8 @@ class GoogleCalendar(GoogleService):
 
     # EVENTS
     @google_api_safe_run
-    def get_events(self, calendarid, starttime=None, endtime=None, **kwargs):
-        events = self.connection.events().list(calendarId=calendarid, timeMin=starttime, timeMax=endtime, **kwargs).execute()
+    def get_events(self, calendarid, starttime=None, endtime=None, orderby="startTime", **kwargs):
+        events = self.connection.events().list(calendarId=calendarid, timeMin=starttime, timeMax=endtime, orderBy=orderby, singleEvents=True if orderby else None, **kwargs).execute()
         return events.get('items', [])
     
     @google_api_safe_run

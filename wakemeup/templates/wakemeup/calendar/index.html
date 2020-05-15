@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load datatransform %}
 
 {% block headimport %}
 <style>
@@ -26,17 +27,26 @@
 				</div>
 			</div>
 			<div class="row">
-				<div class="col-4">
-					<b>Eventos</b><br>
+				<div class="col-5">
+					<div style="font-size:1.4vw"><b>Fechas tope</b></div>
+					<div style="font-size:1.2vw;white-space: nowrap;" nowrap>
 					{% if events %}
 						{% for event in events %}
-							<a href="{{event.htmlLink}}" target="_blank">{{event.end.date}} - {{event.summary}}</a><br>
+							<b><i>
+							{% if event.end.date %}
+								{{event.end.date|parse_date|date:"d-m-Y"}}
+							{% else %}
+								{{event.end.dateTime|parse_date|date:"d-m-Y"}}
+							{% endif %}
+							</b></i>
+							<a href="{{event.htmlLink}}" target="_blank">{{event.summary|truncatechars:40}}</a><br>
 						{% endfor %}
 					{% else %}
 						No hay registros.
 					{% endif %}
+					</div>
 				</div>
-				<div class="col-8">
+				<div class="col-7">
 				    <div class="responsive-iframe-container">
 						<iframe src="https://calendar.google.com/calendar/embed?height=600&amp;wkst=2&amp;bgcolor=%23ffffff&amp;ctz=America%2FBogota&amp;src={{ program.calendarid }}&amp;color=%23B39DDB&amp;showTitle=0&amp;showNav=1&amp;showDate=1&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;hl=es_419"
 								style="border-width:0" width="800" height="600" frameborder="0" scrolling="no">
