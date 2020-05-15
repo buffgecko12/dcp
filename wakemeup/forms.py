@@ -14,9 +14,9 @@ from wakemeup.models.environment import *
 from user.models.authorization import Role
 
 from lib.UsefulFunctions.miscUtils import *
-
-import datetime
 from lib.UsefulFunctions.stringUtils import *
+
+from dotmap import DotMap
 
 BOOLEAN_CHOICES = ((True, 'S' + mychr('i')), (False, 'No'))
 DEFAULT_SCHOOL_YEAR = get_school_year()
@@ -136,6 +136,45 @@ def set_field_size(field, size=''):
         myfield = field.css_class + fieldclass
 
     return myfield
+
+# Base form
+class MyForm(forms.Form):
+    
+    config = {}
+    readonly = False
+    
+    def __init__(self, *args, **kwargs):
+
+        # Extract context variables        
+        self.context = kwargs.pop('context', {})
+        self.request = self.context.get('request', {})
+        
+        super(MyForm, self).__init__(*args, **kwargs)
+
+    def configure(self):
+        myconfig = DotMap(self.config)
+        
+        # Configure fields
+        for field, fieldinfo in myconfig.get('fields').items():            
+            myfield = self.fields[field]
+            
+            if fieldinfo.initial:
+                myfield.initial = fieldinfo.initial
+                
+            if fieldinfo.readonly:
+                myfield.widget.attrs.update({'readonly':True})
+                
+            if fieldinfo.hidden:
+                myfield.widget = forms.HiddenInput()
+                
+            if fieldinfo.dropdown:
+                info = fieldinfo.dropdown
+                set_dropdown_choices(self, fieldname=field, lookupargs=info.lookupargs, selectflag=info.selectflag, sortflag=info.sortflag)
+
+        # Make all fields read-only
+        if(self.readonly):
+            for field in self.fields:
+                self.fields[field].widget.attrs.update({'readonly':True})
 
 class UploadFileForm(forms.Form):
 
@@ -569,7 +608,7 @@ class ClassForm(forms.Form):
     class Meta:
         model = Class
 
-class MyUserForm(forms.Form):
+class MyAccountForm(MyForm):
 
     # Define form fields
     username = forms.CharField(label="Nombre de usuario", max_length=50)
@@ -581,38 +620,34 @@ class MyUserForm(forms.Form):
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     profilepictureid = forms.IntegerField(label='Avatar', required=False)
 
-    sharedaccountflag = forms.ChoiceField(label='Cuenta compartida', required=True, choices=BOOLEAN_CHOICES, initial=False)
+    sharedaccountflag = forms.BooleanField(label='Cuenta compartida', required=False, initial=False)
 
     def __init__ (self, *args, **kwargs):
+        super(MyAccountForm, self).__init__(*args, **kwargs)
+        myuser = self.request.user
 
-        # Extract request info
-        request = kwargs.pop("request")
-
-        # Call base class constructor (i.e. Teacher Form)
-        super(MyUserForm, self).__init__(*args, **kwargs)
+        # Configure form based on user
+        if(myuser):
+            myschoolid = {'initial': myuser.schoolid, 'readonly': True} if not myuser.is_admin() else {}
+            myschoolid.update({'dropdown':{'lookupargs':{'schoolid': None if myuser.is_admin() else myuser.schoolid, 'userflag':True}}})
+    
+            # Configure fields
+            self.readonly = True if myuser.sharedaccountflag else False
+            self.config.update({
+                'fields': {
+                    'sharedaccountflag': {'hidden': True if not myuser.is_admin() else False},
+                    'username': {'initial': myuser.username, 'readonly': True},
+                    'schoolid': myschoolid,
+                    'profilepictureid': {'hidden': True if myuser.sharedaccountflag else False, 'dropdown': {'lookupargs':{'userid':myuser.userid}, 'selectflag': False, 'sortflag': False}}
+                }})
+            
+            self.configure()
 
         # Set form helper properties
         self.helper = FormHelper()
         setFormHelper(self.helper)
         self.helper.form_tag = False
 
-        # Display username, but don't allow edits
-        self.fields['username'].initial=request.user.username
-        self.fields['username'].widget.attrs['readonly'] = True
-
-        # Teachers can only add students
-        if(not request.user.is_admin()):
-            myschoolid = request.user.schoolid # Can only add students to their own school
-            self.fields['schoolid'].initial = myschoolid
-            self.fields['schoolid'].disabled = True
-            self.fields['schoolid'].widget=forms.HiddenInput()
-        else:
-            myschoolid = None
-
-        # Set drop-downs
-        set_dropdown_choices(self,fieldname='schoolid', lookupargs={'schoolid':myschoolid, 'userflag':True})
-        set_dropdown_choices(self,fieldname='profilepictureid', lookupargs={'userid':request.user.userid}, selectflag=False, sortflag=False)
-        
         # Set form layout
         self.helper.layout = Layout(
             'userid',
@@ -622,8 +657,8 @@ class MyUserForm(forms.Form):
             'lastname',
             'emailaddress',
             'sharedaccountflag',
-            InlineRadios('profilepictureid', template = 'wakemeup/admin/profilepicture.html'),
-            getAdminFormActions()
+            InlineRadios('profilepictureid', template='wakemeup/admin/profilepicture.html'),
+            getAdminFormActions() if not self.readonly else None
         )
 
     # Make sure email address does not already exist

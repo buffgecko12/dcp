@@ -281,10 +281,15 @@ def about(request):
 
 @check_authentication
 def myaccount(request):
+
+    context = {'request': request}
+    
     if request.method == "POST":
-        
+
+        auth = request.user.get_site_auth().myaccount
+
         # Bind form data
-        form = MyUserForm(request.POST, request.FILES, request=request)
+        form = MyAccountForm(request.POST, request.FILES, context=context)
 
         if(form.is_valid()):
             
@@ -300,16 +305,18 @@ def myaccount(request):
             )
 
             # Save user
-            myuser.save_user()
+            if not auth.profile.disable:
+                myuser.save_user()
+
     else:
         myuser = get_user_model().objects.get(userid=request.user.userid)
         
         if(myuser):
-            form=MyUserForm(request=request, initial=vars(myuser))
+            form = MyAccountForm(initial=vars(myuser), context=context)
             
         # Return empty form
         else:
-            form=MyUserForm(request=request)
+            form = MyAccountForm(context=context)
 
     # Get user objects
     myreputationevents = UserReputationEventsTable(UserReputationEvent.objects.get_events(userid=request.user.userid), orderable=False)
@@ -330,11 +337,11 @@ def myaccount(request):
 @check_authorization
 def get_calendar(request):
 
-    userprogram = UserProgram.objects.get(programname='incentive', userid=request.user.userid, schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=request.user.schoolid) # TO-DO: Fix for variables (schoolid, schoolyear, programname)
-    events = GoogleCalendar().get_events(calendarid=userprogram.calendarid) if userprogram.calendarid else None
+    program = Program.objects.get(programname='incentive', schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=request.user.schoolid) # TO-DO: Fix for variables (schoolid, schoolyear, programname)
+    events = GoogleCalendar().get_events(calendarid=program.calendarid) if getattr(program, 'calendarid', None) else None
     
     context = {
-        'userprogram':userprogram,
+        'program':program,
         'events':events
     }
     
