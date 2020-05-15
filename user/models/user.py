@@ -11,6 +11,8 @@ from user.models.base import MyModel
 
 from wakemeup.models.environment import File
 
+from dotmap import DotMap
+
 # Don't override default methods (get, all, save, delete) to avoid clashing with Django authentication
 class MyUserManager(BaseUserManager):
 
@@ -223,7 +225,7 @@ class MyUser(AbstractBaseUser):
         
         sharedaccountdisable = True if self.sharedaccountflag else False
 
-        return {
+        auth = {
             # Default permissions
             'objects': self.get_object_auth(),
             
@@ -243,6 +245,8 @@ class MyUser(AbstractBaseUser):
                 'badges': {'disable': True},
             },
         }
+        
+        return DotMap(auth)
     
     def add_event(self, eventid, contractid = None):
         return MyUser.objects.add_event(self, eventid, contractid)
