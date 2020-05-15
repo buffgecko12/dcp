@@ -218,6 +218,31 @@ class MyUser(AbstractBaseUser):
             })
 
         return result
+
+    def get_site_auth(self):
+        
+        sharedaccountdisable = True if self.sharedaccountflag else False
+
+        return {
+            # Default permissions
+            'objects': self.get_object_auth(),
+            
+            # Navbar
+            'navbar': {
+                'admin': {'disable': False if self.is_admin() else True},
+                'contracts':{'disable': True},
+                'reputation': {'disable': True},
+                'notifications': {'disable': True},
+                },
+            
+            # My Account
+            'myaccount': {
+                'profile': {'disable': sharedaccountdisable},
+                'tools': {'disable': sharedaccountdisable},
+                'reputation': {'disable': True},
+                'badges': {'disable': True},
+            },
+        }
     
     def add_event(self, eventid, contractid = None):
         return MyUser.objects.add_event(self, eventid, contractid)
