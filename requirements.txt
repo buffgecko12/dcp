@@ -12,5 +12,6 @@ dj-database-url
 whitenoise
 google-auth
 google-api-python-client
+dotmap
 
 #django-inline-svg
