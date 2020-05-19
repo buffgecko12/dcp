@@ -16,6 +16,8 @@ from lib.UsefulFunctions.miscUtils import get_app_setting
 from lib.UsefulFunctions.stringUtils import split_filename
 from wakemeup import models
 
+GD_FILE_FIELDS = 'name,fileExtension,size,mimeType,description,id,properties,webContentLink,iconLink,parents'
+
 # Wrapper function to handle API errors
 def google_api_safe_run(func):
 
@@ -237,7 +239,7 @@ class GoogleDrive(GoogleService):
                     metadata, 
                     file_data = None, 
                     mimetype = 'application/octet-stream', 
-                    fields = ('name,fileExtension,size,mimeType,description,id,properties,webContentLink,iconLink'), 
+                    fields = (GD_FILE_FIELDS), 
                     directoryflag = False, 
                     file_path = None):
 
@@ -255,14 +257,17 @@ class GoogleDrive(GoogleService):
         ).execute()
 
     @google_api_safe_run
-    def get_file(self, fileid, fields=None):
+    def get_file(self, fileid, fields=GD_FILE_FIELDS):
         return self.connection.files().get(fileId=fileid, fields=fields).execute()
 
     @google_api_safe_run
-    def get_files(self, scope="user", driveid=None, fields='files(name,fileExtension,size,mimeType,description,id,properties,webContentLink,iconLink)', spaces="drive", paginateflag=False, ignoredirectoryflag=True, searchquery='', **kwargs):
+    def get_files(self, scope="user", driveid=None, fields='files({0})'.format(GD_FILE_FIELDS), spaces="drive", paginateflag=False, ignoredirectoryflag=True, ignoretrashedflag=True, searchquery='', **kwargs):
 
         if ignoredirectoryflag:
-            searchquery += ' and ' if searchquery else '' + "(mimeType != 'application/vnd.google-apps.folder')"
+            searchquery += (' and ' if searchquery else '') + "(mimeType != 'application/vnd.google-apps.folder')"
+
+        if ignoretrashedflag:
+            searchquery += (' and ' if searchquery else '') + "trashed=false"
 
         # Map parameters to Google API
         params = {'driveId':driveid, 'corpora':scope, 'fields':fields, 'spaces':spaces, 'q':searchquery, **kwargs}
@@ -373,16 +378,36 @@ class GoogleDrive(GoogleService):
         if actions.get('setproperties'):
             myfile = copy.deepcopy(gd_file)
             gd_file['properties'] = {'gd':myfile, **myfile.pop('properties', {})}
+            gd_file['properties']['parentid'] = gd_file.get('parents',[])[0] # Store first parent
 
-    def sync(self, fileid=None, **kwargs):
+
+    def get_driveid(self):
+
+        gd_write = GoogleDrive(permissions=['write'])
+        
+        tempfolderid = gd_write.create_file(metadata={'name':'temp'}, directoryflag=True)["id"] # Create temp folder
+        rootfileid = gd_write.get_file(fileid=tempfolderid, fields='parents')["parents"][0] # Get parent ID
+        gd_write.delete_file(fileid=tempfolderid) # Delete temp folder
+        
+        return rootfileid
+
+    def sync(self, fileid=None, deleteoptions={'deleteremovedflag':True}, ignoredirectoryflag=False, **kwargs):
         
         myfilelist = []
+        mydriveid = self.get_driveid()
         
         # Get files
         if not fileid:
-            myfiles = self.get_files(**kwargs)
+            myfiles = self.get_files(ignoredirectoryflag=ignoredirectoryflag, **kwargs)
         else:
             myfiles = [self.get_file(fileid=fileid)]
+            deleteoptions= {'deleteremovedflag':False}
+
+        # Don't delete top-level directory
+        if not deleteoptions.get('excludefiles'):
+            deleteoptions['excludefiles'] = [mydriveid]
+        else:
+            deleteoptions['excludefiles'].append(mydriveid)
 
         # Create batch file list        
         for myfile in myfiles:
@@ -403,7 +428,7 @@ class GoogleDrive(GoogleService):
             })
         
         # Call batch upsert
-        result = models.environment.File.objects.save_batch(myfilelist, 'GD')
+        result = models.environment.File.objects.save_batch(fileinfo=myfilelist, filesource='GD', deleteoptions=deleteoptions)
         
         return result
 

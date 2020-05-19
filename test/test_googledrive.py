@@ -127,6 +127,10 @@ class testGoogleDrive(unittest.TestCase):
         newfile = File().save(gd_file={'gd':self.gd_write,'metadata':{'name':'test_file'}, 'directoryflag':True})
         newfile_gdid = newfile['gd_file']['id']
         
+        # Create sub-directories
+        newfile2 = self.gd_write.create_file(metadata={'name':'Sub-directory 1', 'parents':[newfile_gdid]}, directoryflag=True)
+        newfile3 = self.gd_write.create_file(metadata={'name':'Sub-directory 2', 'parents':[newfile2['id']]}, directoryflag=True)
+        
         myrepofile = File.objects.get_file_alt(fileid=newfile_gdid)
         mygdfile = self.gd_read.get_file(fileid=newfile_gdid)
 
@@ -140,6 +144,10 @@ class testGoogleDrive(unittest.TestCase):
         # Verify file names are in sync
         self.assertEqual(File.objects.get_file_alt(fileid=newfile_gdid).filename, self.gd_read.get_file(fileid=newfile_gdid)['name'])
 
+        # Sync all files
+        self.gd_read.sync()
+
+        # Delete test file and all children
         self.gd_write.delete_file(fileid=newfile_gdid, deleteoptions={'repository':True})
 
     def tearDown(self):

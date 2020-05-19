@@ -89,8 +89,8 @@ class FileManager(models.Manager):
 
         return {'fileid':fileid,'gd_file':gd_file}
     
-    def save_batch(self, fileinfo, filesource=None):
-        return save_data('SP_DCPUpsertFileBatch', (to_json(fileinfo), filesource), returnall=True)
+    def save_batch(self, fileinfo, filesource=None, deleteoptions={'deleteremovedflag':False}):
+        return save_data('SP_DCPUpsertFileBatch', (to_json(fileinfo), filesource, to_json(deleteoptions)), returnall=True)
     
     def delete(self, myFile, contractid=None, schoolid=None, alternatefileid=None, filesource=None):
         return delete_data('SP_DCPDeleteFile', (myFile.fileid, myFile.contractid, myFile.schoolid, myFile.alternatefileid, myFile.filesource))
