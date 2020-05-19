@@ -520,6 +520,16 @@ class SchoolRewardForm(forms.Form):
         model = SchoolReward
 
 class SchoolCalendarForm(forms.Form):
+    
+    calendarid = forms.CharField(required=False, label='URL de calendario')
+
+    def __init__ (self, *args, **kwargs):
+        super(SchoolCalendarForm, self).__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        
+class SchoolCalendarForm_set(forms.Form):
 
     # Define form fields
     selected = forms.BooleanField(required=False,label=' ',initial=True)
@@ -530,7 +540,7 @@ class SchoolCalendarForm(forms.Form):
     itemnotes = forms.CharField(required=False,max_length=500,label='Notas', widget=forms.Textarea(attrs={'rows':1}))
 
     def __init__ (self, *args, **kwargs):
-        super(SchoolCalendarForm, self).__init__(*args, **kwargs)
+        super(SchoolCalendarForm_set, self).__init__(*args, **kwargs)
 
         self.helper = FormHelper()
         self.helper.form_tag = False
