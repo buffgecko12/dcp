@@ -63,7 +63,7 @@ def check_authorization(view):
         elif(view_action in ("get", "download")):
             myrequestedaccesslevel = 4
             
-        elif(view_action == "edit"):
+        elif(view_action in ("edit", "execute")):
             if(kwargs.get('objectid') == "new"):
                 myrequestedaccesslevel = 10 # Create
             else:
@@ -84,7 +84,7 @@ def check_authorization(view):
         if myuser.is_authenticated:
 
             # Get object
-            if(view_action in ('list','get','download','upload','edit','create','delete')):
+            if(view_action in ('list','get','download','upload','edit','create','execute','delete')):
                 myobject = Object.objects.get_object_by_name(objectname=kwargs.get('objecttype') or view_object) # business object
             else:
                 myobject = Object.objects.get_object_by_name(objectname=viewname) # view
@@ -177,6 +177,7 @@ def load_rewards(request):
     
     return render(request, 'wakemeup/admin//reward_options.html', context)
 
+@check_authorization
 def execute_admintools(request):
 
     # Handle link redirect
