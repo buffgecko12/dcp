@@ -69,7 +69,7 @@ def check_authorization(view):
             else:
                 myrequestedaccesslevel = 8 # Edit
                 
-        elif(view_action in ("create", "upload")):
+        elif(view_action == "create"):
             myrequestedaccesslevel = 10
             
         elif(view_action == "delete"):
@@ -84,7 +84,7 @@ def check_authorization(view):
         if myuser.is_authenticated:
 
             # Get object
-            if(view_action in ('list','get','download','upload','edit','create','execute','delete')):
+            if(view_action in ('list','get','download','edit','create','execute','delete')):
                 myobject = Object.objects.get_object_by_name(objectname=kwargs.get('objecttype') or view_object) # business object
             else:
                 myobject = Object.objects.get_object_by_name(objectname=viewname) # view
@@ -355,7 +355,7 @@ def list_file(request):
     return render(request, 'wakemeup/files/list_file.html', context)
 
 @check_authorization
-def upload_file(request):
+def create_file(request):
 
     # Process form
     if request.method == "POST" and not request.POST.get('source'):
@@ -394,7 +394,7 @@ def upload_file(request):
                     'name': myfile.name,
                     'originalFilename': myfile.name,
                     'description':'Archivo subido por ' + request.user.userdisplayname,
-                    'parents':[uploaddir],
+                    'parents':[uploaddir] if uploaddir else None,
                     'properties':{
                         'userid':myuserid,
                         'uploaduserdisplayname': request.user.userdisplayname,
@@ -429,7 +429,7 @@ def upload_file(request):
     else:
         form = UploadFileForm(initial=request.POST, request=request) # Pass any post data (i.e. from links)
 
-    return render(request, 'wakemeup/files/upload_file.html', context={'form':form})
+    return render(request, 'wakemeup/files/create_file.html', context={'form':form})
 
 @check_authorization
 def download_file(request, fileid):
@@ -638,91 +638,59 @@ def edit_object(request, objecttype, objectid):
 
         # Create form instance (bind data to form)
         form = objectForm(request.POST, request.FILES, request=request)
-        calendarform = SchoolCalendarForm(request.POST)
 
-        if form.is_valid() and calendarform.is_valid():
+        if form.is_valid():
             
             kwargs = {}
             
             # Create new object
             if(objecttype == 'school'):
-
-                # Capture data use policy file info
-#                 originalpolicyfileid = request.POST.get("datausepolicyfileid") # Read in original fileid
-#                 
-#                 mydatausepolicyfileid = originalpolicyfileid or None
-#                 mydatausepolicyfile = request.FILES.get('datausepolicyfile')
-
-                # New file was uploaded
-#                 if(mydatausepolicyfile):
-# 
-#                     # Read in binary data
-#                     mydatafile = convert_form_binary_to_db(mydatausepolicyfile)
-#                     
-#                     # Create new file object
-#                     myfile = File(
-#                         fileid = None,
-#                         filename = get_file_name_info(mydatausepolicyfile.name)['file_name'],
-#                         fileextension = get_file_name_info(mydatausepolicyfile.name)['file_extension'],
-#                         filesize = mydatausepolicyfile.size,
-#                         filetype = mydatausepolicyfile.content_type,
-# #                         description = 'File description',
-#                         filedata = psycopg2.Binary(mydatafile),
-#                     )
-#                     
-#                     # Save new file and capture fileid
-#                     mydatausepolicyfileid = myfile.save()
-#                     
-#                     # Delete old file (if exists)
-#                     if(originalpolicyfileid):
-#                         File(fileid=originalpolicyfileid).delete()
                 
-                # Process guardian approval policy
-#                 guardianapprovalpolicy = json.dumps({'requiredfields':form.cleaned_data.get('guardianapprovalpolicy')})
-                
-                myschool = objectClass(
-                    schoolid = form.cleaned_data.get('schoolid'),
-                    schooldisplayname = form.cleaned_data.get('schooldisplayname'),
-                    schoolabbreviation = form.cleaned_data.get('schoolabbreviation'),
-                    address = form.cleaned_data.get('address'),
-                    city = form.cleaned_data.get('city'),
-                    department = form.cleaned_data.get('department'),
-#                     datausepolicyfileid = mydatausepolicyfileid,
-#                     guardianapprovalpolicy = guardianapprovalpolicy
-                )
+                # Validate calendar form
+                calendarform = SchoolCalendarForm(request.POST)
 
-                # Extract program info
-                myprogram = Program.objects.get(programname='incentive', schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=form.cleaned_data.get('schoolid')) # TO-DO: Fix hard-coded programname
-
-                if myprogram:
-                    if not myprogram.programdetails:
-                        myprogram.programdetails = {} 
-                        
-                    myprogram.programdetails.setdefault('google', {}).setdefault('calendar', {})['id'] = calendarform.cleaned_data.get('calendarid') 
-
-                schoolrewardformset = SchoolRewardFormSet(request.POST)
-
-                context.update({ # TO-DO: Not sure if needed?
-                    'schoolrewardformset':schoolrewardformset,
-                    'schoolcalendarform':calendarform
-                })
-                
-                if schoolrewardformset.is_valid():
-                    schoolreward_data = []
+                if calendarform.is_valid():
+                    myschool = objectClass(
+                        schoolid = form.cleaned_data.get('schoolid'),
+                        schooldisplayname = form.cleaned_data.get('schooldisplayname'),
+                        schoolabbreviation = form.cleaned_data.get('schoolabbreviation'),
+                        address = form.cleaned_data.get('address'),
+                        city = form.cleaned_data.get('city'),
+                        department = form.cleaned_data.get('department'),
+                    )
+    
+                    # Extract program info
+                    myprogram = Program.objects.get(programname='incentive', schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=form.cleaned_data.get('schoolid')) # TO-DO: Fix hard-coded programname
+    
+                    if myprogram:
+                        if not myprogram.programdetails:
+                            myprogram.programdetails = {} 
+                            
+                        myprogram.programdetails.setdefault('google', {}).setdefault('calendar', {})['id'] = calendarform.cleaned_data.get('calendarid') 
+    
+                    schoolrewardformset = SchoolRewardFormSet(request.POST)
+    
+                    context.update({ # TO-DO: Not sure if needed?
+                        'schoolrewardformset':schoolrewardformset,
+                        'schoolcalendarform':calendarform
+                    })
                     
-                    # Loop through formset
-                    for myform in schoolrewardformset:
-
-                        if(myform.cleaned_data.get('selected')):
-                            schoolreward_data.append({
-                                'rewardid': myform.cleaned_data.get('rewardid'),
-                                'rewardvalue': myform.cleaned_data.get('rewardvalue'),
-                            })
-
-                    # Save school info
-                    myschool.save(**kwargs)
-                    myprogram.save()
-                    SchoolReward(schoolid=myschool.schoolid).save(rewardinfo=to_json(schoolreward_data))
+                    if schoolrewardformset.is_valid():
+                        schoolreward_data = []
+                        
+                        # Loop through formset
+                        for myform in schoolrewardformset:
+    
+                            if(myform.cleaned_data.get('selected')):
+                                schoolreward_data.append({
+                                    'rewardid': myform.cleaned_data.get('rewardid'),
+                                    'rewardvalue': myform.cleaned_data.get('rewardvalue'),
+                                })
+    
+                        # Save school info
+                        myschool.save(**kwargs)
+                        myprogram.save()
+                        SchoolReward(schoolid=myschool.schoolid).save(rewardinfo=to_json(schoolreward_data))
 
             elif(objecttype == 'class'):
                 myclass = objectClass(
@@ -825,8 +793,6 @@ def edit_object(request, objecttype, objectid):
                         'address': myobject.address,
                         'city': myobject.city,
                         'department': myobject.department,
-#                         'datausepolicyfileid':myobject.datausepolicyfileid,
-#                         'guardianapprovalpolicy':myobject.guardianapprovalpolicy.get('requiredfields') if myobject.guardianapprovalpolicy else None
                     }
                 )
 
@@ -909,6 +875,12 @@ def edit_object(request, objecttype, objectid):
             return redirect_home()
         
     return render(request, form_template, {'form': form, 'objecttype':objecttype, **context})
+
+@check_authorization
+def edit_permissions(request):
+    
+    # Placeholder
+    return redirect_home()
 
 @check_authorization
 def get_contract(request, contractid):

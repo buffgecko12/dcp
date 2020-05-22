@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^admin/(?P<objecttype>(school|class|teacher|reward|contract))/(?P<objectid>\d+)/delete$', views.delete_object, name="delete_object"), # Delete object    
 
     url(r'^admin/tools$', views.execute_admintools, name="execute_admintools"),
+    url(r'^admin/edit_permissions', views.edit_permissions, name="edit_permissions"),
 
     # User 
     url(r'^admin/create_user', views.create_user, name="create_user"),
@@ -28,8 +29,8 @@ urlpatterns = [
     url(r'^calendar/', views.get_calendar, name='get_calendar'),
 
     # Files
-    url(r'^files/upload$', views.upload_file, name="upload_file"),
-    url(r'^files/list$', views.list_file, name="list_file"),
+    url(r'^files$', views.list_file, name="list_file"),
+    url(r'^files/create$', views.create_file, name="create_file"),
     url(r'^files/download/(?P<fileid>\d+)$', views.download_file, name='download_file'), # File download
     
     # Misc

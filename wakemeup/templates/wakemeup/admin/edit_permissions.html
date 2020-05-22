@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+<!-- Set page title -->
+{% block title %}Permisos{% endblock %}
+
+{% block headimport %}
+    <link href="{% static 'css/forms.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+	<br>
+	<form method="POST" enctype="multipart/form-data" action="{% url 'wakemeup:edit_permissions' %}" novalidate>
+		<div class="container-fluid">
+			<!-- Nav tabs -->
+			<ul class="nav nav-tabs nav-tabs-sticky">
+			  <li class="nav-item">
+			    <a class="nav-link active" data-toggle="tab" href="#general">Archivos</a>
+			  </li>
+			</ul>
+			
+				<!-- Tab panes -->
+			    {% csrf_token %}
+				<div class="tab-content">
+					<br>
+					  <div class="tab-pane active" id="general">
+							{% crispy filepermissionform %}
+					  </div>
+				</div>
+			<br>
+			<input type="submit" class="btn btn-primary" name="submit" value="Enviar"/>
+			<input type="submit" class="btn btn-secondary" name="cancel" value="Cancelar"/>
+		</div
+	</form>
+{% endblock %}
+
+{% block bodyimport %}
+
+	<!-- Javascript to maintain tab positioning -->
+	<script src="{% static 'js/jquery.stickytabs.js' %}"></script>
+	
+	<script>
+		$(document).ready(function() {
+			$('.nav-tabs-sticky').stickyTabs();
+		});
+	</script>
+{% endblock %}

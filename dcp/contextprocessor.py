@@ -27,12 +27,17 @@ def dcp(request):
         # Navigation-specific
         navigation = {
             'link_post': {
-                'upload_file': {
+                'create_file': {
                     "fields": {
                         'source':'navbar',
                         'schoolyear':get_school_year(),
                         'programname':'incentive',
                         'fileclass':'contractfile'
+                    }
+                },
+                'edit_permissions': {
+                    "fields": {
+                        'source':'navbar'
                     }
                 }
             }
