@@ -79,8 +79,8 @@ class MyUserManager(BaseUserManager):
             'profilepicturefile':mydata[2]
         })
 
-    def check_access(self, myUser, objectid, objectclass, requestedaccesslevel, businessobjectpermissionsflag):
-        return get_data(self, 'SP_DCPCheckUserObjectAccess(%s,%s,%s,%s,%s)', (myUser.userid, objectid, objectclass, requestedaccesslevel, businessobjectpermissionsflag))
+    def check_access(self, myUser, objectid, objectclass, requestedaccesslevel, objectpermissionsflag):
+        return get_data(self, 'SP_DCPCheckUserObjectAccess(%s,%s,%s,%s,%s)', (myUser.userid, objectid, objectclass, requestedaccesslevel, objectpermissionsflag))
 
     def add_event(self, myUser, eventid, contractid):
         return save_data('SP_DCPProcessUserEvent', (myUser.userid, eventid, contractid,))
@@ -206,8 +206,8 @@ class MyUser(AbstractBaseUser):
     def manage_display_info(self, actiontype, notificationtype = None):
         return MyUser.objects.manage_display_info(self, actiontype, notificationtype)
         
-    def check_access(self, objectid, objectclass, requestedaccesslevel=4, businessobjectpermissionsflag=False):
-        return MyUser.objects.check_access(self, objectid, objectclass, requestedaccesslevel, businessobjectpermissionsflag)
+    def check_access(self, objectid, objectclass, requestedaccesslevel=4, objectpermissionsflag=False):
+        return MyUser.objects.check_access(self, objectid, objectclass, requestedaccesslevel, objectpermissionsflag)
     
     def get_object_auth(self):
         myobjects = self.check_access(objectid=None, objectclass='BO', requestedaccesslevel=None)
@@ -257,8 +257,8 @@ class MyUser(AbstractBaseUser):
     def send_email(self, email_subject = None, email_body = None):
         return MyUser.objects.send_email(self, email_subject, email_body)
 
-    def get_files(self, accesslevel=4, **kwargs):
-        return File.objects.get_files(accessinfo={'userid':self.userid, 'requestedaccesslevel':accesslevel}, **kwargs)
+    def get_files(self, accesslevel=4, hierarchyflag=False, objectpermissionsflag=False, **kwargs):
+        return File.objects.get_files(hierarchyflag=hierarchyflag, accessinfo={'userid':self.userid, 'requestedaccesslevel':accesslevel, 'objectpermissionsflag':objectpermissionsflag}, **kwargs)
 
     def is_admin(self):
         if(self.usertype == 'AD' or self.usertype == 'SU'):

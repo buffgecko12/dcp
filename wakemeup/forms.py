@@ -2,7 +2,7 @@ from django.urls import reverse
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import get_user_model
-from django.forms.widgets import HiddenInput
+from django.forms.widgets import HiddenInput, CheckboxSelectMultiple
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
@@ -80,9 +80,18 @@ def getAdminFormActions(cancel_url = 'wakemeup:index', cancel_context="", cancel
         # Submit button
         Submit('submit_next','Enviar', css_id='next'),
     )
+
+def get_field_with_checkbox(field):
+    mydiv = Div(
+               Div(field + '_checkbox', css_class='col-sm-1 my-auto'),
+               Div(field, css_class='col-sm-11 my-auto'),
+               css_class='row'
+        )
     
+    return mydiv
+
 def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, lookupargs={}, ignoredefaultsflag=False, sortflag=True):
-    choices = [("0","-- Escoger --")] if selectflag else []
+    choices = [("","-- Escoger --")] if selectflag else []
 
     if ignoredefaultsflag:
         lookupargs['schoolyear'] = lookupargs.get('schoolyear') or None
@@ -176,9 +185,10 @@ class MyForm(forms.Form):
             for field in self.fields:
                 self.fields[field].widget.attrs.update({'readonly':True})
 
-class UploadFileForm(forms.Form):
+class FileForm(MyForm):
 
     # Program info
+    fileid = forms.CharField(widget=forms.HiddenInput, required=False)
     userid = forms.ChoiceField(required=True, label='Usuario')
     programname = forms.ChoiceField(required=True, label='Programa')
     schoolid = forms.ChoiceField(label='Colegio')
@@ -187,21 +197,19 @@ class UploadFileForm(forms.Form):
     # File info
     fileclass = forms.ChoiceField(label='Clase')
     contractid = forms.TypedChoiceField(label='Contrato', required=False, empty_value=None)
-    filetype = forms.ChoiceField(label='Tipo de archivo')
-    description = forms.CharField(max_length=500, label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}), required=False)
+    filecategory = forms.ChoiceField(label='Tipo de archivo')
+    filedescription = forms.CharField(max_length=500, label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}), required=False)
     accessroles = forms.MultipleChoiceField(label='Acceso', widget=forms.SelectMultiple(attrs={'size':'8'}), required=False)
     url = forms.URLField(label='URL', required=False)
     
     def __init__ (self, *args, **kwargs):
+        super(FileForm, self).__init__(*args, **kwargs)
 
-        # Extract "request" parameter
-        request = kwargs.pop('request', None)
+        request = self.request
 
         # Extract programname (if specified)
         initialvalues = kwargs.get('initial', {})
         programname = initialvalues.get('programname')
-
-        super(UploadFileForm, self).__init__(*args, **kwargs)
 
         # Hide admin fields
         if not request.user.is_admin():
@@ -217,7 +225,7 @@ class UploadFileForm(forms.Form):
             'schoolyear':   {'dropdown':{'lookupargs':{'programname':programname, 'userflag':True}}, 'default':DEFAULT_SCHOOL_YEAR},
             'programname':  {'dropdown':{'categoryclass':'program', 'lookupargs':{'userflag':True}}},
             'userid':       {'dropdown':{'lookupargs':{'programname':programname, 'userflag':True}}, 'default':request.user.userid},
-            'filetype':     {'dropdown':{'categoryclass':'contractfile'}},
+            'filecategory':     {'dropdown':{'categoryclass':'contractfile'}},
             'fileclass':    {'dropdown':'default'},
             'accessroles':  {'dropdown':{'lookupargs':{'roleclass':['US']}, 'selectflag':False}, 'default':Role.objects.get(name='Public').roleid if request.user.is_admin() else ''},
         }
@@ -247,10 +255,11 @@ class UploadFileForm(forms.Form):
             ) if request.user.is_admin() else Div('programname','schoolyear','schoolid','userid'), # Only show for admin
             Fieldset(
                 'General',
+                'fileid',
                 'fileclass',
                 'contractid',
-                'filetype',
-                'description',
+                'filecategory',
+                'filedescription',
                 'accessroles',
 #                 Div(css_class='dropzone', css_id='id_dropzone'),
                 HTML('<hr class="separator">'),
@@ -266,6 +275,43 @@ class UploadFileForm(forms.Form):
     # Specify model
     class Meta:
         model = File
+
+class FileFormBulk(FileForm):
+
+#     filelist = forms.MultipleChoiceField(label='Archivos', widget=CheckboxSelectMultiple)
+    
+    def __init__(self, *args, **kwargs):
+        super(FileFormBulk, self).__init__(*args, **kwargs)
+
+        self.fields['fileid'].initial = 'bulk'
+
+        # Generate checkbox field for each form field
+        for myfield in list(self.fields):
+            self.fields[myfield].required = False
+            self.fields['{field}_checkbox'.format(field=myfield)] = forms.BooleanField(required=False, label='')
+
+        # Set form layout
+        self.helper.layout = Layout(
+            Fieldset(
+                'Programa',
+                'fileid',
+                get_field_with_checkbox('programname'),
+                get_field_with_checkbox('schoolyear'),
+                get_field_with_checkbox('schoolid'),
+                get_field_with_checkbox('userid'),
+                HTML('<hr class="separator">'),
+            ) if self.request.user.is_admin() else Div('programname','schoolyear','schoolid','userid'), # Only show for admin
+            Fieldset(
+                'General',
+                get_field_with_checkbox('fileclass'),
+                get_field_with_checkbox('contractid'),
+                get_field_with_checkbox('filecategory'),
+                get_field_with_checkbox('filedescription'),
+                get_field_with_checkbox('accessroles'),
+            ),
+            getAdminFormActions()
+        )
+        self.helper.label_class += ' my-auto'
 
 class LoginForm(AuthenticationForm):
 

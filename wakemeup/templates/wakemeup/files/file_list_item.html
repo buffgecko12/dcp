@@ -1,0 +1,10 @@
+{% for x in ""|ljust:file.displayindent %}&nbsp;{% endfor %}
+{% if not file.directoryflag and showlinks %}
+	<img height="20" src="{{file.fileattributes.gd.iconLink}}"/>
+	<a href="{% url 'wakemeup:get_file' file.fileid %}">
+		{{file.filename|truncatechars:filenamelength|default_if_none:30}}
+	</a>
+{% else %}
+	<img height="24" src="{{file.fileattributes.gd.iconLink}}"/>
+	{{file.filename|truncatechars:filenamelength|default_if_none:30}}
+{% endif %}<br>

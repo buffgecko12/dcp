@@ -60,7 +60,7 @@ def check_authorization(view):
         if(view_action == "list"):
             myrequestedaccesslevel = 1
             
-        elif(view_action in ("get", "download")):
+        elif(view_action == "get"):
             myrequestedaccesslevel = 4
             
         elif(view_action in ("edit", "execute")):
@@ -84,7 +84,7 @@ def check_authorization(view):
         if myuser.is_authenticated:
 
             # Get object
-            if(view_action in ('list','get','download','edit','create','execute','delete')):
+            if(view_action in ('list','get','edit','create','execute','delete')):
                 myobject = Object.objects.get_object_by_name(objectname=kwargs.get('objecttype') or view_object) # business object
             else:
                 myobject = Object.objects.get_object_by_name(objectname=viewname) # view
@@ -94,7 +94,7 @@ def check_authorization(view):
 
                 # Check user has requested access to object
                 if (myuser.check_access(objectid=myobject.objectid, objectclass=myobject.objectclass, requestedaccesslevel=myrequestedaccesslevel)):
-                    
+
                     # Valid permission - continue
                     return view(*args, **kwargs)
         else:
@@ -177,11 +177,14 @@ def load_rewards(request):
     
     return render(request, 'wakemeup/admin//reward_options.html', context)
 
+def check_saveform(request):
+    return True if request.method == "POST" and not request.POST.get('source') else False
+
 @check_authorization
 def execute_admintools(request):
 
     # Handle link redirect
-    if request.method == "POST" and not request.POST.get('source'):
+    if check_saveform(request):
         action = request.POST.get('action')
         
         if action == "drivesync":
@@ -224,7 +227,7 @@ def redirect_home():
     return redirect('wakemeup:index')        
 
 def redirect_referer(request):
-    return redirect(request.META['HTTP_REFERER']) if request.META['HTTP_REFERER'] else redirect_home()
+    return redirect(request.META['HTTP_REFERER']) if request.META.get('HTTP_REFERER') else redirect_home()
 
 @check_authorization
 def delete_object(request, objecttype, objectid):
@@ -351,88 +354,162 @@ def get_calendar(request):
 @check_authorization
 def list_file(request):
 
-    context = {'files':request.user.get_files()}
+    context = {'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin())}
     return render(request, 'wakemeup/files/list_file.html', context)
 
 @check_authorization
-def create_file(request):
+def edit_file(request, fileid=None):
 
-    # Process form
-    if request.method == "POST" and not request.POST.get('source'):
-        
-        # Bind form data
-        form = UploadFileForm(request.POST, request.FILES, request=request)
+    fileid = request.POST.get('fileid', None)
 
-        if(form.is_valid()):
+    context = {'fileid':fileid}
 
-            # Connect to Google Drive
-            gd = GoogleDrive(permissions=['write'])
-            
-            # Get program info
-            myprogramname = form.cleaned_data.get('programname')
-            myuserid = form.cleaned_data.get('userid')
-            myschoolyear = form.cleaned_data.get('schoolyear')
-            myschoolid = form.cleaned_data.get('schoolid')
-
-            myfileclass = form.cleaned_data.get('fileclass')
-            myfiletype = form.cleaned_data.get('filetype')
-            myaccessroles = form.cleaned_data.get('accessroles')
-            
-            filetypes = Category.objects.get_categories(categoryclass='contractfile' if myfileclass == "CT" else "programfile" if myfileclass == "PG" else "")
-            
-            # Get user upload directory or use default (programname, school year); otherwise GD will default to "root"
-            myuserprogram = UserProgram.objects.get(userid=myuserid, programname=myprogramname, schoolyear=myschoolyear, schoolid=myschoolid, uploaddirflag=True) # Create upload dir
-            uploaddir = getattr(myuserprogram, 'uploaddirectoryid_gd', None) or \
-                        gd.lookup_fileid(gd_locator='program_uploads_base', schoolyear=myschoolyear, programname=myprogramname)
-
-            # Loop through files
-            files = [request.FILES.get('file[%d]' % i)
-                 for i in range(0, len(request.FILES))]
-
-            for myfile in files:
-                file_metadata = {
-                    'name': myfile.name,
-                    'originalFilename': myfile.name,
-                    'description':'Archivo subido por ' + request.user.userdisplayname,
-                    'parents':[uploaddir] if uploaddir else None,
-                    'properties':{
-                        'userid':myuserid,
-                        'uploaduserdisplayname': request.user.userdisplayname,
-                        'uploaduserid':request.user.userid,
-                        'programname':myprogramname
-                    }
-                }
-
-                # Build GD file
-                gd_file = {
-                    'gd': gd,
-                    'metadata':file_metadata,
-                    'file_data':myfile,
-                }
-
-                # Create file in repository
-                newfile = File(
-                    fileclass = form.cleaned_data.get('fileclass'),
-                    filecategory = myfiletype,
-                    schoolyear = myschoolyear,
-                    schoolid = myschoolid,
-                    fileURL=form.cleaned_data.get('url'),
-                    contractid = form.cleaned_data.get('contractid'),
-                    filedescription = form.cleaned_data.get('description')
-                ).save(gd_file=gd_file)
-                
-                # Save ACLs for file
-                RoleACL().save(
-                    acllist=to_json([{"roleid":myrole, "aclinfo":[{"objectid":newfile['fileid'], "objectclass":'FL', "accesslevel":4}]} for myrole in myaccessroles])
-                )
-                
+    # Set correct template
+    if(fileid =="bulk" or not fileid):
+        form_template = 'wakemeup/files/edit_file_bulk.html'
+        context.update({'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin())})
     else:
-        form = UploadFileForm(initial=request.POST, request=request) # Pass any post data (i.e. from links)
+        form_template = 'wakemeup/files/edit_file.html'
 
-    return render(request, 'wakemeup/files/create_file.html', context={'form':form})
+    # SAVE FILE
+    if check_saveform(request):
+        
+        # Single file
+        if fileid != "bulk":
+            
+            # Bind form data
+            form = FileForm(request.POST, request.FILES, context={"request": request})
+    
+            if(form.is_valid()):
+    
+                # Connect to Google Drive
+                gd = GoogleDrive(permissions=['write'])
+                
+                # Get program info
+                myprogramname = form.cleaned_data.get('programname')
+                myuserid = form.cleaned_data.get('userid')
+                myschoolyear = form.cleaned_data.get('schoolyear')
+                myschoolid = form.cleaned_data.get('schoolid')
+    
+                myfileclass = form.cleaned_data.get('fileclass')
+                myfilecategory = form.cleaned_data.get('filecategory')
+                myaccessroles = form.cleaned_data.get('accessroles')
+                
+                filetypes = Category.objects.get_categories(categoryclass='contractfile' if myfileclass == "CT" else "programfile" if myfileclass == "PG" else "")
+                
+                # Get user upload directory or use default (programname, school year); otherwise GD will default to "root"
+                myuserprogram = UserProgram.objects.get(userid=myuserid, programname=myprogramname, schoolyear=myschoolyear, schoolid=myschoolid, uploaddirflag=True) # Create upload dir
+                uploaddir = getattr(myuserprogram, 'uploaddirectoryid_gd', None) or \
+                            gd.lookup_fileid(gd_locator='program_uploads_base', schoolyear=myschoolyear, programname=myprogramname)
+    
+                # Loop through files
+                files = [request.FILES.get('file[%d]' % i)
+                     for i in range(0, len(request.FILES))]
+    
+                for myfile in files:
+                    file_metadata = {
+                        'name': myfile.name,
+                        'originalFilename': myfile.name,
+                        'description':'Archivo subido por ' + request.user.userdisplayname,
+                        'parents':[uploaddir] if uploaddir else None,
+                        'properties':{
+                            'userid':myuserid,
+                            'uploaduserdisplayname': request.user.userdisplayname,
+                            'uploaduserid':request.user.userid,
+                            'programname':myprogramname
+                        }
+                    }
+    
+                    # Build GD file
+                    gd_file = {
+                        'gd': gd,
+                        'metadata':file_metadata,
+                        'file_data':myfile,
+                    }
+    
+                    # Create file in repository
+                    newfile = File(
+                        fileclass = form.cleaned_data.get('fileclass'),
+                        filecategory = myfilecategory,
+                        schoolyear = myschoolyear,
+                        schoolid = myschoolid,
+                        fileURL=form.cleaned_data.get('url'),
+                        contractid = form.cleaned_data.get('contractid'),
+                        filedescription = form.cleaned_data.get('filedescription')
+                    ).save(gd_file=gd_file)
+                    
+                    # Save ACLs for file
+                    RoleACL().save(
+                        acllist=[{"roleid":myrole, "aclinfo":[{"objectid":newfile['fileid'], "objectclass":'FL', "accesslevel":4}]} for myrole in myaccessroles]
+                    )
+                    
+        # Bulk files
+        else:
+            form = FileFormBulk(request.POST, context={'request': request})
 
+            if(form.is_valid()):
+                accessroles = form.cleaned_data.pop('accessroles')
+                filelist = request.POST.getlist('filelist')
+                formdata = form.cleaned_data
+
+                fileinfo = {}
+                acllist = []
+                
+                print(filelist)
+                filelist = convert_string_array(filelist)
+                print(filelist)
+                
+                # Prepare fileinfo
+                for key, value in formdata.items():
+                    
+                    # Look for "checkbox" fields
+                    if(key[-9:] == "_checkbox"):
+                        myfield = key[:-9]
+                        selected = formdata[key]
+                        
+                        # Copy selected attribute to new dictionary
+                        if selected:
+                            try:
+                                fileinfo[myfield] = formdata[myfield] if formdata[myfield] else None
+                            except:
+                                pass
+
+                # Loop through files in file list
+                for myrole in accessroles:
+                    acllist.append(
+                        {
+                            "roleid": myrole, 
+                            "aclinfo": [{"objectid": myfileid, "objectclass":'FL', "accesslevel":4} for myfileid in filelist]
+                        } 
+                    )
+
+                # Update file info
+                File.objects.update_attributes(filelist, fileinfo, acllist)
+
+    # CREATE NEW
+    elif fileid == "new":
+        form = FileForm(initial=request.POST, context={'request': request}) # Pass any post data (i.e. from links)
+
+    # UPDATE EXISTING FILE
+    elif(fileid):
+        myfile = File.objects.get(fileid=fileid)
+        
+        # Create form
+        if(myfile):
+            form = FileForm(initial=vars(myfile), context={'request': request})
+                
+        # Handle off-case for invalid object id
+        else:
+            return redirect_home()
+
+    # UPDATE FILES (BULK)
+    else:
+        form = FileFormBulk(initial=request.POST, context={'request': request})
+
+    return render(request, form_template, {'form': form, **context})
+    
 @check_authorization
-def download_file(request, fileid):
+def get_file(request, fileid):
     
     myfile = File.objects.get(fileid)
     myuser = request.user
@@ -440,7 +517,7 @@ def download_file(request, fileid):
     if myfile:
         
         # Check if user has download access to this file
-        hasfileaccess = myuser.check_access(objectid=myfile.fileid, objectclass='FL', requestedaccesslevel=4)
+        hasfileaccess = myuser.check_access(objectid=myfile.fileid, objectclass='FL', requestedaccesslevel=4, objectpermissionsflag=request.user.is_admin())
         
         if hasfileaccess:
             if myfile.filesource == 'GD':

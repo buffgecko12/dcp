@@ -194,7 +194,7 @@ class ProgramManager(models.Manager):
                 'Subidas':{'metadata':{'gd_locator':'program_uploads_base','schoolyear':myProgram.schoolyear,'programname':myProgram.programname}},
                 'metadata':{
                     'parentid':myProgram.gd.lookup_fileid(gd_locator='program_base',programname=myProgram.programname),
-                    'description':'Google Drive - ' + myProgram.programname + ' base directory (' + str(myProgram.schoolyear) + ')',
+                    'filedescription':'Google Drive - ' + myProgram.programname + ' base directory (' + str(myProgram.schoolyear) + ')',
                     'gd_locator':myProgram.gd_locator,
                     'schoolid':myProgram.schoolid,
                     'schoolyear':myProgram.schoolyear,
@@ -257,19 +257,6 @@ class UserProgramManager(models.Manager):
             )
         )
 
-#         # Create structures
-#         if(createoptions):
-#             if(createoptions.get('drive')):
-#                 
-#                 # Get user program again (w/extra info)
-#                 myprogram = self.get(userid=myUserProgram.userid, programname=myUserProgram.programname, schoolid=myUserProgram.schoolid, schoolyear=myUserProgram.schoolyear)
-#                 myprogram.gd = myUserProgram.gd
-#                 
-#                 myprogram.create_drive()
-# 
-#             if(createoptions.get('calendar')):
-#                 myprogram.create_calendar()
-            
         return myuserprogram
         
     def delete(self, myUserProgram):
@@ -293,7 +280,7 @@ class UserProgramManager(models.Manager):
                 dirname:{
                     'metadata':{
                         'parentid':gd.lookup_fileid(gd_locator='program_uploads_base',schoolyear=myUserProgram.schoolyear, programname=myUserProgram.programname),
-                        'description':'Google Drive - User Upload directory (' + str(myUserProgram.programname) + ' - ' + str(myUserProgram.schoolyear) + ')',
+                        'filedescription':'Google Drive - User Upload directory (' + str(myUserProgram.programname) + ' - ' + str(myUserProgram.schoolyear) + ')',
                         'gd_locator':'program_uploads_user',
                         'schoolyear':myUserProgram.schoolyear,
                         'programname':myUserProgram.programname,

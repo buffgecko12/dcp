@@ -14,8 +14,13 @@ class FileManager(models.Manager):
     def get(self, fileid):
         return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, None, None, None, None, None, None, None, None, None))
 
-    def get_files(self, fileid=None, fileclass=None, filecategory=None, alternatefileid=None, contractid=None, schoolid=None, schoolyear=None, fileattributes=None, filesource=None, accessinfo=None):
-        return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo)))
+    def get_files(self, fileid=None, fileclass=None, filecategory=None, alternatefileid=None, contractid=None, schoolid=None, schoolyear=None, fileattributes=None, filesource=None, accessinfo=None, hierarchyflag=False, relativeroot=None):
+        spname = 'SP_DCPGetFile' if not hierarchyflag else 'SP_DCPGetFileHierarchy'
+
+        if not hierarchyflag:
+            return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo)))
+        else:
+            return get_data(self, 'SP_DCPGetFileHierarchy(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo), relativeroot))
 
     def get_file_alt(self, fileid, filesource='GD'):
         result = self.get_files(alternatefileid=fileid, filesource=filesource)
@@ -38,7 +43,7 @@ class FileManager(models.Manager):
             gd_file['metadata'].setdefault('properties', {}).setdefault('repository', {})
 
             gd_file['metadata']['properties']['repository'].update({
-                'description':myFile.filedescription,
+                'filedescription':myFile.filedescription,
                 'filecategory':myFile.filecategory,
                 'contractid':myFile.contractid,
                 'schoolid':myFile.schoolid,
@@ -91,6 +96,9 @@ class FileManager(models.Manager):
     
     def save_batch(self, fileinfo, filesource=None, deleteoptions={'deleteremovedflag':False}):
         return save_data('SP_DCPUpsertFileBatch', (to_json(fileinfo), filesource, to_json(deleteoptions)), returnall=True)
+    
+    def update_attributes(self, filelist, fileinfo, accessinfo):
+        return save_data('SP_DCPUpdateFileAttributes', (filelist, to_json(fileinfo), to_json(accessinfo)))
     
     def delete(self, myFile, contractid=None, schoolid=None, alternatefileid=None, filesource=None):
         return delete_data('SP_DCPDeleteFile', (myFile.fileid, myFile.contractid, myFile.schoolid, myFile.alternatefileid, myFile.filesource))

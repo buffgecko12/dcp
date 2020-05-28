@@ -4,22 +4,5 @@
 {% block title %}Descargar archivos{% endblock %}
 
 {% block content %}
-
-	{% for file in files %}
-		{% ifchanged file.fileclass or file.filecategory %}<br>{% endifchanged %}
-		{% ifchanged file.fileclass %}
-			<h4>{{ file.fileclassdisplayname }}</h4>
-		{% endifchanged %}
-		
-		{% ifchanged file.filecategory %}
-			{% if file.filecategory %}
-				<h6>{{ file.filecategorydisplayname }}</h6>
-			{% endif %}
-		{% endifchanged %}
-		
-		<a href="{% url 'wakemeup:download_file' file.fileid %}">
-			<img height="24" src="{{file.fileattributes.gd.iconLink}}"/>
-			{{file.filename|truncatechars:30}}
-		</a><br>
-	{% endfor %}
+	{% include "wakemeup/files/file_list.html" with filenamelength=60 showlinks=True %}
 {% endblock %}

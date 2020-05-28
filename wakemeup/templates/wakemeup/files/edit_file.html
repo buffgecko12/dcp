@@ -55,7 +55,7 @@
 {% block title %}Subir archivos{% endblock %}
 
 {% block content %}
-	<form action="{% url 'wakemeup:create_file' %}"
+	<form action="{% url 'wakemeup:edit_file' fileid=fileid %}"
 		  id="mydropzone" class="dropzone"
 	      enctype="multipart/form-data" 
 	      method="post">

@@ -27,12 +27,20 @@ def dcp(request):
         # Navigation-specific
         navigation = {
             'link_post': {
-                'create_file': {
+                'edit_file': {
                     "fields": {
                         'source':'navbar',
                         'schoolyear':get_school_year(),
                         'programname':'incentive',
-                        'fileclass':'contractfile'
+                        'fileclass':'contractfile',
+                        'fileid':'new'
+                    }
+                },
+                'edit_file_bulk': {
+                    "fields": {
+                        'source':'navbar',
+                        'schoolyear':get_school_year(),
+                        'programname':'incentive',
                     }
                 },
                 'edit_permissions': {
