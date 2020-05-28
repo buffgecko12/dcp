@@ -89,7 +89,7 @@ def generate_options(items, idfield, displayfield, removeduplicatesflag=True):
             ]
 
 def to_json(mydict):
-    return json.dumps(mydict)
+    return json.dumps(mydict) if mydict else None
 
 def read_json(myjson, stringflag=True):
     if not stringflag:
