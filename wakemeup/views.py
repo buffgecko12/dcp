@@ -107,6 +107,10 @@ def check_authorization(view):
     # Return view
     return view_wrapper
 
+# Check if form is being saved
+def check_saveform(request):
+    return True if request.method == "POST" and not request.POST.get('source') else False
+
 # AJAX Request handler
 def load_teachers(request):
     contractid = request.GET.get('contractid') # Check if existing contract
@@ -176,9 +180,6 @@ def load_rewards(request):
     }
     
     return render(request, 'wakemeup/admin//reward_options.html', context)
-
-def check_saveform(request):
-    return True if request.method == "POST" and not request.POST.get('source') else False
 
 @check_authorization
 def execute_admintools(request):
