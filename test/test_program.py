@@ -129,7 +129,7 @@ class testProgram(unittest.TestCase):
         cls.myprogram1.delete(deleteoptions={'repository':True,'drive':True,'calendar':False})
         cls.myprogram2.delete(deleteoptions={'repository':True,'drive':True,'calendar':False})
 
-        Role(roleid=cls.myprogram1.result.get('defaultroleid')).delete()
+        Role(roleid=cls.myprogram1.defaultroleid).delete()
 
         delete_school(cls.myschool)
         

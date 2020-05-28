@@ -387,7 +387,7 @@ class Program(MyModel):
                 mycalendar = self.create_calendar(publicflag=True)
 
                 # Store / return calendar info                
-                self.result['calendar'] = mycalendar
+                self.calendarid = mycalendar
                 self.programdetails['google'] = {'calendar':{'id':mycalendar['id']}} # TO-DO: Watch out here, in case overwriting provided programdetails
                 
             if(createoptions.get('defaultrole')):
@@ -412,7 +412,7 @@ class Program(MyModel):
                 
                 RoleACL().save(acllist)
                 
-                self.result['defaultroleid'] = mydefaultroleid
+                self.defaultroleid = mydefaultroleid
                 self.programdetails['defaultroleid'] = mydefaultroleid
 
     objects = ProgramManager()
