@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import JSONField, DateTimeRangeField
 from wakemeup.models.school import *
 from wakemeup.models.base import MyModel
 from wakemeup.models.environment import File
+from user.models.authorization import Role, RoleACL
 
 from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.miscUtils import *
@@ -371,8 +372,9 @@ class Program(MyModel):
             
         super(Program, self).__init__(*args,**kwargs)
         
-        # Default to 0 (program-level) if not specified
-        self.schoolid = self.schoolid or kwargs.get('schoolid') or 0
+        # Initialize parameters
+        self.programdetails = self.programdetails or {}
+        self.schoolid = self.schoolid or kwargs.get('schoolid') or 0 # Default to 0 (program-level) if not specified
         
         # Create google directory
         if(createoptions):
@@ -386,7 +388,32 @@ class Program(MyModel):
 
                 # Store / return calendar info                
                 self.result['calendar'] = mycalendar
-                self.programdetails = {'google':{'calendar':{'id':mycalendar['id']}}} # TO-DO: Watch out here, in case overwriting provided programdetails
+                self.programdetails['google'] = {'calendar':{'id':mycalendar['id']}} # TO-DO: Watch out here, in case overwriting provided programdetails
+                
+            if(createoptions.get('defaultrole')):
+                schoolabbreviation = School.objects.get(schoolid=self.schoolid).schoolabbreviation
+                
+                defaultdirs = [
+                    File.objects.lookup_fileid(gd_locator='programs_base'),
+                    File.objects.lookup_fileid(gd_locator='program_base', programname=self.programname),
+                    File.objects.lookup_fileid(gd_locator='program_base_year', programname=self.programname, schoolyear=self.schoolyear)
+                ]
+
+                mydefaultroleid = Role(roleclass='PG', name=('Programa ({0}) - {1}' + (' - {2}' if self.schoolid else '')).format(self.programname, self.schoolyear, schoolabbreviation)).save()
+                
+                # Assign Default ACLs
+                acllist = [
+                    {"roleid":mydefaultroleid, "aclinfo":
+                        [
+                            {"objectid":myfileid,"objectclass":"FL","accesslevel":4} if myfileid else () for myfileid in list(filter(None, defaultdirs)) # Read permission on directories
+                        ]
+                    },
+                ]
+                
+                RoleACL().save(acllist)
+                
+                self.result['defaultroleid'] = mydefaultroleid
+                self.programdetails['defaultroleid'] = mydefaultroleid
 
     objects = ProgramManager()
 

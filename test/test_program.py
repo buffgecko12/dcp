@@ -18,7 +18,7 @@ class testProgram(unittest.TestCase):
         cls.myschool = create_school()
 
         # Define programs at each school
-        cls.myprogram1 = create_program(schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=cls.myschool.schoolid, gd=cls.gd, gc=cls.gc, createoptions={'calendar':False,'drive':True})
+        cls.myprogram1 = create_program(schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=cls.myschool.schoolid, gd=cls.gd, gc=cls.gc, createoptions={'calendar':False,'drive':True,'defaultrole':True})
         cls.myprogram2 = create_program(schoolyear=2019, schoolid=cls.myschool.schoolid, gd="default", gc="default", createoptions={'calendar':False,'drive':True})
  
         # Create users
@@ -47,7 +47,7 @@ class testProgram(unittest.TestCase):
     def testUpdateProgram(self):
         
         # Save new values
-        self.myprogram1.programdetails = {'google':{'calendar':{'id':'someid'}}}
+        self.myprogram1.programdetails.update({'google':{'calendar':{'id':'someid'}}})
         self.myprogram1.save()
 
         # Verify        
@@ -128,6 +128,8 @@ class testProgram(unittest.TestCase):
  
         cls.myprogram1.delete(deleteoptions={'repository':True,'drive':True,'calendar':False})
         cls.myprogram2.delete(deleteoptions={'repository':True,'drive':True,'calendar':False})
+
+        Role(roleid=cls.myprogram1.result.get('defaultroleid')).delete()
 
         delete_school(cls.myschool)
         

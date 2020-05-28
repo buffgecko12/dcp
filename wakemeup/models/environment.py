@@ -7,6 +7,8 @@ from lib.UsefulFunctions.dataUtils import generate_options, to_json
 import lib.UsefulFunctions.googleUtils as google
 from django.contrib.postgres.fields import JSONField
 
+import copy
+
 class FileManager(models.Manager):
     def all(self):
         return self.get_files()
@@ -26,7 +28,22 @@ class FileManager(models.Manager):
         result = self.get_files(alternatefileid=fileid, filesource=filesource)
         
         return result[0] if result else None
+
             
+    def lookup_fileid(self, gd_locator=None, programname=None, userid=None, fileattributes={}, alternatefileidflag=False, **kwargs):
+        
+        # Initialize new dictionary
+        newattributes = copy.deepcopy(fileattributes)
+
+        for myvar in ('gd_locator','programname','userid'):
+            if eval(myvar):
+                newattributes[myvar] = str(eval(myvar)) # GD returns properties as string (TO-DO: Check this)
+
+        myfile = self.get_files(filesource='GD', fileattributes=to_json(newattributes), **kwargs)
+
+        if myfile:
+            return myfile[0].alternatefileid if alternatefileidflag else myfile[0].fileid # Return alternate id for first result
+
 
     def save(self, myFile, *args, **kwargs):
 
