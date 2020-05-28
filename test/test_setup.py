@@ -289,7 +289,7 @@ def create_role(roleclass=None, name="New role",description="Some description",p
     myrole.roleid = myrole.save()
     return myrole
 
-def create_object(objectclass="VW",objectname="download_file"):
+def create_object(objectclass="VW",objectname="test_object"):
     myobject = Object(
         objectid=None,
         objectclass=objectclass,
