@@ -171,7 +171,7 @@ class ProgramManager(models.Manager):
 
         # Delete files
         myProgram.gd.delete_file(
-            fileid = myProgram.gd.lookup_fileid(gd_locator=myProgram.gd_locator, schoolid=myProgram.schoolid, schoolyear=myProgram.schoolyear, programname=myProgram.programname),
+            fileid = File.objects.lookup_fileid_gd(gd_locator=myProgram.gd_locator, schoolid=myProgram.schoolid, schoolyear=myProgram.schoolyear, programname=myProgram.programname),
             deleteoptions=deleteoptions
         )
 
@@ -186,7 +186,7 @@ class ProgramManager(models.Manager):
                 'Contratos':{'metadata':{'gd_locator':'contracts_base','schoolyear':myProgram.schoolyear,'programname':myProgram.programname}},
                 'Subidas':{'metadata':{'gd_locator':'program_uploads_base','schoolyear':myProgram.schoolyear,'programname':myProgram.programname}},
                 'metadata':{
-                    'parentid':myProgram.gd.lookup_fileid(gd_locator='program_base',programname=myProgram.programname),
+                    'parentid':File.objects.lookup_fileid_gd(gd_locator='program_base',programname=myProgram.programname),
                     'filedescription':'Google Drive - ' + myProgram.programname + ' base directory (' + str(myProgram.schoolyear) + ')',
                     'gd_locator':myProgram.gd_locator,
                     'schoolid':myProgram.schoolid,
@@ -272,7 +272,7 @@ class UserProgramManager(models.Manager):
             gd_structure = {
                 dirname:{
                     'metadata':{
-                        'parentid':gd.lookup_fileid(gd_locator='program_uploads_base',schoolyear=myUserProgram.schoolyear, programname=myUserProgram.programname),
+                        'parentid':File.objects.lookup_fileid_gd(gd_locator='program_uploads_base',schoolyear=myUserProgram.schoolyear, programname=myUserProgram.programname),
                         'filedescription':'Google Drive - User Upload directory (' + str(myUserProgram.programname) + ' - ' + str(myUserProgram.schoolyear) + ')',
                         'gd_locator':'program_uploads_user',
                         'schoolyear':myUserProgram.schoolyear,

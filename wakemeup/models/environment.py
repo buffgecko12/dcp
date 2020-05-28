@@ -29,7 +29,6 @@ class FileManager(models.Manager):
         
         return result[0] if result else None
 
-            
     def lookup_fileid(self, gd_locator=None, programname=None, userid=None, fileattributes={}, alternatefileidflag=False, **kwargs):
         
         # Initialize new dictionary
@@ -44,6 +43,8 @@ class FileManager(models.Manager):
         if myfile:
             return myfile[0].alternatefileid if alternatefileidflag else myfile[0].fileid # Return alternate id for first result
 
+    def lookup_fileid_gd(self, **kwargs):
+        return self.lookup_fileid(alternatefileidflag=True, **kwargs)
 
     def save(self, myFile, *args, **kwargs):
 

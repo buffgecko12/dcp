@@ -401,7 +401,7 @@ def edit_file(request, fileid=None):
                 # Get user upload directory or use default (programname, school year); otherwise GD will default to "root"
                 myuserprogram = UserProgram.objects.get(userid=myuserid, programname=myprogramname, schoolyear=myschoolyear, schoolid=myschoolid, uploaddirflag=True) # Create upload dir
                 uploaddir = getattr(myuserprogram, 'uploaddirectoryid_gd', None) or \
-                            gd.lookup_fileid(gd_locator='program_uploads_base', schoolyear=myschoolyear, programname=myprogramname)
+                            File.objects.lookup_fileid_gd(gd_locator='program_uploads_base', schoolyear=myschoolyear, programname=myprogramname)
     
                 # Loop through files
                 files = [request.FILES.get('file[%d]' % i)

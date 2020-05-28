@@ -84,11 +84,11 @@ class testGoogleDrive(unittest.TestCase):
         self.gd_write.create_structure(gd_structure)
 
         # Lookup file and verify it exists on GD
-        myfileid = self.gd_read.lookup_fileid(fileattributes={'gd_locator':'dir_1'})
+        myfileid = File.objects.lookup_fileid_gd(fileattributes={'gd_locator':'dir_1'})
         self.assertTrue(myfileid)
 
         # Test lookup using alternate argument
-        myfileid = self.gd_read.lookup_fileid(gd_locator='dir_1')
+        myfileid = File.objects.lookup_fileid_gd(gd_locator='dir_1')
         self.assertTrue(myfileid)
         
         self.assertTrue(self.gd_read.get_file(fileid=myfileid))

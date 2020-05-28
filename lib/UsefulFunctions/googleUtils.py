@@ -345,25 +345,11 @@ class GoogleDrive(GoogleService):
 
         return myresult
 
-    def lookup_fileid(self, gd_locator=None, programname=None, userid=None, fileattributes={}, **kwargs):
-
-        # Initialize new dictionary
-        newattributes = copy.deepcopy(fileattributes)
-
-        for myvar in ('gd_locator','programname','userid'):
-            if eval(myvar):
-                newattributes[myvar] = str(eval(myvar)) # GD returns properties as string
-
-        myfile = models.environment.File.objects.get_files(filesource='GD', fileattributes=to_json(newattributes), **kwargs)
-
-        if myfile:
-            return myfile[0].alternatefileid # Return alternate id for first result
-
     def get_gd_file(self, **kwargs):
-        myfileid = self.lookup_fileid(**kwargs) # Get Google File ID
+        myfileid = models.environment.File.objects.lookup_fileid_gd(**kwargs) # Get Google File ID
 
         if myfileid:
-            return self.get_file(self.lookup_fileid(**kwargs))
+            return self.get_file(models.environment.File.objects.lookup_fileid_gd(**kwargs))
         else:
             return None
 
