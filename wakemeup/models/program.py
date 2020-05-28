@@ -142,14 +142,6 @@ class ProgramManager(models.Manager):
 
     def save(self, myProgram):
 
-#         # Create structures
-#         if(createoptions):
-#             if(createoptions.get('drive')):
-#                 self.create_drive(myProgram)
-# 
-#             if(createoptions.get('calendar')):
-#                 self.create_calendar(myProgram)
-
         # Save data
         return save_data('SP_DCPUpsertProgram', (
             myProgram.programname,
