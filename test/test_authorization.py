@@ -155,7 +155,7 @@ class testAuthorization(unittest.TestCase):
         self.assertFalse(self.myadmin.check_access(self.myobject1.objectid,self.myobject1.objectclass,1)) # Admin - no edit access
         
         # Grant ACLs on contracts
-        myacllist = to_json([
+        myacllist = [
             # Teachers
             {"roleid":self.myrole_teachers.roleid, "aclinfo":
                 [
@@ -169,7 +169,7 @@ class testAuthorization(unittest.TestCase):
                     {"objectid":self.myobject1.objectid,"objectclass":self.myobject1.objectclass,"accesslevel":12}, # object1 - delete
                 ]
             },
-        ])
+        ]
 
         # Batch save
         create_role_ACL(myrole=None,myobject=None,accesslevel=None,acllist=myacllist) # Read access to "Public"

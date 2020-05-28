@@ -83,7 +83,7 @@ class RoleACLManager(models.Manager):
             myRoleACL.objectid,
             myRoleACL.objectclass,
             myRoleACL.accesslevel,
-            acllist
+            to_json(acllist)
             )
         )[0] # Return ID
 
