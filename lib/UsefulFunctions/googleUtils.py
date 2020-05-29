@@ -367,6 +367,7 @@ class GoogleDrive(GoogleService):
             gd_file['properties']['parentid'] = gd_file.get('parents',[])[0] # Store first parent
 
 
+    @google_api_safe_run
     def get_driveid(self):
 
         gd_write = GoogleDrive(permissions=['write'])
@@ -377,6 +378,7 @@ class GoogleDrive(GoogleService):
         
         return rootfileid
 
+    @google_api_safe_run
     def sync(self, fileid=None, deleteoptions={'deleteremovedflag':True}, ignoredirectoryflag=False, **kwargs):
         
         myfilelist = []
