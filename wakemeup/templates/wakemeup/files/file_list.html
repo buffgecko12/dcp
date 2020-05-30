@@ -1,12 +1,14 @@
 {% for file in files %}
-	{% if editflag %}
-		<div class="custom-control custom-checkbox">
-			<input type="checkbox" class="checkboxinput custom-control-input" name="filelist" id="id_filelist_{{file.fileid}}" value="{{file.fileid}}">
-			<label class="custom-control-label" for="id_filelist_{{file.fileid}}">&nbsp;
-				{% include "wakemeup/files/file_list_item.html" with filenamelength=60 showlinks=showlinks %}
-			</label>
-		</div>
-	{% else %}
-		{% include "wakemeup/files/file_list_item.html" with filenamelength=60 showlinks=showlinks %}
-	{% endif %}	
+	<span class="d-flex flex-wrap align-items-center">
+		{% if editflag %}
+			<div class="custom-control custom-checkbox">
+				<input type="checkbox" class="checkboxinput custom-control-input" name="filelist" id="id_filelist_{{file.fileid}}" value="{{file.fileid}}">
+				<label class="custom-control-label" for="id_filelist_{{file.fileid}}">&nbsp;
+					{% include "wakemeup/files/file_list_item.html" with filenamelength=60 showlinks=showlinks %}
+				</label>
+			</div>
+		{% else %}
+			{% include "wakemeup/files/file_list_item.html" with filenamelength=60 showlinks=showlinks %}
+		{% endif %}	
+	</span>
 {% endfor %}

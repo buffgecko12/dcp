@@ -1,10 +1,9 @@
 {% for x in ""|ljust:file.displayindent %}&nbsp;{% endfor %}
 {% if not file.directoryflag and showlinks %}
-	<img height="20" src="{{file.fileattributes.gd.iconLink}}"/>
-	<a href="{% url 'wakemeup:get_file' file.fileid %}">
-		{{file.filename|truncatechars:filenamelength|default_if_none:30}}
-	</a>
+	<img height="20" src="{{file.fileattributes.gd.iconLink}}"/>&nbsp;&nbsp;
+	<a href="{% url 'wakemeup:get_file' file.fileid %}">{{file.filename|truncatechars:filenamelength|default_if_none:30}}</a>
+	&nbsp;&nbsp;<a href="{% url 'wakemeup:get_file' fileid=file.fileid %}?forcedownload=True"><i class="fas fa-file-download"></i></a>
 {% else %}
-	<img height="24" src="{{file.fileattributes.gd.iconLink}}"/>
+	<img height="24" src="{{file.fileattributes.gd.iconLink}}"/>&nbsp;
 	{{file.filename|truncatechars:filenamelength|default_if_none:30}}
-{% endif %}<br>
+{% endif %}
