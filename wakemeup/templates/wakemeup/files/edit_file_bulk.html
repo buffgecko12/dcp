@@ -4,15 +4,15 @@
 {% block title %}Gestionar archivos{% endblock %}
 
 {% block content %}
-		<form action="{% url 'wakemeup:edit_file_bulk' %}" method="post">
-	<div class="row">
+	<form action="{% url 'wakemeup:edit_file_bulk' %}" method="post">
+		<div class="row">
 			<div class="col-5">
 				<br><legend>Archivos</legend>
 				{% include "wakemeup/files/file_list.html" with editflag=True filenamelength=30 showlinks=False %}
 			</div>
 			<div class="col-7"><br>
-					{% crispy form %}
+				{% crispy form %}
 			</div>
-	</div>
-		</form>
+		</div>
+	</form>
 {% endblock %}
