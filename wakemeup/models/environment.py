@@ -3,7 +3,7 @@ from django.db import models
 from wakemeup.models.base import MyModel
 from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.stringUtils import mychr, split_filename
-from lib.UsefulFunctions.dataUtils import generate_options, to_json
+from lib.UsefulFunctions.dataUtils import generate_options, to_json, convert_to_array
 import lib.UsefulFunctions.googleUtils as google
 from django.contrib.postgres.fields import JSONField
 
@@ -14,11 +14,12 @@ class FileManager(models.Manager):
         return self.get_files()
 
     def get(self, fileid):
-        return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, None, None, None, None, None, None, None, None, None))
+        return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (convert_to_array(fileid), None, None, None, None, None, None, None, None, None))
 
     def get_files(self, fileid=None, fileclass=None, filecategory=None, alternatefileid=None, contractid=None, schoolid=None, schoolyear=None, fileattributes=None, filesource=None, accessinfo=None, hierarchyflag=False, relativeroot=None):
-        spname = 'SP_DCPGetFile' if not hierarchyflag else 'SP_DCPGetFileHierarchy'
-
+        
+        fileid = convert_to_array(fileid)
+        
         if not hierarchyflag:
             return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo)))
         else:
@@ -58,15 +59,7 @@ class FileManager(models.Manager):
             gd = gd_file.pop('gd')
 
             # Save additional properties
-            gd_file['metadata'].setdefault('properties', {}).setdefault('repository', {})
-
-            gd_file['metadata']['properties']['repository'].update({
-                'filedescription':myFile.filedescription,
-                'filecategory':myFile.filecategory,
-                'contractid':myFile.contractid,
-                'schoolid':myFile.schoolid,
-                'schoolyear':myFile.schoolyear
-            })
+            gd_file['metadata'].setdefault('properties',{}).update(myFile.get_properties(altproperties=gd_file['metadata'].get('properties')))
 
             # Save file
             gd_file = gd.create_file(**gd_file)
@@ -112,11 +105,11 @@ class FileManager(models.Manager):
 
         return {'fileid':fileid,'gd_file':gd_file}
     
-    def save_batch(self, fileinfo, filesource=None, deleteoptions={'deleteremovedflag':False}):
-        return save_data('SP_DCPUpsertFileBatch', (to_json(fileinfo), filesource, to_json(deleteoptions)), returnall=True)
+    def save_batch(self, fileinfo, filesource=None, overridecustomfieldsflag=None, deleteoptions={'deleteremovedflag':False}):
+        return save_data('SP_DCPUpsertFileBatch', (to_json(fileinfo), filesource, to_json(deleteoptions), overridecustomfieldsflag), returnall=True)
     
-    def update_attributes(self, filelist, fileinfo, accessinfo):
-        return save_data('SP_DCPUpdateFileAttributes', (filelist, to_json(fileinfo), to_json(accessinfo)))
+    def update_attributes(self, filelist, fileinfo, acllist):
+        return save_data('SP_DCPUpdateFileAttributes', (filelist, to_json(fileinfo), to_json(acllist)))
     
     def delete(self, myFile, contractid=None, schoolid=None, alternatefileid=None, filesource=None):
         return delete_data('SP_DCPDeleteFile', (myFile.fileid, myFile.contractid, myFile.schoolid, myFile.alternatefileid, myFile.filesource))
@@ -161,6 +154,24 @@ class File(MyModel):
 
     # File Manager instance
     objects = FileManager()
+    
+    def get_properties(self, altproperties={}):
+        mydict = {
+            'filedescription': self.filedescription or altproperties.get('filedescription'),
+            'filecategory': self.filecategory or altproperties.get('filecategory'),
+            'fileclass': self.fileclass or altproperties.get('fileclass'),
+            'contractid': self.contractid or altproperties.get('contractid'),
+            'schoolid': self.schoolid or altproperties.get('schoolid'),
+            'schoolyear': self.schoolyear or altproperties.get('schoolyear') 
+        }
+
+        for field in ('programname', 'userid', 'gd_locator'):
+            myvalue = (self.fileattributes or {}).get(field)
+            
+            if myvalue:
+                mydict[field] = myvalue
+                
+        return mydict
     
 class Category(MyModel):
     
