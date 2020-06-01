@@ -107,6 +107,10 @@ def check_authorization(view):
     # Return view
     return view_wrapper
 
+# Get relative root directory for files
+def get_rootdir(request, gd_locator, programname='incentive'): # TO-DO: Fix hardcoded
+    return File.objects.lookup_fileid_gd(gd_locator=gd_locator, programname=programname) if not request.user.is_admin() else None
+
 # Check if form is being saved
 def check_saveform(request):
     return True if request.method == "POST" and not request.POST.get('source') else False
@@ -355,7 +359,7 @@ def get_calendar(request):
 @check_authorization
 def list_file(request):
 
-    context = {'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin())}
+    context = {'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin(), relativeroot=get_rootdir(request=request, gd_locator='program_base', programname='incentive'))}
     return render(request, 'wakemeup/files/list_file.html', context)
 
 @check_authorization
@@ -368,7 +372,7 @@ def edit_file(request, fileid=None):
     # Set correct template
     if(fileid =="bulk" or not fileid):
         form_template = 'wakemeup/files/edit_file_bulk.html'
-        context.update({'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin())})
+        context.update({'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin(), relativeroot=get_rootdir(request=request, gd_locator='program_base'))})
     else:
         form_template = 'wakemeup/files/edit_file.html'
 
@@ -387,10 +391,10 @@ def edit_file(request, fileid=None):
                 gd = GoogleDrive(permissions=['write'])
                 
                 # Get program info
-                myprogramname = form.cleaned_data.get('programname')
-                myuserid = form.cleaned_data.get('userid')
-                myschoolyear = form.cleaned_data.get('schoolyear')
-                myschoolid = form.cleaned_data.get('schoolid')
+                myprogramname = form.cleaned_data.get('programname') or None
+                myuserid = form.cleaned_data.get('userid') or None
+                myschoolyear = form.cleaned_data.get('schoolyear') or None
+                myschoolid = form.cleaned_data.get('schoolid') or None
     
                 myfileclass = form.cleaned_data.get('fileclass')
                 myfilecategory = form.cleaned_data.get('filecategory')
@@ -456,9 +460,7 @@ def edit_file(request, fileid=None):
                 fileinfo = {}
                 acllist = []
                 
-                print(filelist)
                 filelist = convert_string_array(filelist)
-                print(filelist)
                 
                 # Prepare fileinfo
                 for key, value in formdata.items():
@@ -485,7 +487,20 @@ def edit_file(request, fileid=None):
                     )
 
                 # Update file info
-                File.objects.update_attributes(filelist, fileinfo, acllist)
+                File.objects.update_attributes(filelist=filelist, fileinfo=fileinfo, acllist=acllist)
+                
+                # Update Google Drive info
+                if(filelist):
+                    
+                    # Connect to Google Drive
+                    gd = GoogleDrive(permissions=['all'])
+                    
+                    # Get list of GD files with info
+                    myfiles = File.objects.get_files(fileid=filelist, filesource='GD')
+                    
+                    # Update google attributes
+                    for myfile in myfiles:
+                        gd.update_file(fileid=myfile.alternatefileid, metadata={'properties':myfile.get_properties()})
 
     # CREATE NEW
     elif fileid == "new":
@@ -493,6 +508,8 @@ def edit_file(request, fileid=None):
 
     # UPDATE EXISTING FILE
     elif(fileid):
+        
+        fileid = int(fileid)
         myfile = File.objects.get(fileid=fileid)
         
         # Create form
@@ -512,8 +529,12 @@ def edit_file(request, fileid=None):
 @check_authorization
 def get_file(request, fileid):
     
+    fileid = int(fileid)
+    
     myfile = File.objects.get(fileid)
     myuser = request.user
+
+    forcedownload = request.GET.get('forcedownload', False)
 
     if myfile:
         
@@ -533,7 +554,7 @@ def get_file(request, fileid):
             elif myfile.filesource == 'DB':
                 myfile.filename = myfile.filename + myfile.fileextension
 
-            return getFileResponse(filedata=myfile.filedata, filename=myfile.filename, filesize=myfile.filesize, contenttype=myfile.filetype)
+            return getFileResponse(filedata=myfile.filedata, filename=myfile.filename, filesize=myfile.filesize, contenttype=myfile.filetype, forcedownload=forcedownload)
         
     # File does not exist or user has no access - return to refering page
     return redirect_referer(request)
@@ -1096,7 +1117,13 @@ def create_user(request):
                 # Register user for programs
                 for year in myschoolyear:
                     UserProgram(userid=newuser.userid, programname=myprogramname, schoolid=myschoolid, schoolyear=year).save()
-
+                    
+                    # Add user to roles
+                    for myschool in (0, myschoolid):
+                        Role(
+                            roleid=Program.objects.get(programname=myprogramname, schoolid=myschoolid, schoolyear=year).defaultroleid
+                        ).modify_role_item(userid=newuser.userid)
+                
             # Go back to index page
             return render(request, 'wakemeup/admin/create_user_confirmation.html', {'userinfo':newuser, 'conf_password_display':conf_password_display})
     else:
