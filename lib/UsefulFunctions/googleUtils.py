@@ -403,20 +403,36 @@ class GoogleDrive(GoogleService):
             # Prep gd file
             self.prepare_gd_file(myfile)
 
+            myproperties = myfile.get('properties', {})
+            
+            # Remove already stored fields from properties
+            myfiledescription = myfile.get('description') or myproperties.pop('filedescription', None)
+            myfilecategory = myproperties.pop('filecategory', None)
+            mycontractid = myproperties.pop('contractid', None)
+            myschoolid = myproperties.pop('schoolid', None)
+            myschoolyear = myproperties.pop('schoolyear', None)
+            myfileclass = myproperties.pop('fileclass', None)
+
             myfilelist.append({
                 'filename':myfile.get('name'),
                 'fileextension':myfile.get('fileExtension'),
                 'alternatefileid':myfile.get('id'),
                 'filetype':myfile.get('mimeType'),
                 'filesize':myfile.get('size'),
-                'filedescription':myfile.get('description'),
                 'fileurl':myfile.get('webContentLink'),
-                'fileattributes':myfile.get('properties'),
-                'filesource':'GD'
+                'fileattributes':myproperties,
+                'filesource':'GD',
+                'filedescription':myfiledescription,
+                'filecategory':myfilecategory,
+                'contractid':mycontractid,
+                'schoolid':myschoolid,
+                'schoolyear':myschoolyear,
+                'fileclass':myfileclass,
+                
             })
         
         # Call batch upsert
-        result = models.environment.File.objects.save_batch(fileinfo=myfilelist, filesource='GD', deleteoptions=deleteoptions)
+        result = models.environment.File.objects.save_batch(fileinfo=myfilelist, filesource='GD', deleteoptions=deleteoptions, overridecustomfieldsflag=False)
         
         return result
 

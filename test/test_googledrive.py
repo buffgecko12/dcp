@@ -124,7 +124,7 @@ class testGoogleDrive(unittest.TestCase):
 
     def testSync(self):
 
-        newfile = File().save(gd_file={'gd':self.gd_write,'metadata':{'name':'test_file'}, 'directoryflag':True})
+        newfile = File(filedescription='something', schoolid=1, contractid=None, fileattributes={'programname':'test_program'}).save(gd_file={'gd':self.gd_write,'metadata':{'name':'test_file'}, 'directoryflag':True})
         newfile_gdid = newfile['gd_file']['id']
         
         # Create sub-directories
@@ -134,18 +134,37 @@ class testGoogleDrive(unittest.TestCase):
         myrepofile = File.objects.get_file_alt(fileid=newfile_gdid)
         mygdfile = self.gd_read.get_file(fileid=newfile_gdid)
 
-        # Verify file names are in sync
+        # Verify properties are in sync
         self.assertEqual(myrepofile.filename, mygdfile['name'])
+
+        self.assertEqual(myrepofile.schoolid, int(mygdfile['properties']['schoolid']) or 0)
+        self.assertEqual(myrepofile.schoolid, 1)
+        
+        self.assertEqual(mygdfile['properties']['programname'], myrepofile.fileattributes['programname'])
+        self.assertEqual(myrepofile.fileattributes['programname'], 'test_program')
         
         # Change file name in GD and run sync
-        myfile = self.gd_write.update_file(fileid=newfile_gdid, metadata={'name':self.newname})
+        myrepofile_orig = myrepofile
+        self.gd_write.update_file(fileid=newfile_gdid, metadata={'name':self.newname, 'schoolid':100})
         self.gd_read.sync(fileid=newfile_gdid)
         
-        # Verify file names are in sync
-        self.assertEqual(File.objects.get_file_alt(fileid=newfile_gdid).filename, self.gd_read.get_file(fileid=newfile_gdid)['name'])
+        # Verify fields are updated as expected
+        myrepofile = File.objects.get_file_alt(fileid=newfile_gdid)
+        self.assertEqual(myrepofile.filename, self.gd_read.get_file(fileid=newfile_gdid)['name']) # Names are in sync
+        self.assertEqual(myrepofile.schoolid, myrepofile_orig.schoolid) # Un-editable field should not be updated
 
-        # Sync all files
+
+        # Delete from repository
+        myrepofile.delete()
+        self.assertFalse(File.objects.get_file_alt(fileid=newfile_gdid))
+
+        # Re-sync files        
         self.gd_read.sync()
+        
+        # Lookup file info again using google ID
+        myrepofile_new = File.objects.get_file_alt(fileid=newfile_gdid)
+        self.assertTrue(myrepofile_orig.schoolid, myrepofile_new.schoolid)
+        self.assertTrue(myrepofile_orig.fileattributes['programname'], myrepofile_new.fileattributes['programname'])
 
         # Delete test file and all children
         self.gd_write.delete_file(fileid=newfile_gdid, deleteoptions={'repository':True})
