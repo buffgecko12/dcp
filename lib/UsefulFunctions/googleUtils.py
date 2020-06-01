@@ -405,14 +405,7 @@ class GoogleDrive(GoogleService):
 
             myproperties = myfile.get('properties', {})
             
-            # Remove already stored fields from properties
-            myfiledescription = myfile.get('description') or myproperties.pop('filedescription', None)
-            myfilecategory = myproperties.pop('filecategory', None)
-            mycontractid = myproperties.pop('contractid', None)
-            myschoolid = myproperties.pop('schoolid', None)
-            myschoolyear = myproperties.pop('schoolyear', None)
-            myfileclass = myproperties.pop('fileclass', None)
-
+            # Add new file to list
             myfilelist.append({
                 'filename':myfile.get('name'),
                 'fileextension':myfile.get('fileExtension'),
@@ -420,14 +413,15 @@ class GoogleDrive(GoogleService):
                 'filetype':myfile.get('mimeType'),
                 'filesize':myfile.get('size'),
                 'fileurl':myfile.get('webContentLink'),
-                'fileattributes':myproperties,
                 'filesource':'GD',
-                'filedescription':myfiledescription,
-                'filecategory':myfilecategory,
-                'contractid':mycontractid,
-                'schoolid':myschoolid,
-                'schoolyear':myschoolyear,
-                'fileclass':myfileclass,
+                'fileattributes':myproperties,
+                # Remove already stored fields from properties
+                'filedescription':myfile.get('description') or myproperties.pop('filedescription', None),
+                'filecategory':myproperties.pop('filecategory', None),
+                'contractid':myproperties.pop('contractid', None),
+                'schoolid':myproperties.pop('schoolid', None),
+                'schoolyear':myproperties.pop('schoolyear', None),
+                'fileclass':myproperties.pop('fileclass', None)
                 
             })
         
