@@ -189,10 +189,10 @@ class FileForm(MyForm):
 
     # Program info
     fileid = forms.CharField(widget=forms.HiddenInput, required=False)
-    userid = forms.ChoiceField(required=True, label='Usuario')
-    programname = forms.ChoiceField(required=True, label='Programa')
-    schoolid = forms.ChoiceField(label='Colegio')
-    schoolyear = forms.ChoiceField(label='A' + mychr('n') + 'o')
+    userid = forms.ChoiceField(required=False, label='Usuario')
+    programname = forms.ChoiceField(label='Programa')
+    schoolid = forms.ChoiceField(label='Colegio', required=False)
+    schoolyear = forms.ChoiceField(label='A' + mychr('n') + 'o', required=False)
     
     # File info
     fileclass = forms.ChoiceField(label='Clase')
