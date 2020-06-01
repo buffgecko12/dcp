@@ -65,7 +65,7 @@ def get_google_role(service, role):
         }
     
     return rolemap[service][role]
-    
+
 class GoogleService(object):
 
     connection = None
@@ -257,8 +257,15 @@ class GoogleDrive(GoogleService):
         ).execute()
 
     @google_api_safe_run
-    def get_file(self, fileid, fields=GD_FILE_FIELDS):
-        return self.connection.files().get(fileId=fileid, fields=fields).execute()
+    def export_file(self, fileid, exporttype, fields=GD_FILE_FIELDS):
+        return self.connection.files().export(fileId=fileid, mimeType=exporttype, fields=fields)
+
+    @google_api_safe_run
+    def get_file(self, fileid, fields=GD_FILE_FIELDS, mediaflag=False):
+        if not mediaflag:
+            return self.connection.files().get(fileId=fileid, fields=fields).execute()
+        else:
+            return self.connection.files().get_media(fileId=fileid, fields=fields)
 
     @google_api_safe_run
     def get_files(self, scope="user", driveid=None, fields='files({0})'.format(GD_FILE_FIELDS), spaces="drive", paginateflag=False, ignoredirectoryflag=True, ignoretrashedflag=True, searchquery='', **kwargs):
@@ -302,9 +309,13 @@ class GoogleDrive(GoogleService):
         return self.objects.get_file(self, fileid, fields='webContentLink')['webContentLink']
 
     @google_api_safe_run
-    def download_file(self, fileid):
+    def download_file(self, fileid, mimetype=None):
 
-        request = self.connection.files().get_media(fileId=fileid)
+        if not mimetype:
+            request = self.get_file(fileid=fileid, mediaflag=True)
+        else:
+            request = self.export_file(fileid=fileid, exporttype=mimetype)
+            
         stream = io.BytesIO()
         downloader = MediaIoBaseDownload(stream, request)
         done = False

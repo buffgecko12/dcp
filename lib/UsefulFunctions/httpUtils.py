@@ -6,3 +6,16 @@ def getFileResponse(filedata, filename, filesize, contenttype, forcedownload=Fal
     response['Content-Disposition'] = '%s; filename=%s' % ('attachment' if forcedownload else '', filename) # force browser to download file
     response['Content-Length'] = filesize
     return response
+
+# https://developers.google.com/drive/api/v3/ref-export-formats
+# https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
+def get_mimetype(fileformat):
+    myformat = None
+
+    if fileformat:
+        if fileformat == "docx":
+            myformat = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        elif fileformat == "pdf":
+            myformat = 'application/pdf'
+
+    return myformat

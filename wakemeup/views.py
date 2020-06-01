@@ -525,7 +525,7 @@ def edit_file(request, fileid=None):
         form = FileFormBulk(initial=request.POST, context={'request': request})
 
     return render(request, form_template, {'form': form, **context})
-    
+
 @check_authorization
 def get_file(request, fileid):
     
@@ -534,7 +534,8 @@ def get_file(request, fileid):
     myfile = File.objects.get(fileid)
     myuser = request.user
 
-    forcedownload = request.GET.get('forcedownload', False)
+    forcedownload = request.GET.get('forcedownload', True)
+    exporttype = request.GET.get('exporttype', None)
 
     if myfile:
         
@@ -545,8 +546,14 @@ def get_file(request, fileid):
             if myfile.filesource == 'GD':
                 
                 gd = GoogleDrive()
-                myfile.filedata = gd.download_file(myfile.alternatefileid)
-                myfile.filename = myfile.filename + '.' + myfile.fileextension
+                mymimetype = get_mimetype(exporttype)
+                myfileextension = exporttype if mymimetype else myfile.fileextension
+                
+                myfile.filedata = gd.download_file(fileid=myfile.alternatefileid, mimetype=mymimetype)
+                myfile.filename = (myfile.filename or '') + (('.' + myfileextension if myfileextension else ''))
+
+                if not myfile.filesize:
+                    myfile.filesize = len(myfile.filedata)
 
 #                 myfileurl = gd.get_file_weblink(fileid=myfile.alternatefileid)
 #                 return redirect(myfileurl)

@@ -1,8 +1,14 @@
 {% for x in ""|ljust:file.displayindent %}&nbsp;{% endfor %}
 {% if not file.directoryflag and showlinks %}
 	<img height="20" src="{{file.fileattributes.gd.iconLink}}"/>&nbsp;&nbsp;
-	<a href="{% url 'wakemeup:get_file' file.fileid %}">{{file.filename|truncatechars:filenamelength|default_if_none:30}}</a>
-	&nbsp;&nbsp;<a href="{% url 'wakemeup:get_file' fileid=file.fileid %}?forcedownload=True"><i class="fas fa-file-download"></i></a>
+	
+	{% if file.filetype == "application/vnd.google-apps.document" %}
+		<a href="{% url 'wakemeup:get_file' fileid=file.fileid %}?exporttype=docx">{{file.filename|truncatechars:filenamelength|default_if_none:30}}</a>&nbsp;&nbsp;
+		<a href="{% url 'wakemeup:get_file' fileid=file.fileid %}?exporttype=pdf"><img height="20" src="https://drive-thirdparty.googleusercontent.com/128/type/application/pdf"/></a>
+	{% else %}
+		<a href="{% url 'wakemeup:get_file' file.fileid %}">{{file.filename|truncatechars:filenamelength|default_if_none:30}}</a>
+		{% comment %}&nbsp;&nbsp;<a href="{% url 'wakemeup:get_file' fileid=file.fileid %}"><i class="fas fa-file-download"></i></a>{% endcomment %}
+	{% endif %}
 {% else %}
 	<img height="24" src="{{file.fileattributes.gd.iconLink}}"/>&nbsp;
 	{{file.filename|truncatechars:filenamelength|default_if_none:30}}
