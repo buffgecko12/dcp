@@ -292,7 +292,9 @@ class UserProgramManager(models.Manager):
             # Return newly created GoogleId
             return newfile
         
-        # TO-DO: Possibly check here for return value
+        else:
+            # Handle case of file in GD, but not in repository
+            pass
 
 class Reward(MyModel):
 
