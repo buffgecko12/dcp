@@ -225,7 +225,7 @@ class FileForm(MyForm):
             'schoolyear':   {'dropdown':{'lookupargs':{'programname':programname, 'userflag':True}}, 'default':DEFAULT_SCHOOL_YEAR},
             'programname':  {'dropdown':{'categoryclass':'program', 'lookupargs':{'userflag':True}}},
             'userid':       {'dropdown':{'lookupargs':{'programname':programname, 'userflag':True}}, 'default':request.user.userid},
-            'filecategory':     {'dropdown':{'categoryclass':'contractfile'}},
+            'filecategory':     {'dropdown':{'categoryclass':'programfile'}},
             'fileclass':    {'dropdown':'default'},
             'accessroles':  {'dropdown':{'lookupargs':{'roleclass':['US']}, 'selectflag':False}, 'default':Role.objects.get(name='Public').roleid if request.user.is_admin() else ''},
         }
