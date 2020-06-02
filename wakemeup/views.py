@@ -109,7 +109,11 @@ def check_authorization(view):
 
 # Get relative root directory for files
 def get_rootdir(request, gd_locator, programname='incentive'): # TO-DO: Fix hardcoded
-    return File.objects.lookup_fileid_gd(gd_locator=gd_locator, programname=programname) if not request.user.is_admin() else None
+    if request.user.is_admin():
+        gd_locator = "programs_base"
+        programname = None
+        
+    return File.objects.lookup_fileid_gd(gd_locator=gd_locator, programname=programname)
 
 # Check if form is being saved
 def check_saveform(request):
@@ -534,7 +538,7 @@ def get_file(request, fileid):
     myfile = File.objects.get(fileid)
     myuser = request.user
 
-    forcedownload = request.GET.get('forcedownload', True)
+    forcedownload = True if request.GET.get('forcedownload', 'true').lower() == "true" else False # Force download if not specified
     exporttype = request.GET.get('exporttype', None)
 
     if myfile:
