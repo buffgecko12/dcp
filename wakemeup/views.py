@@ -110,7 +110,7 @@ def check_authorization(view):
 # Get relative root directory for files
 def get_rootdir(request, gd_locator, programname='incentive'): # TO-DO: Fix hardcoded
     if request.user.is_admin():
-        gd_locator = "programs_base"
+        gd_locator = get_gd_locator('programs_base')
         programname = None
         
     return File.objects.lookup_fileid_gd(gd_locator=gd_locator, programname=programname)
@@ -363,7 +363,7 @@ def get_calendar(request):
 @check_authorization
 def list_file(request):
 
-    context = {'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin(), relativeroot=get_rootdir(request=request, gd_locator='program_base', programname='incentive'))}
+    context = {'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin(), relativeroot=get_rootdir(request=request, gd_locator=get_gd_locator('program_base'), programname='incentive'))}
     return render(request, 'wakemeup/files/list_file.html', context)
 
 @check_authorization
@@ -376,7 +376,7 @@ def edit_file(request, fileid=None):
     # Set correct template
     if(fileid =="bulk" or not fileid):
         form_template = 'wakemeup/files/edit_file_bulk.html'
-        context.update({'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin(), relativeroot=get_rootdir(request=request, gd_locator='program_base'))})
+        context.update({'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin(), relativeroot=get_rootdir(request=request, gd_locator=get_gd_locator('program_base')))})
     else:
         form_template = 'wakemeup/files/edit_file.html'
 
@@ -409,7 +409,7 @@ def edit_file(request, fileid=None):
                 # Get user upload directory or use default (programname, school year); otherwise GD will default to "root"
                 myuserprogram = UserProgram.objects.get(userid=myuserid, programname=myprogramname, schoolyear=myschoolyear, schoolid=myschoolid, uploaddirflag=True) # Create upload dir
                 uploaddir = getattr(myuserprogram, 'uploaddirectoryid_gd', None) or \
-                            File.objects.lookup_fileid_gd(gd_locator='program_uploads_base', schoolyear=myschoolyear, programname=myprogramname)
+                            File.objects.lookup_fileid_gd(gd_locator=get_gd_locator('program_uploads_base'), schoolyear=myschoolyear, programname=myprogramname)
     
                 # Loop through files
                 files = [request.FILES.get('file[%d]' % i)

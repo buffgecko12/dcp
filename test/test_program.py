@@ -2,6 +2,7 @@ import unittest
 import itertools
 from test_setup import *
 from lib.UsefulFunctions.dataUtils import * 
+from lib.UsefulFunctions.googleUtils import get_gd_locator
 
 from django.contrib.auth import get_user_model
 
@@ -36,7 +37,7 @@ class testProgram(unittest.TestCase):
 
         # Check directories are created
         for myprogram in (self.myprogram1, self.myprogram2):
-            gdfile = myprogram.gd.get_gd_file(gd_locator='program_base_year', schoolyear=myprogram.schoolyear, programname=myprogram.programname)
+            gdfile = myprogram.gd.get_gd_file(gd_locator=get_gd_locator('program_base_year'), schoolyear=myprogram.schoolyear, programname=myprogram.programname)
             self.assertTrue(gdfile)
 
     def testGetProgram(self):
@@ -62,11 +63,11 @@ class testProgram(unittest.TestCase):
         
         # Verify files / objects are gone (program, drive, calendar)
         self.assertFalse(Program.objects.get(programname='new_program', schoolyear=2018, schoolid=newprogram.schoolid))
-        self.assertFalse(newprogram.gd.get_gd_file(gd_locator='program_base_year', schoolyear=newprogram.schoolyear, programname=newprogram.programname, schoolid=newprogram.schoolid))
+        self.assertFalse(newprogram.gd.get_gd_file(gd_locator=get_gd_locator('program_base_year'), schoolyear=newprogram.schoolyear, programname=newprogram.programname, schoolid=newprogram.schoolid))
         self.assertFalse(newprogram.gc.get_calendar(calendarid=newcalendarid))
 
     def testCreateUserProgram(self):
-        gdfile = self.myprogram1.gd.get_gd_file(gd_locator='program_uploads_user', schoolyear=self.myprogram1.schoolyear, programname=self.myprogram1.programname, userid=self.myuser_teacher.userid)
+        gdfile = self.myprogram1.gd.get_gd_file(gd_locator=get_gd_locator('program_uploads_user'), schoolyear=self.myprogram1.schoolyear, programname=self.myprogram1.programname, userid=self.myuser_teacher.userid)
         self.assertTrue(gdfile)
         
     def testGetUserProgram(self): # TO-DO: update to handle multiple schoolid values
