@@ -14,6 +14,7 @@ from googleapiclient.errors import HttpError
 from lib.UsefulFunctions.dataUtils import get_matching_item, to_json, convert_json_to_dict
 from lib.UsefulFunctions.miscUtils import get_app_setting
 from lib.UsefulFunctions.stringUtils import split_filename
+from lib.UsefulFunctions.envUtils import check_env
 from wakemeup import models
 
 GD_FILE_FIELDS = 'name,fileExtension,size,mimeType,description,id,properties,webContentLink,iconLink,parents'
@@ -65,6 +66,20 @@ def get_google_role(service, role):
         }
     
     return rolemap[service][role]
+
+def get_gd_locator(gd_locator):
+    myenv = check_env()
+    
+    if myenv == "production":
+        suffix = ""
+    elif myenv == "staging":
+        suffix = "_stg"
+    elif myenv == "test":
+        suffix = "_tst"
+    else:
+        suffix = "_dev"
+
+    return gd_locator + suffix
 
 class GoogleService(object):
 

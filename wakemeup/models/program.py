@@ -10,7 +10,7 @@ from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.miscUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
 from lib.UsefulFunctions.emailUtils import send_email
-from lib.UsefulFunctions.googleUtils import GoogleDrive, GoogleCalendar
+from lib.UsefulFunctions.googleUtils import GoogleDrive, GoogleCalendar, get_gd_locator
 from lib.UsefulFunctions.dataUtils import generate_options, to_json
 
 DEFAULT_SCHOOL_YEAR = get_school_year()
@@ -183,10 +183,10 @@ class ProgramManager(models.Manager):
         # Define directory structure
         gd_structure = {
             str(myProgram.schoolyear):{
-                'Contratos':{'metadata':{'gd_locator':'contracts_base','schoolyear':myProgram.schoolyear,'programname':myProgram.programname}},
-                'Subidas':{'metadata':{'gd_locator':'program_uploads_base','schoolyear':myProgram.schoolyear,'programname':myProgram.programname}},
+                'Contratos':{'metadata':{'gd_locator':get_gd_locator('contracts_base'),'schoolyear':myProgram.schoolyear,'programname':myProgram.programname}},
+                'Subidas':{'metadata':{'gd_locator':get_gd_locator('program_uploads_base'),'schoolyear':myProgram.schoolyear,'programname':myProgram.programname}},
                 'metadata':{
-                    'parentid':File.objects.lookup_fileid_gd(gd_locator='program_base',programname=myProgram.programname),
+                    'parentid':File.objects.lookup_fileid_gd(gd_locator=get_gd_locator('program_base'),programname=myProgram.programname),
                     'filedescription':'Google Drive - ' + myProgram.programname + ' base directory (' + str(myProgram.schoolyear) + ')',
                     'gd_locator':myProgram.gd_locator,
                     'schoolid':myProgram.schoolid,
@@ -261,7 +261,7 @@ class UserProgramManager(models.Manager):
         
         # Check directory doesn't already exist in GD
         if(directorytype == 'upload'):
-            mydir = gd.get_gd_file(gd_locator='program_uploads_user', programname=myUserProgram.programname, userid=myUserProgram.userid, schoolyear=myUserProgram.schoolyear)
+            mydir = gd.get_gd_file(gd_locator=get_gd_locator('program_uploads_user'), programname=myUserProgram.programname, userid=myUserProgram.userid, schoolyear=myUserProgram.schoolyear)
         
         if(not mydir):
             # Get user info
@@ -272,9 +272,9 @@ class UserProgramManager(models.Manager):
             gd_structure = {
                 dirname:{
                     'metadata':{
-                        'parentid':File.objects.lookup_fileid_gd(gd_locator='program_uploads_base',schoolyear=myUserProgram.schoolyear, programname=myUserProgram.programname),
+                        'parentid':File.objects.lookup_fileid_gd(gd_locator=get_gd_locator('program_uploads_base'),schoolyear=myUserProgram.schoolyear, programname=myUserProgram.programname),
                         'filedescription':'Google Drive - User Upload directory (' + str(myUserProgram.programname) + ' - ' + str(myUserProgram.schoolyear) + ')',
-                        'gd_locator':'program_uploads_user',
+                        'gd_locator':get_gd_locator('program_uploads_user'),
                         'schoolyear':myUserProgram.schoolyear,
                         'programname':myUserProgram.programname,
                         'userid':myUserProgram.userid
@@ -355,7 +355,7 @@ class Program(MyModel):
     programname = models.CharField(max_length=50)
     programdetails = JSONField()
     calendarid = models.CharField(max_length=250)
-    gd_locator = 'program_base_year'
+    gd_locator = get_gd_locator('program_base_year')
     
     def __init__(self,*args,**kwargs):
         
@@ -396,9 +396,9 @@ class Program(MyModel):
                 schoolabbreviation = School.objects.get(schoolid=self.schoolid).schoolabbreviation
                 
                 defaultdirs = [
-                    File.objects.lookup_fileid(gd_locator='programs_base'),
-                    File.objects.lookup_fileid(gd_locator='program_base', programname=self.programname),
-                    File.objects.lookup_fileid(gd_locator='program_base_year', programname=self.programname, schoolyear=self.schoolyear)
+                    File.objects.lookup_fileid(gd_locator=get_gd_locator('programs_base')),
+                    File.objects.lookup_fileid(gd_locator=get_gd_locator('program_base'), programname=self.programname),
+                    File.objects.lookup_fileid(gd_locator=get_gd_locator('program_base_year'), programname=self.programname, schoolyear=self.schoolyear)
                 ]
 
                 mydefaultroleid = Role(roleclass='PG', name=('Programa ({0}) - {1}' + (' - {2}' if self.schoolid else '')).format(self.programname, self.schoolyear, schoolabbreviation)).save()
