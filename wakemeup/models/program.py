@@ -180,11 +180,19 @@ class ProgramManager(models.Manager):
 
     def create_drive(self, myProgram, *args, **kwargs):
         
+        programinfo = {'schoolyear':myProgram.schoolyear,'programname':myProgram.programname}
+        
         # Define directory structure
         gd_structure = {
             str(myProgram.schoolyear):{
-                'Contratos':{'metadata':{'gd_locator':get_gd_locator('contracts_base'),'schoolyear':myProgram.schoolyear,'programname':myProgram.programname}},
-                'Subidas':{'metadata':{'gd_locator':get_gd_locator('program_uploads_base'),'schoolyear':myProgram.schoolyear,'programname':myProgram.programname}},
+                'Archivos':{
+                    'Documentos':{'metadata':{'gd_locator':get_gd_locator('program_files_documents'), **programinfo}},
+                    'Videos':{'metadata':{'gd_locator':get_gd_locator('program_files_videos'), **programinfo}},
+                    'Entrevistas':{'metadata':{'gd_locator':get_gd_locator('program_files_interviews'), **programinfo}},
+                    'metadata':{'gd_locator':get_gd_locator('program_files_base'), **programinfo},
+                },
+                'Contratos':{'metadata':{'gd_locator':get_gd_locator('contracts_base'), **programinfo}},
+                'Subidas':{'metadata':{'gd_locator':get_gd_locator('program_uploads_base'), **programinfo}},
                 'metadata':{
                     'parentid':File.objects.lookup_fileid_gd(gd_locator=get_gd_locator('program_base'),programname=myProgram.programname),
                     'filedescription':'Google Drive - ' + myProgram.programname + ' base directory (' + str(myProgram.schoolyear) + ')',
