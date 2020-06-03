@@ -17,7 +17,7 @@ from lib.UsefulFunctions.stringUtils import split_filename
 from lib.UsefulFunctions.envUtils import check_env
 from wakemeup import models
 
-GD_FILE_FIELDS = 'name,fileExtension,size,mimeType,description,id,properties,webContentLink,iconLink,parents'
+GD_FILE_FIELDS = 'name,fileExtension,size,mimeType,description,id,properties,webContentLink,iconLink,parents,shortcutDetails'
 
 # Wrapper function to handle API errors
 def google_api_safe_run(func):
@@ -326,8 +326,11 @@ class GoogleDrive(GoogleService):
     @google_api_safe_run
     def download_file(self, fileid, mimetype=None):
 
+        # Binary file
         if not mimetype:
             request = self.get_file(fileid=fileid, mediaflag=True)
+            
+        # Google Doc
         else:
             request = self.export_file(fileid=fileid, exporttype=mimetype)
             
@@ -383,15 +386,28 @@ class GoogleDrive(GoogleService):
 
         # Update icon link        
         if actions.get('updatefields'):
-            gd_file['iconLink'] = gd_file.get('iconLink','').replace("16","128")
-            gd_file['name'] = split_filename(gd_file.get('name'))['name']
+            gd_file['iconLink'] = gd_file.get('iconLink','').replace("16","128") # Change to higher icon resolution
+            gd_file['name'] = split_filename(gd_file.get('name'))['name'] # Parse out filename
 
-        # Set attributes field
+        # Set properties (attributes) field
         if actions.get('setproperties'):
+            
+            shortcutinfo = gd_file.get('shortcutDetails')
+            
+            # Parse out shortcut info
+            if shortcutinfo:
+                gd_file['mimeType'] = shortcutinfo.get('targetMimeType') # Use target mimetype instead of shortcut's
+                
+                iconlink = gd_file['iconLink']
+                index = iconlink.find("/application/")
+                gd_file['iconLink'] = iconlink[:index] + "/" + shortcutinfo.get('targetMimeType') # Use target's iconlink instead of shortcut's
+                
             myfile = copy.deepcopy(gd_file)
-            gd_file['properties'] = {'gd':myfile, **myfile.pop('properties', {})}
-            gd_file['properties']['parentid'] = gd_file.get('parents',[])[0] # Store first parent
 
+            gd_file.setdefault('properties',{}).update({
+                'gd':myfile, **myfile.pop('properties', {}),
+                'parentid':gd_file.get('parents',[None])[0] # Store first parent                
+            })
 
     @google_api_safe_run
     def get_driveid(self):

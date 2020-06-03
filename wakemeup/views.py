@@ -549,11 +549,19 @@ def get_file(request, fileid):
         if hasfileaccess:
             if myfile.filesource == 'GD':
                 
+                # Regular file
+                if not myfile.shortcutdetails:
+                    myfileid = myfile.alternatefileid
+                    
+                # Shortcut - Point to target file
+                else:
+                    myfileid = myfile.shortcutdetails['targetId']
+                
                 gd = GoogleDrive()
                 mymimetype = get_mimetype(exporttype)
                 myfileextension = exporttype if mymimetype else myfile.fileextension
                 
-                myfile.filedata = gd.download_file(fileid=myfile.alternatefileid, mimetype=mymimetype)
+                myfile.filedata = gd.download_file(fileid=myfileid, mimetype=mymimetype)
                 myfile.filename = (myfile.filename or '') + (('.' + myfileextension if myfileextension else ''))
 
                 if not myfile.filesize:
