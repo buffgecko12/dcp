@@ -21,10 +21,18 @@
   max-width: 300px;
 }
 
-/* Navbar */
+/* https://stackoverflow.com/questions/27979939/adjusting-bootstrap-dropdown-menu-height */
+.navbar-brand, .navbar-nav > li > a {
+    line-height: 30px;
+/*    height: 75px;*/
+ /*   padding-top: 0px; */
+}
+
+/* ORIGINAL
 .navbar-nav li a {
  line-height: 30px;
 }
+*/
 
 .faicon {
     margin-left: 10px;
