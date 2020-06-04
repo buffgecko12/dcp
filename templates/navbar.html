@@ -44,8 +44,8 @@
 						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'video' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=video">Videos</a>
 						<div class="dropdown-divider"></div>
 						<a class="dropdown-item {% if url_name == 'list_file' and not request.GET.filetype %} active {% endif %}" href="{% url 'wakemeup:list_file' %}">Ver Todos</a>
-						<div class="dropdown-divider"></div>
 						{% if auth.objects.file.accesslevel >= 10 %}
+							<div class="dropdown-divider"></div>
 							{% url 'wakemeup:edit_file' fileid='new' as actionurl %}
 							{% link_post navcontext=navigation formname="edit_file" actionurl=actionurl displaytype="navbar" urlname=url_name linktext="Subir" %}
 							{% url 'wakemeup:edit_file_bulk' as actionurl %}
