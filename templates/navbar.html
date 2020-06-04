@@ -37,11 +37,17 @@
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Archivos</a>
 					<div class="dropdown-menu">
-						<a class="dropdown-item {% if url_name == 'list_file' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}">Descargar</a>
+						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'letter' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=letter">Correspondencia</a>
+						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'interview' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=interview">Entrevistas</a>
+						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'form' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=form">Formularios</a>
+						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'report' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=report">Informes</a>
+						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'video' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=video">Videos</a>
+						<div class="dropdown-divider"></div>
+						<a class="dropdown-item {% if url_name == 'list_file' and not request.GET.filetype %} active {% endif %}" href="{% url 'wakemeup:list_file' %}">Ver Todos</a>
+						<div class="dropdown-divider"></div>
 						{% if auth.objects.file.accesslevel >= 10 %}
 							{% url 'wakemeup:edit_file' fileid='new' as actionurl %}
 							{% link_post navcontext=navigation formname="edit_file" actionurl=actionurl displaytype="navbar" urlname=url_name linktext="Subir" %}
-							<div class="dropdown-divider"></div>
 							{% url 'wakemeup:edit_file_bulk' as actionurl %}
 							{% link_post navcontext=navigation formname="edit_file_bulk" actionurl=actionurl displaytype="navbar" urlname=url_name linktext="Gestionar" %}
 						{% endif %}
