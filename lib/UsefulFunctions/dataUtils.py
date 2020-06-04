@@ -60,7 +60,7 @@ def convert_form_binary_to_db(formfieldname):
 
     return mydatafile
 
-def convert_to_array(value):
+def to_array(value):
     if(value):
         return value if isinstance(value, collections.abc.Sequence) else [value]
     else:

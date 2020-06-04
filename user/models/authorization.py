@@ -38,7 +38,7 @@ class RoleManager(models.Manager):
         return get_data_pk(self, 'SP_DCPGetRole(%s,%s,%s,%s)', (roleid, None, name, None))
 
     def get_roles(self, roleid=None, roleclass=None, name=None, internalflag=None):
-        return get_data(self, 'SP_DCPGetRole(%s,%s,%s,%s)', (roleid, convert_to_array(roleclass), name, internalflag))
+        return get_data(self, 'SP_DCPGetRole(%s,%s,%s,%s)', (roleid, to_array(roleclass), name, internalflag))
     
     def save(self, myRole):
         return save_data('SP_DCPUpsertRole', (

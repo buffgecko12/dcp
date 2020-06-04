@@ -3,7 +3,7 @@ from django.db import models
 from wakemeup.models.base import MyModel
 from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.stringUtils import mychr, split_filename
-from lib.UsefulFunctions.dataUtils import generate_options, to_json, convert_to_array
+from lib.UsefulFunctions.dataUtils import generate_options, to_json, to_array
 import lib.UsefulFunctions.googleUtils as google
 from django.contrib.postgres.fields import JSONField
 
@@ -14,11 +14,12 @@ class FileManager(models.Manager):
         return self.get_files()
 
     def get(self, fileid):
-        return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (convert_to_array(fileid), None, None, None, None, None, None, None, None, None))
+        return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (to_array(fileid), None, None, None, None, None, None, None, None, None))
 
     def get_files(self, fileid=None, fileclass=None, filecategory=None, alternatefileid=None, contractid=None, schoolid=None, schoolyear=None, fileattributes=None, filesource=None, accessinfo=None, hierarchyflag=False, relativeroot=None):
         
-        fileid = convert_to_array(fileid)
+        fileid = to_array(fileid)
+        filecategory = to_array(filecategory)
         
         if not hierarchyflag:
             return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo)))
