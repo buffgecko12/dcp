@@ -2,7 +2,7 @@
 	{% for x in ""|ljust:file.displayindent %}&nbsp;{% endfor %}
 {% endif %}
 
-<img height="{{iconsize|default:24}}" src="{{file.fileattributes.gd.iconLink}}"/>&nbsp;
+<img {% if icontileflag %}class="m-1" {% endif %} height="{% if not file.directoryflag %}{{iconsize|default:20}}{% else %}24{% endif %}" src="{{file.fileattributes.gd.iconLink}}"/>&nbsp;
 
 {% if not file.directoryflag and showlinks %}&nbsp;
 	{% if file.filetype == "application/vnd.google-apps.document" %}

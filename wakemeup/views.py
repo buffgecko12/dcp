@@ -393,7 +393,7 @@ def list_file(request):
         }
 
 #     context = {'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin(), relativeroot=get_rootdir(request=request, gd_locator=get_gd_locator('program_base'), programname='incentive'))}
-    context = {'files':request.user.get_files(**fileparams), "filefilter": filefilter, 'iconsize': 36 if not hierarchyflag else 24}
+    context = {'files':request.user.get_files(**fileparams), "filefilter": filefilter, 'iconsize': 36 if not hierarchyflag else None, 'icontileflag': False if not filefilter else True}
     return render(request, 'wakemeup/files/list_file.html', context)
 
 @check_authorization
