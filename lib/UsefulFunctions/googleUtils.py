@@ -255,7 +255,8 @@ class GoogleDrive(GoogleService):
                     filedata = None, 
                     fields = (GD_FILE_FIELDS), 
                     directoryflag = False, 
-                    filepath = None):
+                    filepath = None,
+                    updaterepoflag = False):
 
         media_content = None
 
@@ -267,23 +268,33 @@ class GoogleDrive(GoogleService):
         else:
             media_content = get_gd_media_file(file=filedata, mimetype='application/octet-stream', filepath=filepath)
 
-        return self.connection.files().create(
+        result = self.connection.files().create(
             body=metadata,
             media_body=media_content,
             fields=fields
         ).execute()
+        
+        # Update GD attributes and return file
+        if updaterepoflag:
+            self.sync(fileid=result['id'])
+            
+            # Refresh result
+            result = self.get_file(fileid=result['id'])
+            
+        return result
 
-    def create_shortcut(self, shortcutfilename, targetfileid, targetmimetype=None):
+    def create_shortcut(self, shortcutfilename, targetfileid, targetmimetype=None, updaterepoflag=True):
         metadata = {
             'Name': shortcutfilename,
             'mimeType': 'application/vnd.google-apps.shortcut',
             'shortcutDetails': {
                 'targetId': targetfileid,
                 'targetMimeType:': targetmimetype
-            }
+            },
+            'properties': self.get_file(fileid=targetfileid)['properties'] # Copy target file's properties
         }
         
-        return self.create_file(metadata=metadata)
+        return self.create_file(metadata=metadata, updaterepoflag=updaterepoflag)
 
     @google_api_safe_run
     def export_file(self, fileid, exporttype, fields=GD_FILE_FIELDS):

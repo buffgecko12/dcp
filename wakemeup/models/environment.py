@@ -109,8 +109,24 @@ class FileManager(models.Manager):
     def save_batch(self, fileinfo, filesource=None, overridecustomfieldsflag=None, deleteoptions={'deleteremovedflag':False}):
         return save_data('SP_DCPUpsertFileBatch', (to_json(fileinfo), filesource, to_json(deleteoptions), overridecustomfieldsflag), returnall=True)
     
-    def update_attributes(self, filelist, fileinfo, acllist):
-        return save_data('SP_DCPUpdateFileAttributes', (filelist, to_json(fileinfo), to_json(acllist)))
+    def update_attributes(self, fileid, fileinfo=None, acllist=None, updategdflag=True):
+        fileid = to_array(fileid)
+        result = save_data('SP_DCPUpdateFileAttributes', (fileid, to_json(fileinfo), to_json(acllist)))
+        
+        # Update Google Drive info
+        if (fileid and updategdflag):
+            
+            # Connect to Google Drive
+            gd = google.GoogleDrive(permissions=['all'])
+            
+            # Get list of GD files with info
+            myfiles = self.get_files(fileid=fileid, filesource='GD')
+            
+            # Update google attributes
+            for myfile in myfiles:
+                gd.update_file(fileid=myfile.alternatefileid, metadata={'properties':myfile.get_properties()})
+        
+        return result
     
     def delete(self, myFile, contractid=None, schoolid=None, alternatefileid=None, filesource=None):
         return delete_data('SP_DCPDeleteFile', (myFile.fileid, myFile.contractid, myFile.schoolid, myFile.alternatefileid, myFile.filesource))

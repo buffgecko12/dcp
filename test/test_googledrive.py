@@ -18,7 +18,7 @@ class testGoogleDrive(unittest.TestCase):
         cls.gd_write = GoogleDrive(permissions=['write'])
 
         cls.metadata = {'name': 'Test directory', 'parents':['root'], 'properties':{'key1':'val1'}}
-        cls.mymediafile = cls.gd_write.create_file(metadata={'name':'testpic.jpg'},filepath=get_abs_path('test/img/sampleimg.jpg'))
+        cls.mymediafile = cls.gd_write.create_file(metadata={'name':'testpic.jpg'},filepath=get_abs_path('test/img/sampleimg.jpg'), updaterepoflag=True)
 
         cls.newname = 'newname'
     
@@ -122,6 +122,35 @@ class testGoogleDrive(unittest.TestCase):
         # Delete file
         self.gd_write.delete_file(fileid=newfile['id'])
 
+
+
+    def testCreateShortcut(self):
+
+        targetid = self.mymediafile['id']
+        File.objects.update_attributes(fileid=File.objects.get_file_alt(fileid=targetid).fileid, fileinfo={'fileclass':'test_class','filecategory':'ZZ'})
+
+        # Create new shortcut
+        myshortcut = self.gd_write.create_shortcut(shortcutfilename='My Shortcut', targetfileid=targetid)
+        
+        # Lookup shortcut's repo file info
+        shortcut_gdid = myshortcut['id']
+        myrepofile = File.objects.get_file_alt(fileid=shortcut_gdid)
+        
+        # Verify shortcut is in sync with repository
+        self.assertEqual(myshortcut['shortcutDetails']['targetId'], targetid)
+        self.assertEqual(myrepofile.fileclass, 'test_class')
+
+        # Delete file from repo
+        myrepofile.delete()
+        self.assertIsNone(File.objects.get_file_alt(fileid=shortcut_gdid))
+
+        # Sync file with repository and get info
+        self.gd_read.sync(fileid=shortcut_gdid)
+        
+        # Verify file re-created with imported metadata
+        myrepofile = File.objects.get_file_alt(fileid=shortcut_gdid)
+        self.assertEqual(myrepofile.fileclass, 'test_class')
+        
     def testSync(self):
 
         newfile = File(filedescription='something', schoolid=1, contractid=None, fileattributes={'programname':'test_program'}).save(gd_file={'gd':self.gd_write,'metadata':{'name':'test_file'}, 'directoryflag':True})

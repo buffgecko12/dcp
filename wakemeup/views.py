@@ -521,20 +521,7 @@ def edit_file(request, fileid=None):
                     )
 
                 # Update file info
-                File.objects.update_attributes(filelist=filelist, fileinfo=fileinfo, acllist=acllist)
-                
-                # Update Google Drive info
-                if(filelist):
-                    
-                    # Connect to Google Drive
-                    gd = GoogleDrive(permissions=['all'])
-                    
-                    # Get list of GD files with info
-                    myfiles = File.objects.get_files(fileid=filelist, filesource='GD')
-                    
-                    # Update google attributes
-                    for myfile in myfiles:
-                        gd.update_file(fileid=myfile.alternatefileid, metadata={'properties':myfile.get_properties()})
+                File.objects.update_attributes(fileid=filelist, fileinfo=fileinfo, acllist=acllist)
 
     # CREATE NEW
     elif fileid == "new":
