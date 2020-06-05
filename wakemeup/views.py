@@ -463,7 +463,7 @@ def edit_file(request, fileid=None):
                     gd_file = {
                         'gd': gd,
                         'metadata':file_metadata,
-                        'file_data':myfile,
+                        'filedata':myfile,
                     }
     
                     # Create file in repository

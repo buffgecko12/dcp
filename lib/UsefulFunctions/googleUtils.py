@@ -252,24 +252,38 @@ class GoogleDrive(GoogleService):
     # Create directory / file
     def create_file(self, 
                     metadata, 
-                    file_data = None, 
-                    mimetype = 'application/octet-stream', 
+                    filedata = None, 
                     fields = (GD_FILE_FIELDS), 
                     directoryflag = False, 
-                    file_path = None):
+                    filepath = None):
+
+        media_content = None
 
         # Set file attributes
         if directoryflag:
             metadata['mimeType'] = 'application/vnd.google-apps.folder'
-            media_content = None
+        elif metadata.get('mimeType') == "application/vnd.google-apps.shortcut":
+            pass
         else:
-            media_content = get_gd_media_file(file=file_data, mimetype=mimetype, file_path=file_path)
+            media_content = get_gd_media_file(file=filedata, mimetype='application/octet-stream', filepath=filepath)
 
         return self.connection.files().create(
             body=metadata,
             media_body=media_content,
             fields=fields
         ).execute()
+
+    def create_shortcut(self, shortcutfilename, targetfileid, targetmimetype=None):
+        metadata = {
+            'Name': shortcutfilename,
+            'mimeType': 'application/vnd.google-apps.shortcut',
+            'shortcutDetails': {
+                'targetId': targetfileid,
+                'targetMimeType:': targetmimetype
+            }
+        }
+        
+        return self.create_file(metadata=metadata)
 
     @google_api_safe_run
     def export_file(self, fileid, exporttype, fields=GD_FILE_FIELDS):
@@ -527,11 +541,11 @@ def get_google_credentials(service = 'drive', permissions = ['read']):
 def get_google_service(service, version, permissions = ['read'], credentials = None):
     return build(serviceName=service, version=version, credentials=credentials or get_google_credentials(service=service, permissions=permissions))
 
-def get_gd_media_file(file, mimetype, file_path=None, chunksize = (5*1024*1024), resumable=True):
+def get_gd_media_file(file, mimetype, filepath=None, chunksize = (5*1024*1024), resumable=True):
 
     # Prepare file from path
-    if file_path:
-        return MediaFileUpload(file_path, mimetype, chunksize, resumable)
+    if filepath:
+        return MediaFileUpload(filepath, mimetype, chunksize, resumable)
 
     # Prepare file from binary
     else:

@@ -18,7 +18,7 @@ class testGoogleDrive(unittest.TestCase):
         cls.gd_write = GoogleDrive(permissions=['write'])
 
         cls.metadata = {'name': 'Test directory', 'parents':['root'], 'properties':{'key1':'val1'}}
-        cls.mymediafile = cls.gd_write.create_file(metadata={'name':'testpic.jpg'},file_path=get_abs_path('test/img/sampleimg.jpg'))
+        cls.mymediafile = cls.gd_write.create_file(metadata={'name':'testpic.jpg'},filepath=get_abs_path('test/img/sampleimg.jpg'))
 
         cls.newname = 'newname'
     
