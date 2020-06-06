@@ -574,9 +574,11 @@ def get_file(request, fileid):
                 else:
                     myfileid = myfile.shortcutdetails['targetId']
                 
+                # Export file - Google Drive
                 gd = GoogleDrive()
                 mymimetype = get_mimetype(exporttype)
                 myfileextension = exporttype if mymimetype else myfile.fileextension
+                mycontenttype = mymimetype or myfile.filetype # Handle case of export
                 
                 myfile.filedata = gd.download_file(fileid=myfileid, mimetype=mymimetype)
                 myfile.filename = (myfile.filename or '') + (('.' + myfileextension if myfileextension else ''))
@@ -590,7 +592,7 @@ def get_file(request, fileid):
             elif myfile.filesource == 'DB':
                 myfile.filename = myfile.filename + myfile.fileextension
 
-            return getFileResponse(filedata=myfile.filedata, filename=myfile.filename, filesize=myfile.filesize, contenttype=myfile.filetype, forcedownload=forcedownload)
+            return getFileResponse(filedata=myfile.filedata, filename=myfile.filename, filesize=myfile.filesize, contenttype=mycontenttype, forcedownload=forcedownload)
         
     # File does not exist or user has no access - return to refering page
     return redirect_referer(request)
