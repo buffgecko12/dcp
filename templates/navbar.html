@@ -48,8 +48,11 @@
 							<div class="dropdown-divider"></div>
 							{% url 'wakemeup:edit_file' fileid='new' as actionurl %}
 							{% link_post navcontext=navigation formname="edit_file" actionurl=actionurl displaytype="navbar" urlname=url_name linktext="Subir" %}
-							{% url 'wakemeup:edit_file_bulk' as actionurl %}
-							{% link_post navcontext=navigation formname="edit_file_bulk" actionurl=actionurl displaytype="navbar" urlname=url_name linktext="Gestionar" %}
+
+							{% if not auth.navbar.files.manage.disable %}
+								{% url 'wakemeup:edit_file_bulk' as actionurl %}
+								{% link_post navcontext=navigation formname="edit_file_bulk" actionurl=actionurl displaytype="navbar" urlname=url_name linktext="Gestionar" %}
+							{% endif %}
 						{% endif %}
 					</div>
 				</li>
@@ -71,11 +74,16 @@
 							<a class="dropdown-item" href="{% url 'wakemeup:list_object' objecttype='teacher' %}">Docentes</a>
 							<a class="dropdown-item" href="{% url 'wakemeup:list_object' objecttype='reward' %}">Premios</a>
 							<div class="dropdown-divider"></div>
-							<a class="dropdown-item {% if url_name == 'create_user' %} active {% endif %}" href="{% url 'wakemeup:create_user' %}">Crear usuario</a>
+							
+							{% if auth.objects.user.accesslevel >= 10 %}
+								<a class="dropdown-item {% if url_name == 'create_user' %} active {% endif %}" href="{% url 'wakemeup:create_user' %}">Crear usuario</a>
+							{% endif %}
 							
 							<!-- Permissions -->
-							{% url 'wakemeup:edit_permissions' as actionurl %}
-							{% link_post navcontext=navigation formname="edit_permissions" actionurl=actionurl displaytype="navbar" urlname=url_name linktext="Permisos" %}
+							{% if not auth.navbar.admin.permissions.disable and auth.objects.permissions.accesslevel >= 8%}
+								{% url 'wakemeup:edit_permissions' as actionurl %}
+								{% link_post navcontext=navigation formname="edit_permissions" actionurl=actionurl displaytype="navbar" urlname=url_name linktext="Permisos" %}
+							{% endif %}
 							
 							<!-- Admin tools -->
 							{% url 'wakemeup:execute_admintools' as actionurl %}

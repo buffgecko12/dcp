@@ -209,6 +209,17 @@ class MyUser(AbstractBaseUser):
     def check_access(self, objectid, objectclass, requestedaccesslevel=4, objectpermissionsflag=False):
         return MyUser.objects.check_access(self, objectid, objectclass, requestedaccesslevel, objectpermissionsflag)
     
+    # Helper function to check permissions from an "auth" object
+    def check_access_auth(self, auth, objectname, requestedaccesslevel):
+        result = False
+        myaccesslevel = auth.get(objectname, {}).get('accesslevel')
+
+        if myaccesslevel:
+            if (myaccesslevel >= requestedaccesslevel):
+                result = True 
+
+        return result
+
     def get_object_auth(self):
         myobjects = self.check_access(objectid=None, objectclass='BO', requestedaccesslevel=None)
         
@@ -219,30 +230,42 @@ class MyUser(AbstractBaseUser):
                 myobject.objectname: {'accesslevel': myobject.accesslevel}
             })
 
-        return result
+        return DotMap(result)
 
     def get_site_auth(self):
         
-        sharedaccountdisable = True if self.sharedaccountflag else False
-
+        DISABLE = {'disable':True}
+        DISABLE_ADMINONLY = {'disable': True if not self.is_admin() else False}
+        DISABLE_SHAREDACCOUNT = {'disable': True if self.sharedaccountflag else False}
+        
+        objectauth = self.get_object_auth()
+        
         auth = {
             # Default permissions
-            'objects': self.get_object_auth(),
+            'objects': objectauth,
             
             # Navbar
             'navbar': {
-                'admin': {'disable': False if self.is_admin() else True},
-                'contracts':{'disable': True},
-                'reputation': {'disable': True},
-                'notifications': {'disable': True},
+                'admin': {
+                    'permissions':{**DISABLE},
+                    'syncgd':{**DISABLE_ADMINONLY},
+                    **DISABLE_ADMINONLY,
+                },
+                'contracts':{**DISABLE},
+                'reputation': {**DISABLE},
+                'notifications': {**DISABLE},
+                'files': {
+                    'upload': {**DISABLE_ADMINONLY},
+                    'manage': {**DISABLE_ADMINONLY},
+                    }
                 },
             
             # My Account
             'myaccount': {
-                'profile': {'disable': sharedaccountdisable},
-                'tools': {'disable': sharedaccountdisable},
-                'reputation': {'disable': True},
-                'badges': {'disable': True},
+                'profile': {**DISABLE_SHAREDACCOUNT},
+                'tools': {**DISABLE_SHAREDACCOUNT},
+                'reputation': {**DISABLE},
+                'badges': {**DISABLE},
             },
         }
         
