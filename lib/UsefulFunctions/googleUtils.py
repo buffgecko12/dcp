@@ -15,6 +15,7 @@ from lib.UsefulFunctions.dataUtils import get_matching_item, to_json, convert_js
 from lib.UsefulFunctions.miscUtils import get_app_setting
 from lib.UsefulFunctions.stringUtils import split_filename
 from lib.UsefulFunctions.envUtils import check_env
+from lib.UsefulFunctions.httpUtils import get_mimetype
 from wakemeup import models
 
 GD_FILE_FIELDS = 'name,fileExtension,size,mimeType,description,id,properties,webContentLink,iconLink,parents,shortcutDetails'
@@ -407,13 +408,18 @@ class GoogleDrive(GoogleService):
         else:
             return None
 
+    def gd_update_iconlink(self, gd_file, mimetype):
+        iconlink = gd_file['iconLink']
+        index = iconlink.find("/application/")
+        gd_file['iconLink'] = iconlink[:index] + "/" + mimetype # Use target's iconlink instead of shortcut's
+
     def prepare_gd_file(self, gd_file, actions={'updatefields':True,'setproperties':True}):
 
-        # Update icon link        
+        # Update icon link (do this before setting properties below)
         if actions.get('updatefields'):
             gd_file['iconLink'] = gd_file.get('iconLink','').replace("16","128") # Change to higher icon resolution
             gd_file['name'] = split_filename(gd_file.get('name'))['name'] # Parse out filename
-
+            
         # Set properties (attributes) field
         if actions.get('setproperties'):
             
@@ -423,10 +429,12 @@ class GoogleDrive(GoogleService):
             if shortcutinfo:
                 gd_file['mimeType'] = shortcutinfo.get('targetMimeType') # Use target mimetype instead of shortcut's
                 
-                iconlink = gd_file['iconLink']
-                index = iconlink.find("/application/")
-                gd_file['iconLink'] = iconlink[:index] + "/" + shortcutinfo.get('targetMimeType') # Use target's iconlink instead of shortcut's
-                
+                self.gd_update_iconlink(gd_file, shortcutinfo.get('targetMimeType'))
+
+            # Change default GD icons to standard icons
+            if(gd_file['mimeType'] == get_mimetype('gdoc')):
+                self.gd_update_iconlink(gd_file, get_mimetype('docx'))
+
             myfile = copy.deepcopy(gd_file)
 
             gd_file.setdefault('properties',{}).update({
