@@ -12,6 +12,9 @@
 		position: absolute; top:0; left: 0; width: 100%; height: 100%;
 	}
 	
+	.text-responsive {
+	  font-size: calc(25% + 1vw);
+	}	
 </style>
 {% endblock %}
 
@@ -29,14 +32,14 @@
 			<div class="row">
 				<div class="col-6">
 					<div style="font-size:1.4vw"><b>Fechas tope</b></div>
-					<div style="font-size:1.4vw;white-space: nowrap;" nowrap>
+					<div class="text-responsive" style="white-space: nowrap;">
 					{% if events %}
 						{% for event in events %}
 							<b><i>
 							{% if event.end.date %}
-								{{event.end.date|parse_date|date:"d-m-Y"}}
+								{{event.end.date|parse_date|date:"d/m/Y"}}
 							{% else %}
-								{{event.end.dateTime|parse_date|date:"d-m-Y"}}
+								{{event.end.dateTime|parse_date|date:"d/m/Y"}}
 							{% endif %}
 							</b></i>
 							<a href="{{event.htmlLink}}" target="_blank">{{event.summary|truncatechars:45}}</a><br>
