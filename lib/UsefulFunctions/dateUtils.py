@@ -47,3 +47,15 @@ def display_timestamp_range(timestamprange, formatstring="%d/%m/%Y"):
 
 def get_current_timestamp_db():
     return format_timestamp_string_db(datetime.datetime.now())
+
+def parse_timestamp(value):
+    mydate = None
+    dateformat = "%Y-%m-%d"
+
+    if value:
+        try:
+            mydate = datetime.strptime(value, dateformat)
+        except:
+            mydate = datetime.strptime(value, dateformat + "T%H:%M:%SZ")
+        
+    return mydate
