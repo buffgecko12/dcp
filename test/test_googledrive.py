@@ -150,6 +150,8 @@ class testGoogleDrive(unittest.TestCase):
         # Verify file re-created with imported metadata
         myrepofile = File.objects.get_file_alt(fileid=shortcut_gdid)
         self.assertEqual(myrepofile.fileclass, 'test_class')
+
+        myrepofile.delete()
         
     def testSync(self):
 
