@@ -7,7 +7,7 @@
 {% if not file.directoryflag and showlinks %}&nbsp;
 	{% if file.filetype == "application/vnd.google-apps.document" %}
 		<a href="{% url 'wakemeup:get_file' fileid=file.fileid %}?exporttype=docx">{{file.filename|truncatechars:filenamelength|default:30}}</a>&nbsp;&nbsp;
-		<a href="{% url 'wakemeup:get_file' fileid=file.fileid %}?exporttype=pdf"><img height="20" src="https://drive-thirdparty.googleusercontent.com/128/type/application/pdf"/></a>
+		<a href="{% url 'wakemeup:get_file' fileid=file.fileid %}?exporttype=pdf"><img height="24" src="https://drive-thirdparty.googleusercontent.com/128/type/application/pdf"/></a>
 	{% else %}
 		<a href="{% url 'wakemeup:get_file' file.fileid %}{% if file.filetype == "video/mp4" %}?forcedownload=False{% endif %}">{{file.filename|truncatechars:filenamelength|default:30}}</a>
 		{% if file.filetype == "video/mp4" %}&nbsp;&nbsp;<a href="{% url 'wakemeup:get_file' fileid=file.fileid %}"><i class="fas fa-file-download fa-lg"></i></a>{% endif %}

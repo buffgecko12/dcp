@@ -11,4 +11,6 @@
 			{% include "wakemeup/files/file_list_item.html" with filenamelength=filenamelength showlinks=showlinks iconsize=iconsize icontileflag=icontileflag %}
 		{% endif %}	
 	</span>
+{% empty %}
+	No hay registros.
 {% endfor %}
