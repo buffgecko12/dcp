@@ -219,13 +219,16 @@ class FileForm(MyForm):
             self.fields['schoolyear'] = forms.IntegerField(widget=forms.HiddenInput)
             self.fields['accessroles'] = forms.CharField(widget=forms.HiddenInput, required=False)
 
+        dropdownoptions = {'userflag':False, 'schoolid':None, 'programname': None, 'schoolyear':None} if request.user.is_admin() else \
+                          {'userflag':True, 'schoolid':request.user.schoolid, 'programname': programname}
+
         # Initialize fields (TO-DO: Update to use AJAX based on schoolid)
         fieldinfo = {
-            'schoolid':     {'dropdown':{'lookupargs':{'programname':programname, 'userflag':True}}, 'default':request.user.schoolid},
-            'schoolyear':   {'dropdown':{'lookupargs':{'programname':programname, 'userflag':True}}, 'default':DEFAULT_SCHOOL_YEAR},
-            'programname':  {'dropdown':{'categoryclass':'program', 'lookupargs':{'userflag':True}}},
+            'schoolid':     {'dropdown':{'lookupargs':{**dropdownoptions}}, 'default':request.user.schoolid},
+            'schoolyear':   {'dropdown':{'lookupargs':{**dropdownoptions}}, 'default':DEFAULT_SCHOOL_YEAR},
+            'programname':  {'dropdown':{'categoryclass':'program', 'lookupargs':{**dropdownoptions}}},
             'userid':       {'dropdown':{'lookupargs':{'programname':programname, 'userflag':True}}, 'default':request.user.userid},
-            'filecategory':     {'dropdown':{'categoryclass':'programfile'}},
+            'filecategory': {'dropdown':{'categoryclass':'programfile'}},
             'fileclass':    {'dropdown':'default'},
             'accessroles':  {'dropdown':{'lookupargs':{'roleclass':['US']}, 'selectflag':False}, 'default':Role.objects.get(name='Public').roleid if request.user.is_admin() else ''},
         }
