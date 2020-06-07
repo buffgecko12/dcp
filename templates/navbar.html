@@ -31,6 +31,20 @@
 						</div>
 					</li>
 				{% endif %}
+
+				<!-- CALENDAR -->
+				{% if not auth.navbar.calendar.disable and auth.objects.calendar.accesslevel >= 4 %}
+				<li class="nav-item dropdown">
+					<a class="nav-link" href="{% url 'wakemeup:get_calendar' %}">Calendario</a>
+				</li>
+				{% endif %}
+				
+				<!-- REWARDS -->
+				{% if not auth.navbar.reward.disable and auth.objects.reward.accesslevel >= 1 %}
+				<li class="nav-item dropdown">
+					<a class="nav-link" href="{% url 'wakemeup:list_object_general' objecttype='reward' %}">Incentivos</a>
+				</li>
+				{% endif %}
 				
 				<!-- FILES -->
 				{% if not auth.navbar.files.disable and auth.objects.file.accesslevel >= 4 %}
@@ -61,14 +75,8 @@
 				</li>
 				{% endif %}
 				
-				<!-- CALENDAR -->
-				{% if not auth.navbar.calendar.disable and auth.objects.calendar.accesslevel >= 4 %}
-				<li class="nav-item dropdown">
-					<a class="nav-link" href="{% url 'wakemeup:get_calendar' %}">Calendario</a>
-				</li>
-				{% endif %}
+				<!-- ADMIN -->
 				{% if not auth.navbar.admin.disable %}
-					<!-- ADMIN -->
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Admin</a>
 						<div class="dropdown-menu">
