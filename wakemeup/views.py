@@ -685,6 +685,9 @@ def addreward(request):
 @check_authorization
 def list_object(request, objecttype):
 
+    # Default to manage mode
+    manageflag = True
+
     # Get teacheruserid (if teacher is logged on)
     if request.user.usertype == 'TR':
         teacheruserid = request.user.userid
@@ -699,22 +702,46 @@ def list_object(request, objecttype):
         objectSet = SchoolsTable(School.objects.all())
 
     elif objecttype == 'class':
-        objectSet = ClassesTable(Class.objects.get_classes(teacheruserid = teacheruserid))
+        objectSet = ClassesTable(Class.objects.get_classes(teacheruserid=teacheruserid))
 
     elif objecttype == 'teacher':
-        objectSet = TeachersTable(Teacher.objects.get_teachers(teacheruserid = teacheruserid))
+        objectSet = TeachersTable(Teacher.objects.get_teachers(teacheruserid=teacheruserid))
 
     elif objecttype == 'reward':
 
+        manageflag = False
+
+        # Set default options
+        rewardfunction = SchoolReward.objects.get_school_rewards
+        rewardfilter = {'schoolyear': DEFAULT_SCHOOL_YEAR, 'schoolid': request.user.schoolid}
+        tableoptions = {
+            'excludefields': ['vendor','rewardvalue','manage_buttons'],
+        }
+
+        # Admin options
+        if request.user.is_admin():
+            manageflag = True
+            # Get all rewards
+            rewardfunction = Reward.objects.get_rewards
+            
+            rewardfilter.pop('schoolid')
+            tableoptions.update({
+                'excludefields': [],
+            })
+        
+        # Teacher options
+        if request.user.usertype == "TR":
+            tableoptions['excludefields'].remove('rewardvalue')
+
         # Look up rewards
-        objectSet = RewardsTable(Reward.objects.get_rewards())
+        objectSet = RewardsTable(rewardfunction(**rewardfilter), tableoptions=tableoptions)
 
     else:
         pass
         
     RequestConfig(request).configure(objectSet)
         
-    return render(request, 'wakemeup/admin/index.html', {'objects' : objectSet, 'objecttype': objecttype})
+    return render(request, 'wakemeup/admin/index.html', {'objects' : objectSet, 'objecttype': objecttype, 'manageflag': manageflag})
 
 @check_authorization
 def edit_object(request, objecttype, objectid):

@@ -101,18 +101,26 @@ class TeachersTable(tables.Table):
 
 class RewardsTable(tables.Table):
 
+    def __init__(self, *args, **kwargs):
+        # Pull out table options
+        self.tableoptions = kwargs.pop('tableoptions', {})
+        super(RewardsTable, self).__init__(*args, **kwargs)
+
     objectid = 'rewardid'
 
     rewardvalue = tables.TemplateColumn(
         template_name='wakemeup/admin/fields/currency_field.html',
         verbose_name='Valor',
     )
-    
-    manage_buttons = getManageButtons(accessor=objectid)
+        manage_buttons = getManageButtons(accessor=objectid)
+
+    def before_render(self, request):
+        for myfield in self.tableoptions.get('excludefields', []):
+            self.columns.hide(myfield)
 
     class Meta:
         model = Reward
-        fields = ('rewardcategorydisplayname','vendor','rewarddisplayname','rewarddescription','rewardvalue')
+        fields = ('rewardcategorydisplayname', 'vendor', 'rewarddisplayname', 'rewarddescription', 'rewardvalue')
         empty_text = EMPTY_TEXT
 
 class ContractsTable(tables.Table):
