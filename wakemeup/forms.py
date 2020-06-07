@@ -442,7 +442,7 @@ class RewardForm(forms.Form):
     vendor = forms.CharField(max_length=100,label='Vendedor')
     rewarddisplayname = forms.CharField(max_length=100,label='Incentivo')
     rewarddescription = forms.CharField(max_length=500,label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}))
-    rewardvalue = forms.IntegerField(label='Valor',localize=True)
+    rewardvalue = forms.IntegerField(label='Valor',localize=True, required=False)
 
     def __init__ (self, *args, **kwargs):
 
@@ -554,7 +554,7 @@ class SchoolRewardForm(forms.Form):
     vendor = forms.CharField(required=False,label='Vendedor',widget=forms.TextInput(attrs={'textonly':True}))
     rewarddisplayname = forms.CharField(required=False,label='Incentivo',widget=forms.TextInput(attrs={'textonly':True}))
     rewarddescription = forms.CharField(required=False,label='Descripci' + mychr('o') + 'n',widget=forms.TextInput(attrs={'textonly':True}))
-    rewardvalue = forms.IntegerField(widget=forms.NumberInput,required=True,label='Valor',localize=True)
+    rewardvalue = forms.IntegerField(widget=forms.NumberInput,required=False,label='Valor',localize=True)
 
     def __init__ (self, *args, **kwargs):
         super(SchoolRewardForm, self).__init__(*args, **kwargs)

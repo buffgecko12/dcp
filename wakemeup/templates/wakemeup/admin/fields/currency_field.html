@@ -1,2 +1,6 @@
 {% load humanize %}
-${{ value|intcomma}}
+{% if value is not None %}
+	${{value|intcomma}}
+{% else %}
+	<span class="text-danger"><i>Pendiente</i></span>
+{% endif %}
