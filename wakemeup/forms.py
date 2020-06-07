@@ -440,7 +440,7 @@ class RewardForm(forms.Form):
 
     rewardcategory = forms.ChoiceField(required=True,label='Categor' + mychr('i') + 'a')
     vendor = forms.CharField(max_length=100,label='Vendedor')
-    rewarddisplayname = forms.CharField(max_length=100,label='Premio')
+    rewarddisplayname = forms.CharField(max_length=100,label='Incentivo')
     rewarddescription = forms.CharField(max_length=500,label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}))
     rewardvalue = forms.IntegerField(label='Valor',localize=True)
 
@@ -464,7 +464,7 @@ class RewardForm(forms.Form):
         # Set form layout
         self.helper.layout = Layout(
             Fieldset(
-                'Crear / Editar premio',
+                'Crear / Editar incentivo',
                 'rewardcategory',
                 'vendor',
                 'rewardid',
@@ -552,7 +552,7 @@ class SchoolRewardForm(forms.Form):
     selected = forms.BooleanField(required=False,label=' ')
     rewardcategorydisplayname = forms.CharField(required=False,max_length=100,label='Categor' + mychr('i') + 'a',widget=forms.TextInput(attrs={'textonly':True}))
     vendor = forms.CharField(required=False,label='Vendedor',widget=forms.TextInput(attrs={'textonly':True}))
-    rewarddisplayname = forms.CharField(required=False,label='Premio',widget=forms.TextInput(attrs={'textonly':True}))
+    rewarddisplayname = forms.CharField(required=False,label='Incentivo',widget=forms.TextInput(attrs={'textonly':True}))
     rewarddescription = forms.CharField(required=False,label='Descripci' + mychr('o') + 'n',widget=forms.TextInput(attrs={'textonly':True}))
     rewardvalue = forms.IntegerField(widget=forms.NumberInput,required=True,label='Valor',localize=True)
 

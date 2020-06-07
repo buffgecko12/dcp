@@ -1,5 +1,5 @@
 <span class="text-nowrap">
-	<strong>Opciones de premio</strong>
+	<strong>Opciones de incentivo</strong>
 </span><br>
 <i>
 	{% for reward in goal.rewardinfo.currentrewards %}
@@ -9,7 +9,7 @@
 	<span class="text-danger">
 		<small><strong>
 			{% if goal.rewardselectedby == "TR" %}
-				<br>* premios seleccionados por docente
+				<br>* incentivos seleccionados por docente
 			{% endif %}
 			{% if goal.maxnumrewards %} 
 				<br>* max numero de ganadores = {{ goal.maxnumrewards }}

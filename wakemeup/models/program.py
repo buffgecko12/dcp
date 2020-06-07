@@ -308,7 +308,7 @@ class Reward(MyModel):
 
     rewardid = models.IntegerField(primary_key=True)
     schoolyear = models.SmallIntegerField()
-    rewarddisplayname = models.CharField(max_length=100,verbose_name='Premio')
+    rewarddisplayname = models.CharField(max_length=100,verbose_name='Incentivo')
     rewarddescription = models.CharField(max_length=500,verbose_name='Descripci' + mychr('o') + 'n')
     rewardvalue = models.IntegerField(verbose_name='Valor')
     rewardcategory = models.CharField(max_length=10, verbose_name='Categor' + mychr('i') + 'a')

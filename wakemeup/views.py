@@ -676,7 +676,7 @@ def addreward(request):
             # Save object
             myreward.save()
 
-            return HttpResponse("Premio guardado.")
+            return HttpResponse("Incentivo guardado.")
     else:
         form = RewardForm(cancel_type="button")
 

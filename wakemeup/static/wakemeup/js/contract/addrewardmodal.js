@@ -27,7 +27,7 @@ function update_rewardform(type) {
 			},
 			success: function(data){
 	            $("#mymodaldiv").html(data); // Update div with return HTML
-	            if(data == "Premio guardado.") { // Successfully saved reward
+	            if(data == "Incentivo guardado.") { // Successfully saved reward
 		            setTimeout(
 	            		function(){
 			            	$('#addRewardModal').modal('hide'); // Close after a few seconds

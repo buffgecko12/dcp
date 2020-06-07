@@ -10,7 +10,7 @@
 		{% elif objecttype == "class" %}Cursos
 		{% elif objecttype == "teacher" %}Docentes
 		{% elif objecttype == "student" %}Estudiantes
-		{% elif objecttype == "reward" %}Premios
+		{% elif objecttype == "reward" %}Incentivos
 		{% endif %}
 		{% if objecttype not in 'teacher student' %}
 			{% if objecttype == "class" and request.user.usertype != "TR" or objecttype == "reward" %}
