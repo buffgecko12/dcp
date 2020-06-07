@@ -108,12 +108,12 @@ def check_authorization(view):
     return view_wrapper
 
 # Get relative root directory for files
-def get_rootdir(request, gd_locator, programname='incentive'): # TO-DO: Fix hardcoded
+def get_rootdir(request, gd_locator, programname='incentive', **kwargs): # TO-DO: Fix hardcoded
     if request.user.is_admin():
         gd_locator = get_gd_locator('programs_base')
         programname = None
         
-    return File.objects.lookup_fileid_gd(gd_locator=gd_locator, programname=programname)
+    return File.objects.lookup_fileid_gd(gd_locator=gd_locator, programname=programname, **kwargs)
 
 # Check if form is being saved
 def check_saveform(request):
@@ -387,7 +387,7 @@ def list_file(request):
 
     fileparams = {
         'filecategory': filecategory,
-        'relativeroot': get_rootdir(request=request, gd_locator=get_gd_locator('program_base'), programname='incentive'),
+        'relativeroot': get_rootdir(request=request, gd_locator=get_gd_locator('program_files_base'), programname='incentive', schoolyear=DEFAULT_SCHOOL_YEAR),
         'objectpermissionsflag': request.user.is_admin(),
         'hierarchyflag': hierarchyflag
         }
