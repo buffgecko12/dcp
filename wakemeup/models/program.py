@@ -185,9 +185,11 @@ class ProgramManager(models.Manager):
         # Define directory structure
         gd_structure = {
             str(myProgram.schoolyear):{
+                # Update default ACLs when creating new Program()
                 'Archivos':{
                     'Documentos':{'metadata':{'gd_locator':get_gd_locator('program_files_documents'), **programinfo}},
                     'Videos':{'metadata':{'gd_locator':get_gd_locator('program_files_videos'), **programinfo}},
+                    'Entrevistas':{'metadata':{'gd_locator':get_gd_locator('program_files_interviews'), **programinfo}},
                     'metadata':{'gd_locator':get_gd_locator('program_files_base'), **programinfo},
                 },
                 'Contratos':{'metadata':{'gd_locator':get_gd_locator('contracts_base'), **programinfo}},
@@ -401,12 +403,22 @@ class Program(MyModel):
                 
             if(createoptions.get('defaultrole')):
                 schoolabbreviation = School.objects.get(schoolid=self.schoolid).schoolabbreviation
+
+                programinfo = {'schoolyear':self.schoolyear,'programname':self.programname}
                 
-                defaultdirs = [
+                # Base directories
+                basedirs = [
                     File.objects.lookup_fileid(gd_locator=get_gd_locator('programs_base')),
-                    File.objects.lookup_fileid(gd_locator=get_gd_locator('program_base'), programname=self.programname),
-                    File.objects.lookup_fileid(gd_locator=get_gd_locator('program_base_year'), programname=self.programname, schoolyear=self.schoolyear)
+                    File.objects.lookup_fileid(gd_locator=get_gd_locator('program_base'), programname=self.programname)
                 ]
+                
+                # Program directories
+                programdirs = [
+                    File.objects.lookup_fileid(gd_locator=get_gd_locator(mydir), **programinfo) for mydir in \
+                    ('program_base_year', 'program_files_base', 'program_files_videos', 'program_files_interviews' ,'program_files_documents')
+                ]
+                 
+                defaultdirs = basedirs + programdirs
 
                 mydefaultroleid = Role(roleclass='PG', name=('Programa ({0}) - {1}' + (' - {2}' if self.schoolid else '')).format(self.programname, self.schoolyear, schoolabbreviation)).save()
                 
