@@ -171,7 +171,7 @@
 			
 				<!-- LOGIN -->
 				<li class="nav-item">
-					<a class="nav-link" href="{% url 'login' %}">Iniciar sesi&#243;n</a>
+					<a class="nav-link" href="{% url 'login' %}?next={% firstof request.path '/' %}">Iniciar sesi&#243;n</a>
 				</li>
 			{% endif %}
 		</ul>

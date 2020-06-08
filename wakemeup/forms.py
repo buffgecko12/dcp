@@ -342,7 +342,6 @@ class LoginForm(AuthenticationForm):
                 Submit('login', 'Iniciar', css_class='btn-primary'),
                 HTML("<br><br><p><a href=""{% url 'password_reset' %}"">&#191;Olvid&#243; su contrase&#241;a?</a></p>")
             ),
-            Hidden('next',reverse('wakemeup:index'))
         )
 
 class SignupForm(UserCreationForm):
