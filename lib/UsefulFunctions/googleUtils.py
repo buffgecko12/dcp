@@ -424,10 +424,12 @@ class GoogleDrive(GoogleService):
         if actions.get('setproperties'):
             
             shortcutinfo = gd_file.get('shortcutDetails')
+            gd_file.setdefault('properties',{})
             
             # Parse out shortcut info
             if shortcutinfo:
                 gd_file['mimeType'] = shortcutinfo.get('targetMimeType') # Use target mimetype instead of shortcut's
+                gd_file['properties'] = self.get_file(fileid=shortcutinfo.get('targetId')).get('properties') or gd_file['properties'] # Copy target file's properties
                 
                 self.gd_update_iconlink(gd_file, shortcutinfo.get('targetMimeType'))
 
@@ -437,7 +439,7 @@ class GoogleDrive(GoogleService):
 
             myfile = copy.deepcopy(gd_file)
 
-            gd_file.setdefault('properties',{}).update({
+            gd_file['properties'].update({
                 'gd':myfile, **myfile.pop('properties', {}),
                 'parentid':gd_file.get('parents',[None])[0] # Store first parent                
             })
