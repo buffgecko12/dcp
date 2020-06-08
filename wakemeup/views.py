@@ -47,42 +47,41 @@ def check_authentication(view):
 def check_authorization(view):
     
     def view_wrapper(*args, **kwargs):
-
-        # Parse out view info
-        viewname = view.__name__ # i.e. "create_contract"
-        viewname_split = viewname.split("_")
-        
-        # Get action & object
-        view_action = viewname_split[0]
-        view_object = viewname_split[1] if len(viewname_split) > 1 else None # Use second index of view name (if specified)
-
-        # Convert to access levels
-        if(view_action == "list"):
-            myrequestedaccesslevel = 1
-            
-        elif(view_action == "get"):
-            myrequestedaccesslevel = 4
-            
-        elif(view_action in ("edit", "execute")):
-            if(kwargs.get('objectid') == "new"):
-                myrequestedaccesslevel = 10 # Create
-            else:
-                myrequestedaccesslevel = 8 # Edit
-                
-        elif(view_action == "create"):
-            myrequestedaccesslevel = 10
-            
-        elif(view_action == "delete"):
-            myrequestedaccesslevel = 12
-            
-        else:
-            myrequestedaccesslevel = 1 # Browse
-        
         myuser = args[0].user
 
         # Check user is logged on
         if myuser.is_authenticated:
-
+            
+            # Parse out view info
+            viewname = view.__name__ # i.e. "create_contract"
+            viewname_split = viewname.split("_")
+            
+            # Get action & object
+            view_action = viewname_split[0]
+            view_object = viewname_split[1] if len(viewname_split) > 1 else None # Use second index of view name (if specified)
+    
+            # Convert to access levels
+            if(view_action == "list"):
+                myrequestedaccesslevel = 1
+                
+            elif(view_action == "get"):
+                myrequestedaccesslevel = 4
+                
+            elif(view_action in ("edit", "execute")):
+                if(kwargs.get('objectid') == "new"):
+                    myrequestedaccesslevel = 10 # Create
+                else:
+                    myrequestedaccesslevel = 8 # Edit
+                    
+            elif(view_action == "create"):
+                myrequestedaccesslevel = 10
+                
+            elif(view_action == "delete"):
+                myrequestedaccesslevel = 12
+                
+            else:
+                myrequestedaccesslevel = 1 # Browse
+            
             # Get object
             if(view_action in ('list','get','edit','create','execute','delete')):
                 myobject = Object.objects.get_object_by_name(objectname=kwargs.get('objecttype') or view_object) # business object
@@ -99,7 +98,7 @@ def check_authorization(view):
                     return view(*args, **kwargs)
         else:
             # Not authenticated - redirect to login page
-            return redirect('login')
+            return redirect(reverse('login') + '?next={0}'.format(args[0].get_full_path_info()))
         
         # Not authorized - redirect to homepage (TO-DO: Create "not authorized" page)
         return redirect_home()
