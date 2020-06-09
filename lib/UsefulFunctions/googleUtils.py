@@ -429,7 +429,7 @@ class GoogleDrive(GoogleService):
             # Parse out shortcut info
             if shortcutinfo:
                 gd_file['mimeType'] = shortcutinfo.get('targetMimeType') # Use target mimetype instead of shortcut's
-                gd_file['properties'] = self.get_file(fileid=shortcutinfo.get('targetId')).get('properties') or gd_file['properties'] # Copy target file's properties
+                gd_file['properties'] = gd_file['properties'] or self.get_file(fileid=shortcutinfo.get('targetId')).get('properties') or {} # Copy target file's properties (if empty)
                 
                 self.gd_update_iconlink(gd_file, shortcutinfo.get('targetMimeType'))
 
