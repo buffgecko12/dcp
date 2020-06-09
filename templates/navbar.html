@@ -51,13 +51,14 @@
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Archivos</a>
 					<div class="dropdown-menu">
+						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'contract' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=contract">Contratos</a>
 						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'letter' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=letter">Correspondencia</a>
 						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'interview' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=interview">Entrevistas</a>
 						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'form' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=form">Formularios</a>
 						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'report' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=report">Informes</a>
 						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'video' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=video">Videos</a>
 						<div class="dropdown-divider"></div>
-						<a class="dropdown-item {% if url_name == 'list_file' and not request.GET.filetype %} active {% endif %}" href="{% url 'wakemeup:list_file' %}">Ver Todos</a>
+						<a class="dropdown-item {% if url_name == 'list_file' and not request.GET.filetype %} active {% endif %}" href="{% url 'wakemeup:list_file' %}">Explorador de archivos</a>
 						{% if auth.objects.file.accesslevel >= 10 %}
 							{% if not auth.navbar.files.manage.disable or not auth.navbar.files.upload.disable %}
 								<div class="dropdown-divider"></div>

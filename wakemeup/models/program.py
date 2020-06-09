@@ -187,12 +187,12 @@ class ProgramManager(models.Manager):
             str(myProgram.schoolyear):{
                 # Update default ACLs when creating new Program()
                 'Archivos':{
+                    'Contratos':{'metadata':{'gd_locator':get_gd_locator('program_files_contracts'), **programinfo}},
                     'Documentos':{'metadata':{'gd_locator':get_gd_locator('program_files_documents'), **programinfo}},
                     'Videos':{'metadata':{'gd_locator':get_gd_locator('program_files_videos'), **programinfo}},
                     'Entrevistas':{'metadata':{'gd_locator':get_gd_locator('program_files_interviews'), **programinfo}},
                     'metadata':{'gd_locator':get_gd_locator('program_files_base'), **programinfo},
                 },
-                'Contratos':{'metadata':{'gd_locator':get_gd_locator('contracts_base'), **programinfo}},
                 'Subidas':{'metadata':{'gd_locator':get_gd_locator('program_uploads_base'), **programinfo}},
                 'metadata':{
                     'parentid':File.objects.lookup_fileid_gd(gd_locator=get_gd_locator('program_base'),programname=myProgram.programname),
@@ -415,7 +415,7 @@ class Program(MyModel):
                 # Program directories
                 programdirs = [
                     File.objects.lookup_fileid(gd_locator=get_gd_locator(mydir), **programinfo) for mydir in \
-                    ('program_base_year', 'program_files_base', 'program_files_videos', 'program_files_interviews' ,'program_files_documents')
+                    ('program_base_year', 'program_files_base', 'program_files_contracts', 'program_files_videos', 'program_files_interviews' ,'program_files_documents')
                 ]
                  
                 defaultdirs = basedirs + programdirs

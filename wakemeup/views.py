@@ -362,37 +362,56 @@ def get_calendar(request):
 @check_authorization
 def list_file(request):
 
+    # Initialize parameters
     filetype = request.GET.get('filetype')
+    schoolyear = None if request.user.is_admin() else DEFAULT_SCHOOL_YEAR
+    hierarchyflag = False
+    relativeroot = None
     filefilter = {}
+    programname = 'incentive'
     
     # Program filters
     if filetype == "interview":
         filecategory = ['IVV','IVT']
+        filetypedisplay = 'Entrevistas'
+        schoolyear = None
     elif filetype == "report":
         filecategory = ['RTY','RT','SVT','SVS']
+        filetypedisplay = 'Informes'
     elif filetype == "video":
         filecategory = ['VW']
+        filetypedisplay = 'Videos'
     elif filetype == "form":
         filecategory = ['CTF']
+        filetypedisplay = 'Formularios'
     elif filetype == "letter":
         filecategory = ['LTI','LTT']
+        filetypedisplay = 'Correspondencia'
+    elif filetype == "contract":
+        filecategory = ['CT','CTC','CTE','CTO','CTP']
+        filetypedisplay = 'Contratos'
     else:
         filecategory = None
+        filetypedisplay = 'Archivos'
 
     if filecategory:
         filefilter.update({'filecategory': filecategory})
 
-    hierarchyflag = True if not filefilter else False
+    if not filefilter:
+        hierarchyflag = True
+        relativeroot = get_rootdir(request=request, gd_locator=get_gd_locator('program_files_base'), programname=programname, schoolyear=schoolyear)
 
-    fileparams = {
-        'filecategory': filecategory,
-        'relativeroot': get_rootdir(request=request, gd_locator=get_gd_locator('program_files_base'), programname='incentive', schoolyear=DEFAULT_SCHOOL_YEAR),
-        'objectpermissionsflag': request.user.is_admin(),
-        'hierarchyflag': hierarchyflag
-        }
+    fileparams = {'filecategory': filecategory, 'schoolyear': schoolyear, 'relativeroot': relativeroot, 'objectpermissionsflag': request.user.is_admin(), 'hierarchyflag': hierarchyflag}
 
-#     context = {'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin(), relativeroot=get_rootdir(request=request, gd_locator=get_gd_locator('program_base'), programname='incentive'))}
-    context = {'files':request.user.get_files(**fileparams), "filefilter": filefilter, 'iconsize': 36 if not hierarchyflag else None, 'icontileflag': False if not filefilter else True}
+    context = {
+        'files':request.user.get_files(**fileparams), 
+        "filetype": filetypedisplay, 
+        'schoolyear': schoolyear,
+        'programname': programname,
+        'iconsize': 36 if not hierarchyflag else None, 
+        'icontileflag': False if not filefilter else True
+    }
+    
     return render(request, 'wakemeup/files/list_file.html', context)
 
 @check_authorization

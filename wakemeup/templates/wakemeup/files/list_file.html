@@ -1,8 +1,21 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 
-{% block title %}Descargar archivos{% endblock %}
+{% block title %}{{filetype}}{% endblock %}
 
-{% block content %}<br>
-	{% include "wakemeup/files/file_list.html" with filenamelength=60 showlinks=True iconsize=iconsize icontileflag=icontileflag%}
+{% block content %}
+	<div class="container-fluid"><br>
+		<div class="row">
+			<div class="col">
+				<div align="center"><h2>{{filetype}}{% if schoolyear %} para {{schoolyear}}{% endif %}</h2></div><br>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col">
+				<div align="center">
+					{% include "wakemeup/files/file_list.html" with filenamelength=60 showlinks=True iconsize=iconsize icontileflag=icontileflag%}
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}
