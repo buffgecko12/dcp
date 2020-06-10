@@ -382,10 +382,10 @@ def list_file(request):
         filecategory = ['VW']
         filetypedisplay = 'Videos'
     elif filetype == "form":
-        filecategory = ['CTF']
+        filecategory = ['FCT']
         filetypedisplay = 'Formularios'
-    elif filetype == "letter":
-        filecategory = ['LTI','LTT']
+    elif filetype == "document":
+        filecategory = ['LTI','LTT','DTG']
         filetypedisplay = 'Correspondencia'
     elif filetype == "contract":
         filecategory = ['CT','CTC','CTE','CTO','CTP']
