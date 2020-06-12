@@ -49,11 +49,23 @@
 
         <!-- Page title -->
         <title class="title">
-            Wake Me Up - {% block title %}Inicio{% endblock %}
+            DCP - {% block title %}Inicio{% endblock %}
         </title>    
-    
-        <!-- Image to use for favorite/bookmark icon -->        
-        <link rel="icon" sizes="192x192" href="{% static 'img/favicon.png' %}" />
+
+        <!-- Image to use for favorite/bookmark icon -->
+{% comment %}        <link rel="icon" sizes="192x192" href="{% static 'img/logo/android-icon-96x96.png' %}" />{% endcomment %}
+
+		<link rel="apple-touch-icon-precomposed" sizes="57x57" href="{% static 'img/favicon/apple-touch-icon-57x57.png' %}"/>
+		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="{% static 'img/favicon/apple-touch-icon-114x114.png' %}"/>
+		<link rel="apple-touch-icon-precomposed" sizes="72x72" href="{% static 'img/favicon/apple-touch-icon-72x72.png' %}"/>
+		<link rel="apple-touch-icon-precomposed" sizes="144x144" href="{% static 'img/favicon/apple-touch-icon-144x144.png' %}"/>
+		<link rel="apple-touch-icon-precomposed" sizes="120x120" href="{% static 'img/favicon/apple-touch-icon-120x120.png' %}"/>
+		<link rel="apple-touch-icon-precomposed" sizes="152x152" href="{% static 'img/favicon/apple-touch-icon-152x152.png' %}"/>
+		<link rel="icon" type="image/png" href="{% static 'img/favicon/favicon-32x32.png' %}" sizes="32x32"/>
+		<link rel="icon" type="image/png" href="{% static 'img/favicon/favicon-16x16.png' %}" sizes="16x16"/>
+		<meta name="application-name" content="DCP"/>
+		<meta name="msapplication-TileColor" content="#000000"/>
+		<meta name="msapplication-TileImage" content="{% static 'img/favicon/mstile-144x144.png' %}"/>
     </head>
 
     {% block body %}
