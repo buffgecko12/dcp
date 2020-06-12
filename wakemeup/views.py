@@ -386,7 +386,7 @@ def list_file(request):
         filetypedisplay = 'Formularios'
     elif filetype == "document":
         filecategory = ['LTI','LTT','DTG']
-        filetypedisplay = 'Correspondencia'
+        filetypedisplay = 'Documentos'
     elif filetype == "contract":
         filecategory = ['CT','CTC','CTE','CTO','CTP']
         filetypedisplay = 'Contratos'
