@@ -317,6 +317,9 @@ class GoogleDrive(GoogleService):
         if ignoretrashedflag:
             searchquery += (' and ' if searchquery else '') + "trashed=false"
 
+        # Include nextPageToken
+        fields = "nextPageToken" + ("," + fields if fields else '')
+
         # Map parameters to Google API
         params = {'driveId':driveid, 'corpora':scope, 'fields':fields, 'spaces':spaces, 'q':searchquery, **kwargs}
 
@@ -336,7 +339,7 @@ class GoogleDrive(GoogleService):
                 result.extend(files['files'])
                 
                 pagetoken = files.get('nextPageToken')
-                
+
                 if not pagetoken:
                     break
             
