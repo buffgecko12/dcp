@@ -365,16 +365,17 @@ def list_file(request):
     # Initialize parameters
     filetype = request.GET.get('filetype')
     schoolyear = None if request.user.is_admin() else DEFAULT_SCHOOL_YEAR
-    hierarchyflag = False
-    relativeroot = None
+    hierarchyflag = True
     filefilter = {}
     programname = 'incentive'
+    allfilesflag = False
     
     # Program filters
     if filetype == "interview":
         filecategory = ['IVV','IVT']
         filetypedisplay = 'Entrevistas'
         schoolyear = None
+        allfilesflag = True
     elif filetype == "report":
         filecategory = ['RTY','RT','SVT','SVS']
         filetypedisplay = 'Informes'
@@ -397,18 +398,28 @@ def list_file(request):
     if filecategory:
         filefilter.update({'filecategory': filecategory})
 
-    if not filefilter:
-        hierarchyflag = True
-        relativeroot = get_rootdir(request=request, gd_locator=get_gd_locator('program_files_base'), programname=programname, schoolyear=schoolyear)
+    relativeroot = get_rootdir(
+        request = request, 
+        gd_locator = get_gd_locator('program_files_base' if not allfilesflag else 'program_base'), 
+        programname = programname, 
+        schoolyear = schoolyear
+    )
 
-    fileparams = {'filecategory': filecategory, 'schoolyear': schoolyear, 'relativeroot': relativeroot, 'objectpermissionsflag': request.user.is_admin(), 'hierarchyflag': hierarchyflag}
+    fileparams = {
+        'filecategory': filecategory, 
+        'schoolyear': schoolyear, 
+        'relativeroot': relativeroot, 
+        'objectpermissionsflag': request.user.is_admin(), 
+        'hierarchyflag': hierarchyflag,
+        'orderbyhierarchyflag': True if not filefilter else False
+    }
 
     context = {
         'files':request.user.get_files(**fileparams), 
         "filetype": filetypedisplay, 
         'schoolyear': schoolyear,
         'programname': programname,
-        'iconsize': 36 if not hierarchyflag else None, 
+        'iconsize': 36 if filefilter else None, 
         'icontileflag': False if not filefilter else True
     }
     

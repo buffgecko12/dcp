@@ -16,7 +16,7 @@ class FileManager(models.Manager):
     def get(self, fileid):
         return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (to_array(fileid), None, None, None, None, None, None, None, None, None))
 
-    def get_files(self, fileid=None, fileclass=None, filecategory=None, alternatefileid=None, contractid=None, schoolid=None, schoolyear=None, fileattributes=None, filesource=None, accessinfo=None, hierarchyflag=False, relativeroot=None):
+    def get_files(self, fileid=None, fileclass=None, filecategory=None, alternatefileid=None, contractid=None, schoolid=None, schoolyear=None, fileattributes=None, filesource=None, accessinfo=None, hierarchyflag=False, relativeroot=None, orderbyhierarchyflag=True):
         
         fileid = to_array(fileid)
         filecategory = to_array(filecategory)
@@ -24,7 +24,7 @@ class FileManager(models.Manager):
         if not hierarchyflag:
             return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo)))
         else:
-            return get_data(self, 'SP_DCPGetFileHierarchy(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo), relativeroot))
+            return get_data(self, 'SP_DCPGetFileHierarchy(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo), relativeroot, orderbyhierarchyflag))
 
     def get_file_alt(self, fileid, filesource='GD'):
         result = self.get_files(alternatefileid=fileid, filesource=filesource)
