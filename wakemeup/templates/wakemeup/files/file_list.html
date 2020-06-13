@@ -1,11 +1,14 @@
+{% load l10n %}
 {% for file in files %}
 	<span class="d-flex flex-wrap align-items-center">
 		{% if editflag %}
 			<div class="custom-control custom-checkbox">
-				<input type="checkbox" class="checkboxinput custom-control-input" name="filelist" id="id_filelist_{{file.fileid}}" value="{{file.fileid}}">
-				<label class="custom-control-label" for="id_filelist_{{file.fileid}}">&nbsp;
-					{% include "wakemeup/files/file_list_item.html" with filenamelength=filenamelength showlinks=showlinks iconsize=iconsize icontileflag=icontileflag %}
-				</label>
+				{% localize off %}
+					<input type="checkbox" class="checkboxinput custom-control-input" name="filelist" id="id_filelist_{{file.fileid}}" value="{{file.fileid}}">
+					<label class="custom-control-label" for="id_filelist_{{file.fileid}}">&nbsp;
+						{% include "wakemeup/files/file_list_item.html" with filenamelength=filenamelength showlinks=showlinks iconsize=iconsize icontileflag=icontileflag %}
+					</label>
+				{% endlocalize %}
 			</div>
 		{% else %}
 			{% include "wakemeup/files/file_list_item.html" with filenamelength=filenamelength showlinks=showlinks iconsize=iconsize icontileflag=icontileflag %}
