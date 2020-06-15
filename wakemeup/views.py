@@ -714,8 +714,9 @@ def addreward(request):
 @check_authorization
 def list_object(request, objecttype):
 
-    # Default to manage mode
+    # Initialize default variables
     manageflag = True
+    objectdisplayname = None
 
     # Get teacheruserid (if teacher is logged on)
     if request.user.usertype == 'TR':
@@ -729,15 +730,19 @@ def list_object(request, objecttype):
     # Retrieve objects
     if objecttype == 'school':
         objectSet = SchoolsTable(School.objects.all())
+        objectdisplayname = 'Colegios'
 
     elif objecttype == 'class':
         objectSet = ClassesTable(Class.objects.get_classes(teacheruserid=teacheruserid))
+        objectdisplayname = 'Cursos'
 
     elif objecttype == 'teacher':
         objectSet = TeachersTable(Teacher.objects.get_teachers(teacheruserid=teacheruserid))
+        objectdisplayname = 'Docentes'
 
     elif objecttype == 'reward':
 
+        objectdisplayname = 'Incentivos'
         manageflag = False
 
         # Set default options
@@ -770,7 +775,7 @@ def list_object(request, objecttype):
         
     RequestConfig(request).configure(objectSet)
         
-    return render(request, 'wakemeup/admin/index.html', {'objects' : objectSet, 'objecttype': objecttype, 'manageflag': manageflag})
+    return render(request, 'wakemeup/admin/index.html', {'objects' : objectSet, 'objecttype': objecttype, 'manageflag': manageflag, 'objectdisplayname':objectdisplayname})
 
 @check_authorization
 def edit_object(request, objecttype, objectid):

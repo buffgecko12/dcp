@@ -3,15 +3,11 @@
 {% load render_table from django_tables2 %}
 
 <!-- Set page title -->
-{% block title %}Admin{% endblock %}
+{% block title %}{% if manageflag %}Admin - {% endif %}{{objectdisplayname}}{% endblock %}
 
 {% block content %}
-	<legend> {% if objecttype == "school" %}Colegios
-		{% elif objecttype == "class" %}Cursos
-		{% elif objecttype == "teacher" %}Docentes
-		{% elif objecttype == "student" %}Estudiantes
-		{% elif objecttype == "reward" %}Incentivos
-		{% endif %}
+	<legend> 
+		{{objectdisplayname}}
 		{% if objecttype not in 'teacher student' %}
 			{% if objecttype == "class" and request.user.usertype != "TR" or objecttype == "reward" %}
 				{% if manageflag %}
