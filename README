@@ -60,5 +60,8 @@ Configure Google API
 
 	Link: https://stackoverflow.com/questions/47446480/how-to-use-google-api-credentials-json-on-heroku
 
+3. Update DNS records 
+- if using gmail, add "anti-spoof" DNS record so mails don't route to SPAM
+
 Links
 https://docs.djangoproject.com/en/3.0/intro/install/
