@@ -12,6 +12,10 @@
   border-radius : .2rem;
 }
 
+.infopage {
+	max-width: 800px;
+}
+
 /* Menus */
 .scrollable-menu {
   height: auto;
