@@ -61,8 +61,8 @@ def convert_form_binary_to_db(formfieldname):
     return mydatafile
 
 def to_array(value):
-    if(value):
-        return value if isinstance(value, collections.abc.Sequence) else [value]
+    if value:
+        return value if (isinstance(value, collections.abc.Sequence) and (not isinstance(value, str))) else [value]
     else:
         return None
 
