@@ -40,6 +40,7 @@ urlpatterns = [
     # Misc
     url(r'^admin/img/(?P<objecttype>(teacher))/(?P<objectid>\d+)/preview$', views.preview_image, name="preview_image"), # Image preview
     url(r'^about$', views.about, name='about'),
+    url(r'^howtoparticipate$', views.howtoparticipate, name='howtoparticipate'),
 
     # Ajax
     url(r'^ajax/load-classes/', views.load_classes, name='ajax_load_classes'),
@@ -50,5 +51,5 @@ urlpatterns = [
     url(r'^ajax/addreward/', views.addreward, name='ajax_add_reward'),
 
     # Default (catch all)    
-    url(r'.*', views.index, name = "default"),
+    url(r'.*', views.index, name="default"),
 ]

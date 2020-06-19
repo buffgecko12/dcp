@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% load static %}
+
+<!-- Set page title -->
+{% block title %}C&oacute;mo participar{% endblock %}
+
+{% block headimport %}
+<!-- ACCORDION: https://bootsnipp.com/snippets/O5D4q -->
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('.panel-collapse').on('shown.bs.collapse', function (e) {
+			    var $card = $(this).closest('.card');
+			    $('html,body').animate({
+			        scrollTop: $card.offset().top - 70
+			    }, 400); 
+			}); 
+		});	
+	</script>
+	
+	<style>
+		.panel-group {
+		    background: #fff none repeat scroll 0 0;
+		    border-radius: 3px;
+		    box-shadow: 0 5px 30px 0 rgba(0, 0, 0, 0.04);
+		    margin-bottom: 0;
+		    padding: 30px;
+		}
+		#accordion .card {
+		    border: medium none;
+		    border-radius: 0;
+		    box-shadow: none;
+		    margin: 0 0 15px 10px;
+		}
+		#accordion .panel-heading {
+		    border-radius: 30px;
+		    padding: 0;
+		}
+		#accordion .panel-title a {
+		    background: #ffb900 none repeat scroll 0 0;
+		    border: 1px solid transparent;
+		    border-radius: 30px;
+		    color: #fff;
+		    display: block;
+		    font-size: 16px;
+			font-weight: bold;
+		    padding: 12px 20px 12px 50px;
+		    position: relative;
+		    transition: all 0.3s ease 0s;
+		}
+		#accordion .panel-title a.collapsed {
+		    background: #fff none repeat scroll 0 0;
+		    border: 1px solid #ddd;
+		    color: #333;
+		}
+		#accordion .panel-title a::after, #accordion .panel-title a.collapsed::after {
+		    background: #ffb900 none repeat scroll 0 0;
+		    border: 1px solid transparent;
+		    border-radius: 50%;
+		    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.58);
+		    color: #fff;
+		    content: "\f078";
+		    font-family: fontawesome;
+		    font-size: 15px;
+		    height: 55px;
+		    left: -20px;
+		    line-height: 55px;
+		    position: absolute;
+		    text-align: center;
+		    top: -5px;
+		    transition: all 0.3s ease 0s;
+		    width: 55px;
+		}
+		#accordion .panel-title a.collapsed::after {
+		    background: #fff none repeat scroll 0 0;
+		    border: 1px solid #ddd;
+		    box-shadow: none;
+		    color: #333;
+		    content: "\f054";
+		}
+		#accordion .panel-body {
+		    background: transparent none repeat scroll 0 0;
+		    border-top: medium none;
+		    padding: 20px 25px 10px 9px;
+		    position: relative;
+		}
+		#accordion .panel-body p {
+		    border-left: 1px dashed #8c8c8c;
+		    padding-left: 25px;
+		}
+	</style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="section-title text-center"><br>
+					<h2>C&oacute;mo participar</h2>
+				</div>
+			</div>
+		</div>
+		<div class="row d-flex flex-wrap align-items-center">
+			<div class="col-md-12">
+				<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+					<div class="card">
+						<div class="panel-heading" role="tab" id="headingOne">
+							<h4 class="panel-title">
+								<a role="button" data-toggle="collapse" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+									Paso 1 - Preparar los acuerdos
+								</a>
+							</h4>
+						</div>
+						<div id="collapseOne" class="panel-collapse collapse show" role="tabpanel" aria-labelledby="headingOne" data-parent="#accordion">
+							<div class="panel-body">
+								<p>
+									Descargar y llenar el 
+										<a href="{% url 'wakemeup:get_file' fileid=contractfileid %}?exporttype=pdf">formulario del acuerdo de estudiante-docente</a>&nbsp;
+										<a href="{% url 'wakemeup:get_file' fileid=contractfileid %}?exporttype=docx">
+											<img height="20" src="https://drive-thirdparty.googleusercontent.com/128/type/application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
+										</a>
+								</p>
+
+
+
+
+
+							</div>
+						</div>
+					</div>
+					<div class="card">
+						<div class="panel-heading" role="tab" id="headingTwo">
+							<h4 class="panel-title">
+								<a class="collapsed" role="button" data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+									Paso 2 - Entregar los acuerdos
+								</a>
+							</h4>
+						</div>
+						<div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo" data-parent="#accordion">
+							<div class="panel-body">
+								<p>
+									Entregar los acuerdos con los nombres y las firmas de los participantes <a href="{% url 'wakemeup:get_calendar' %}"><img height="24px" src="{% static 'img/icon/calendar.png' %}"></a>
+								</p>
+							</div>
+						</div>
+					</div>
+					<div class="card">
+						<div class="panel-heading" role="tab" id="headingThree">
+							<h4 class="panel-title">
+								<a class="collapsed" role="button" data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+									Paso 3 - Entregar los resultados
+								</a>
+							</h4>
+						</div>
+						<div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree" data-parent="#accordion">
+							<div class="panel-body">
+								<p>
+									1. Evidencias (videos, fotos o archivos)<br>
+									2. Lista de ganadores<br>
+									3. Lista de incentivos seleccionados <a href="{% url 'wakemeup:get_calendar' %}"><img height="24px" src="{% static 'img/icon/calendar.png' %}"></a><br>
+								</p>
+							</div>
+						</div>
+					</div>
+					<div class="card">
+						<div class="panel-heading" role="tab" id="headingFour">
+							<h4 class="panel-title">
+								<a class="collapsed" role="button" data-toggle="collapse" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+									Paso 4 - Recibir los incentivos
+								</a>
+							</h4>
+						</div>
+						<div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour" data-parent="#accordion">
+							<div class="panel-body" align="center">
+								<p><img src="{% static 'img/incentive.png' %}" class="img-responsive" style="width:100%;max-width:300px"></p>
+							</div>
+						</div>
+					</div>
+					<div class="card">
+						<div class="panel-heading" role="tab" id="headingFive">
+							<h4 class="panel-title">
+								<a class="collapsed" role="button" data-toggle="collapse" href="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+									Como enviar los archivos
+								</a>
+							</h4>
+						</div>
+						<div id="collapseFive" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive" data-parent="#accordion">
+							<div class="panel-body">
+								<p>
+									Opci&oacute;n 1 - Por <a href="mailto:admin@duitamacolegioproject.org">correo</a><br>
+									Opci&oacute;n 2 - Por Whatsapp<br>
+									Opci&oacute;n 3 - Por Google Drive (admin@duitamacolegioproject.org)
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>	
+		</div>		
+	</div>
+{% endblock %}

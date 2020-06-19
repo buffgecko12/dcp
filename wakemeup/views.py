@@ -292,6 +292,11 @@ def about(request):
     return render(request, 'wakemeup/about.html')
 
 @check_authentication
+def howtoparticipate(request):
+    contracttemplate = File.objects.lookup_fileid(programname='incentive', schoolyear=DEFAULT_SCHOOL_YEAR, filecategory='FCT', fileclass='programfile') # TO-DO: Fix hard-coded
+    return render(request, 'wakemeup/howtoparticipate.html', {'contractfileid': contracttemplate})
+
+@check_authentication
 def myaccount(request):
 
     context = {'request': request}

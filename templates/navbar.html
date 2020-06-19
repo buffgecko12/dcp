@@ -77,6 +77,11 @@
 				</li>
 				{% endif %}
 				
+				<!-- HOW TO PARTICIPATE -->
+				<li class="nav-item dropdown">
+					<a class="nav-link" href="{% url 'wakemeup:howtoparticipate' %}">C&oacute;mo participar</a>
+				</li>
+				
 				<!-- ADMIN -->
 				{% if not auth.navbar.admin.disable %}
 					<li class="nav-item dropdown">
