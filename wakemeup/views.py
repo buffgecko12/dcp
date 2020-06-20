@@ -107,8 +107,8 @@ def check_authorization(view):
     return view_wrapper
 
 # Get relative root directory for files
-def get_rootdir(request, gd_locator, programname='incentive', **kwargs): # TO-DO: Fix hardcoded
-    if request.user.is_admin():
+def get_rootdir(request, gd_locator, programname='incentive', ignoreadminflag=False, **kwargs): # TO-DO: Fix hardcoded
+    if (request.user.is_admin() and not ignoreadminflag):
         gd_locator = get_gd_locator('programs_base')
         programname = None
         
@@ -293,7 +293,13 @@ def about(request):
 
 @check_authentication
 def howtoparticipate(request):
-    contracttemplate = File.objects.lookup_fileid(programname='incentive', schoolyear=DEFAULT_SCHOOL_YEAR, filecategory='FCT', fileclass='programfile') # TO-DO: Fix hard-coded
+    relativeroot = get_rootdir(request=request, gd_locator=get_gd_locator('program_files_documents'), schoolyear=DEFAULT_SCHOOL_YEAR, ignoreadminflag=True)
+    contracttemplate = getattr(
+        (request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin(), relativeroot=relativeroot, fileclass='programfile', filecategory='FCT') or [None])[0], 
+        'fileid', 
+        None
+    )
+    
     return render(request, 'wakemeup/howtoparticipate.html', {'contractfileid': contracttemplate})
 
 @check_authentication

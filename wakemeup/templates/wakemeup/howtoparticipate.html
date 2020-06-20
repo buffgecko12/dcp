@@ -117,8 +117,10 @@
 								<div class="panel-body">
 									<p>
 										Descargar y rellenar el formulario del acuerdo de estudiante-docente&nbsp;
-										<a href="{% url 'wakemeup:get_file' fileid=contractfileid %}?exporttype=pdf"><img height="24" src="https://drive-thirdparty.googleusercontent.com/128/type/application/pdf"/></a>&nbsp;
-										<a href="{% url 'wakemeup:get_file' fileid=contractfileid %}?exporttype=docx"><img height="24" src="https://drive-thirdparty.googleusercontent.com/128/type/application/vnd.openxmlformats-officedocument.wordprocessingml.document"/></a>
+										{% if contractfileid %}
+											<a href="{% url 'wakemeup:get_file' fileid=contractfileid %}?exporttype=pdf"><img height="24" src="https://drive-thirdparty.googleusercontent.com/128/type/application/pdf"/></a>&nbsp;
+											<a href="{% url 'wakemeup:get_file' fileid=contractfileid %}?exporttype=docx"><img height="24" src="https://drive-thirdparty.googleusercontent.com/128/type/application/vnd.openxmlformats-officedocument.wordprocessingml.document"/></a>
+										{% endif %}
 									</p>
 								</div>
 							</div>
