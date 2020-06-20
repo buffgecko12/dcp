@@ -47,7 +47,7 @@
 										<a href="{{event.htmlLink}}" target="_blank" {% if todays_date > end_date|parse_date|date:"Y-m-d" %}class='redStrikeHover'{% endif %}>{{event.summary|truncatechars:45}}</a><br>
 								</span>								
 							{% endfor %}
-							<br><div><i>** Debido a los cambios al calendario escolar este a&ntilde;o por el Coronavirus, hemos eliminado la primera ronda.</i></div>
+							<br><div><i>** Debido a los cambios al calendario escolar de este a&ntilde;o por el Coronavirus, hemos eliminado la primera ronda.</i></div>
 						{% else %}
 							No hay registros.
 						{% endif %}
