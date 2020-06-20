@@ -101,99 +101,96 @@
 		</div>
 		<div class="row d-flex flex-wrap align-items-center">
 			<div class="col-md-12">
-				<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-					<div class="card">
-						<div class="panel-heading" role="tab" id="headingOne">
-							<h4 class="panel-title">
-								<a role="button" data-toggle="collapse" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-									Paso 1 - Preparar los acuerdos
-								</a>
-							</h4>
+				{% if request.user.usertype == "ST" %}
+					<div class="d-flex justify-content-center">Por favor consulte con su profe de ingl&eacute;s.</div>
+				{% else %}
+					<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+						<div class="card">
+							<div class="panel-heading" role="tab" id="headingOne">
+								<h4 class="panel-title">
+									<a role="button" data-toggle="collapse" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+										Paso 1 - Preparar los acuerdos
+									</a>
+								</h4>
+							</div>
+							<div id="collapseOne" class="panel-collapse collapse show" role="tabpanel" aria-labelledby="headingOne" data-parent="#accordion">
+								<div class="panel-body">
+									<p>
+										Descargar y rellenar el formulario del acuerdo de estudiante-docente&nbsp;
+										<a href="{% url 'wakemeup:get_file' fileid=contractfileid %}?exporttype=pdf"><img height="24" src="https://drive-thirdparty.googleusercontent.com/128/type/application/pdf"/></a>&nbsp;
+										<a href="{% url 'wakemeup:get_file' fileid=contractfileid %}?exporttype=docx"><img height="24" src="https://drive-thirdparty.googleusercontent.com/128/type/application/vnd.openxmlformats-officedocument.wordprocessingml.document"/></a>
+									</p>
+								</div>
+							</div>
 						</div>
-						<div id="collapseOne" class="panel-collapse collapse show" role="tabpanel" aria-labelledby="headingOne" data-parent="#accordion">
-							<div class="panel-body">
-								<p>
-									Descargar y llenar el 
-										<a href="{% url 'wakemeup:get_file' fileid=contractfileid %}?exporttype=pdf">formulario del acuerdo de estudiante-docente</a>&nbsp;
-										<a href="{% url 'wakemeup:get_file' fileid=contractfileid %}?exporttype=docx">
-											<img height="20" src="https://drive-thirdparty.googleusercontent.com/128/type/application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
-										</a>
-								</p>
-
-
-
-
-
+						<div class="card">
+							<div class="panel-heading" role="tab" id="headingTwo">
+								<h4 class="panel-title">
+									<a class="collapsed" role="button" data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+										Paso 2 - Entregar los acuerdos
+									</a>
+								</h4>
+							</div>
+							<div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo" data-parent="#accordion">
+								<div class="panel-body">
+									<p>
+										Entregar los acuerdos con los nombres y las firmas de los participantes <a href="{% url 'wakemeup:get_calendar' %}" target="_blank"><img height="24" src="{% static 'img/icon/calendar.png' %}"></a>
+									</p>
+								</div>
+							</div>
+						</div>
+						<div class="card">
+							<div class="panel-heading" role="tab" id="headingThree">
+								<h4 class="panel-title">
+									<a class="collapsed" role="button" data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+										Paso 3 - Entregar los resultados
+									</a>
+								</h4>
+							</div>
+							<div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree" data-parent="#accordion">
+								<div class="panel-body">
+									<p>
+										1. Evidencias (videos, fotos o archivos)<br>
+										2. Lista de ganadores<br>
+										3. Lista de incentivos seleccionados <a href="{% url 'wakemeup:get_calendar' %}" target="_blank"><img height="24" src="{% static 'img/icon/calendar.png' %}"></a><br>
+									</p>
+								</div>
+							</div>
+						</div>
+						<div class="card">
+							<div class="panel-heading" role="tab" id="headingFour">
+								<h4 class="panel-title">
+									<a class="collapsed" role="button" data-toggle="collapse" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+										Paso 4 - Recibir los incentivos
+									</a>
+								</h4>
+							</div>
+							<div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour" data-parent="#accordion">
+								<div class="panel-body" align="center">
+									<p><img src="{% static 'img/incentive.png' %}" class="img-responsive" style="width:100%;max-width:300px"></p>
+								</div>
+							</div>
+						</div>
+						<div class="card">
+							<div class="panel-heading" role="tab" id="headingFive">
+								<h4 class="panel-title">
+									<a class="collapsed" role="button" data-toggle="collapse" href="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+										C&oacute;mo enviar los archivos
+									</a>
+								</h4>
+							</div>
+							<div id="collapseFive" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive" data-parent="#accordion">
+								<div class="panel-body">
+									<p>
+										Opci&oacute;n 1 - Por <a href="mailto:admin@duitamacolegioproject.org">correo electr&oacute;nico</a><br>
+										Opci&oacute;n 2 - Por WhatsApp<br>
+										Opci&oacute;n 3 - Por Google Drive (<i>admin@duitamacolegioproject.org</i>)
+									</p>
+								</div>
 							</div>
 						</div>
 					</div>
-					<div class="card">
-						<div class="panel-heading" role="tab" id="headingTwo">
-							<h4 class="panel-title">
-								<a class="collapsed" role="button" data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-									Paso 2 - Entregar los acuerdos
-								</a>
-							</h4>
-						</div>
-						<div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo" data-parent="#accordion">
-							<div class="panel-body">
-								<p>
-									Entregar los acuerdos con los nombres y las firmas de los participantes <a href="{% url 'wakemeup:get_calendar' %}"><img height="24px" src="{% static 'img/icon/calendar.png' %}"></a>
-								</p>
-							</div>
-						</div>
-					</div>
-					<div class="card">
-						<div class="panel-heading" role="tab" id="headingThree">
-							<h4 class="panel-title">
-								<a class="collapsed" role="button" data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-									Paso 3 - Entregar los resultados
-								</a>
-							</h4>
-						</div>
-						<div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree" data-parent="#accordion">
-							<div class="panel-body">
-								<p>
-									1. Evidencias (videos, fotos o archivos)<br>
-									2. Lista de ganadores<br>
-									3. Lista de incentivos seleccionados <a href="{% url 'wakemeup:get_calendar' %}"><img height="24px" src="{% static 'img/icon/calendar.png' %}"></a><br>
-								</p>
-							</div>
-						</div>
-					</div>
-					<div class="card">
-						<div class="panel-heading" role="tab" id="headingFour">
-							<h4 class="panel-title">
-								<a class="collapsed" role="button" data-toggle="collapse" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-									Paso 4 - Recibir los incentivos
-								</a>
-							</h4>
-						</div>
-						<div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour" data-parent="#accordion">
-							<div class="panel-body" align="center">
-								<p><img src="{% static 'img/incentive.png' %}" class="img-responsive" style="width:100%;max-width:300px"></p>
-							</div>
-						</div>
-					</div>
-					<div class="card">
-						<div class="panel-heading" role="tab" id="headingFive">
-							<h4 class="panel-title">
-								<a class="collapsed" role="button" data-toggle="collapse" href="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
-									Como enviar los archivos
-								</a>
-							</h4>
-						</div>
-						<div id="collapseFive" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive" data-parent="#accordion">
-							<div class="panel-body">
-								<p>
-									Opci&oacute;n 1 - Por <a href="mailto:admin@duitamacolegioproject.org">correo</a><br>
-									Opci&oacute;n 2 - Por Whatsapp<br>
-									Opci&oacute;n 3 - Por Google Drive (admin@duitamacolegioproject.org)
-								</p>
-							</div>
-						</div>
-					</div>
-				</div>
+				{% endif %}
 			</div>	
 		</div>		
 	</div>
