@@ -34,10 +34,10 @@
 					<div align="center"><h2>Calendario para {{program.schoolyear|stringformat:"i"}}</h2></div><br>
 				</div>
 			</div>
-			<div class="row">
-				<div class="col-6">
+			<div class="row d-flex justify-content-center">
+				<div class="col-6" style="min-width:250px">
 					<div style="font-size:2vmax"><b>Fechas tope</b></div>
-					<div class="text-responsive">
+					<div class="text-responsive" align="left">
 						{% now "Y-m-d" as todays_date %}
 						{% if events %}
 							{% for event in events %}
@@ -51,9 +51,9 @@
 						{% else %}
 							No hay registros.
 						{% endif %}
-					</div>
+					</div><br>
 				</div>
-				<div class="col-6">
+				<div class="col-6" style="min-width:250px">
 				    <div class="responsive-iframe-container">
 						<iframe src="https://calendar.google.com/calendar/embed?height=600&amp;wkst=2&amp;bgcolor=%23ffffff&amp;ctz=America%2FBogota&amp;src={{ program.calendarid }}&amp;color=%23B39DDB&amp;showTitle=0&amp;showNav=1&amp;showDate=1&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;hl=es_419"
 								style="border-width:0" width="800" height="600" frameborder="0" scrolling="no">
