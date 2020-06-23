@@ -52,7 +52,7 @@
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Archivos</a>
 					<div class="dropdown-menu">
-						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'contract' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=contract">Contratos</a>
+{% comment %}						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'contract' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=contract">Contratos</a>{% endcomment %}
 						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'document' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=document">Documentos</a>
 						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'interview' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=interview">Entrevistas</a>
 						<a class="dropdown-item {% if url_name == 'list_file' and request.GET.filetype == 'form' %} active {% endif %}" href="{% url 'wakemeup:list_file' %}?filetype=form">Formularios</a>

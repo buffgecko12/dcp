@@ -399,9 +399,9 @@ def list_file(request):
     elif filetype == "document":
         filecategory = ['LTI','LTT','DTG']
         filetypedisplay = 'Documentos'
-    elif filetype == "contract":
-        filecategory = ['CT','CTC','CTE','CTO','CTP']
-        filetypedisplay = 'Contratos'
+#     elif filetype == "contract":
+#         filecategory = ['CT','CTC','CTE','CTO','CTP']
+#         filetypedisplay = 'Contratos'
     else:
         filecategory = None
         filetypedisplay = 'Archivos'
