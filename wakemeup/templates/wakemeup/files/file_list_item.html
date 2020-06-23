@@ -1,4 +1,4 @@
-{% if file.displayindent %}
+{% if file.displayindent and not icontileflag %}
 	{% for x in ""|ljust:file.displayindent %}&nbsp;{% endfor %}
 {% endif %}
 
