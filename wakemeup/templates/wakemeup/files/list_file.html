@@ -4,7 +4,7 @@
 {% block title %}{{filetype}}{% endblock %}
 
 {% block content %}
-	<div class="container-fluid" style="white-space:nowrap;overflow:auto"><br>
+	<div class="container-fluid"><br>
 		<div class="row">
 			<div class="col">
 				<div align="center"><h2>{{filetype}}{% if schoolyear %} ({{schoolyear}}){% endif %}</h2></div><br>
@@ -12,7 +12,7 @@
 		</div>
 		<div class="row">
 			<div class="col">
-				<div align="center">
+				<div align="center" style="white-space:nowrap;overflow:auto">
 					{% include "wakemeup/files/file_list.html" with filenamelength=60 showlinks=True iconsize=iconsize icontileflag=icontileflag%}
 				</div>
 			</div>
