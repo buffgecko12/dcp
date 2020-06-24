@@ -115,7 +115,7 @@ class RewardsTable(tables.Table):
     
     rewarddescription = tables.Column(
         verbose_name = 'Descripci' + mychr('o') + 'n',
-        attrs={"td": {"style": "min-width:225px;max-width:400px"}}
+        attrs={"td": {"style": "min-width:300px;max-width:400px"}}
         )
         manage_buttons = getManageButtons(accessor=objectid)
 
