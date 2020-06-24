@@ -112,6 +112,11 @@ class RewardsTable(tables.Table):
         template_name='wakemeup/admin/fields/currency_field.html',
         verbose_name='Valor',
     )
+    
+    rewarddescription = tables.Column(
+        verbose_name = 'Descripci' + mychr('o') + 'n',
+        attrs={"td": {"style": "min-width:225px;max-width:400px"}}
+        )
         manage_buttons = getManageButtons(accessor=objectid)
 
     def before_render(self, request):
