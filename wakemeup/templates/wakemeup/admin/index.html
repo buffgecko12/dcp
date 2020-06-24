@@ -6,20 +6,31 @@
 {% block title %}{% if manageflag %}Admin - {% endif %}{{objectdisplayname}}{% endblock %}
 
 {% block content %}
-	<legend> 
-		{{objectdisplayname}}
-		{% if objecttype not in 'teacher student' %}
-			{% if objecttype == "class" and request.user.usertype != "TR" or objecttype == "reward" %}
-				{% if manageflag %}
-					<div class="float-right">
-						<a href="{% url 'wakemeup:edit_object' objecttype=objecttype objectid='new' %}">
-							<i class="fas fa-plus-circle" style="font-size:1.125em;vertical-align:middle"></i>
-						</a>
-					</div>
-				{% endif %}
-			{% endif %}
-		{% endif %}
-	</legend>
-	
-	{% render_table objects %}
+	<div class="container"><br>
+		<div class="row">
+			<div class="col">
+				<div align="center">
+					<h2>
+						{{objectdisplayname}}
+						{% if objecttype not in 'teacher student' %}
+							{% if objecttype == "class" and request.user.usertype != "TR" or objecttype == "reward" %}
+								{% if manageflag %}
+									<div class="float-right">
+										<a href="{% url 'wakemeup:edit_object' objecttype=objecttype objectid='new' %}">
+											<i class="fas fa-plus-circle" style="font-size:1.125em;vertical-align:middle"></i>
+										</a>
+									</div>
+								{% endif %}
+							{% endif %}
+						{% endif %}
+					</h2>
+				</div><div style="font-size:6px"><br></div>
+			</div>
+		</div>
+		<div class="row d-flex justify-content-center">
+			<div class="col">
+				{% render_table objects %}
+			</div>
+		</div>
+    </div>
 {% endblock %}
