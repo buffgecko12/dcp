@@ -434,14 +434,15 @@ class GoogleDrive(GoogleService):
                 targetfile = self.get_file(fileid=shortcutinfo.get('targetId'))
                 
                 # Use target file's metadata
-                gd_file['mimeType'] = targetfile.get('mimeType')
-                gd_file['fileExtension'] = targetfile.get('fileExtension')
-                gd_file['size'] = targetfile.get('size')
-                
-                # Copy target file's properties (only if shortcut info is empty)
-                gd_file['properties'] = gd_file['properties'] or targetfile.get('properties') or {}
-                
-                self.gd_update_iconlink(gd_file, shortcutinfo.get('targetMimeType'))
+                if targetfile:
+                    gd_file['mimeType'] = targetfile.get('mimeType')
+                    gd_file['fileExtension'] = targetfile.get('fileExtension')
+                    gd_file['size'] = targetfile.get('size')
+                    
+                    # Copy target file's properties (only if shortcut info is empty)
+                    gd_file['properties'] = gd_file['properties'] or targetfile.get('properties') or {}
+                    
+                    self.gd_update_iconlink(gd_file, shortcutinfo.get('targetMimeType'))
 
             # Change default icons
             if(gd_file['mimeType'] == get_mimetype('gdoc')):
