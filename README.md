@@ -1,5 +1,8 @@
 # Duitama Colegio Project - Web App
-These instructions will allow you to configure your environment and deploy the web app.
+These instructions will help you to configure your environment and deploy the web app.  
+
+*Note: These instructions were culled from notes I kept while configuring the various environments and have not been extensively tested*
+
 ### Configure Development Environment
 Install and configure the following applications, in order:  
 
