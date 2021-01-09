@@ -32,9 +32,9 @@ Install and configure the following applications, in order:
 
   - clone the *[dcp]* project
   - update environment variables: */.env*
-  - install dependencies (*requirements.txt*)
+  - install dependencies (*/requirements.txt*)
   - configure source directories (*/lib*, */test*)
-  - configure initial values: setup.py
+  - configure initial values: */setup.py*
   - [configure SSL]
 
 ### Configure Google API  
@@ -52,7 +52,7 @@ Install and configure the following applications, in order:
 2. Configure Google Drive Storage key:
 
     **Local Environment**  
-    Copy key file specified in *.env* file (GOOGLE_APPLICATION_CREDENTIALS) to expected location
+    Copy key file (GOOGLE_APPLICATION_CREDENTIALS) specified in *.env* file to expected location
 
     **Heroku**
     1. Create config variables
@@ -63,7 +63,7 @@ Install and configure the following applications, in order:
     3. Push a [tiny change] to re-deploy
 
 3. Update DNS records  
-   - if using gmail, add "anti-spoof" DNS record so mails don't route to SPAM
+   - if using Gmail, add "anti-spoof" DNS record so mails don't route to SPAM
 
 ### Install
 Run *build.py* in the *dcp_repo* project root to install the application.  
