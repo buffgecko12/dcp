@@ -1,7 +1,6 @@
 # Duitama Colegio Project - Web App
-These are notes I kept when I configured my development environment.  You can modify them as you see fit.
 
-### Configure Environment
+### Configure Development Environment
 Install and configure the following applications, in order:  
 
 1. JRE SE
