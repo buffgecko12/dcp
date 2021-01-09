@@ -1,83 +1,82 @@
-<h1>Duitama Colegio Project - Web App Notes</h1>
+# Duitama Colegio Project - Web App
 These are notes I kept when I configured my development environment.  You can modify them as you see fit.
 
-<h2>Configure Development Environment</h2>
+### Configure Environment
 Install and configure the following applications, in order:  
 
 1. JRE SE
-2. Eclipse (JavaScript developer) or preferred IDE
-  - PyDev
+2. Eclipse (JavaScript developer) or preferred IDE with PyDev
 3. PostgreSQL Database
 4. Python (32-bit win)
-  - pip (may already be included in python install)
-  - virtualenv and virtualenvwrapper
-  - psycopg2 (Postgres)
-  - Django
-  - Heroku
-  - Pylint
-    - disable=C0114,C0115,C0116,bare-except,no-else-return
+    - pip (may already be included in python install)
+    - virtualenv and virtualenvwrapper
+    - psycopg2 (Postgres)
+    - Django
+    - Heroku
+    - Pylint
+      - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
 5. GitBash
 6. SQL Data Modeler / Developer
-  - Configure Postgres DSN: https://stackoverflow.com/questions/7592519/oracle-sql-developer-and-postgresql
+    - [Configure Postgres DSN]
 7. Heroku CLI
 
-<h2> Configure Repository project (dcp_repo)</h2>
+### Configure Repository project (*dcp_repo*)
 
   - install dependencies (ConfigParser)
   - add libraries to project path (configure src folders)
   - configure database.ini
-  - environment variables
-  - setx ENV "development" (development environment); requires Eclipse restart
+  - configure initial values: *src/load_intiial_data.sql*
+  - set environment variables
+    - `setx ENV "development"` (dev. environment; requires IDE restart)
 
-<h2> Configure Application project (dcp)</h2>
+### Configure Application project (*dcp*)
 
-  - update environment variables (.env)
+  - update environment variables: *.env*
   - install dependencies (requirements.txt)
-  - configure source folders (/lib, /test)
-  - configure load_initial_data scripts (repository, application)
-  - configure SSL: https://devcenter.heroku.com/articles/acquiring-an-ssl-certificate
+  - configure source directories (/lib, /test)
+  - configure initial values: *setup.py*
+  - [configure SSL]
 
-<h2>Configure Google API</h2>
+### Configure Google API  
+1. Grant Google Project service account user API access to Google Drive user account (GOOGLE_DRIVE_USER) using the following scopes:
 
-1. Grant Google Project service account user API access to Google Drive user account (GOOGLE_DRIVE_USER)
+      | Access | Scope |
+      | ------ | ------ |
+      | ALL | https://www.googleapis.com/auth/drive |
+      | LIST |  https://www.googleapis.com/auth/drive.metadata.readonly |
+      | READ | https://www.googleapis.com/auth/drive.readonly |
+      | WRITE | https://www.googleapis.com/auth/drive.file |
 
-  - add "all, list, read, write" scopes:
-  
-	> **ALL**  https://www.googleapis.com/auth/drive  
-	> **LIST** https://www.googleapis.com/auth/drive.metadata.readonly  
-	> **READ** https://www.googleapis.com/auth/drive.readonly  
-    > **WRITE** https://www.googleapis.com/auth/drive.file  
-
-  - https://support.google.com/a/answer/162106?hl=en
-  - https://developers.google.com/drive/api/v2/about-auth
+    Additional Info: [Domain Wide Delegation], [Authorization Scopes]
   
 2. Configure Google Drive Storage key:
 
-  **Local**  
-Copy key file specified in .env file (GOOGLE_APPLICATION_CREDENTIALS) to expected location
+    **Local**  
+    Copy key file specified in .env file (GOOGLE_APPLICATION_CREDENTIALS) to expected location
 
-  **Heroku**
-  1. Create config variables
-     - GOOGLE_APPLICATION_CREDENTIALS = google-credentials.json  
-     - GOOGLE_CREDENTIALS = *\<paste entire service account key json\>*
+    **Heroku**
+    1. Create config variables
+       - GOOGLE_APPLICATION_CREDENTIALS = google-credentials.json  
+       - GOOGLE_CREDENTIALS = *\<paste entire service account key json\>*
 
-  2. Add "google-application-credentials" buildpack
-      - https://github.com/gerywahyunugraha/heroku-google-application-credentials-buildpack
-      
-  3. Push a tiny change to re-deploy
-
-	Link: https://stackoverflow.com/questions/47446480/how-to-use-google-api-credentials-json-on-heroku
+    2. Add *[google-application-credentials]* buildpack
+    3. Push a [tiny change] to re-deploy
 
 3. Update DNS records  
+   - if using gmail, add "anti-spoof" DNS record so mails don't route to SPAM
 
- - if using gmail, add "anti-spoof" DNS record so mails don't route to SPAM
+### Install
+Run build.py in the "dcp_repo" project to install the application.  
 
-<h2>Install</h2>  
+This will create all the objects in the repository, initialize the data, configure Google Drive/Calendar and setup the web app.  
 
-1. Open setup.py in the "dcp" project and configure the initial values.  
-2. Run build.py in the "dcp_repo" project to install the application.  
+### Reference
+[Django 3 Install Guide]
 
-This will create all the objects in the repository and then initialize the data, configure Google Drive/Calendar, etc.  
-
-<h2>Reference</h2>
-https://docs.djangoproject.com/en/3.0/intro/install/
+[Configure Postgres DSN]: https://stackoverflow.com/questions/7592519/oracle-sql-developer-and-postgresql
+[configure SSL]: https://devcenter.heroku.com/articles/acquiring-an-ssl-certificate
+[Domain Wide Delegation]: https://support.google.com/a/answer/162106?hl=en
+[Authorization Scopes]: https://developers.google.com/drive/api/v2/about-auth
+[google-application-credentials]: https://github.com/gerywahyunugraha/heroku-google-application-credentials-buildpack
+[tiny change]: https://stackoverflow.com/questions/47446480/how-to-use-google-api-credentials-json-on-heroku
+[Django 3 Install Guide]: https://docs.djangoproject.com/en/3.0/intro/install/
