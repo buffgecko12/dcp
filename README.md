@@ -19,16 +19,18 @@ Install and configure the following applications, in order:
     - [Configure Postgres DSN]
 7. Heroku CLI
 
-### Configure Repository project (*dcp_repo*)
+### Configure Repository
 
+  - clone the *[dcp_repo]* project
   - install dependencies (ConfigParser)
   - add libraries to project path (configure *src* folders)
   - configure *database.ini*
   - configure initial values: *src/load_intiial_data.sql*
   - set environment variables and restart IDE: `setx ENV "development"`
 
-### Configure Application project (*dcp*)
+### Configure Application
 
+  - clone the *[dcp]* project
   - update environment variables: *.env*
   - install dependencies (*requirements.txt*)
   - configure source directories (*/lib*, */test*)
@@ -78,3 +80,5 @@ This will setup the repository, add the initial data, configure Google Drive/Cal
 [google-application-credentials]: https://github.com/gerywahyunugraha/heroku-google-application-credentials-buildpack
 [tiny change]: https://stackoverflow.com/questions/47446480/how-to-use-google-api-credentials-json-on-heroku
 [Django 3 Install Guide]: https://docs.djangoproject.com/en/3.0/intro/install/
+[dcp_repo]: https://gitlab.com/buffgecko/dcp_repo
+[dcp]: https://gitlab.com/buffgecko/dcp
