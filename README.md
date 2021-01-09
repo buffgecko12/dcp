@@ -1,12 +1,12 @@
 # Duitama Colegio Project - Web App
-
+These instructions will allow you to configure your environment and deploy the web app.
 ### Configure Development Environment
 Install and configure the following applications, in order:  
 
 1. JRE SE
 2. Eclipse (JavaScript developer) or preferred IDE with PyDev
 3. PostgreSQL Database
-4. Python (32-bit win)
+4. Python (32-bit win) and the following packages:
     - pip (may already be included in python install)
     - virtualenv and virtualenvwrapper
     - psycopg2 (Postgres)
@@ -22,18 +22,17 @@ Install and configure the following applications, in order:
 ### Configure Repository project (*dcp_repo*)
 
   - install dependencies (ConfigParser)
-  - add libraries to project path (configure src folders)
-  - configure database.ini
+  - add libraries to project path (configure *src* folders)
+  - configure *database.ini*
   - configure initial values: *src/load_intiial_data.sql*
-  - set environment variables
-    - `setx ENV "development"` (dev. environment; requires IDE restart)
+  - set environment variables and restart IDE: `setx ENV "development"`
 
 ### Configure Application project (*dcp*)
 
   - update environment variables: *.env*
-  - install dependencies (requirements.txt)
-  - configure source directories (/lib, /test)
-  - configure initial values: *setup.py*
+  - install dependencies (*requirements.txt*)
+  - configure source directories (*/lib*, */test*)
+  - configure initial values: setup.py
   - [configure SSL]
 
 ### Configure Google API  
@@ -50,8 +49,8 @@ Install and configure the following applications, in order:
   
 2. Configure Google Drive Storage key:
 
-    **Local**  
-    Copy key file specified in .env file (GOOGLE_APPLICATION_CREDENTIALS) to expected location
+    **Local Environment**  
+    Copy key file specified in *.env* file (GOOGLE_APPLICATION_CREDENTIALS) to expected location
 
     **Heroku**
     1. Create config variables
@@ -65,9 +64,9 @@ Install and configure the following applications, in order:
    - if using gmail, add "anti-spoof" DNS record so mails don't route to SPAM
 
 ### Install
-Run build.py in the "dcp_repo" project to install the application.  
+Run *build.py* in the *dcp_repo* project to install the application.  
 
-This will create all the objects in the repository, initialize the data, configure Google Drive/Calendar and setup the web app.  
+This will setup the repository, add the initial data, configure Google Drive/Calendar and setup the web app.  
 
 ### Reference
 [Django 3 Install Guide]
