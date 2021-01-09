@@ -23,15 +23,15 @@ Install and configure the following applications, in order:
 
   - clone the *[dcp_repo]* project
   - install dependencies (ConfigParser)
-  - add libraries to project path (configure *src* folders)
-  - configure *database.ini*
-  - configure initial values: *src/load_intiial_data.sql*
+  - add libraries to project path and configure *src* folders
+  - configure */database.ini*
+  - configure initial values: */src/load_intiial_data.sql*
   - set environment variables and restart IDE: `setx ENV "development"`
 
 ### Configure Application
 
   - clone the *[dcp]* project
-  - update environment variables: *.env*
+  - update environment variables: */.env*
   - install dependencies (*requirements.txt*)
   - configure source directories (*/lib*, */test*)
   - configure initial values: setup.py
@@ -66,7 +66,7 @@ Install and configure the following applications, in order:
    - if using gmail, add "anti-spoof" DNS record so mails don't route to SPAM
 
 ### Install
-Run *build.py* in the *dcp_repo* project to install the application.  
+Run *build.py* in the *dcp_repo* project root to install the application.  
 
 This will setup the repository, add the initial data, configure Google Drive/Calendar and setup the web app.  
 
