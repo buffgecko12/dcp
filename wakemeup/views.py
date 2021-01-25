@@ -776,7 +776,7 @@ def list_object(request, objecttype):
         
         # Teacher options
         if request.user.usertype == "TR":
-            tableoptions['excludefields'].remove('rewardvalue')
+            tableoptions['excludefields'] = [e for e in tableoptions['excludefields'] if e not in ('rewardvalue', 'vendor')]            
 
         # Look up rewards
         objectSet = RewardsTable(rewardfunction(**rewardfilter), tableoptions=tableoptions)
