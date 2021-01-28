@@ -32,7 +32,7 @@ class testProgram(unittest.TestCase):
 
     def setUp(self):
         pass
-    
+
     def testCreateProgram(self):
 
         # Check directories are created
