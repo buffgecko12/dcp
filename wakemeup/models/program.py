@@ -447,6 +447,27 @@ class Program(MyModel):
     def delete(self, deleteoptions={'repository':True, 'drive':False, 'calendar':False}, *args, **kwargs):
         return Program.objects.delete(self, deleteoptions, *args, **kwargs)
 
+    def copy(self, targetyear, copyoptions={'copyusersflag':True}, createoptions=None, gd='default', gc='default'):
+        
+        # Copy program
+        newprogram = Program(programname=self.programname, schoolid=self.schoolid, schoolyear=targetyear, createoptions=createoptions, gd=gd, gc=gc)
+        newprogram.save()
+
+        # Copy user program
+        if copyoptions.get('copyusersflag') != False:
+            
+            # Get user id list
+            useridlist = copyoptions.get('useridlist') or []
+
+            # Loop through current program's users
+            for myuserprogram in UserProgram.objects.get_user_programs(programname=self.programname, schoolid=self.schoolid, schoolyear=self.schoolyear):
+                if myuserprogram.userid in useridlist or not useridlist:
+                    
+                    # Copy user program
+                    myuserprogram.copy(targetyear=targetyear)
+
+        return newprogram
+
 class UserProgram(Program):
 
     userid = models.IntegerField()
@@ -472,3 +493,13 @@ class UserProgram(Program):
     
     def delete(self, *args, **kwargs):
         return UserProgram.objects.delete(self, *args, **kwargs)
+    
+    def copy(self, targetyear):
+        return UserProgram(
+            programname=self.programname, 
+            schoolid=self.schoolid, 
+            schoolyear=targetyear, 
+            userid=self.userid,
+            maxbudget=self.maxbudget
+        ).save()
+    
