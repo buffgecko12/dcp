@@ -57,7 +57,7 @@ class testProgram(unittest.TestCase):
         originaluser = UserProgram.objects.get(userid=self.myuser_teacher.userid, schoolyear=self.myprogram1.schoolyear, **programparams)
         self.assertTrue(newuser)
         self.assertFalse(UserProgram.objects.get(userid=self.myuser_other.userid, schoolyear=targetyear, **programparams))
-        
+
         # Check attributes were copied
         self.assertEqual(newuser.maxbudget, originaluser.maxbudget)
 
