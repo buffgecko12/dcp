@@ -55,7 +55,7 @@ Install and configure the following applications, in order:
 2. Configure Google Drive Storage key:
 
     **Local Environment**  
-    Copy key file (GOOGLE_APPLICATION_CREDENTIALS) specified in *.env* file to expected location
+    Copy key file (GOOGLE_APPLICATION_CREDENTIALS) specified in *.env* file to expected location (i.e. base project directory)
 
     **Heroku**
     1. Create config variables

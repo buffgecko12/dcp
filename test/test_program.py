@@ -32,13 +32,38 @@ class testProgram(unittest.TestCase):
 
     def setUp(self):
         pass
-    
+
     def testCreateProgram(self):
 
         # Check directories are created
         for myprogram in (self.myprogram1, self.myprogram2):
             gdfile = myprogram.gd.get_gd_file(gd_locator=get_gd_locator('program_base_year'), schoolyear=myprogram.schoolyear, programname=myprogram.programname)
             self.assertTrue(gdfile)
+
+    def testCopyProgram(self):
+        targetyear = 2200
+        programparams = {'programname':self.myprogram1.programname, 'schoolid':self.myprogram1.schoolid}
+
+        # Copy program and verify new one exists
+        newprogram = self.myprogram1.copy(
+            targetyear=targetyear, 
+            createoptions={'calendar':False, 'drive':True}, 
+            copyoptions={'useridlist':[self.myuser_teacher.userid]}
+        )
+        self.assertTrue(Program.objects.get(schoolyear=targetyear, **programparams))
+
+        # Check correct user programs were created
+        newuser = UserProgram.objects.get(userid=self.myuser_teacher.userid, schoolyear=targetyear, **programparams)
+        originaluser = UserProgram.objects.get(userid=self.myuser_teacher.userid, schoolyear=self.myprogram1.schoolyear, **programparams)
+        self.assertTrue(newuser)
+        self.assertFalse(UserProgram.objects.get(userid=self.myuser_other.userid, schoolyear=targetyear, **programparams))
+
+        # Check attributes were copied
+        self.assertEqual(newuser.maxbudget, originaluser.maxbudget)
+
+        # Delete program and verify it is gone        
+        newprogram.delete(deleteoptions={'repository':True,'drive':True,'calendar':False})
+        self.assertFalse(Program.objects.get(schoolyear=newprogram.schoolyear, **programparams))
 
     def testGetProgram(self):
         self.assertTrue(Program.objects.get(programname=self.myprogram1.programname, schoolid=self.myprogram1.schoolid, schoolyear=self.myprogram1.schoolyear))
