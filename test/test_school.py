@@ -9,7 +9,7 @@ class testSchool(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.myreward1 = create_reward()
+        cls.myreward1 = create_reward(schoolyear=2000)
         cls.myreward2 = create_reward()
         
     def setUp(self):
@@ -18,7 +18,7 @@ class testSchool(unittest.TestCase):
         self.myschoolcalendar1 = create_school_calendar(schoolid=self.myschool1.schoolid,itemtype='SP',itemdate=date(2020,3,1))
         self.myschoolcalendar2 = create_school_calendar(schoolid=self.myschool1.schoolid,itemtype='EP',itemdate=date(2020,11,1))
 
-        self.myschoolreward1 = create_school_reward(schoolid=self.myschool1.schoolid,rewardid=self.myreward1.rewardid,rewardvalue=999)
+        self.myschoolreward1 = create_school_reward(schoolid=self.myschool1.schoolid,rewardid=self.myreward1.rewardid, schoolyear=2000, rewardvalue=999)
         self.myschoolreward2 = create_school_reward(schoolid=self.myschool1.schoolid,rewardid=self.myreward2.rewardid)
     
     def testCreateSchool(self):
@@ -84,7 +84,7 @@ class testSchool(unittest.TestCase):
         myreward = SchoolReward.objects.get(schoolid=self.myschool1.schoolid,rewardid=self.myreward1.rewardid)
         
         self.assertTrue(myreward)
-        self.assertTrue(SchoolReward.objects.get_school_rewards(rewardid=self.myreward1.rewardid))
+        self.assertTrue(SchoolReward.objects.get_school_rewards(rewardid=self.myreward1.rewardid, schoolyear=2000))
         self.assertTrue(SchoolReward.objects.all())
 
         # Check reward values
@@ -110,6 +110,28 @@ class testSchool(unittest.TestCase):
         myschoolreward = SchoolReward.objects.get(schoolid=self.myschool1.schoolid,rewardid=self.myreward1.rewardid)
         self.assertTrue(myschoolreward)
         self.assertEqual(myschoolreward.rewardvalue,self.myreward1.rewardvalue)
+
+    def testCopySchoolReward(self):
+        targetyear = self.myreward1.schoolyear + 1
+        newreward = self.myreward1.copy(targetyear=targetyear, copyoptions={'copyschools':True})
+
+        # Case 1 - Copy Reward and related school rewards
+        # Check if all rewards are copied to new year
+        self.assertEqual(Reward.objects.get(rewardid=newreward.rewardid).schoolyear, targetyear)
+        self.assertEqual(SchoolReward.objects.get(schoolid=self.myschool1.schoolid, rewardid=newreward.rewardid).schoolyear, targetyear)
+
+        # Delete rewards
+        for myschoolreward in SchoolReward.objects.get_school_rewards(rewardid=newreward.rewardid):
+            myschoolreward.delete()
+            
+        newreward.delete()
+        
+        # Case 2 - Copy school reward
+#         newschoolreward = self.myschoolreward1.copy(targetyear=targetyear)
+#         self.assertEqual(SchoolReward.objects.get(schoolid=newschoolreward.schoolid, rewardid=newschoolreward.rewardid).schoolyear, targetyear)
+# 
+#         # Delete school reward
+#         newschoolreward.delete()
 
     def testDeleteSchoolReward(self):
         

@@ -140,6 +140,21 @@ class testProgram(unittest.TestCase):
         self.assertFalse(UserProgram.objects.get_user_programs(userid=self.myuser_teacher.userid, schoolid=self.myuser_teacher.schoolid, programname=programname)) # New program should be gone
         self.assertTrue(UserProgram.objects.get_user_programs(userid=self.myuser_teacher.userid)) # Other programs should still remain
 
+    def testCopyUserProgram(self):
+        targetyear = int(DEFAULT_SCHOOL_YEAR) + 1
+        myprograminfo = {'userid':self.myuser_teacher.userid, 'programname':self.myprogram1.programname, 'schoolid':self.myprogram1.schoolid}
+
+        myuserprogram = UserProgram.objects.get(**myprograminfo, schoolyear=DEFAULT_SCHOOL_YEAR)
+
+        # Copy / verify new user program
+        myuserprogram.copy(targetyear=targetyear, createprogramflag=True)
+        newuserprogram = UserProgram.objects.get(**myprograminfo, schoolyear=targetyear)
+        self.assertTrue(newuserprogram)
+
+        # Delete program
+        newuserprogram.delete()
+        self.assertFalse(UserProgram.objects.get(**myprograminfo, schoolyear=targetyear)) # New program should be gone
+ 
     def tearDown(self):
         pass
 

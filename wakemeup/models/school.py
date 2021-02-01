@@ -188,6 +188,21 @@ class SchoolReward(School):
  
     objects = SchoolRewardManager()
     
+    def copy(self, targetyear, newrewardid=None):
+
+#         # lookup original source reward
+#         if not newrewardid:
+#             sourcereward = Reward.objects.get(rewardid=self.rewardid)
+#             
+#             if sourcereward:
+#                 newrewardid = sourcereward.rewardchildren[0] # Get first child
+            
+        # Create new school reward
+        if newrewardid:
+            schoolreward = SchoolReward(schoolid=self.schoolid, rewardid=newrewardid, schoolyear=targetyear, rewardvalue=self.rewardvalue)
+            schoolreward.save()
+            return schoolreward
+
 class Class(School):
     
     classid = models.IntegerField(primary_key=True, verbose_name='ID')

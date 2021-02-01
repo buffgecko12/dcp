@@ -1,5 +1,7 @@
+import copy
+
 from django.db import models
-from django.contrib.postgres.fields import JSONField, DateTimeRangeField
+from django.contrib.postgres.fields import JSONField, DateTimeRangeField, ArrayField
 
 from wakemeup.models.school import *
 from wakemeup.models.base import MyModel
@@ -109,9 +111,9 @@ class RewardManager(models.Manager):
         return self.get_rewards()
     
     def get(self, rewardid):
-        return get_data_pk(self, 'SP_DCPGetReward(%s,%s)', (rewardid,None))
+        return get_data_pk(self, 'SP_DCPGetReward(%s,%s)', (rewardid, None))
     
-    def get_rewards(self, rewardid = None, schoolyear = None):
+    def get_rewards(self, rewardid=None, schoolyear=None):
         return get_data(self, 'SP_DCPGetReward(%s,%s)', (rewardid, schoolyear))
     
     def save(self, myReward):
@@ -123,7 +125,8 @@ class RewardManager(models.Manager):
                 myReward.rewarddescription,
                 myReward.rewardvalue,
                 myReward.rewardcategory,
-                myReward.vendor
+                myReward.vendor,
+                myReward.sourcerewardid
             )
         )[0]
     
@@ -315,9 +318,33 @@ class Reward(MyModel):
     rewardcategory = models.CharField(max_length=10, verbose_name='Categor' + mychr('i') + 'a')
     rewardcategorydisplayname = models.CharField(max_length=100, verbose_name='Categor' + mychr('i') + 'a')
     vendor = models.CharField(max_length=100,verbose_name='Vendedor')
+    sourcerewardid = models.IntegerField() # (internal) may not be needed
+    rewardchildren = ArrayField(models.IntegerField())
     
     objects = RewardManager()
-    
+
+    def copy(self, targetyear, copyoptions={'copyschools':False}):
+
+        # Copy original reward and update values
+        newreward = copy.deepcopy(self)
+        newreward.rewardid = None # Clear existing rewardid
+        newreward.sourcerewardid = self.rewardid # Store source rewardid
+        newreward.schoolyear = targetyear # Set to new year
+
+        # Save new reward
+        newreward.rewardid = newreward.save()
+        
+        if copyoptions.get('copyschools'):
+            
+            # Get all school rewards associated with this reward / school year
+            schoolrewards = SchoolReward.objects.get_school_rewards(rewardid=self.rewardid, schoolyear=self.schoolyear)
+            
+            # Copy school rewards
+            for myschoolreward in schoolrewards:
+                myschoolreward.copy(targetyear=targetyear, newrewardid=newreward.rewardid)
+        
+        return newreward
+        
 class Contract(MyModel):
 
     contractid = models.IntegerField(primary_key=True, verbose_name="ID")
@@ -366,7 +393,7 @@ class Program(MyModel):
     calendarid = models.CharField(max_length=250)
     gd_locator = get_gd_locator('program_base_year')
     
-    def __init__(self,*args,**kwargs):
+    def __init__(self, *args, **kwargs):
         
         # Extract extra parameters (if any)
         createoptions = kwargs.pop('createoptions', None)
@@ -381,7 +408,7 @@ class Program(MyModel):
         if(self.gc == "default"):
             self.gc = GoogleCalendar(permissions=['write']) # Use GC if provided, otherwise get default
             
-        super(Program, self).__init__(*args,**kwargs)
+        super(Program, self).__init__(*args, **kwargs)
         
         # Initialize parameters
         self.programdetails = self.programdetails or {}
@@ -494,11 +521,15 @@ class UserProgram(Program):
     def delete(self, *args, **kwargs):
         return UserProgram.objects.delete(self, *args, **kwargs)
     
-    def copy(self, targetyear):
+    def copy(self, targetyear, createprogramflag=False):
+        programparams = {'programname':self.programname, 'schoolid':self.schoolid, 'schoolyear':targetyear}
+        
+        # Create program (if doesn't exist)
+        if not Program.objects.get(**programparams) and createprogramflag:
+            Program(**programparams).save()
+        
         return UserProgram(
-            programname=self.programname, 
-            schoolid=self.schoolid, 
-            schoolyear=targetyear, 
+            **programparams, 
             userid=self.userid,
             maxbudget=self.maxbudget
         ).save()
