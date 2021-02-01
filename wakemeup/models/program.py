@@ -475,25 +475,35 @@ class Program(MyModel):
         return Program.objects.delete(self, deleteoptions, *args, **kwargs)
 
     def copy(self, targetyear, copyoptions={'copyusersflag':True}, createoptions=None, gd='default', gc='default'):
-        
-        # Copy program
-        newprogram = Program(programname=self.programname, schoolid=self.schoolid, schoolyear=targetyear, createoptions=createoptions, gd=gd, gc=gc)
-        newprogram.save()
 
-        # Copy user program
-        if copyoptions.get('copyusersflag') != False:
+        programparams = {'programname':self.programname, 'schoolid':self.schoolid}
+
+        # Check if new program already exists
+        existingprogram = Program.objects.get(**programparams, schoolyear=targetyear)
+
+        # Don't overwrite if program already exists
+        if existingprogram:
+            return existingprogram
+        else:
             
-            # Get user id list
-            useridlist = copyoptions.get('useridlist') or []
-
-            # Loop through current program's users
-            for myuserprogram in UserProgram.objects.get_user_programs(programname=self.programname, schoolid=self.schoolid, schoolyear=self.schoolyear):
-                if myuserprogram.userid in useridlist or not useridlist:
-                    
-                    # Copy user program
-                    myuserprogram.copy(targetyear=targetyear)
-
-        return newprogram
+            # Copy program
+            newprogram = Program(**programparams, schoolyear=targetyear, createoptions=createoptions, gd=gd, gc=gc)
+            newprogram.save()
+    
+            # Copy user program
+            if copyoptions.get('copyusersflag') != False:
+                
+                # Get user id list
+                useridlist = copyoptions.get('useridlist') or []
+    
+                # Loop through current program's users
+                for myuserprogram in UserProgram.objects.get_user_programs(**programparams, schoolyear=self.schoolyear):
+                    if myuserprogram.userid in useridlist or not useridlist:
+                        
+                        # Copy user program
+                        myuserprogram.copy(targetyear=targetyear)
+    
+            return newprogram
 
 class UserProgram(Program):
 

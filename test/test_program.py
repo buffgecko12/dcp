@@ -50,7 +50,12 @@ class testProgram(unittest.TestCase):
             createoptions={'calendar':False, 'drive':True}, 
             copyoptions={'useridlist':[self.myuser_teacher.userid]}
         )
-        self.assertTrue(Program.objects.get(schoolyear=targetyear, **programparams))
+        self.assertTrue(Program.objects.get(**programparams, schoolyear=targetyear))
+
+        # Make sure duplicate program not created
+        self.myprogram1.copy(targetyear=targetyear)
+        myprograms = Program.objects.get_programs(**programparams, schoolyear=targetyear)
+        self.assertEqual(len(myprograms), 1)
 
         # Check correct user programs were created
         newuser = UserProgram.objects.get(userid=self.myuser_teacher.userid, schoolyear=targetyear, **programparams)
