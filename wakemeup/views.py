@@ -476,7 +476,7 @@ def edit_file(request, fileid=None):
                 filetypes = Category.objects.get_categories(categoryclass='contractfile' if myfileclass == "CT" else "programfile" if myfileclass == "PG" else "")
                 
                 # Get user upload directory or use default (programname, school year); otherwise GD will default to "root"
-                myuserprogram = UserProgram.objects.get(userid=myuserid, programname=myprogramname, schoolyear=myschoolyear, schoolid=myschoolid, uploaddirflag=True) # Create upload dir
+                myuserprogram = UserProgram.objects.get(userid=myuserid, programname=myprogramname, schoolyear=myschoolyear, schoolid=myschoolid, uploaddirflag=True) if myuserid else None # Create upload dir
                 uploaddir = getattr(myuserprogram, 'uploaddirectoryid_gd', None) or \
                             File.objects.lookup_fileid_gd(gd_locator=get_gd_locator('program_uploads_base'), schoolyear=myschoolyear, programname=myprogramname)
     
