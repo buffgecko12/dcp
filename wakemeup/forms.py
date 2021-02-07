@@ -90,28 +90,31 @@ def get_field_with_checkbox(field):
     
     return mydiv
 
-def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, lookupargs={}, ignoredefaultsflag=False, sortflag=True):
+def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, lookupargs={}, ignoredefaultsflag=False, sortflag=True, **kwargs):
     choices = [("","-- Escoger --")] if selectflag else []
 
     if ignoredefaultsflag:
         lookupargs['schoolyear'] = lookupargs.get('schoolyear') or None
 
-    if(fieldname =='userid'):
+    if fieldname =='userid':
         choices += (Program.objects.get_program_options(idfield=fieldname, displayfield='userdisplayname', **lookupargs))
         
-    if(fieldname =='schoolid'):
+    if fieldname =='schoolid':
         choices += (Program.objects.get_program_options(idfield=fieldname, displayfield='schoolabbreviation', **lookupargs))
 
-    if(fieldname =='schoolyear'):
-        choices += (Program.objects.get_program_options(idfield=fieldname, **lookupargs))
+    if fieldname in ('schoolyear', 'sourceyear'):
+        if kwargs.get('expandedflag') == True:
+            choices += (Program.objects.get_year_options(startoffset=3, endoffset=3, programrangeflag=True)) # Expanded program years
+        else:
+            choices += (Program.objects.get_program_options(idfield='schoolyear', **lookupargs)) # Program years
 
-    elif(fieldname == 'accessroles'):
+    elif fieldname == 'accessroles':
         choices += Role.objects.get_role_options(**lookupargs)
         
-    elif(fieldname == 'profilepictureid'):
+    elif fieldname == 'profilepictureid':
         choices += get_user_model().objects.get_profile_picture_options(**lookupargs)
 
-    elif(fieldname == 'programname'):
+    elif fieldname == 'programname':
         choices += (Program.objects.get_program_options(idfield=fieldname, **lookupargs))
 
     else:
@@ -157,6 +160,8 @@ class MyForm(forms.Form):
         # Extract context variables        
         self.context = kwargs.pop('context', {})
         self.request = self.context.get('request', {})
+        self.initialvalues = kwargs.get('initial', {})
+        self.programname = kwargs.get('programname', {})
         
         super(MyForm, self).__init__(*args, **kwargs)
 
@@ -886,3 +891,59 @@ class ContractPartyRewardForm(forms.Form):
 
     class Meta:
         model = ContractPartyReward
+
+class CopyProgramForm(MyForm):
+
+    # General info
+    programname = forms.ChoiceField(label='Programa')
+    schoolid = forms.MultipleChoiceField(label='Colegio', widget=forms.SelectMultiple(attrs={'size':'4'}), required=False)
+    schoolyear = forms.TypedChoiceField(label='A' + mychr('n') + 'o nuevo', coerce=int, empty_value=None)
+    sourceyear = forms.TypedChoiceField(label='A' + mychr('n') + 'o para copiar', required=False, coerce=int, empty_value=None)
+
+    # Copy options
+    exactsourceyearflag = forms.BooleanField(required=False, label='A' + mychr('n') + 'o para copiar tiene que coincidir exactamente')
+    createdriveflag = forms.BooleanField(required=False, label='Crear carpeta nueva en Google Drive')
+    createcalendarflag = forms.BooleanField(required=False, label='Crear calendario nuevo')
+    createdefaultroleflag = forms.BooleanField(required=False, label='Crear rol predeterminado de programa', initial=True)
+    copyusersflag = forms.BooleanField(required=False, label='Copiar usuarios', initial=True)
+    copyrewardsflag = forms.BooleanField(required=False, label='Copiar incentivos', initial=True)
+
+    def __init__ (self, *args, **kwargs):
+        super(CopyProgramForm, self).__init__(*args, **kwargs)
+
+        dropdownoptions = {'userflag':False, 'schoolid':None, 'programname': None, 'schoolyear':None}
+
+        # Initialize fields (TO-DO: Update to use AJAX based on schoolid)
+        fieldinfo = {
+            'programname':  {'dropdown':{'categoryclass':'program', 'lookupargs':{**dropdownoptions}}},
+            'schoolid':     {'dropdown':{'lookupargs':{**dropdownoptions}, 'selectflag':False}},
+            'schoolyear':   {'dropdown':{'lookupargs':{**dropdownoptions}, 'expandedflag':True}, 'default':DEFAULT_SCHOOL_YEAR}, # Expanded year list
+            'sourceyear':   {'dropdown':{'lookupargs':{**dropdownoptions}}, 'default':DEFAULT_SCHOOL_YEAR-1}, # default = most recent year
+        }
+        
+        setup_fields(self, fieldinfo)
+        
+        # Set helper properties
+        self.helper = FormHelper() 
+        setFormHelper(self.helper)
+
+        # Set form layout
+        self.helper.layout = Layout(
+            Fieldset(
+                'General',
+                'programname',
+                'schoolid',
+                'schoolyear',
+                'sourceyear',
+            ),
+            Fieldset(
+                'Opciones de copiar',
+                'createdriveflag',
+                'createcalendarflag',
+                'createdefaultroleflag',
+                'copyusersflag',
+                'copyrewardsflag',
+                'exactsourceyearflag',
+                getAdminFormActions(),
+            )
+        )

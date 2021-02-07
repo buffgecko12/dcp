@@ -105,11 +105,11 @@ class SchoolRewardManager(models.Manager):
     def all(self):
         return self.get_school_rewards()
      
-    def get_school_rewards(self, schoolid = None, rewardid = None, schoolyear = DEFAULT_SCHOOL_YEAR):
-        return get_data(self, 'SP_DCPGetSchoolReward(%s,%s,%s)', (schoolid, rewardid, schoolyear))
+    def get_school_rewards(self, schoolid=None, rewardid=None, schoolyear=DEFAULT_SCHOOL_YEAR, sourcerewardid=None):
+        return get_data(self, 'SP_DCPGetSchoolReward(%s,%s,%s,%s)', (schoolid, rewardid, schoolyear, sourcerewardid))
      
     def get(self, schoolid, rewardid):
-        return get_data_pk(self, 'SP_DCPGetSchoolReward(%s,%s,%s)', (schoolid, rewardid, None))
+        return get_data_pk(self, 'SP_DCPGetSchoolReward(%s,%s,%s,%s)', (schoolid, rewardid, None, None))
      
     def save(self, mySchoolReward, rewardinfo = None):
         return save_data('SP_DCPUpsertSchoolReward',
@@ -190,13 +190,20 @@ class SchoolReward(School):
     
     def copy(self, targetyear, newrewardid=None):
 
-#         # lookup original source reward
-#         if not newrewardid:
-#             sourcereward = Reward.objects.get(rewardid=self.rewardid)
-#             
-#             if sourcereward:
-#                 newrewardid = sourcereward.rewardchildren[0] # Get first child
+        # Direct School Reward copy
+        if not newrewardid:
+            from wakemeup.models.program import Reward
             
+            # Check if source reward has already been copied to target year
+            sourcereward = Reward.objects.get_rewards(sourcerewardid=self.rewardid, schoolyear=targetyear)
+
+            # Reward has already been copied
+            if sourcereward:
+                newrewardid = sourcereward[0].rewardid
+            else:
+                # Make a copy of the source reward
+                newrewardid = getattr(Reward.objects.get(rewardid=self.rewardid).copy(targetyear=targetyear), 'rewardid')
+
         # Create new school reward
         if newrewardid:
             schoolreward = SchoolReward(schoolid=self.schoolid, rewardid=newrewardid, schoolyear=targetyear, rewardvalue=self.rewardvalue)

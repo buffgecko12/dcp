@@ -28,15 +28,18 @@ class testReward(unittest.TestCase):
         self.assertEqual(self.myreward1.rewardvalue, 15000)
 
     def testCopyReward(self):
-        newyear = 2020
+        targetyear = 2020
         
         # Copy reward
-        newreward = self.myreward1.copy(targetyear=newyear)
+        newreward = self.myreward1.copy(targetyear=targetyear)
 
         # Test new reward is created
         newreward = Reward.objects.get(rewardid=newreward.rewardid)
         self.assertTrue(newreward)
-        self.assertEqual(newreward.schoolyear, newyear)
+        self.assertEqual(newreward.schoolyear, targetyear)
+        
+        # Lookup reward by source id
+        self.assertEqual(len(Reward.objects.get_rewards(schoolyear=targetyear, sourcerewardid=self.myreward1.rewardid)), 1)
         
         # Delete new reward
         newreward.delete()

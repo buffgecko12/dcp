@@ -120,18 +120,25 @@ class testSchool(unittest.TestCase):
         self.assertEqual(Reward.objects.get(rewardid=newreward.rewardid).schoolyear, targetyear)
         self.assertEqual(SchoolReward.objects.get(schoolid=self.myschool1.schoolid, rewardid=newreward.rewardid).schoolyear, targetyear)
 
-        # Delete rewards
+        # Delete copied school rewards
         for myschoolreward in SchoolReward.objects.get_school_rewards(rewardid=newreward.rewardid):
             myschoolreward.delete()
             
-        newreward.delete()
-        
         # Case 2 - Copy school reward
-#         newschoolreward = self.myschoolreward1.copy(targetyear=targetyear)
-#         self.assertEqual(SchoolReward.objects.get(schoolid=newschoolreward.schoolid, rewardid=newschoolreward.rewardid).schoolyear, targetyear)
-# 
-#         # Delete school reward
-#         newschoolreward.delete()
+        newschoolreward = self.myschoolreward1.copy(targetyear=targetyear)
+        self.assertEqual(SchoolReward.objects.get(schoolid=newschoolreward.schoolid, rewardid=newschoolreward.rewardid).schoolyear, targetyear)
+        newschoolreward.delete()
+ 
+        # Case 3 - Copy school reward (without source reward already copied)
+        newschoolreward = self.myschoolreward2.copy(targetyear=targetyear)
+        self.assertEqual(SchoolReward.objects.get(schoolid=newschoolreward.schoolid, rewardid=newschoolreward.rewardid).schoolyear, targetyear)
+        self.assertEqual(Reward.objects.get_rewards(sourcerewardid=self.myschoolreward2.rewardid)[0].schoolyear, targetyear)
+ 
+        # Case 4 - Make sure source reward does not get copied again if it has already been copied
+        duplicatereward = self.myschoolreward2.copy(targetyear=targetyear)
+        self.assertEqual(len(SchoolReward.objects.get_school_rewards(schoolid=newschoolreward.schoolid, sourcerewardid=self.myschoolreward2.rewardid)), 1)
+ 
+        newreward.delete()
 
     def testDeleteSchoolReward(self):
         

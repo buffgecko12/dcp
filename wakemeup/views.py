@@ -61,38 +61,38 @@ def check_authorization(view):
             view_object = viewname_split[1] if len(viewname_split) > 1 else None # Use second index of view name (if specified)
     
             # Convert to access levels
-            if(view_action == "list"):
+            if view_action == "list":
                 myrequestedaccesslevel = 1
                 
-            elif(view_action == "get"):
+            elif view_action == "get":
                 myrequestedaccesslevel = 4
                 
-            elif(view_action in ("edit", "execute")):
-                if(kwargs.get('objectid') == "new"):
+            elif view_action in ("edit", "execute"):
+                if kwargs.get('objectid') == "new":
                     myrequestedaccesslevel = 10 # Create
                 else:
                     myrequestedaccesslevel = 8 # Edit
                     
-            elif(view_action == "create"):
+            elif view_action in ("create", "manage"):
                 myrequestedaccesslevel = 10
                 
-            elif(view_action == "delete"):
+            elif view_action == "delete":
                 myrequestedaccesslevel = 12
                 
             else:
                 myrequestedaccesslevel = 1 # Browse
             
             # Get object
-            if(view_action in ('list','get','edit','create','execute','delete')):
+            if view_action in ('list','get','edit','create','execute','delete','manage'):
                 myobject = Object.objects.get_object_by_name(objectname=kwargs.get('objecttype') or view_object) # business object
             else:
                 myobject = Object.objects.get_object_by_name(objectname=viewname) # view
 
             # Check valid object
-            if(myobject):
+            if myobject:
 
                 # Check user has requested access to object
-                if (myuser.check_access(objectid=myobject.objectid, objectclass=myobject.objectclass, requestedaccesslevel=myrequestedaccesslevel)):
+                if myuser.check_access(objectid=myobject.objectid, objectclass=myobject.objectclass, requestedaccesslevel=myrequestedaccesslevel):
 
                     # Valid permission - continue
                     return view(*args, **kwargs)
@@ -791,7 +791,7 @@ def list_object(request, objecttype):
 @check_authorization
 def edit_object(request, objecttype, objectid):
     
-    form_template = 'wakemeup/admin/edit_form.html'
+    form_template = 'wakemeup/admin/form.html'
     context = {}
 
     # Set object forms and check access
@@ -1006,7 +1006,7 @@ def edit_object(request, objecttype, objectid):
                 calendarform = SchoolCalendarForm(initial={'calendarid': Program.objects.get(programname='incentive', schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=myobject.schoolid).calendarid}) # TO-DO: Fix hard-coded programname
 
                 # Reward formset - Merge available rewards with current school rewards
-                rewards = Reward.objects.get_rewards() # TO-DO: Update to get rewrads for given schoolyear
+                rewards = Reward.objects.get_rewards() # TO-DO: Update to get rewards for given schoolyear
                 schoolrewards = SchoolReward.objects.get_school_rewards(schoolid=myobject.schoolid) # Defaults to "DEFAULT_SCHOOL_YEAR"
                 schoolreward_data = []
                 
@@ -1147,7 +1147,6 @@ def list_contract(request):
 
 @check_authorization
 def create_user(request):
-    
     if request.method == 'POST':
 
         # Go home if user clicks cancel
@@ -1224,23 +1223,81 @@ def create_user(request):
 
             if(myschoolid and myprogramname and myschoolyear):
                 
-                # Register user for programs
+                # Create user programs
                 for year in myschoolyear:
                     UserProgram(userid=newuser.userid, programname=myprogramname, schoolid=myschoolid, schoolyear=year).save()
                     
-                    # Add user to roles
-                    for myschool in (0, myschoolid):
-                        Role(
-                            roleid=Program.objects.get(programname=myprogramname, schoolid=myschoolid, schoolyear=year).defaultroleid
-                        ).modify_role_item(userid=newuser.userid)
-                
-            # Go back to index page
+            # Redirect to confirmation page
             return render(request, 'wakemeup/admin/create_user_confirmation.html', {'userinfo':newuser, 'conf_password_display':conf_password_display})
     else:
         # Return empty form
         form = SignupForm(request=request)
         
     return render(request, 'wakemeup/admin/create_user.html', {'form': form})
+
+@check_authorization
+def manage_program(request):
+    if request.method == 'POST':
+ 
+        # Go home if user clicks cancel
+        if "submit_cancel" in request.POST:
+            return redirect_home()
+         
+        # Bind form
+        form = CopyProgramForm(request.POST)
+ 
+        if form.is_valid():
+ 
+            # Store variables to reuse
+            schoolid = form.cleaned_data.get('schoolid')
+            programname = form.cleaned_data.get('programname')
+            sourceyear = form.cleaned_data.get('sourceyear')
+            targetyear = form.cleaned_data.get('schoolyear')
+            exactsourceyearflag = form.cleaned_data.get('exactsourceyearflag')
+
+            programs = Program.objects.get_programs(
+                programname=programname, 
+                schoolyear=sourceyear if exactsourceyearflag else None,
+                schoolid=schoolid or None
+                )
+
+            # Select most recent program year for each school
+            if not exactsourceyearflag:
+
+                # Group programs by school
+                schoolgroups = group_items(programs, 'schoolid')
+                programs = []
+
+                # Build programs list with most recent school year, per school
+                for myschoolgroup in schoolgroups:
+                    myschoolgroup.sort(key=lambda x: x.schoolyear, reverse=True) # Sort by most recent school year
+                    programs.append(myschoolgroup[0]) # Get first entry
+
+            # Copy programs (only if not already copied)
+            for myprogram in programs:
+                if not Program.objects.get(programname=myprogram.programname, schoolid=myprogram.schoolid, schoolyear=targetyear):
+                    myprogram.copy(
+                         targetyear=targetyear,
+                         createoptions={
+                             'calendar':True if form.cleaned_data.get('createcalendarflag') else False, 
+                             'drive':True if form.cleaned_data.get('createdriveflag') else False,
+                             'defaultrole':True if form.cleaned_data.get('createdefaultroleflag') else False,
+                             }, 
+                         copyoptions={'copyusersflag': True if form.cleaned_data.get('copyusersflag') else False}
+                    )
+                    
+                    # Copy rewards
+                    if form.cleaned_data.get('copyrewardsflag'):
+                        print("COPY REWARDS", myprogram.schoolid, myprogram.schoolyear, SchoolReward.objects.get_school_rewards(schoolid=myprogram.schoolid, schoolyear=myprogram.schoolyear))
+                        for schoolreward in SchoolReward.objects.get_school_rewards(schoolid=myprogram.schoolid, schoolyear=myprogram.schoolyear):
+                            print("copying...", schoolreward, targetyear)
+                            schoolreward.copy(targetyear=targetyear)
+
+    else:
+        # Return empty form
+        form = CopyProgramForm(initial={'programname':'incentive'})
+         
+    return render(request, 'wakemeup/admin/form.html', {'form': form})
 
 def reset_password(email, from_email, template='registration/password_reset_email.html'):
     form = PasswordResetForm({'email':email})
