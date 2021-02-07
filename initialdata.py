@@ -113,7 +113,8 @@ ROLE_LIST = {
     
     # Program (2.0.1)
     'role_get_program':{'roleclass':'PG','name':'Program - View','description':'Read/download access on program info','usertypelist':['TR']},
-    'role_create_program':{'roleclass':'PG','name':'Program - Edit','description':'Create access on program info','usertypelist':['SA']},
+    'role_edit_program':{'roleclass':'PG','name':'Program - Edit','description':'Edit access on program info'},
+    'role_create_program':{'roleclass':'PG','name':'Program - Create','description':'Create access on program info','usertypelist':['SA']},
     'role_delete_program':{'roleclass':'PG','name':'Program - Delete','description':'Delete access on program info','usertypelist':['SU']},
 }
 
@@ -140,8 +141,9 @@ ACL_LIST = {
     'role_create_contract':[{'object':'contract','accesslevel':10}],
     'role_delete_contract':[{'object':'contract','accesslevel':12}],
 
-    # Program
+    # Program (2.0.1)
     'role_get_program':[{'object':'program','accesslevel':4}],
+    'role_edit_program':[{'object':'program','accesslevel':8}],
     'role_create_program':[{'object':'program','accesslevel':10}],
     'role_delete_program':[{'object':'program','accesslevel':12}],
     
