@@ -105,3 +105,13 @@ def convert_json_to_dict(myjson):
 
 def multiply_lists(*args):
     return itertools.product(*args)
+
+def group_items(items, groupbycolumn):
+    keyfunc = lambda x: eval('x.' + groupbycolumn)
+    data = sorted(items, key=keyfunc)
+    groups = []
+
+    for k, g in itertools.groupby(data, keyfunc):
+        groups.append(list(g))
+        
+    return groups

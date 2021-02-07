@@ -23,6 +23,7 @@ urlpatterns = [
 
     url(r'^admin/tools$', views.execute_admintools, name="execute_admintools"),
     url(r'^admin/edit_permissions', views.edit_permissions, name="edit_permissions"),
+    url(r'^admin/manage_program', views.manage_program, name="manage_program"),
 
     # User 
     url(r'^admin/create_user', views.create_user, name="create_user"),

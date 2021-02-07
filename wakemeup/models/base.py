@@ -11,3 +11,6 @@ class MyModel(models.Model):
     
     def delete(self):
         return type(self).objects.delete(self)
+
+class Object():
+    pass

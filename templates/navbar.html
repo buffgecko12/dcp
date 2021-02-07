@@ -97,6 +97,10 @@
 								<a class="dropdown-item {% if url_name == 'create_user' %} active {% endif %}" href="{% url 'wakemeup:create_user' %}">Crear usuario</a>
 							{% endif %}
 							
+							{% if auth.objects.program.accesslevel >= 10 %}
+								<a class="dropdown-item {% if url_name == 'manage_program' %} active {% endif %}" href="{% url 'wakemeup:manage_program' %}">Programas</a>
+							{% endif %}
+							
 							<!-- Permissions -->
 							{% if not auth.navbar.admin.permissions.disable and auth.objects.permissions.accesslevel >= 8%}
 								{% url 'wakemeup:edit_permissions' as actionurl %}

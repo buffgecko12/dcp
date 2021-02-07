@@ -27,17 +27,17 @@ Install and configure the following applications, in order:
   - clone the *[dcp_repo]* project
   - install dependencies (ConfigParser)
   - add libraries to project path and configure *src* folders
-  - configure */database.ini*
-  - configure initial values: */src/load_intiial_data.sql*
+  - configure *database.ini*
+  - configure initial values: *src/load_intiial_data.sql*
   - set environment variables and restart IDE: `setx ENV "development"`
 
 ### Configure Application
 
   - clone the *[dcp]* project
-  - update environment variables: */.env*
-  - install dependencies (*/requirements.txt*)
-  - configure source directories (*/lib*, */test*)
-  - configure initial values: */setup.py*
+  - update environment variables: *.env*
+  - install dependencies (*requirements.txt*)
+  - configure source directories (*lib*, *test*)
+  - configure initial values: *setup.py*
   - [configure SSL]
 
 ### Configure Google API  

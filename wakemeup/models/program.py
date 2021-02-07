@@ -1,8 +1,10 @@
+import copy
+
 from django.db import models
-from django.contrib.postgres.fields import JSONField, DateTimeRangeField
+from django.contrib.postgres.fields import JSONField, DateTimeRangeField, ArrayField
 
 from wakemeup.models.school import *
-from wakemeup.models.base import MyModel
+from wakemeup.models.base import MyModel, Object
 from wakemeup.models.environment import File
 from user.models.authorization import Role, RoleACL
 
@@ -109,10 +111,10 @@ class RewardManager(models.Manager):
         return self.get_rewards()
     
     def get(self, rewardid):
-        return get_data_pk(self, 'SP_DCPGetReward(%s,%s)', (rewardid,None))
+        return get_data_pk(self, 'SP_DCPGetReward(%s,%s,%s)', (rewardid, None, None))
     
-    def get_rewards(self, rewardid = None, schoolyear = None):
-        return get_data(self, 'SP_DCPGetReward(%s,%s)', (rewardid, schoolyear))
+    def get_rewards(self, rewardid=None, schoolyear=None, sourcerewardid=None):
+        return get_data(self, 'SP_DCPGetReward(%s,%s,%s)', (rewardid, schoolyear, sourcerewardid))
     
     def save(self, myReward):
         return save_data('SP_DCPUpsertReward', 
@@ -123,7 +125,8 @@ class RewardManager(models.Manager):
                 myReward.rewarddescription,
                 myReward.rewardvalue,
                 myReward.rewardcategory,
-                myReward.vendor
+                myReward.vendor,
+                myReward.sourcerewardid
             )
         )[0]
     
@@ -136,10 +139,10 @@ class ProgramManager(models.Manager):
         return self.get_programs()
     
     def get(self, programname, schoolid, schoolyear):
-        return get_data_pk(self, 'SP_DCPGetProgram(%s,%s,%s,%s)', (programname, schoolid, schoolyear, None))
+        return get_data_pk(self, 'SP_DCPGetProgram(%s,%s,%s,%s,%s)', (programname, schoolid, schoolyear, None, None))
 
-    def get_programs(self, programname=None, schoolid=None, schoolyear=DEFAULT_SCHOOL_YEAR, programdetails=None):
-        return get_data(self, 'SP_DCPGetProgram(%s,%s,%s,%s)', (programname, schoolid, schoolyear, programdetails))
+    def get_programs(self, programname=None, schoolid=None, schoolyear=DEFAULT_SCHOOL_YEAR, programdetails=None, excludegeneralflag=True):
+        return get_data(self, 'SP_DCPGetProgram(%s,%s,%s,%s,%s)', (programname, schoolid, schoolyear, programdetails, excludegeneralflag))
 
     def save(self, myProgram):
 
@@ -223,9 +226,36 @@ class ProgramManager(models.Manager):
 
     def get_program_options(self, idfield, displayfield=None, userflag=False, **kwargs):
         return generate_options(
-            items = self.get_programs(**kwargs) if not userflag else UserProgram.objects.get_user_programs(**kwargs),
-            idfield = idfield,
-            displayfield = displayfield or idfield,
+            items=self.get_programs(**kwargs) if not userflag else UserProgram.objects.get_user_programs(**kwargs),
+            idfield=idfield,
+            displayfield=displayfield or idfield,
+        )
+
+    def get_year_options(self, startyear=2000, endyear=2050, startoffset=0, endoffset=0, programrangeflag=False):
+
+        # Use existing program years for range
+        if programrangeflag:
+            programs = Program.objects.get_programs(schoolyear=None)
+
+            if programs:
+                startyear = min(myprogram.schoolyear for myprogram in programs)
+                endyear = max(myprogram.schoolyear for myprogram in programs)
+ 
+        # Set new range (with offset)
+        startyear = startyear - startoffset
+        endyear = endyear + endoffset
+
+        yearlist = []
+
+        for programyear in list(range(startyear, endyear)):
+            year = Object()
+            year.year = programyear
+            yearlist.append(year)
+
+        return generate_options(
+            items=yearlist,
+            idfield='year',
+            displayfield='year'
         )
 
 class UserProgramManager(models.Manager):
@@ -247,6 +277,23 @@ class UserProgramManager(models.Manager):
         return get_data(self, 'SP_DCPGetUserProgram(%s,%s,%s,%s)', (userid, programname, schoolid, schoolyear))
         
     def save(self, myUserProgram):
+
+        # Check if user program exists
+        existingprogram = UserProgram.objects.get(
+            userid=myUserProgram.userid, 
+            programname=myUserProgram.programname, 
+            schoolid=myUserProgram.schoolid, 
+            schoolyear=myUserProgram.schoolyear
+            )
+        
+        # If new user program, add user to default roles: program year - school, program year - general (0)
+        if not existingprogram:            
+            for myschool in (0, myUserProgram.schoolid):
+                program = Program.objects.get(programname=myUserProgram.programname, schoolid=myschool, schoolyear=myUserProgram.schoolyear)
+    
+                # Add user to program's default role (if exists)
+                if program:
+                    Role(roleid=program.defaultroleid).modify_role_item(userid=myUserProgram.userid)
 
         myuserprogram = save_data('SP_DCPUpsertUserProgram', (
             myUserProgram.userid,
@@ -315,9 +362,36 @@ class Reward(MyModel):
     rewardcategory = models.CharField(max_length=10, verbose_name='Categor' + mychr('i') + 'a')
     rewardcategorydisplayname = models.CharField(max_length=100, verbose_name='Categor' + mychr('i') + 'a')
     vendor = models.CharField(max_length=100,verbose_name='Vendedor')
+    sourcerewardid = models.IntegerField() # (internal) may not be needed
+    rewardchildren = ArrayField(models.IntegerField())
     
     objects = RewardManager()
+
+    def copy(self, targetyear, copyoptions={'copyschools':False}):
+
+        # Make sure reward has not already been copied to target yet
+        if not Reward.objects.get_rewards(schoolyear=targetyear, sourcerewardid=self.rewardid):
+
+            # Copy original reward and update values
+            newreward = copy.deepcopy(self)
+            newreward.rewardid = None # Clear existing rewardid
+            newreward.sourcerewardid = self.rewardid # Store source rewardid
+            newreward.schoolyear = targetyear # Set to new year
     
+            # Save new reward
+            newreward.rewardid = newreward.save()
+            
+            if copyoptions.get('copyschools'):
+                
+                # Get all school rewards associated with this reward / school year
+                schoolrewards = SchoolReward.objects.get_school_rewards(rewardid=self.rewardid, schoolyear=self.schoolyear)
+                
+                # Copy school rewards
+                for myschoolreward in schoolrewards:
+                    myschoolreward.copy(targetyear=targetyear, newrewardid=newreward.rewardid)
+            
+            return newreward
+        
 class Contract(MyModel):
 
     contractid = models.IntegerField(primary_key=True, verbose_name="ID")
@@ -366,7 +440,7 @@ class Program(MyModel):
     calendarid = models.CharField(max_length=250)
     gd_locator = get_gd_locator('program_base_year')
     
-    def __init__(self,*args,**kwargs):
+    def __init__(self, *args, **kwargs):
         
         # Extract extra parameters (if any)
         createoptions = kwargs.pop('createoptions', None)
@@ -381,7 +455,7 @@ class Program(MyModel):
         if(self.gc == "default"):
             self.gc = GoogleCalendar(permissions=['write']) # Use GC if provided, otherwise get default
             
-        super(Program, self).__init__(*args,**kwargs)
+        super(Program, self).__init__(*args, **kwargs)
         
         # Initialize parameters
         self.programdetails = self.programdetails or {}
@@ -417,7 +491,7 @@ class Program(MyModel):
                     File.objects.lookup_fileid(gd_locator=get_gd_locator(mydir), **programinfo) for mydir in \
                     ('program_base_year', 'program_files_base', 'program_files_contracts', 'program_files_videos', 'program_files_interviews' ,'program_files_documents')
                 ]
-                 
+
                 defaultdirs = basedirs + programdirs
 
                 mydefaultroleid = Role(roleclass='PG', name=('Programa ({0}) - {1}' + (' - {2}' if self.schoolid else '')).format(self.programname, self.schoolyear, schoolabbreviation)).save()
@@ -426,7 +500,7 @@ class Program(MyModel):
                 acllist = [
                     {"roleid":mydefaultroleid, "aclinfo":
                         [
-                            {"objectid":myfileid,"objectclass":"FL","accesslevel":4} if myfileid else () for myfileid in list(filter(None, defaultdirs)) # Read permission on directories
+                            {"objectid":myfileid, "objectclass":"FL", "accesslevel":4} if myfileid else () for myfileid in list(filter(None, defaultdirs)) # Read permission on directories
                         ]
                     },
                 ]
@@ -448,25 +522,39 @@ class Program(MyModel):
         return Program.objects.delete(self, deleteoptions, *args, **kwargs)
 
     def copy(self, targetyear, copyoptions={'copyusersflag':True}, createoptions=None, gd='default', gc='default'):
-        
-        # Copy program
-        newprogram = Program(programname=self.programname, schoolid=self.schoolid, schoolyear=targetyear, createoptions=createoptions, gd=gd, gc=gc)
-        newprogram.save()
 
-        # Copy user program
-        if copyoptions.get('copyusersflag') != False:
+        programparams = {'programname':self.programname, 'schoolid':self.schoolid}
+
+        # Check if new program already exists
+        existingprogram = Program.objects.get(**programparams, schoolyear=targetyear)
+
+        # Don't overwrite if program already exists
+        if existingprogram:
+            return existingprogram
+        else:
             
-            # Get user id list
-            useridlist = copyoptions.get('useridlist') or []
-
-            # Loop through current program's users
-            for myuserprogram in UserProgram.objects.get_user_programs(programname=self.programname, schoolid=self.schoolid, schoolyear=self.schoolyear):
-                if myuserprogram.userid in useridlist or not useridlist:
-                    
-                    # Copy user program
-                    myuserprogram.copy(targetyear=targetyear)
-
-        return newprogram
+            # Copy program
+            newprogram = Program(**programparams, schoolyear=targetyear, createoptions=createoptions, gd=gd, gc=gc)
+            newprogram.save()
+            
+            # Copy base program (non-school specific); schoolid = 0
+            baseprogram = Program(programname=self.programname, schoolid=0, schoolyear=targetyear, createoptions=createoptions, gd=gd, gc=gc)
+            baseprogram.save()
+    
+            # Copy user program
+            if copyoptions.get('copyusersflag') != False:
+                
+                # Get user id list
+                useridlist = copyoptions.get('useridlist') or []
+    
+                # Loop through current program's users
+                for myuserprogram in UserProgram.objects.get_user_programs(**programparams, schoolyear=self.schoolyear):
+                    if myuserprogram.userid in useridlist or not useridlist:
+                        
+                        # Copy user program
+                        myuserprogram.copy(targetyear=targetyear)
+    
+            return newprogram
 
 class UserProgram(Program):
 
@@ -494,11 +582,16 @@ class UserProgram(Program):
     def delete(self, *args, **kwargs):
         return UserProgram.objects.delete(self, *args, **kwargs)
     
-    def copy(self, targetyear):
+    def copy(self, targetyear, createprogramflag=False):
+        programparams = {'programname':self.programname, 'schoolid':self.schoolid, 'schoolyear':targetyear}
+        
+        # Create program (if doesn't exist)
+        if not Program.objects.get(**programparams) and createprogramflag:
+            Program(**programparams).save()
+        
+        # Save new user program
         return UserProgram(
-            programname=self.programname, 
-            schoolid=self.schoolid, 
-            schoolyear=targetyear, 
+            **programparams, 
             userid=self.userid,
             maxbudget=self.maxbudget
         ).save()

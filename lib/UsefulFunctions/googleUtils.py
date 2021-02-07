@@ -387,9 +387,14 @@ class GoogleDrive(GoogleService):
         
         myresult = None
 
-        # Delete / recycle file
+        # Recycle file by default
         if not deleteoptions.get('drive'):
-            myresult = self.update_file(fileid=fileid, metadata={'trashed':True})
+            try:
+                myresult = self.update_file(fileid=fileid, metadata={'trashed':True})
+            except:
+                pass
+            
+        # Delete file
         else:
             try:
                 # Handle case where file does not exist

@@ -50,7 +50,12 @@ class testProgram(unittest.TestCase):
             createoptions={'calendar':False, 'drive':True}, 
             copyoptions={'useridlist':[self.myuser_teacher.userid]}
         )
-        self.assertTrue(Program.objects.get(schoolyear=targetyear, **programparams))
+        self.assertTrue(Program.objects.get(**programparams, schoolyear=targetyear))
+
+        # Make sure duplicate program not created
+        self.myprogram1.copy(targetyear=targetyear)
+        myprograms = Program.objects.get_programs(**programparams, schoolyear=targetyear)
+        self.assertEqual(len(myprograms), 1)
 
         # Check correct user programs were created
         newuser = UserProgram.objects.get(userid=self.myuser_teacher.userid, schoolyear=targetyear, **programparams)
@@ -80,7 +85,6 @@ class testProgram(unittest.TestCase):
         self.assertEqual(Program.objects.get(programname=self.myprogram1.programname, schoolid=self.myprogram1.schoolid, schoolyear=self.myprogram1.schoolyear).calendarid, 'someid')
 
     def testDeleteProgram(self):
-
         newprogram = create_program(programname='new_program', schoolyear=2018, schoolid=self.myschool.schoolid, gd=self.gd, gc=self.gc) # Default GD
         newcalendarid = refresh(newprogram).programdetails['google']['calendar']['id']
         
@@ -94,9 +98,15 @@ class testProgram(unittest.TestCase):
     def testCreateUserProgram(self):
         gdfile = self.myprogram1.gd.get_gd_file(gd_locator=get_gd_locator('program_uploads_user'), schoolyear=self.myprogram1.schoolyear, programname=self.myprogram1.programname, userid=self.myuser_teacher.userid)
         self.assertTrue(gdfile)
+
+        # Make sure user added to default program role
+        programrole = Role.objects.get(roleid=self.myprogram1.defaultroleid)
+        programrole2 = Role.objects.get(
+            roleid=(Program.objects.get(programname=self.myprogram1.programname, schoolid=0, schoolyear=self.myprogram1.schoolyear) or {}).get('defaultroleid')
+            )
+        self.assertTrue(self.myuser_teacher.userid in programrole.userlist)
         
     def testGetUserProgram(self): # TO-DO: update to handle multiple schoolid values
-        
         myuserprogram = UserProgram.objects.get(
             userid=self.myuser_teacher.userid,
             schoolid=self.myuser_teacher.schoolid,
@@ -111,7 +121,7 @@ class testProgram(unittest.TestCase):
         
         self.assertTrue(len(UserProgram.objects.get_user_programs(schoolyear=DEFAULT_SCHOOL_YEAR)), 2) # year
         self.assertTrue(len(UserProgram.objects.get_user_programs(userid=self.myuser_teacher.userid)), 2) # user
-        self.assertEqual(Program.objects.get_program_options(idfield='schoolyear', schoolyear=DEFAULT_SCHOOL_YEAR, userflag=True)[0][0], DEFAULT_SCHOOL_YEAR) # year options
+        self.assertEqual(Program.objects.get_program_options(idfield='schoolyear', schoolyear=DEFAULT_SCHOOL_YEAR, userflag=True)[0][0], str(DEFAULT_SCHOOL_YEAR)) # year options
         self.assertEqual(len(Program.objects.get_program_options(idfield='schoolyear', schoolyear=DEFAULT_SCHOOL_YEAR, userflag=True)), 1) # no duplicates
 
     def testUpdateUserProgram(self):
@@ -126,7 +136,6 @@ class testProgram(unittest.TestCase):
         self.assertEqual(myuserprogram.details['some_key'],'some_value')
 
     def testDeleteUserProgram(self):
-
         programname = 'new_program'
         
         myprogram = create_program(programname=programname, schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=self.myschool.schoolid, createoptions=None)
@@ -140,12 +149,26 @@ class testProgram(unittest.TestCase):
         self.assertFalse(UserProgram.objects.get_user_programs(userid=self.myuser_teacher.userid, schoolid=self.myuser_teacher.schoolid, programname=programname)) # New program should be gone
         self.assertTrue(UserProgram.objects.get_user_programs(userid=self.myuser_teacher.userid)) # Other programs should still remain
 
+    def testCopyUserProgram(self):
+        targetyear = DEFAULT_SCHOOL_YEAR + 1
+        myprograminfo = {'userid':self.myuser_teacher.userid, 'programname':self.myprogram1.programname, 'schoolid':self.myprogram1.schoolid}
+
+        myuserprogram = UserProgram.objects.get(**myprograminfo, schoolyear=DEFAULT_SCHOOL_YEAR)
+
+        # Copy / verify new user program
+        myuserprogram.copy(targetyear=targetyear, createprogramflag=True)
+        newuserprogram = UserProgram.objects.get(**myprograminfo, schoolyear=targetyear)
+        self.assertTrue(newuserprogram)
+
+        # Delete program
+        newuserprogram.delete()
+        self.assertFalse(UserProgram.objects.get(**myprograminfo, schoolyear=targetyear)) # New program should be gone
+ 
     def tearDown(self):
         pass
 
     @classmethod
     def tearDownClass(cls):
-        
         UserProgram(userid=cls.myuser_teacher.userid, programname=cls.myprogram1.programname).delete()
         UserProgram(userid=cls.myuser_other.userid, programname=cls.myprogram1.programname).delete()
  
