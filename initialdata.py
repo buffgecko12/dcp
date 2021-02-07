@@ -27,7 +27,7 @@ SCHOOL_LIST = [
         "schooldisplayname":"Sample Colegio",
         "address":"Calle 1 No 2-40",
         "city":"Some City",
-        "department":"'Some department",
+        "department":"Some department",
         "classes": [
             (12,'1201'),
         ]
