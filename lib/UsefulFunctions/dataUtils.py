@@ -115,3 +115,19 @@ def group_items(items, groupbycolumn):
         groups.append(list(g))
         
     return groups
+
+def get_distinct_items(items, distinctfield):
+    mylist = []
+    seen = set() 
+
+#     [seen.add(getattr(item, distinctfield)) or item for item in items if (item and (getattr(item, distinctfield) not in seen))]
+    
+    for item in items:
+        myvalue = getattr(item, distinctfield)
+
+        if myvalue not in seen:
+            seen.add(myvalue)
+            mylist.append(item)
+    
+    
+    return mylist
