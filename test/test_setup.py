@@ -299,7 +299,7 @@ def create_object(objectclass="VW",objectname="test_object"):
     myobject.objectid = myobject.save()
     return myobject
 
-def create_role_ACL(myrole,myobject,accesslevel=4,acllist=None):
+def create_role_ACL(myrole, myobject, accesslevel=4, acllist=None):
     if(get_objectname(myobject) == 'file'):
         myobject.objectclass = 'FL'
         myobject.objectid = myobject.fileid
