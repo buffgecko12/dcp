@@ -29,14 +29,15 @@ Install and configure the following applications, in order:
   - add libraries to project path and configure *src* folders
   - configure *database.ini*
   - configure initial values: *src/load_intiial_data.sql*
-  - set environment variables and restart IDE: `setx ENV "development"`
+  - set environment variables and restart IDE: 
+    - `setx ENV "development"` (valid values: development, test, staging, production)
 
 ### Configure Application
 
   - clone the *[dcp]* project
   - update environment variables: *.env*
   - install dependencies (*requirements.txt*)
-  - configure source directories (*lib*, *test*)
+  - specify source directories as such (*lib*, *test*)
   - configure initial values: *setup.py*
   - [configure SSL]
 
@@ -69,9 +70,18 @@ Install and configure the following applications, in order:
    - if using Gmail, add "anti-spoof" DNS record so mails don't route to SPAM
 
 ### Install
-Run *build.py* in the *dcp_repo* project root to install the application.  
+1. Push the web app code to the target environment
+2. Verify the config filese are configured properly: database.ini (dcp_repo), .env (dcp)
+3. Set the "ENV" environment variable and restart your IDE / Windows Powershell
+4. In your IDE or Windows Powershell, navigate to the *dcp_repo* project root and run the desired build command: 
 
-This will setup the repository, add the initial data, configure Google Drive/Calendar and setup the web app.  
+**Clean install:** *build.py -t install_full*  
+Setup the repository, add initial data, configure Google Drive/Calendar and initialize the web app.  Any existing data is deleted.
+
+**Upgrade:** *build.py -t upgrade -v \<current_version\>*  
+Update the repository and web app with with any schema/logic changes.  Existing data is not modified.
+
+**Other Options:** *build.py -h*  
 
 ### Reference
 [Django 3 Install Guide]
