@@ -113,7 +113,7 @@ class RewardManager(models.Manager):
     def get(self, rewardid):
         return get_data_pk(self, 'SP_DCPGetReward(%s,%s,%s)', (rewardid, None, None))
     
-    def get_rewards(self, rewardid=None, schoolyear=None, sourcerewardid=None):
+    def get_rewards(self, rewardid=None, schoolyear=DEFAULT_SCHOOL_YEAR, sourcerewardid=None):
         return get_data(self, 'SP_DCPGetReward(%s,%s,%s)', (rewardid, schoolyear, sourcerewardid))
     
     def save(self, myReward):
@@ -172,11 +172,14 @@ class ProgramManager(models.Manager):
             except:
                 print("API Error: Could not delete calendar")
 
+        mygdfile = File.objects.lookup_fileid_gd(gd_locator=myProgram.gd_locator, schoolid=myProgram.schoolid, schoolyear=myProgram.schoolyear, programname=myProgram.programname)
+
         # Delete files
-        myProgram.gd.delete_file(
-            fileid = File.objects.lookup_fileid_gd(gd_locator=myProgram.gd_locator, schoolid=myProgram.schoolid, schoolyear=myProgram.schoolyear, programname=myProgram.programname),
-            deleteoptions=deleteoptions
-        )
+        if mygdfile:
+            myProgram.gd.delete_file(
+                fileid = mygdfile,
+                deleteoptions=deleteoptions
+            )
 
         # Delete program
         return delete_data('SP_DCPDeleteProgram', (myProgram.programname, myProgram.schoolid, myProgram.schoolyear))
@@ -533,13 +536,17 @@ class Program(MyModel):
             return existingprogram
         else:
             
-            # Copy program
-            newprogram = Program(**programparams, schoolyear=targetyear, createoptions=createoptions, gd=gd, gc=gc)
+            # Copy school program
+            createoptions_prog = copy.deepcopy(createoptions)
+            createoptions_prog.update({'drive':False, 'calendar':False})
+            
+            newprogram = Program(**programparams, schoolyear=targetyear, createoptions=createoptions_prog, gd=gd, gc=gc)
             newprogram.save()
             
             # Copy base program (non-school specific); schoolid = 0
-            baseprogram = Program(programname=self.programname, schoolid=0, schoolyear=targetyear, createoptions=createoptions, gd=gd, gc=gc)
-            baseprogram.save()
+            if not Program.objects.get(programname=self.programname, schoolid=0, schoolyear=targetyear):
+                baseprogram = Program(programname=self.programname, schoolid=0, schoolyear=targetyear, createoptions=createoptions, gd=gd, gc=gc)
+                baseprogram.save()
     
             # Copy user program
             if copyoptions.get('copyusersflag') != False:
