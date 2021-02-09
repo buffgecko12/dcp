@@ -30,16 +30,16 @@ def dcp(request):
                 'edit_file': {
                     "fields": {
                         'source':'navbar',
-                        'schoolyear':get_school_year(),
+                        'schoolyear':str(get_school_year()),
                         'programname':'incentive',
-                        'fileclass':'contractfile',
+                        'fileclass':'contractfile' if request.user.usertype in ('ST','TR') else 'programfile',
                         'fileid':'new'
                     }
                 },
                 'edit_file_bulk': {
                     "fields": {
                         'source':'navbar',
-                        'schoolyear':get_school_year(),
+                        'schoolyear':str(get_school_year()),
                         'programname':'incentive',
                     }
                 },
