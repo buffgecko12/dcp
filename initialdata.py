@@ -86,6 +86,7 @@ ROLE_LIST = {
     'role_super_user':{'roleclass':'US','name':'Super user','description':'Full access','usertypelist':['SU']},
     'role_site_admin':{'roleclass':'US','name':'Site Administrator','description':'Access to administer site','usertypelist':['SA']},
     'role_admin':{'roleclass':'US','name':'Site Admins (Super User and Site Administrator)','description':'Access to administer site','usertypelist':['SA','SU']},
+    'role_buyer':{'roleclass':'US','name':'Buyer','description':'Comprador','usertypelist':['BR']},
     'role_teacher':{'roleclass':'US','name':'Teacher','description':'Teachers','usertypelist':['TR']},
     'role_staff':{'roleclass':'US','name':'Staff','description':'School staff','usertypelist':['SF']},
     'role_program_admin':{'roleclass':'PG','name':'Program Administrator','description':'Program administrator (i.e. buyer, coordinator)','usertypelist':['AD']},
@@ -100,7 +101,7 @@ ROLE_LIST = {
     
     # Files
     'role_get_file':{'roleclass':'FL','name':'File - View','description':'Read/download access on files','publicflag':True},
-    'role_create_file':{'roleclass':'FL','name':'File - Create','description':'Create access on files','usertypelist':['TR']},
+    'role_create_file':{'roleclass':'FL','name':'File - Create','description':'Create access on files'},
     'role_delete_file':{'roleclass':'FL','name':'File - Delete','description':'Delete access on files','usertypelist':['SU','SA']},
     
     # Calendar
@@ -154,7 +155,12 @@ ACL_LIST = {
         {'object':'reward',"accesslevel":1},
     ],
 
-    # Admins
+    # Buyer
+    'role_buyer':[
+        {'object':'file','accesslevel':10}, # Buyer (upload files)
+    ],
+
+    # Admin
     'role_admin':[
         {'object':'admintools','accesslevel':8}, # Execute admin tools
     ],
