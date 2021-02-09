@@ -71,7 +71,7 @@ Install and configure the following applications, in order:
 
 ### Install
 1. Push the web app code to the target environment
-2. Verify the config filese are configured properly: database.ini (dcp_repo), .env (dcp)
+2. Verify the config files are configured properly: database.ini (dcp_repo), .env (dcp)
 3. Set the "ENV" environment variable and restart your IDE / Windows Powershell
 4. In your IDE or Windows Powershell, navigate to the *dcp_repo* project root and run the desired build command: 
 
