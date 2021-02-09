@@ -75,13 +75,14 @@ Install and configure the following applications, in order:
 3. Set the "ENV" environment variable and restart your IDE / Windows Powershell
 4. In your IDE or Windows Powershell, navigate to the *dcp_repo* project root and run the desired build command: 
 
-**Clean install:** *build.py -t install_full*  
+  **Clean install:** *build.py -t install_full*  
 Setup the repository, add initial data, configure Google Drive/Calendar and initialize the web app.  Any existing data is deleted.
 
-**Upgrade:** *build.py -t upgrade -v \<current_version\>*  
+  **Upgrade:** *build.py -t upgrade -v \<current_version\>*  
 Update the repository and web app with with any schema/logic changes.  Existing data is not modified.
 
-**Other Options:** *build.py -h*  
+  **Other Options:** *build.py -h*  
+5. Heroku Only: Update config variables if needed (i.e. DEFAULT_SCHOOL_YEAR)
 
 ### Reference
 [Django 3 Install Guide]
