@@ -427,7 +427,7 @@ def list_file(request):
     context = {
         'files':request.user.get_files(**fileparams), 
         "filetype": filetypedisplay, 
-        'schoolyear': schoolyear,
+        'schoolyear': str(schoolyear) if schoolyear else None,
         'programname': programname,
         'iconsize': 36 if filefilter else None, 
         'icontileflag': False if not filefilter else True
@@ -896,9 +896,9 @@ def edit_object(request, objecttype, objectid):
                                     'rewardvalue': myform.cleaned_data.get('rewardvalue'),
                                 })
     
-                        # Save school info
+                        # Save info
                         myschool.save(**kwargs)
-                        myprogram.save()
+                        myprogram.save() if myprogram else () # Handles case that program year hasn't been created yet
                         SchoolReward(schoolid=myschool.schoolid).save(rewardinfo=to_json(schoolreward_data))
 
             elif objecttype == 'class':
@@ -1003,7 +1003,12 @@ def edit_object(request, objecttype, objectid):
                     }
                 )
 
-                calendarform = SchoolCalendarForm(initial={'calendarid': Program.objects.get(programname='incentive', schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=myobject.schoolid).calendarid}) # TO-DO: Fix hard-coded programname
+                # Get program
+                myprogram = Program.objects.get(programname='incentive', schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=myobject.schoolid)
+
+                calendarform = SchoolCalendarForm(
+                    initial={'calendarid': myprogram.calendarid if myprogram else None}
+                ) # TO-DO: Fix hard-coded programname
 
                 # Reward formset - Merge available rewards with current school rewards
                 rewards = Reward.objects.get_rewards() # TO-DO: Update to get rewards for given schoolyear
@@ -1273,7 +1278,7 @@ def manage_program(request):
                     myschoolgroup.sort(key=lambda x: x.schoolyear, reverse=True) # Sort by most recent school year
                     programs.append(myschoolgroup[0]) # Get first entry
 
-            # Copy programs (only if not already copied)
+            # Copy school programs (only if not already copied)
             for myprogram in programs:
                 if not Program.objects.get(programname=myprogram.programname, schoolid=myprogram.schoolid, schoolyear=targetyear):
                     myprogram.copy(
@@ -1288,9 +1293,7 @@ def manage_program(request):
                     
                     # Copy rewards
                     if form.cleaned_data.get('copyrewardsflag'):
-                        print("COPY REWARDS", myprogram.schoolid, myprogram.schoolyear, SchoolReward.objects.get_school_rewards(schoolid=myprogram.schoolid, schoolyear=myprogram.schoolyear))
                         for schoolreward in SchoolReward.objects.get_school_rewards(schoolid=myprogram.schoolid, schoolyear=myprogram.schoolyear):
-                            print("copying...", schoolreward, targetyear)
                             schoolreward.copy(targetyear=targetyear)
 
     else:
