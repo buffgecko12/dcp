@@ -51,7 +51,7 @@ def upgrade(upgradeinfo):
             )
 
             # Remove "teacher" usertype from role
-            filecreaterole = Role.objects.get(name='File - Create')
+            filecreaterole = Role.objects.get(name='File - Edit') # New name is File - Create
             filecreaterole.modify_role_item(usertype='TR', changetype='D')
 
         elif myversion == '2.0.2':
