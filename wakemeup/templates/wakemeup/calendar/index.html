@@ -54,15 +54,17 @@
 					<div class="text-responsive" align="left">
 						{% now "Y-m-d" as todays_date %}
 						{% if events %}
-							{% for event in events %}
-								{% firstof event.end.date event.end.dateTime as end_date %}
-								<span style="white-space: nowrap;{% if todays_date > end_date|parse_date|date:"Y-m-d" %};color:red;text-decoration:line-through{% endif %}"">
-										<b><i>{{end_date|parse_date|date:"d/m/Y"}}</b></i>
-										<a href="{{event.htmlLink}}" target="_blank" {% if todays_date > end_date|parse_date|date:"Y-m-d" %}class='redStrikeHover'{% endif %}>{{event.summary|truncatechars:45}}</a><br>
-								</span>								
+							{% regroup events by grouporder as groups_events %}
+							{% for group in groups_events %}
+								{% for item in group.list %}
+									<span style="white-space: nowrap;{% if todays_date > item.eventdate|parse_date|date:"Y-m-d" %};color:red;text-decoration:line-through{% endif %}"">
+											<b><i>{{item.eventdate|parse_date|date:"d/m/Y"}}</b></i>
+											<a href="{{item.htmlLink}}" target="_blank" {% if todays_date > item.eventdate|parse_date|date:"Y-m-d" %}class='redStrikeHover'{% endif %}>{{item.summary|truncatechars:45}}</a><br>
+									</span							
+								{% endfor %}<br><br>
 							{% endfor %}
-							<br><div><i>** Es preferible enviar los resultados antes de las fechas tope. </i></div>
-							<br><div><i>** Debido a los cambios al calendario escolar de este a&ntilde;o por el Coronavirus, hemos eliminado la primera ronda.</i></div>
+							<div><i>** Es preferible cumplir las tareas antes de las fechas tope</i></div>
+							<div><i>** Si no se alcance las fechas tope para la primera ronda, se pueden pasar a la segunda ronda</i></div>
 						{% else %}
 							No hay registros.
 						{% endif %}

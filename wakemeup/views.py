@@ -358,9 +358,30 @@ def myaccount(request):
 
 @check_authorization
 def get_calendar(request):
-
     program = Program.objects.get(programname='incentive', schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=request.user.schoolid) # TO-DO: Fix for variable programname
     events = GoogleCalendar().get_events(calendarid=program.calendarid) if getattr(program, 'calendarid', None) else None
+
+    # Determine "event date"
+    for event in events:
+        event['eventdate'] = event['start']['date'] if event['start']['date'] else event['end']['dateTime']
+
+        summary = event['summary']
+
+        round = None
+        grouporder = None
+        
+        # Parse summary to determine round
+        if '1ra ronda' in summary:
+            round = 1
+            grouporder = 1
+        elif '2da ronda' in summary:
+            round = 2
+            grouporder = 2
+        else:
+            grouporder = 100
+
+        # Add new info to event
+        event.update({'round':round, 'grouporder':grouporder})
     
     context = {
         'program':program,
