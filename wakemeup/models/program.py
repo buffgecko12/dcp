@@ -538,7 +538,7 @@ class Program(MyModel):
             
             # Copy school program
             createoptions_prog = copy.deepcopy(createoptions)
-            createoptions_prog.update({'drive':False, 'calendar':False})
+            createoptions_prog.update({'drive':False})
             
             newprogram = Program(**programparams, schoolyear=targetyear, createoptions=createoptions_prog, gd=gd, gc=gc)
             newprogram.save()
