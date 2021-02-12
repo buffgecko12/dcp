@@ -16,7 +16,7 @@ def upgrade(upgradeinfo):
             # New Objects
             objectlist = {
                 'program':{'objectclass':'BO','objectname':'program'},
-                'file':{'objectclass':'BO','objectname':'file', 'objectid':getattr(Object.objects.get_object_by_name('file'), 'objectid')}, # Included to make installer work below
+                'file':{'objectclass':'BO','objectname':'file'},
             }
             
             # New roles
@@ -50,13 +50,34 @@ def upgrade(upgradeinfo):
                 setup.setup_config('authorization', objectlist=objectlist, rolelist=rolelist, acllist=acllist)
             )
 
-            # Remove "teacher" usertype from role
-            filecreaterole = Role.objects.get(name='File - Edit') # New name is File - Create
-            filecreaterole.modify_role_item(usertype='TR', changetype='D')
+            roles = Role.objects.get_roles()
+
+            # Update roles
+            for role in roles:
+                if role.name == "File - Create":
+                    
+                    # Update name
+                    role.name = "File - Create"
+                    role.save()
+
+                    # Remove teacher from role (perform after saving role info)
+                    role.modify_role_item(usertype='TR', changetype='D')
+                    
+                elif role.name == "Program - View":
+                    role.name = "General - View"
+                    role.save()
+
+                elif role.name == "Program - Edit":
+                    role.name = "General - Edit"
+                    role.save()
+
+                elif role.name == "Program - Delete":
+                    role.name = "General - Delete"
+                    role.save()
 
         elif myversion == '2.0.2':
             pass
 
     # Apply updates
-    print("\n### Aplying v{0} updates".format(upgradeinfo['targetversion'].get('version')))
+    print("\n### Applying v{0} updates".format(upgradeinfo['targetversion'].get('version')))
     setup.setup(setup_list)
