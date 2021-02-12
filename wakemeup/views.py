@@ -1299,23 +1299,22 @@ def manage_program(request):
                     myschoolgroup.sort(key=lambda x: x.schoolyear, reverse=True) # Sort by most recent school year
                     programs.append(myschoolgroup[0]) # Get first entry
 
-            # Copy school programs (only if not already copied)
+            # Copy school programs (checks for existing)
             for myprogram in programs:
-                if not Program.objects.get(programname=myprogram.programname, schoolid=myprogram.schoolid, schoolyear=targetyear):
-                    myprogram.copy(
-                         targetyear=targetyear,
-                         createoptions={
-                             'calendar':True if form.cleaned_data.get('createcalendarflag') else False, 
-                             'drive':True if form.cleaned_data.get('createdriveflag') else False,
-                             'defaultrole':True if form.cleaned_data.get('createdefaultroleflag') else False,
-                             }, 
-                         copyoptions={'copyusersflag': True if form.cleaned_data.get('copyusersflag') else False}
-                    )
-                    
-                    # Copy rewards
-                    if form.cleaned_data.get('copyrewardsflag'):
-                        for schoolreward in SchoolReward.objects.get_school_rewards(schoolid=myprogram.schoolid, schoolyear=myprogram.schoolyear):
-                            schoolreward.copy(targetyear=targetyear)
+                myprogram.copy(
+                     targetyear=targetyear,
+                     createoptions={
+                         'calendar':True if form.cleaned_data.get('createcalendarflag') else False, 
+                         'drive':True if form.cleaned_data.get('createdriveflag') else False,
+                         'defaultrole':True if form.cleaned_data.get('createdefaultroleflag') else False,
+                         }, 
+                     copyoptions={'copyusersflag': True if form.cleaned_data.get('copyusersflag') else False}
+                )
+                
+                # Copy rewards
+                if form.cleaned_data.get('copyrewardsflag'):
+                    for schoolreward in SchoolReward.objects.get_school_rewards(schoolid=myprogram.schoolid, schoolyear=myprogram.schoolyear):
+                        schoolreward.copy(targetyear=targetyear)
 
     else:
         # Return empty form
