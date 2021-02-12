@@ -274,8 +274,12 @@ def create_user_program(userid,programname,schoolid,schoolyear,maxbudget=400000,
     return UserProgram.objects.get(userid=userid,programname=programname,schoolid=schoolid,schoolyear=schoolyear,uploaddirflag=uploaddirflag)
 
 def create_role(roleclass=None, name="New role",description="Some description",publicflag=None,schoollist=None,usertypelist=None,userlist=None,internalflag=None):
+
+    # Add for existing role (by name)
+    roleid = getattr(Role.objects.get(name=name), 'roleid', None)
+    
     myrole = Role(
-        roleid=None,
+        roleid=roleid,
         roleclass=roleclass,
         name=name,
         description=description,
@@ -289,7 +293,11 @@ def create_role(roleclass=None, name="New role",description="Some description",p
     myrole.roleid = myrole.save()
     return myrole
 
-def create_object(objectclass="VW",objectname="test_object", objectid=None):
+def create_object(objectclass="VW",objectname="test_object"):
+
+    # Add for existing object (by name)
+    objectid = getattr(Object.objects.get_object_by_name(objectname), 'objectid', None)
+    
     myobject = Object(
         objectid=objectid,
         objectclass=objectclass,
