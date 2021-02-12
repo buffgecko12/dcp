@@ -79,15 +79,28 @@ Install and configure the following applications, in order:
 Setup the repository, add initial data, configure Google Drive/Calendar and initialize the web app.  Any existing data is deleted.
 
     **Upgrade:** *build.py -t upgrade -v \<current_version\>*  
-Update the repository and web app with with any schema/logic changes.  Existing data is not modified.
+Update the repository and web app with any schema/logic changes.  Existing data is not modified.
 
     **Other Options:** *build.py -h*  
 5. Heroku Only: Update config variables if needed (i.e. DEFAULT_SCHOOL_YEAR)
 
-### Create a New Program Year
-1. Upgrade app (if necessary)
+### How-To: Create New Program Year
+1. *Optional:* Upgrade app
 2. Create new programs in UI (Admin --> Programas)
-4. Update DEFAULT_SCHOOL_YEAR (env.)
+3. Update DEFAULT_SCHOOL_YEAR (env.)
+
+### Notes
+ - to overwrite remote: *git push -f heroku master*
+ - to access heroku bash (cmd line): *heroku run bash -a <app_name>*
+ - to cleanup overridden functions:
+ 
+ 
+ ```sql
+  SELECT 'DROP FUNCTION ' || oid::regprocedure
+  FROM pg_proc
+  WHERE proname = 'sp_dcpupsertreward'  -- name without schema-qualification
+  AND pg_function_is_visible(oid);  -- restrict to current search_path
+```
 
 ### Reference
 [Django 3 Install Guide]
