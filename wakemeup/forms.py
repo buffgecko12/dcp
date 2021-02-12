@@ -917,8 +917,8 @@ class CopyProgramForm(MyForm):
         fieldinfo = {
             'programname':  {'dropdown':{'categoryclass':'program', 'lookupargs':{**dropdownoptions}}},
             'schoolid':     {'dropdown':{'lookupargs':{**dropdownoptions}, 'selectflag':False}},
-            'schoolyear':   {'dropdown':{'lookupargs':{**dropdownoptions}, 'expandedflag':True}, 'default':DEFAULT_SCHOOL_YEAR}, # Expanded year list
-            'sourceyear':   {'dropdown':{'lookupargs':{**dropdownoptions}}, 'default':DEFAULT_SCHOOL_YEAR-1}, # default = most recent year
+            'schoolyear':   {'dropdown':{'lookupargs':{**dropdownoptions}, 'expandedflag':True}, 'default':DEFAULT_SCHOOL_YEAR + 1}, # Expanded year list
+            'sourceyear':   {'dropdown':{'lookupargs':{**dropdownoptions}}, 'default':DEFAULT_SCHOOL_YEAR}, # default = most recent year
         }
         
         setup_fields(self, fieldinfo)
@@ -933,8 +933,8 @@ class CopyProgramForm(MyForm):
                 'General',
                 'programname',
                 'schoolid',
-                'schoolyear',
                 'sourceyear',
+                'schoolyear',
             ),
             Fieldset(
                 'Opciones de copiar',
