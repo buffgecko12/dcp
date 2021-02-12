@@ -54,7 +54,7 @@ def upgrade(upgradeinfo):
 
             # Update roles
             for role in roles:
-                if role.name == "File - Create":
+                if role.name == "File - Edit":
                     
                     # Update name
                     role.name = "File - Create"
