@@ -525,7 +525,6 @@ class Program(MyModel):
         return Program.objects.delete(self, deleteoptions, *args, **kwargs)
 
     def copy(self, targetyear, copyoptions={'copyusersflag':True}, createoptions=None, gd='default', gc='default'):
-
         programparams = {'programname':self.programname, 'schoolid':self.schoolid}
 
         # Check if new program already exists
