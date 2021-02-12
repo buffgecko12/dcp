@@ -84,6 +84,11 @@ Update the repository and web app with with any schema/logic changes.  Existing 
     **Other Options:** *build.py -h*  
 5. Heroku Only: Update config variables if needed (i.e. DEFAULT_SCHOOL_YEAR)
 
+### Create a New Program Year
+1. Upgrade app (if necessary)
+2. Create new programs in UI (Admin --> Programas)
+4. Update DEFAULT_SCHOOL_YEAR (env.)
+
 ### Reference
 [Django 3 Install Guide]
 
