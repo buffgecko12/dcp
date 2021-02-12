@@ -357,7 +357,7 @@ class SignupForm(UserCreationForm):
     firstname = forms.CharField(label='Nombre(s)', max_length=100)
     lastname = forms.CharField(label='Apellido(s)', max_length=100)
     usertype = forms.ChoiceField(label='Tipo de usuario')
-    schoolid = forms.ChoiceField(label='Colegio', widget=forms.Select, required=False)
+    schoolid = forms.TypedChoiceField(label='Colegio', widget=forms.Select, required=False, coerce=int, empty_value=None)
     classid = forms.CharField(label='Curso(s)', widget=forms.SelectMultiple, required=False)
     emailaddress = forms.EmailField(label='Correo', max_length=250, required=False)
     sharedaccountflag = forms.ChoiceField(label='Cuenta compartida', required=True, choices=BOOLEAN_CHOICES, initial=False)
@@ -380,7 +380,7 @@ class SignupForm(UserCreationForm):
         # Populate usertype drop-down
         set_dropdown_choices(self,fieldname='usertype')
         set_dropdown_choices(self,fieldname='schoolid', ignoredefaultsflag=True)
-        set_dropdown_choices(self,fieldname='programname',lookupargs={'schoolid':0}, ignoredefaultsflag=True)
+        set_dropdown_choices(self,fieldname='programname',lookupargs={'schoolid':0, 'excludegeneralflag':False}, ignoredefaultsflag=True)
         set_dropdown_choices(self,fieldname='schoolyear', selectflag=False, ignoredefaultsflag=True)
 
         # Set password fields as optional
