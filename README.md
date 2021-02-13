@@ -70,8 +70,8 @@ Install and configure the following applications, in order:
    - if using Gmail, add "anti-spoof" DNS record so mails don't route to SPAM
 
 ### Install
-1. Push the web app code to the target environment
-2. Verify the config files are configured properly: database.ini (dcp_repo), .env (dcp)
+1. *Optional:* Take a backup of your database
+2. Verify the config files have the correct values: database.ini (*dcp_repo*), .env (*dcp*)
 3. Set the "ENV" environment variable and restart your IDE or close your Windows Powershell
 4. In your IDE or in a new Windows Powershell, navigate to the *dcp_repo* project root and run the desired build command: 
 
@@ -82,7 +82,8 @@ Setup the repository, add initial data, configure Google Drive/Calendar and init
 Update the repository and web app with any schema/logic changes.  Existing data is not modified.
 
     **Other Options:** *build.py -h*  
-5. Heroku Only: Update config variables if needed (i.e. DEFAULT_SCHOOL_YEAR)
+5. Push the web app code to the target environment
+6. Heroku Only: Update config variables if needed (i.e. DEFAULT_SCHOOL_YEAR)
 
 ### How-To: Create New Program Year
 1. *Optional:* Upgrade app
