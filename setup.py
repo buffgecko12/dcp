@@ -9,7 +9,6 @@ from wakemeup.models.environment import File
 from lib.UsefulFunctions.stringUtils import *
 from lib.UsefulFunctions.dataUtils import *
 from lib.UsefulFunctions.googleUtils import GoogleDrive
-from lib.UsefulFunctions.envUtils import check_env
 
 import initialdata
 
