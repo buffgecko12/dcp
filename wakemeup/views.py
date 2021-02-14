@@ -359,11 +359,11 @@ def myaccount(request):
 @check_authorization
 def get_calendar(request):
     program = Program.objects.get(programname='incentive', schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=request.user.schoolid) # TO-DO: Fix for variable programname
-    events = GoogleCalendar().get_events(calendarid=program.calendarid) if getattr(program, 'calendarid', None) else None
+    events = GoogleCalendar().get_events(calendarid=program.calendarid) if getattr(program, 'calendarid', None) else []
 
     # Determine "event date"
     for event in events:
-        event['eventdate'] = event['start']['date'] if event['start']['date'] else event['end']['dateTime']
+        event['eventdate'] = event['start']['date'] if event['start'].get('date') else event['end'].get('dateTime')
 
         summary = event['summary']
 
