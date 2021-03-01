@@ -42,7 +42,7 @@
 
 {% block content %}
 	<div class="container"><br>
-		{% if program.calendarid %}
+		{% if calendarid %}
 			<div class="row">
 				<div class="col">
 					<div align="center"><h2>Calendario ({{program.schoolyear|stringformat:"i"}})</h2></div><div style="font-size:6px"><br></div>
@@ -59,7 +59,7 @@
 								{% for item in group.list %}
 									<span style="white-space: nowrap;{% if todays_date > item.eventdate|parse_date|date:"Y-m-d" %};color:red;text-decoration:line-through{% endif %}"">
 											<b><i>{{item.eventdate|parse_date|date:"d/m/Y"}}</b></i>
-											<a href="{{item.htmlLink}}" target="_blank" {% if todays_date > item.eventdate|parse_date|date:"Y-m-d" %}class='redStrikeHover'{% endif %}>{{item.summary|truncatechars:45}}</a><br>
+											<a href="{{item.htmlLink}}" target="_blank" {% if todays_date > item.eventdate|parse_date|date:"Y-m-d" %}class='redStrikeHover'{% endif %}>{{item.summary|truncatechars:40}}</a><br>
 									</span							
 								{% endfor %}<br><br>
 							{% endfor %}
@@ -72,7 +72,7 @@
 				</div>
 				<div class="col-6" style="min-width:250px">
 				    <div class="responsive-iframe-container">
-						<iframe src="https://calendar.google.com/calendar/embed?height=600&amp;wkst=2&amp;bgcolor=%23ffffff&amp;ctz=America%2FBogota&amp;src={{ program.calendarid }}&amp;color=%23B39DDB&amp;showTitle=0&amp;showNav=1&amp;showDate=1&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;hl=es_419"
+						<iframe src="https://calendar.google.com/calendar/embed?height=600&amp;wkst=2&amp;bgcolor=%23ffffff&amp;ctz=America%2FBogota&amp;src={{ calendarid }}&amp;color=%23B39DDB&amp;showTitle=0&amp;showNav=1&amp;showDate=1&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0&amp;showTz=0&amp;hl=es_419"
 								style="border-width:0" width="800" height="600" frameborder="0" scrolling="no">
 						</iframe>
 				    </div>

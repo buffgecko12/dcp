@@ -18,6 +18,7 @@ from lib.UsefulFunctions.googleUtils import GoogleDrive, GoogleCalendar
 from django_tables2 import RequestConfig
 
 import psycopg2
+import re
 
 from wakemeup.tables import *
 from wakemeup.forms import *
@@ -357,34 +358,40 @@ def myaccount(request):
     return render(request, 'wakemeup/myaccount.html', context)
 
 @check_authorization
-def get_calendar(request):
-    program = Program.objects.get(programname='incentive', schoolyear=DEFAULT_SCHOOL_YEAR, schoolid=request.user.schoolid) # TO-DO: Fix for variable programname
-    events = GoogleCalendar().get_events(calendarid=program.calendarid) if getattr(program, 'calendarid', None) else []
+def get_calendar(request, currentyearonlyflag=True):
+    programparams = {'programname':'incentive', 'schoolyear':DEFAULT_SCHOOL_YEAR, 'schoolid':request.user.schoolid} # TO-DO: Fix for variable programname
+    program = Program.objects.get(**programparams)
+    userprogram = UserProgram.objects.get(userid=request.user.userid, **programparams) # User may not have a user-program entry (i.e. super user)
+
+    # Determine calendar to use
+    calendarid = getattr(userprogram, 'calendarid', None) or getattr(program, 'calendarid', None)
+
+    events_src = GoogleCalendar().get_events(calendarid=calendarid) if calendarid else []
+    events = []
 
     # Determine "event date"
-    for event in events:
-        event['eventdate'] = event['start']['date'] if event['start'].get('date') else event['end'].get('dateTime')
+    for event in events_src: # Loop through copy of list
 
-        summary = event['summary']
+        # Determine program/school year
+        eventdate = event['start']['date'] if event['start'].get('date') else event['end'].get('dateTime')
+        event['eventdate'] = eventdate
+        schoolyear = parse_timestamp(eventdate).year
 
-        round = None
-        grouporder = None
-        
-        # Parse summary to determine round
-        if '1ra ronda' in summary:
-            round = 1
-            grouporder = 1
-        elif '2da ronda' in summary:
-            round = 2
-            grouporder = 2
-        else:
-            grouporder = 100
-
-        # Add new info to event
-        event.update({'round':round, 'grouporder':grouporder})
+        # Append event to list
+        if (not currentyearonlyflag or schoolyear == DEFAULT_SCHOOL_YEAR):
+            
+            # Determine grouping and ordering
+            m = re.search('^ronda (\d+)', event['summary']) # format - "ronda 1"
+            round = m.groups()[0] if m else None
+            grouporder = round or 100 # Default to the end, if no round specified
     
+            # Add new info to event and append to list
+            event.update({'round':round, 'grouporder':grouporder})
+            events.append(event)
+
     context = {
         'program':program,
+        'calendarid': calendarid, # Give preference to user-specified calendar
         'events':events
     }
     
@@ -464,7 +471,7 @@ def edit_file(request, fileid=None):
     context = {'fileid':fileid}
 
     # Set correct template
-    if(fileid =="bulk" or not fileid):
+    if (fileid =="bulk" or not fileid):
         form_template = 'wakemeup/files/edit_file_bulk.html'
         context.update({'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin(), relativeroot=get_rootdir(request=request, gd_locator=get_gd_locator('program_base')))})
     else:
@@ -479,7 +486,7 @@ def edit_file(request, fileid=None):
             # Bind form data
             form = FileForm(request.POST, request.FILES, context={"request": request})
     
-            if(form.is_valid()):
+            if form.is_valid():
     
                 # Connect to Google Drive
                 gd = GoogleDrive(permissions=['write'])
@@ -546,7 +553,7 @@ def edit_file(request, fileid=None):
         else:
             form = FileFormBulk(request.POST, context={'request': request})
 
-            if(form.is_valid()):
+            if form.is_valid():
                 accessroles = form.cleaned_data.pop('accessroles')
                 filelist = request.POST.getlist('filelist')
                 formdata = form.cleaned_data
@@ -588,13 +595,13 @@ def edit_file(request, fileid=None):
         form = FileForm(initial=request.POST, context={'request': request}) # Pass any post data (i.e. from links)
 
     # UPDATE EXISTING FILE
-    elif(fileid):
+    elif fileid:
         
         fileid = int(fileid)
         myfile = File.objects.get(fileid=fileid)
         
         # Create form
-        if(myfile):
+        if myfile:
             form = FileForm(initial=vars(myfile), context={'request': request})
                 
         # Handle off-case for invalid object id
