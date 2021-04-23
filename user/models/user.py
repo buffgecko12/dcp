@@ -255,7 +255,9 @@ class MyUser(AbstractBaseUser):
                 'reputation': {**DISABLE},
                 'notifications': {**DISABLE},
                 'files': {
-                    'upload': {**DISABLE_ADMINONLY},
+                    'general': DISABLE if self.usertype == "BR" else True,
+                    'explorer': DISABLE if self.usertype == "BR" else True,
+#                     'upload': {**DISABLE_ADMINONLY},
                     'manage': {**DISABLE_ADMINONLY},
                     }
                 },

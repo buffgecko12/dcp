@@ -466,7 +466,7 @@ def list_file(request):
 @check_authorization
 def edit_file(request, fileid=None):
 
-    fileid = request.POST.get('fileid', None)
+    fileid = request.POST.get('fileid', None) or (fileid if fileid == "new" else ()) # Handle off-case of "newfile" request without post data
 
     context = {'fileid':fileid}
 
@@ -610,6 +610,11 @@ def edit_file(request, fileid=None):
 
     # UPDATE FILES (BULK)
     else:
+        
+        # Restrict bulk edit to admins for now
+        if not request.user.is_admin():
+            return redirect_home()
+
         form = FileFormBulk(initial=request.POST, context={'request': request})
 
     return render(request, form_template, {'form': form, **context})

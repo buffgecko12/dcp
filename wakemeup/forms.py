@@ -219,10 +219,10 @@ class FileForm(MyForm):
         # Hide admin fields
         if not request.user.is_admin():
             self.fields['userid'] = forms.IntegerField(widget=forms.HiddenInput)
-            self.fields['programname'] = forms.CharField(widget=forms.HiddenInput)
-            self.fields['schoolid'] = forms.IntegerField(widget=forms.HiddenInput)
-            self.fields['schoolyear'] = forms.IntegerField(widget=forms.HiddenInput)
-            self.fields['accessroles'] = forms.CharField(widget=forms.HiddenInput, required=False)
+            self.fields['programname'].widget = forms.HiddenInput()
+            self.fields['schoolid'].widget=forms.HiddenInput()
+            self.fields['schoolyear'].widget = forms.HiddenInput()
+            self.fields['accessroles'].widget = forms.HiddenInput()
 
         dropdownoptions = {'userflag':False, 'schoolid':None, 'programname': None, 'schoolyear':None} if request.user.is_admin() else \
                           {'userflag':True, 'schoolid':request.user.schoolid, 'programname': programname}
@@ -265,7 +265,7 @@ class FileForm(MyForm):
                 'General',
                 'fileid',
                 'fileclass',
-                'contractid',
+#                 'contractid',
                 'filecategory',
                 'filedescription',
                 'accessroles',
@@ -276,7 +276,7 @@ class FileForm(MyForm):
                     'url',
                     HTML('<br>'),
     #                 getAdminFormActions(),
-                )
+                ) if request.user.is_admin() else None
             )
         )
 
@@ -312,7 +312,7 @@ class FileFormBulk(FileForm):
             Fieldset(
                 'General',
                 get_field_with_checkbox('fileclass'),
-                get_field_with_checkbox('contractid'),
+#                 get_field_with_checkbox('contractid'),
                 get_field_with_checkbox('filecategory'),
                 get_field_with_checkbox('filedescription'),
                 get_field_with_checkbox('accessroles'),
