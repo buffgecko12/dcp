@@ -33,6 +33,7 @@ def dcp(request):
                         'schoolyear':str(get_school_year()),
                         'programname':'incentive',
                         'fileclass':'contractfile' if request.user.usertype in ('ST','TR') else 'programfile',
+                        'filecategory':'DTG', # Default to general
                         'fileid':'new'
                     }
                 },
