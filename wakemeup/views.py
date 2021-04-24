@@ -1199,7 +1199,7 @@ def create_user(request):
             # Store variables to reuse
             username = form.cleaned_data.get('username')
             mypassword = form.cleaned_data.get('password1')
-            myschoolid = form.cleaned_data.get('schoolid')
+            myschoolid = form.cleaned_data.get('schoolid') or 0 # Default to "general" schoolid if not provided
             myprogramname = form.cleaned_data.get('programname')
             myschoolyear = form.cleaned_data.get('schoolyear')
 
@@ -1259,7 +1259,7 @@ def create_user(request):
                              'Duitama Colegio Project'
             )
 
-            if(myschoolid and myprogramname and myschoolyear):
+            if(myprogramname and myschoolyear): # schoolid defaults to 0 (general)
                 
                 # Create user programs
                 for year in myschoolyear:
