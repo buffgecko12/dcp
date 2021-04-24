@@ -130,7 +130,7 @@ def set_initial_value(form, fieldname, default=None):
     form.fields[fieldname].initial = form.fields[fieldname].initial or default
 
 def setup_field(form, fieldname, dropdown=None, default=None):
-    if(dropdown):
+    if dropdown:
         set_dropdown_choices(form=form, fieldname=fieldname, **dropdown if not dropdown == "default" else {})
         
     set_initial_value(form=form, fieldname=fieldname, default=default)
