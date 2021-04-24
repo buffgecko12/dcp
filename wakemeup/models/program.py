@@ -319,13 +319,14 @@ class UserProgramManager(models.Manager):
         gd = myUserProgram.gd
         
         # Check directory doesn't already exist in GD
-        if(directorytype == 'upload'):
+        if directorytype == 'upload':
             mydir = gd.get_gd_file(gd_locator=get_gd_locator('program_uploads_user'), programname=myUserProgram.programname, userid=myUserProgram.userid, schoolyear=myUserProgram.schoolyear)
         
-        if(not mydir):
+        if not mydir:
+
             # Get user info
             myuser = get_user_model().objects.get_user(userid=myUserProgram.userid)
-            dirname = myuser.schoolabbreviation + ' - ' + myuser.userdisplayname
+            dirname = (myuser.schoolabbreviation + ' - ' if myuser.schoolid else '') + myuser.userdisplayname
 
             # Define directory structure
             gd_structure = {
