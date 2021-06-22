@@ -4,7 +4,7 @@ These instructions will help you to configure your environment and deploy the we
 *Note: These instructions were culled from notes I kept while configuring the various environments and have not been extensively tested*
 
 ### Configure Development Environment
-Install and configure the following applications, in order:  
+**Install and configure the following applications, in order:**  
 
 1. JRE SE 11+
 2. Eclipse (JavaScript developer) or preferred IDE
@@ -18,18 +18,19 @@ Install and configure the following applications, in order:
     - [Set result set limit]: Specify *ARRAYFETCHSIZE* value in preferences file
 7. Heroku CLI
 
-Configure virtual environments (repeat for each project):
-1.  Create and activate virtual env.
+**Configure virtual environments (repeat for each project):**
+1. Create and activate virtual env.
     - cd <virtual_env>\<parent>\<dir>
     - py -m venv <project_name>
-    - <project_name>\Scripts\activate.bat
+    - <project_name>\Scripts\activate.bat  
+    
 
 2. Install Python packages using *pip install* in command prompt:
-  - psycopg2 (Postgres)
-  - Django
-  - Heroku
-  - Pylint (optional)
-    - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
+    - psycopg2 (Postgres)
+    - Django
+    - Heroku
+    - Pylint (optional)
+      - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
 
 ### Configure Repository
 
