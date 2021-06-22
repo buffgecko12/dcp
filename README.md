@@ -6,21 +6,28 @@ These instructions will help you to configure your environment and deploy the we
 ### Configure Development Environment
 Install and configure the following applications, in order:  
 
-1. JRE SE
-2. Eclipse (JavaScript developer) or preferred IDE with PyDev
+1. JRE SE 11+
+2. Eclipse (JavaScript developer) or preferred IDE
+  - Install PyDev (http://www.pydev.org/updates)
 3. PostgreSQL Database
-4. Python (32-bit win) and the following packages:
-    - pip (may already be included in python install)
-    - virtualenv and virtualenvwrapper
-    - psycopg2 (Postgres)
-    - Django
-    - Heroku
-    - Pylint
-      - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
-5. GitBash
+4. Python 3+ (64-bit win)
+5. Git
 6. SQL Data Modeler / Developer
     - [Configure Postgres DSN]
 7. Heroku CLI
+
+Configure virtual environments (repeat for each project):
+1.  Create and activate virtual env.
+    - cd <virtual_env>\<parent>\<dir>
+    - py -m venv <project_name>
+    - <project_name>\Scripts\activate.bat
+
+2. Install Python packages using *pip install* in command prompt:
+  - psycopg2 (Postgres)
+  - Django
+  - Heroku
+  - Pylint (optional)
+    - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
 
 ### Configure Repository
 
