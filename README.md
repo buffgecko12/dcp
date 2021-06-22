@@ -8,7 +8,7 @@ Install and configure the following applications, in order:
 
 1. JRE SE 11+
 2. Eclipse (JavaScript developer) or preferred IDE
-  - Install PyDev (http://www.pydev.org/updates)
+    - Install PyDev (http://www.pydev.org/updates)
 3. PostgreSQL Database
 4. Python 3+ (64-bit win)
 5. Git
