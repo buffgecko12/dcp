@@ -8,12 +8,14 @@ Install and configure the following applications, in order:
 
 1. JRE SE 11+
 2. Eclipse (JavaScript developer) or preferred IDE
-    - Install PyDev (http://www.pydev.org/updates)
+    - Install [PyDev](http://www.pydev.org/updates)
+    - (optional) [Change icons]: "C:\Users\<user>\.p2\pool\plugins\<product_folder>"
 3. PostgreSQL Database
 4. Python 3+ (64-bit win)
 5. Git
 6. SQL Data Modeler / Developer
-    - [Configure Postgres DSN]
+    - [Configure Postgres DSN]: Specify hostname: "\<hostname\>/\<database\>?"
+    - [Set result set limit]: Specify *ARRAYFETCHSIZE* value in preferences file
 7. Heroku CLI
 
 Configure virtual environments (repeat for each project):
@@ -114,6 +116,7 @@ Update the repository and web app with any schema/logic changes.  Existing data 
 [Django 3 Install Guide]
 
 [Configure Postgres DSN]: https://stackoverflow.com/questions/7592519/oracle-sql-developer-and-postgresql
+[Set result set limit]: https://stackoverflow.com/questions/8842577/how-to-increase-buffer-size-in-oracle-sql-developer-to-view-all-records
 [configure SSL]: https://devcenter.heroku.com/articles/acquiring-an-ssl-certificate
 [Domain Wide Delegation]: https://support.google.com/a/answer/162106?hl=en
 [Authorization Scopes]: https://developers.google.com/drive/api/v2/about-auth
@@ -122,3 +125,4 @@ Update the repository and web app with any schema/logic changes.  Existing data 
 [Django 3 Install Guide]: https://docs.djangoproject.com/en/3.0/intro/install/
 [dcp_repo]: https://gitlab.com/buffgecko/dcp_repo
 [dcp]: https://gitlab.com/buffgecko/dcp
+[Change icons]: https://gist.github.com/marlonbernardes/d3d7fd75ee689c2b989b
