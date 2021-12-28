@@ -25,29 +25,32 @@ These instructions will help you to configure your environment and deploy the we
     - <project_name>\Scripts\activate.bat  
     
 
-2. Install Python packages using *pip install* in command prompt:
+2. Install project-specific Python packages using *pip install* in command prompt:
     - psycopg2 (Postgres)
     - Django
     - Heroku
     - Pylint (optional)
       - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
 
-### Configure Repository
+
+### Configure Repository (dcp_repo)
 
   - clone the *[dcp_repo]* project
   - install dependencies (ConfigParser)
   - add libraries to project path and configure *src* folders
   - configure *database.ini*
   - configure initial values: *src/load_intiial_data.sql*
+  - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
   - set environment variables and restart IDE: 
     - `setx ENV "development"` (valid values: development, test, staging, production)
 
-### Configure Application
+### Configure Web Application (dcp)
 
   - clone the *[dcp]* project
   - update environment variables: *.env*
   - install dependencies (*requirements.txt*)
   - specify source directories as such (*lib*, *test*)
+  - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
   - configure initial values: *setup.py*
   - [configure SSL]
 
