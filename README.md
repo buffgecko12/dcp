@@ -101,7 +101,8 @@ Update the repository and web app with any schema/logic changes.  Existing data 
 ### How-To: Create New Program Year
 1. *Optional:* Upgrade app
 2. Create new programs in UI (Admin --> Programas)
-3. Update DEFAULT_SCHOOL_YEAR (env.)
+3. Update DEFAULT_SCHOOL_YEAR (env / config variables)
+4. Upload new documents for new year (acuerdo, videos, etc.)
 
 ### How-To: Update Calendars
 1. Create calendars for new program years (most likely done when creating new program year)
