@@ -103,6 +103,16 @@ Update the repository and web app with any schema/logic changes.  Existing data 
 2. Create new programs in UI (Admin --> Programas)
 3. Update DEFAULT_SCHOOL_YEAR (env.)
 
+### How-To: Update Calendars
+1. Create calendars for new program years (most likely done when creating new program year)
+2. Export master "incentive" calendar from previous year
+3. Import calendar events to current year's master "incentive" calendar
+4. Update dates and export new calendar
+5. Import calendar events to individual schools
+6. Get calendar Ids for new school / program year and update in UI (Admin --> Colegio)
+
+** Make sure calendars are set as "public"
+
 ### Notes
  - to overwrite remote: *git push -f heroku master*
  - to access heroku bash (cmd line): *heroku run bash -a <app_name>*
