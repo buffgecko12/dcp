@@ -110,7 +110,7 @@ Update the repository and web app with any schema/logic changes.  Existing data 
 3. Import calendar events to current year's master "incentive" calendar
 4. Update dates and export new calendar
 5. Import calendar events to individual schools
-6. Get calendar Ids for new school / program year and update in UI (Admin --> Colegio)
+6. *Optional* If calendar events don't show up in the UI, manually update the CalendarId for the new school / program year (Admin --> Colegio)
 
 ** Make sure calendars are set as "public"
 
