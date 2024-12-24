@@ -19,7 +19,7 @@ These instructions will help you to configure your environment and deploy the we
 7. Heroku CLI
 
 **Configure virtual environments (repeat for each project):**
-1. Create and activate virtual env.
+1. Create and activate virtual environment via Command line:
     - cd <virtual_env>\<parent>\<dir>
     - py -m venv <project_name>
     - <project_name>\Scripts\activate.bat  
