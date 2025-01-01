@@ -10,7 +10,7 @@ These instructions will help you to configure your environment and deploy the we
 2. Eclipse (JavaScript developer) or preferred IDE
     - Install [PyDev](http://www.pydev.org/updates)
     - (optional) [Change icons]: "C:\Users\<user>\.p2\pool\plugins\<product_folder>"
-3. PostgreSQL Database
+3. PostgreSQL Database (14)
 4. Python 3+ (64-bit win)
 5. Git
 6. SQL Data Modeler / Developer
@@ -18,19 +18,21 @@ These instructions will help you to configure your environment and deploy the we
     - [Set result set limit]: Specify *ARRAYFETCHSIZE* value in preferences file
 7. Heroku CLI
 
-**Configure virtual environments (repeat for each project):**
-1. Create and activate virtual environment via Command line:
-    - cd <virtual_env>\<parent>\<dir>
-    - py -m venv <project_name>
-    - <project_name>\Scripts\activate.bat  
-    
-
-2. Install project-specific Python packages using *pip install* in command prompt:
-    - psycopg2 (Postgres)
-    - Django
+**Configure environment:**
+1. Install dependencies using *pip install* in command prompt:
     - Heroku
     - Pylint (optional)
       - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
+
+2. Create and activate virtual environment via Command line:
+    - cd \<virtual_envs_dir> (i.e. c:\home\projects\.venv\)
+    - python -m venv \<virtual_env_name>
+    - \<virtual_env_name>\Scripts\activate.bat  
+
+4. Install application dependencies using *requirements.txt* file
+    - pip install -r \<path_to_requirement_file>
+
+** ***be sure you are in the newly created virtual environment*** *
 
 
 ### Configure Repository (dcp_repo)
@@ -48,7 +50,6 @@ These instructions will help you to configure your environment and deploy the we
 
   - clone the *[dcp]* project
   - update environment variables: *.env*
-  - install dependencies (*requirements.txt*)
   - specify source directories as such (*lib*, *test*)
   - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
   - configure initial values: *setup.py*
