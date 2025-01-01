@@ -24,13 +24,13 @@ These instructions will help you to configure your environment and deploy the we
     - Pylint (optional)
       - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
 
-2. Create and activate virtual environment via Command line:
+2. Create and activate virtual environment via command prompt:
     - cd \<virtual_envs_dir> (i.e. c:\home\projects\.venv\)
     - python -m venv \<virtual_env_name>
     - \<virtual_env_name>\Scripts\activate.bat  
 
-4. Install application dependencies using *requirements.txt* file
-    - pip install -r \<path_to_requirement_file>
+4. Install application dependencies using *requirements.txt* file in main application's base directory
+    - pip install -r \<path_to_requirements_file>
 
 ** ***be sure you are in the newly created virtual environment*** *
 
