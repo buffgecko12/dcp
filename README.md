@@ -33,8 +33,7 @@ These instructions will help you to configure your environment and deploy the we
     - pip install ConfigParser
     - pip install -r \<path_to_requirements_file>
 
-** ***be sure you are in the newly created virtual environment*** *
-
+     ** ***be sure you are in the newly created virtual environment*** *
 
 ### Configure Repository (dcp_repo)
 
