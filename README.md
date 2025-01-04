@@ -25,7 +25,7 @@ These instructions will help you to configure your environment and deploy the we
       - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
 
 2. Create and activate virtual environment via command prompt:
-    - cd \<virtual_envs_dir> (i.e. c:\home\projects\.venv\)
+    - cd \<virtual_envs_dir> (i.e. c:\home\projects\\.venv\)
     - python -m venv \<virtual_env_name>
     - \<virtual_env_name>\Scripts\activate.bat  
 
