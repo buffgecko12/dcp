@@ -29,7 +29,8 @@ These instructions will help you to configure your environment and deploy the we
     - python -m venv \<virtual_env_name>
     - \<virtual_env_name>\Scripts\activate.bat  
 
-4. Install application dependencies using *requirements.txt* file in main application's base directory
+4. Install application dependencies:
+    - pip install ConfigParser
     - pip install -r \<path_to_requirements_file>
 
 ** ***be sure you are in the newly created virtual environment*** *
@@ -38,7 +39,6 @@ These instructions will help you to configure your environment and deploy the we
 ### Configure Repository (dcp_repo)
 
   - clone the *[dcprepo]* project
-  - install dependencies (ConfigParser)
   - add libraries to project path and configure *src* folders
   - configure *database.ini*
   - configure initial values: *src/load_intiial_data.sql*
