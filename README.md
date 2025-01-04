@@ -29,11 +29,11 @@ These instructions will help you to configure your environment and deploy the we
     - python -m venv \<virtual_env_name>
     - \<virtual_env_name>\Scripts\activate.bat  
 
-4. Install application dependencies:
-    - pip install ConfigParser
-    - pip install -r \<path_to_requirements_file>
+4. Install application dependencies:  
 
      ** ***be sure you are in the newly created virtual environment*** *
+    - pip install ConfigParser
+    - pip install -r \<path_to_requirements_file>
 
 ### Configure Repository (dcp_repo)
 
