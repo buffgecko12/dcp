@@ -6,7 +6,7 @@ These instructions will help you to configure your environment and deploy the we
 ### Configure Development Environment
 **Install and configure the following applications, in order:**  
 
-1. JRE SE 11+
+1. JRE SE 11+ (required for Eclipse)
 2. Eclipse (JavaScript developer) or preferred IDE
     - Install [PyDev](http://www.pydev.org/updates)
     - (optional) [Change icons]: "C:\Users\<user>\.p2\pool\plugins\<product_folder>"
