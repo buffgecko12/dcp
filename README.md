@@ -37,7 +37,7 @@ These instructions will help you to configure your environment and deploy the we
 
 ### Configure Repository (dcp_repo)
 
-  - clone the *[dcp_repo]* project
+  - clone the *[dcprepo]* project
   - install dependencies (ConfigParser)
   - add libraries to project path and configure *src* folders
   - configure *database.ini*
@@ -139,6 +139,6 @@ Update the repository and web app with any schema/logic changes.  Existing data 
 [google-application-credentials]: https://github.com/gerywahyunugraha/heroku-google-application-credentials-buildpack
 [tiny change]: https://stackoverflow.com/questions/47446480/how-to-use-google-api-credentials-json-on-heroku
 [Django 3 Install Guide]: https://docs.djangoproject.com/en/3.0/intro/install/
-[dcp_repo]: https://gitlab.com/buffgecko/dcp_repo
+[dcprepo]: https://github.com/buffgecko12/dcprepo
 [dcp]: https://gitlab.com/buffgecko/dcp
 [Change icons]: https://gist.github.com/marlonbernardes/d3d7fd75ee689c2b989b
