@@ -38,7 +38,7 @@ These instructions will help you to configure your environment and deploy the we
 
   - clone the *[dcprepo]* project
   - update config file: `database.ini`
-  - configure initial values: `src/load_intiial_data.sql`
+  - configure initial values: `src/load_intitial_data.sql`
   - configure IDE:
     - add libraries to project path
     - specify *src* folders as such
