@@ -1,43 +1,43 @@
 # Duitama Colegio Project - Web App
 These instructions will help you to configure your environment and deploy the web app.  
 
-*Note: These instructions were culled from notes I kept while configuring the various environments and have not been extensively tested*
-
 ### Configure Development Environment
 **Install and configure the following applications, in order:**  
 
-1. JRE SE 11+ (required for Eclipse)
-2. Eclipse (JavaScript developer) or preferred IDE
-    - Install [PyDev](http://www.pydev.org/updates)
-    - (optional) [Change icons]: "C:\Users\<user>\.p2\pool\plugins\<product_folder>"
-3. PostgreSQL Database (14)
-4. Python 3+ (64-bit win)
-5. Git
-6. SQL Data Modeler / Developer
+1. [Eclipse](https://www.eclipse.org/downloads/) (or preferred IDE)
+    - [JDK SE](https://www.oracle.com/java/technologies/downloads/#java23) (may be included with Eclipse)
+    - [PyDev](http://www.pydev.org/updates)
+    - [Change icons](https://gist.github.com/marlonbernardes/d3d7fd75ee689c2b989b): "C:\Users\<user>\.p2\pool\plugins\<product_folder>" (optional)
+2. [PostgreSQL](https://www.postgresql.org/download/)
+3. [Python](https://www.python.org/downloads/)
+4. [Git](https://git-scm.com/downloads)
+5. [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli#install-the-heroku-cli)
+6. [SQL Data Modeler](https://www.oracle.com/database/sqldeveloper/technologies/sql-data-modeler/download/)
+7. [SQL Developer](https://www.oracle.com/database/sqldeveloper/technologies/download/)
     - [Configure Postgres DSN]: Specify hostname: "\<hostname\>/\<database\>?"
     - [Set result set limit]: Specify *ARRAYFETCHSIZE* value in preferences file
-7. Heroku CLI
 
 **Configure environment:**
-1. Install dependencies using *pip install* in command prompt:
-    - Heroku
-    - Pylint (optional)
+1. Install Python environment package dependencies via command prompt:
+    - *pip install Heroku*
+    - *pip install Pylint* (optional)
       - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
 
 2. Create and activate virtual environment via command prompt:
-    - cd \<virtual_envs_dir> (i.e. c:\home\projects\\.venv\)
-    - python -m venv \<virtual_env_name>
-    - \<virtual_env_name>\Scripts\activate.bat  
+    - *cd \<virtual_envs_dir>* (i.e. c:\home\projects\\.venv\\)
+    - *python -m venv \<virtual_env_name>*
+    - *\<virtual_env_name>\Scripts\activate.bat*  
 
-4. Install application dependencies:  
+4. Install Python application dependencies using *requirements.txt* file in main application's base directory
+    - *pip install -r \<path_to_requirements_file>*
 
-      ***\* be sure you are in the newly created virtual environment \****
-    - pip install ConfigParser
-    - pip install -r \<path_to_requirements_file>
+** ***be sure you are in the newly created virtual environment*** *
+
 
 ### Configure Repository (dcp_repo)
 
-  - clone the *[dcprepo]* project
+  - clone the *[dcp_repo]* project
+  - install dependencies (ConfigParser)
   - add libraries to project path and configure *src* folders
   - configure *database.ini*
   - configure initial values: *src/load_intiial_data.sql*
@@ -138,6 +138,6 @@ Update the repository and web app with any schema/logic changes.  Existing data 
 [google-application-credentials]: https://github.com/gerywahyunugraha/heroku-google-application-credentials-buildpack
 [tiny change]: https://stackoverflow.com/questions/47446480/how-to-use-google-api-credentials-json-on-heroku
 [Django 3 Install Guide]: https://docs.djangoproject.com/en/3.0/intro/install/
-[dcprepo]: https://github.com/buffgecko12/dcprepo
+[dcp_repo]: https://gitlab.com/buffgecko/dcp_repo
 [dcp]: https://gitlab.com/buffgecko/dcp
 [Change icons]: https://gist.github.com/marlonbernardes/d3d7fd75ee689c2b989b
