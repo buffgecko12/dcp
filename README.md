@@ -11,8 +11,8 @@ These instructions will help you to configure your environment and deploy the we
 3. [Python](https://www.python.org/downloads/)
 4. [Git](https://git-scm.com/downloads)
 5. [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli#install-the-heroku-cli)
-6. [SQL Data Modeler](https://www.oracle.com/database/sqldeveloper/technologies/sql-data-modeler/download/) **
-7. [SQL Developer](https://www.oracle.com/database/sqldeveloper/technologies/download/) **
+6. [SQL Data Modeler](https://www.oracle.com/database/sqldeveloper/technologies/sql-data-modeler/download/) (optional) **
+7. [SQL Developer](https://www.oracle.com/database/sqldeveloper/technologies/download/) (optional)  **
     - [Configure Postgres DSN]: Specify hostname: "\<hostname\>/\<database\>?"
     - [Set result set limit]: Specify *ARRAYFETCHSIZE* value in preferences file
 
@@ -34,19 +34,19 @@ These instructions will help you to configure your environment and deploy the we
     - `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)
     - `pip install configparser` (used by installer to read config files)
 
-### Configure Repository (dcprepo)
+### Configure Repository
 
   - clone the *[dcprepo]* project
   - update config file: `database.ini`
   - configure initial values: `src/load_intiial_data.sql`
-  - configure IDE
+  - configure IDE:
     - add libraries to project path
     - specify *src* folders as such
     - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
   - set environment variables and restart IDE: 
     - `setx ENV "development"` (valid values: development, test, staging, production)
 
-### Configure Web Application (dcp)
+### Configure Web Application
 
   - clone the *[dcp]* project
   - update environment variables: `.env`
@@ -71,7 +71,7 @@ These instructions will help you to configure your environment and deploy the we
 2. Configure Google Drive Storage key:
 
     **Local Environment**  
-    Copy key file (GOOGLE_APPLICATION_CREDENTIALS) specified in *.env* file to expected location (i.e. base project directory)
+    Copy key file (GOOGLE_APPLICATION_CREDENTIALS specified in *.env* file) to expected location (i.e. base project directory)
 
     **Heroku**
     1. Create config variables
@@ -85,8 +85,8 @@ These instructions will help you to configure your environment and deploy the we
    - if using Gmail, add "anti-spoof" DNS record so mails don't route to SPAM
 
 ### Install
-1. *Optional:* Take a backup of your database
-2. Verify the config files have the correct values: database.ini (*dcprepo*), .env (*dcp*)
+1. Take a backup of your database (optional)
+2. Verify config files have the correct values: `database.ini` (*dcprepo*), `.env` (*dcp*)
 3. Set the "ENV" environment variable and restart your IDE or close your Windows Powershell
 4. In your IDE or in a new Windows Powershell, navigate to the *dcprepo* project root and run the desired build command: 
 
