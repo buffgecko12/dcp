@@ -4,52 +4,57 @@ These instructions will help you to configure your environment and deploy the we
 ### Configure Development Environment
 **Install and configure the following applications, in order:**  
 
-1. [Eclipse](https://www.eclipse.org/downloads/) (or preferred IDE)
-    - [JDK SE](https://www.oracle.com/java/technologies/downloads/#java23) (may be included with Eclipse)
-    - [PyDev](http://www.pydev.org/updates)
+1. [Eclipse](https://www.eclipse.org/downloads/) ** (or preferred IDE)
+    - Insall [PyDev](http://www.pydev.org/updates) add-on
     - [Change icons](https://gist.github.com/marlonbernardes/d3d7fd75ee689c2b989b): "C:\Users\<user>\.p2\pool\plugins\<product_folder>" (optional)
 2. [PostgreSQL](https://www.postgresql.org/download/)
 3. [Python](https://www.python.org/downloads/)
 4. [Git](https://git-scm.com/downloads)
 5. [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli#install-the-heroku-cli)
-6. [SQL Data Modeler](https://www.oracle.com/database/sqldeveloper/technologies/sql-data-modeler/download/)
-7. [SQL Developer](https://www.oracle.com/database/sqldeveloper/technologies/download/)
+6. [SQL Data Modeler](https://www.oracle.com/database/sqldeveloper/technologies/sql-data-modeler/download/) **
+7. [SQL Developer](https://www.oracle.com/database/sqldeveloper/technologies/download/) **
     - [Configure Postgres DSN]: Specify hostname: "\<hostname\>/\<database\>?"
     - [Set result set limit]: Specify *ARRAYFETCHSIZE* value in preferences file
 
+  *\*\* requires [JDK](https://www.oracle.com/java/technologies/downloads/#java23)*
+
+
 **Configure environment:**
 1. Install Python environment package dependencies via command prompt:
-    - *pip install Heroku*
-    - *pip install Pylint* (optional)
+    - `pip install Heroku`
+    - `pip install Pylint` (optional)
       - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
 
 2. Create and activate virtual environment via command prompt:
-    - *cd \<virtual_envs_dir>* (i.e. c:\home\projects\\.venv\\)
-    - *python -m venv \<virtual_env_name>*
-    - *\<virtual_env_name>\Scripts\activate.bat*  
+    - `cd \<virtual_envs_dir>` (i.e. c:\home\projects\\.venv\\)
+    - `python -m venv <virtual_env_name>`
+    - `<virtual_env_name>\Scripts\activate.bat`  
 
-3. Within virtual environment, install Python application dependencies using *requirements.txt* file:
-    - *pip install -r \<path_to_requirements_file>* (file is in main app's base directory)
+3. Within virtual environment, install Python application dependencies:
+    - `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)
+    - `pip install configparser` (used by installer to read config files)
 
 ### Configure Repository (dcprepo)
 
   - clone the *[dcprepo]* project
-  - install dependencies (ConfigParser)
-  - add libraries to project path and configure *src* folders
-  - configure *database.ini*
-  - configure initial values: *src/load_intiial_data.sql*
-  - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
+  - update config file: `database.ini`
+  - configure initial values: `src/load_intiial_data.sql`
+  - configure IDE
+    - add libraries to project path
+    - specify *src* folders as such
+    - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
   - set environment variables and restart IDE: 
     - `setx ENV "development"` (valid values: development, test, staging, production)
 
 ### Configure Web Application (dcp)
 
   - clone the *[dcp]* project
-  - update environment variables: *.env*
-  - specify source directories as such (*lib*, *test*)
-  - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
-  - configure initial values: *setup.py*
-  - [configure SSL]
+  - update environment variables: `.env`
+  - configure initial values: `initialdata.py`
+  - configure IDE
+    - specify source directories as such (*lib*, *test*)
+    - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
+  - [configure SSL] (optional depending on environment)
 
 ### Configure Google API  
 1. Grant Google Project service account user API access to Google Drive user account (GOOGLE_DRIVE_USER) using the following scopes:
@@ -136,5 +141,5 @@ Update the repository and web app with any schema/logic changes.  Existing data 
 [tiny change]: https://stackoverflow.com/questions/47446480/how-to-use-google-api-credentials-json-on-heroku
 [Django 3 Install Guide]: https://docs.djangoproject.com/en/3.0/intro/install/
 [dcprepo]: https://github.com/buffgecko12/dcprepo
-[dcp]: https://gitlab.com/buffgecko/dcp
+[dcp]: https://github.com/buffgecko12/dcp
 [Change icons]: https://gist.github.com/marlonbernardes/d3d7fd75ee689c2b989b
