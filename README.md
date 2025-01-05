@@ -28,15 +28,12 @@ These instructions will help you to configure your environment and deploy the we
     - *python -m venv \<virtual_env_name>*
     - *\<virtual_env_name>\Scripts\activate.bat*  
 
-4. Install Python application dependencies using *requirements.txt* file in main application's base directory
-    - *pip install -r \<path_to_requirements_file>*
+3. Within virtual environment, install Python application dependencies using *requirements.txt* file:
+    - *pip install -r \<path_to_requirements_file>* (file is in main app's base directory)
 
-** ***be sure you are in the newly created virtual environment*** *
+### Configure Repository (dcprepo)
 
-
-### Configure Repository (dcp_repo)
-
-  - clone the *[dcp_repo]* project
+  - clone the *[dcprepo]* project
   - install dependencies (ConfigParser)
   - add libraries to project path and configure *src* folders
   - configure *database.ini*
@@ -84,9 +81,9 @@ These instructions will help you to configure your environment and deploy the we
 
 ### Install
 1. *Optional:* Take a backup of your database
-2. Verify the config files have the correct values: database.ini (*dcp_repo*), .env (*dcp*)
+2. Verify the config files have the correct values: database.ini (*dcprepo*), .env (*dcp*)
 3. Set the "ENV" environment variable and restart your IDE or close your Windows Powershell
-4. In your IDE or in a new Windows Powershell, navigate to the *dcp_repo* project root and run the desired build command: 
+4. In your IDE or in a new Windows Powershell, navigate to the *dcprepo* project root and run the desired build command: 
 
     **Clean install:** *build.py -t install_full*  
 Setup the repository, add initial data, configure Google Drive/Calendar and initialize the web app.  Any existing data is deleted.
@@ -138,6 +135,6 @@ Update the repository and web app with any schema/logic changes.  Existing data 
 [google-application-credentials]: https://github.com/gerywahyunugraha/heroku-google-application-credentials-buildpack
 [tiny change]: https://stackoverflow.com/questions/47446480/how-to-use-google-api-credentials-json-on-heroku
 [Django 3 Install Guide]: https://docs.djangoproject.com/en/3.0/intro/install/
-[dcp_repo]: https://gitlab.com/buffgecko/dcp_repo
+[dcprepo]: https://github.com/buffgecko12/dcprepo
 [dcp]: https://gitlab.com/buffgecko/dcp
 [Change icons]: https://gist.github.com/marlonbernardes/d3d7fd75ee689c2b989b
