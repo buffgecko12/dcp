@@ -30,8 +30,8 @@ These instructions will help you to configure your environment and deploy the we
     - `python -m venv <virtual_env_name>`
     - `<virtual_env_name>\Scripts\activate.bat`
     - add a path file with source directories to emulate `%PYTHONPATH%`:
-      - `echo <lib_path> > <virtual_env_name>\Lib\site-packages\<app_name>path.pth`
-      - i.e. `echo C:\home\projects\dcp\test\;C:\home\projects\dcp\lib\; > c:\home\projects\.venv\Lib\site-packages\dcppath.pth`
+      - `echo import sys;sys.path.append('<lib_path_escaped>'); > <virtual_env_name>\Lib\site-packages\<app_name>path.pth`
+      - i.e. `echo import sys;sys.path.append('C:\\home\\projects\\dcp\\test\\');sys.path.append('C:\\home\\projects\\dcp\\lib\\'); > c:\home\projects\.venv\dcp2-prd\lib\site-packages\dcp.pth`
 
 3. Within virtual environment, install Python application dependencies:
     - `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)
