@@ -5,7 +5,6 @@ from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.stringUtils import mychr, split_filename
 from lib.UsefulFunctions.dataUtils import generate_options, to_json, to_array
 import lib.UsefulFunctions.googleUtils as google
-from django.contrib.postgres.fields import JSONField
 
 import copy
 
@@ -163,7 +162,7 @@ class File(MyModel):
     filepath = models.CharField(max_length=256)
     fileclass = models.CharField(max_length=50)
     filecategory = models.CharField(max_length=10)
-    fileattributes = JSONField()
+    fileattributes = models.JSONField()
     alternatefileid = models.IntegerField()
     contractid = models.IntegerField()
     schoolid = models.IntegerField()

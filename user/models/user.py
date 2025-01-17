@@ -5,7 +5,7 @@ from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.stringUtils import mychr
 from lib.UsefulFunctions.emailUtils import send_email
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import ArrayField
 
 from user.models.base import MyModel
 

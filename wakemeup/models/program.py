@@ -1,7 +1,7 @@
 import copy
 
 from django.db import models
-from django.contrib.postgres.fields import JSONField, DateTimeRangeField, ArrayField
+from django.contrib.postgres.fields import DateTimeRangeField, ArrayField
 
 from wakemeup.models.school import *
 from wakemeup.models.base import MyModel, Object
@@ -408,7 +408,7 @@ class Contract(MyModel):
     evidencets = models.DateTimeField(verbose_name='Evidencias')
     contractstatus = models.CharField(max_length=1,verbose_name='Estado')
     notes = models.CharField(max_length=500,verbose_name="Notas")
-    partyinfo = JSONField()
+    partyinfo = models.JSONField()
     contractvalue = models.IntegerField(verbose_name="Valor")
 
     # Objects manager
@@ -440,7 +440,7 @@ class Program(MyModel):
     schoolyear = models.SmallIntegerField(primary_key=True,verbose_name='A' + mychr('n') + 'o escolar')
     schoolid = models.IntegerField()
     programname = models.CharField(max_length=50)
-    programdetails = JSONField()
+    programdetails = models.JSONField()
     calendarid = models.CharField(max_length=250)
     gd_locator = get_gd_locator('program_base_year')
     
@@ -568,7 +568,7 @@ class UserProgram(Program):
     userid = models.IntegerField()
     maxbudget = models.IntegerField(primary_key=True,verbose_name='Prespuesto m' + mychr('a') + 'ximo')
     uploaddirectoryid = models.IntegerField()
-    details = JSONField()
+    details = models.JSONField()
     
     # Derived fields
     budgetspent = models.IntegerField(verbose_name='Gastos')
