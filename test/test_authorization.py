@@ -1,4 +1,5 @@
 import unittest
+import json
 from test_setup import *
 from user.models.authorization import *
 from lib.UsefulFunctions.dataUtils import * 
@@ -54,8 +55,14 @@ class testAuthorization(unittest.TestCase):
         self.myroleacl4 = create_role_ACL(self.myrole_teachers, self.myobject1, 4) # Read access to "Teachers"
 
         # ACLS - School
-        self.myroleacl5 = create_role_ACL(Role(roleid=self.myschool1.defaultroleids['school']), self.myfile4, 4) # Read access to school
-        self.myroleacl6 = create_role_ACL(Role(roleid=self.myschool1.defaultroleids['teachers']), self.myfile5, 8) # Read access to teachers at a school
+        self.myroleacl5 = create_role_ACL(
+            Role(
+                roleid=json.loads(self.myschool1.defaultroleids)['school']
+            ), 
+            self.myfile4, 
+            4
+        ) # Read access to school
+        self.myroleacl6 = create_role_ACL(Role(roleid=json.loads(self.myschool1.defaultroleids)['teachers']), self.myfile5, 8) # Read access to teachers at a school
 
         # ACLS - Public
         self.myroleacl7 = create_role_ACL(self.myrole_public, self.myfile3, 4)
