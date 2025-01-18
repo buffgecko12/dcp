@@ -1,5 +1,6 @@
 # Hack to get around import issues
 import sys
+import json
 from datetime import datetime
 
 testflag = False
@@ -336,7 +337,7 @@ def delete_school(myschool):
     # Delete roles
     if(getattr(myschool,'defaultroleids',None)):
         for myschoolrole in ('teachers','school','admin'):
-            Role(myschool.defaultroleids[myschoolrole]).delete()
+            Role(json.loads(myschool.defaultroleids)[myschoolrole]).delete()
 
     # Delete school
     myschool.delete()

@@ -14,7 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from django.conf.urls import url, include
+from django.conf.urls import include
+from django.urls import re_path
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 
@@ -22,12 +23,12 @@ from wakemeup.forms import LoginForm
 
 urlpatterns = [
 #     path('admin/', admin.site.urls),
-    url('^wakemeup/', include('wakemeup.urls', namespace='wakemeup'), name='index'),
-    url(r'^login/$', auth_views.LoginView.as_view( # Catch login before default url
+    re_path('^wakemeup/', include('wakemeup.urls', namespace='wakemeup'), name='index'),
+    re_path(r'^login/$', auth_views.LoginView.as_view( # Catch login before default url
             template_name = 'registration/login.html', 
             authentication_form=LoginForm
         )
         , name="login"),
-    url(r'^', include('django.contrib.auth.urls')), # Auth views (login, logout, reset password)
-    url(r'^.*$', RedirectView.as_view(pattern_name='wakemeup:index')), # Redirect all other URLs to "Wake Me Up" homepage
+    re_path(r'^', include('django.contrib.auth.urls')), # Auth views (login, logout, reset password)
+    re_path(r'^.*$', RedirectView.as_view(pattern_name='wakemeup:index')), # Redirect all other URLs to "Wake Me Up" homepage
 ]
