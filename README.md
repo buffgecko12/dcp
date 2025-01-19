@@ -119,7 +119,7 @@ Update the repository and web app with any schema/logic changes.  Existing data 
 
 ** Make sure calendars are set as "public"
 
-### How-To:Build / Deploy Code
+### How-To: Build / Deploy Code
 1. Configure a [Heroku remote]([url](https://devcenter.heroku.com/articles/git#create-a-heroku-remote))
 2. Push change to Heroku "remote": _git push heroku main_
 
