@@ -7,7 +7,7 @@ def convert_date_to_timestamp_db(date, localizeFlag=True):
 
     if localizeFlag:
         tz = get_current_timezone()
-        mytimestamp = tz.localize(mytimestamp)
+        mytimestamp = mytimestamp.replace(tzinfo=tz)
 
     return mytimestamp
 
@@ -24,7 +24,7 @@ def format_timestamp_string_db(timestamp, formatstring='%d/%m/%Y', localizeFlag=
 
     if localizeFlag:
         tz = get_current_timezone()
-        mytimestamp = tz.localize(mytimestamp)
+        mytimestamp = mytimestamp.replace(tzinfo=tz)
 
     return mytimestamp
 
