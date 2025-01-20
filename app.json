@@ -1,0 +1,6 @@
+{
+	"stack": "heroku-24",
+	"info-upgradestack": "https://devcenter.heroku.com/articles/upgrading-to-the-latest-stack",
+	"info-app.json": "https://devcenter.heroku.com/articles/app-json-schema#stack",
+	"info-reviewapps": "https://devcenter.heroku.com/articles/github-integration-review-apps"
+}

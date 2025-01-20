@@ -7,7 +7,7 @@ DEBUG = False
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') 
 SECURE_SSL_REDIRECT = True
 
-# Configure Django App for Heroku (DATABASE_URL, ALLOWED_HOSTS, WhiteNoise Logging, Heroku CI)
+# Configure app for Heroku: DATABASE_URL, ALLOWED_HOSTS, WhiteNoise (static assets), Logging, Heroku CI
 django_heroku.settings(locals())
 
 LOGGING = {

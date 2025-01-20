@@ -147,5 +147,8 @@ SHORT_DATETIME_FORMAT = 'j/n/y' # Used for django-tables2
 # Ignore errors on start-up
 SILENCED_SYSTEM_CHECKS = ['models.E005']
 
+# Default PK data type for models
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 # Custom settings
 DEFAULT_SCHOOL_YEAR = config('DEFAULT_SCHOOL_YEAR') # Default school year to display

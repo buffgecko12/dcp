@@ -32,6 +32,16 @@ SCHOOL_LIST = [
             (12,'1201'),
         ]
     },
+    {
+        "schoolabbreviation":"TC",
+        "schooldisplayname":"Test Colegio",
+        "address":"Some address",
+        "city":"Some city",
+        "department":"Some department",
+        "classes": [
+            (12,'1201'),
+        ]
+    },
 ]
 
 REWARD_LIST = [
