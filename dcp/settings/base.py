@@ -95,11 +95,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
-# Internationalization
+# Internationalization (L18N) / Localization (L10N); Localization enabled by default
 LANGUAGE_CODE = 'es-co'
 TIME_ZONE = 'UTC'
 USE_I18N = True
-USE_L10N = True # Can be removed, default to True in Django 4.0
 USE_TZ = True
 
 # Static files
