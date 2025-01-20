@@ -99,7 +99,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'es-co'
 TIME_ZONE = 'UTC'
 USE_I18N = True
-USE_L10N = True
+USE_L10N = True # Can be removed, default to True in Django 4.0
 USE_TZ = True
 
 # Static files
