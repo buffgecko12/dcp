@@ -16,7 +16,7 @@ These instructions will help you to configure your environment and deploy the we
     - [Configure Postgres DSN]: Specify hostname: "\<hostname\>/\<database\>?"
     - [Set result set limit]: Specify *ARRAYFETCHSIZE* value in preferences file
 
-  *\*\* may require [JDK](https://www.oracle.com/java/technologies/downloads/#java23)*
+  *\*\* requires JRE or [JDK](https://www.oracle.com/java/technologies/downloads/#java23)*
 
 
 **Configure environment:**
