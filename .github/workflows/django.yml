@@ -23,10 +23,9 @@ jobs:
         echo "PYTHONPATH=$GITHUB_WORKSPACE/test/:$GITHUB_WORKSPACE/lib/" >> $GITHUB_ENV
 
     - name: Create Google Services JSON file
-      run: cat $GITHUB_WORKSPACE/google-credentials.json | base64
-
-    - name: Populate Google Services JSON file
-      run: echo ${{ secrets.GOOGLE_SERVICES_JSON }} > $GITHUB_WORKSPACE/google-credentials.json
+      run: |
+        cat $GITHUB_WORKSPACE/google-credentials.json | base64
+        echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > $GITHUB_WORKSPACE/google-credentials.json
         
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
