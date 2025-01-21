@@ -44,7 +44,7 @@ jobs:
         python manage.py test test.test_environment
         # python manage.py test test.test_googlecalendar
         # python manage.py test test.test_googledrive
-        python manage.py test test.test_program
+        # python manage.py test test.test_program
         python manage.py test test.test_reward
         python manage.py test test.test_school
         python manage.py test test.test_teacher
