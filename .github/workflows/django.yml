@@ -20,7 +20,7 @@ jobs:
     - name: Set env
       run: | 
         echo "DATABASE_URL=${{ secrets.DATABASE_URL_HEROKU_TST }}" >> $GITHUB_ENV
-        echo "PYTHONPATH=$GITHUB_WORKSPACE/test/;$GITHUB_WORKSPACE/lib/" >> $GITHUB_ENV
+        echo "PYTHONPATH=$GITHUB_WORKSPACE/test/:$GITHUB_WORKSPACE/lib/" >> $GITHUB_ENV
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
