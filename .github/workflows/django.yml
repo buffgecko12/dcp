@@ -32,16 +32,16 @@ jobs:
     - name: Run Tests
       run: |
         echo "$PYTHONPATH"
-        python manage.py test test.test_authorization.py
-        python manage.py test test.test_class.py
-        python manage.py test test.test_contract.py
-        python manage.py test test.test_environment.py
-        python manage.py test test.test_googlecalendar.py
-        python manage.py test test.test_googledrive.py
-        python manage.py test test.test_program.py
-        python manage.py test test.test_reward.py
-        python manage.py test test.test_school.py
-        python manage.py test test.test_teacher.py
-        python manage.py test test.test_tz.py
-        python manage.py test test.test_user_reputation.py
-        python manage.py test test.test_user.py
+        python manage.py test test.test_authorization
+        python manage.py test test.test_class
+        python manage.py test test.test_contract
+        python manage.py test test.test_environment
+        python manage.py test test.test_googlecalendar
+        python manage.py test test.test_googledrive
+        python manage.py test test.test_program
+        python manage.py test test.test_reward
+        python manage.py test test.test_school
+        python manage.py test test.test_teacher
+        python manage.py test test.test_tz
+        python manage.py test test.test_user_reputation
+        python manage.py test test.test_user
