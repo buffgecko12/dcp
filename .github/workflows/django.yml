@@ -31,6 +31,7 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       run: |
+        echo "PYTHONPATH=$PYTHONPATH"
         python manage.py test test.test_authorization.py
         python manage.py test test.test_class.py
         python manage.py test test.test_contract.py
