@@ -22,8 +22,11 @@ jobs:
         echo "DATABASE_URL=${{ secrets.DATABASE_URL_HEROKU_TST }}" >> $GITHUB_ENV
         echo "PYTHONPATH=$GITHUB_WORKSPACE/test/:$GITHUB_WORKSPACE/lib/" >> $GITHUB_ENV
 
-    - name: Create Google Services JSON File
-      run: echo ${{ secrets.GOOGLE_SERVICES_JSON }} | base64 -di > $GITHUB_WORKSPACE/google-credentials.json
+    - name: Create Google Services JSON file
+      run: cat $GITHUB_WORKSPACE/google-credentials.json | base64
+
+    - name: Populate Google Services JSON file
+      run: echo ${{ secrets.GOOGLE_SERVICES_JSON }} > $GITHUB_WORKSPACE/google-credentials.json
         
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
