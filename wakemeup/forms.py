@@ -205,7 +205,7 @@ class FileForm(MyForm):
     filecategory = forms.ChoiceField(label='Tipo de archivo')
     filedescription = forms.CharField(max_length=500, label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}), required=False)
     accessroles = forms.MultipleChoiceField(label='Acceso', widget=forms.SelectMultiple(attrs={'size':'8'}), required=False)
-    url = forms.URLField(label='URL', required=False)
+    url = forms.URLField(label='URL', required=False, assume_scheme='https') # Can remove "assume_scheme='https'" in Django 6.0 (default)
     
     def __init__ (self, *args, **kwargs):
         super(FileForm, self).__init__(*args, **kwargs)
