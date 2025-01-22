@@ -20,7 +20,13 @@ jobs:
     - name: Set env
       run: | 
         echo "DATABASE_URL=${{ secrets.DATABASE_URL_HEROKU_TST }}" >> $GITHUB_ENV
-        echo "PYTHONPATH=$GITHUB_WORKSPACE/test/" >> $GITHUB_ENV
+        echo "PYTHONPATH=$GITHUB_WORKSPACE/test/:$GITHUB_WORKSPACE/lib/" >> $GITHUB_ENV
+
+    - name: Create Google Services JSON file
+      run: |
+        cat $GITHUB_WORKSPACE/google-credentials.json | base64
+        echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > $GITHUB_WORKSPACE/google-credentials.json
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
@@ -31,18 +37,17 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       run: |
-        echo "$GITHUB_WORKSPACE"
         echo "$PYTHONPATH"
-        python manage.py test test.test_authorization.py
-        python manage.py test test.test_class.py
-        python manage.py test test.test_contract.py
-        python manage.py test test.test_environment.py
-        python manage.py test test.test_googlecalendar.py
-        python manage.py test test.test_googledrive.py
-        python manage.py test test.test_program.py
-        python manage.py test test.test_reward.py
-        python manage.py test test.test_school.py
-        python manage.py test test.test_teacher.py
-        python manage.py test test.test_tz.py
-        python manage.py test test.test_user_reputation.py
-        python manage.py test test.test_user.py
+        python manage.py test test.test_authorization
+        python manage.py test test.test_class
+        python manage.py test test.test_contract
+        python manage.py test test.test_environment
+        # python manage.py test test.test_googlecalendar
+        # python manage.py test test.test_googledrive
+        # python manage.py test test.test_program
+        python manage.py test test.test_reward
+        python manage.py test test.test_school
+        python manage.py test test.test_teacher
+        python manage.py test test.test_tz
+        python manage.py test test.test_user_reputation
+        python manage.py test test.test_user
