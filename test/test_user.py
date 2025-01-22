@@ -104,6 +104,11 @@ class testUser(unittest.TestCase):
         # Test e-mail
         self.myuser.send_email(email_subject='test',email_body='test body')
 
+    def testMakeRandomPassword(self):
+
+        mypass = get_user_model().objects.make_random_password(length=15)
+        self.assertEqual(len(mypass), 15)
+
     def cleanUp(self):
 
         # Delete user

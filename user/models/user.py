@@ -8,6 +8,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.postgres.fields import ArrayField
 
 from user.models.base import MyModel
+import secrets
 
 from wakemeup.models.environment import File
 
@@ -109,6 +110,9 @@ class MyUserManager(BaseUserManager):
         # Send e-mail (if address exists)
         if(myUser.emailaddress):
             send_email(subject=email_subject, body=email_body, to_list=[myUser.emailaddress,])
+
+    def make_random_password(self, length=10, allowed_chars='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'):
+        return ''.join(secrets.choice(allowed_chars) for i in range(length))
 
 class UserReputationEventManager(models.Manager):
     
