@@ -35,7 +35,7 @@
         <tbody>
             {% for form in formset %}
                 {% if form_show_errors and not form.is_extra %}
-                    {% include "bootstrap3/errors.html" %}
+                    {% include "bootstrap4/errors.html" %}
                 {% endif %}
 
                 <tr>
@@ -47,7 +47,7 @@
                    				</td>
                				</div>
                    		{% else %}
-	                        {% include 'bootstrap3/field.html' with tag="td" form_show_labels=False %}
+	                        {% include 'bootstrap4/field.html' with tag="td" form_show_labels=False %}
                         {% endif %}
                     {% endfor %}
                 </tr>
@@ -56,7 +56,7 @@
     </table>
 	{% endwith %}
 </div>
-    {% include "bootstrap3/inputs.html" %}
+    {% include "bootstrap4/inputs.html" %}
 
 {% if formset_tag %}</form>{% endif %}
 {% endspecialspaceless %}

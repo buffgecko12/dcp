@@ -32,6 +32,7 @@ PROJECT_APPS = [
     'user.apps.UsersConfig',
     'wakemeup.apps.WakemeupConfig',
     'crispy_forms',
+    'crispy_bootstrap4',
     'django_tables2',
     'django.contrib.humanize',
     'widget_tweaks',

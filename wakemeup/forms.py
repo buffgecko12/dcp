@@ -567,7 +567,7 @@ class SchoolRewardForm(forms.Form):
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.template = 'wakemeup/admin/edit_inline_formset.html'
-        self.helper.field_template = 'bootstrap3/field.html'
+        self.helper.field_template = 'bootstrap4/field.html'
 
     # Specify model
     class Meta:
@@ -599,7 +599,7 @@ class SchoolCalendarForm_set(forms.Form):
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.template = 'wakemeup/admin/edit_inline_formset.html'
-        self.helper.field_template = 'bootstrap3/field.html'
+        self.helper.field_template = 'bootstrap4/field.html'
 
         set_dropdown_choices(self,fieldname='itemtype',categoryclass='calendar')
         
