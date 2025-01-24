@@ -176,7 +176,8 @@ class MyForm(forms.Form):
                 myfield.initial = fieldinfo.initial
                 
             if fieldinfo.readonly:
-                myfield.widget.attrs.update({'readonly':True})
+                myfield.disabled = True
+                # myfield.widget.attrs.update({'readonly':True})
                 
             if fieldinfo.hidden:
                 myfield.widget = forms.HiddenInput()
@@ -188,7 +189,8 @@ class MyForm(forms.Form):
         # Make all fields read-only
         if(self.readonly):
             for field in self.fields:
-                self.fields[field].widget.attrs.update({'readonly':True})
+                self.fields[field].disabled = True
+                # self.fields[field].widget.attrs.update({'readonly':True})
 
 class FileForm(MyForm):
 
@@ -205,7 +207,7 @@ class FileForm(MyForm):
     filecategory = forms.ChoiceField(label='Tipo de archivo')
     filedescription = forms.CharField(max_length=500, label='Descripci' + mychr('o') + 'n', widget=forms.Textarea(attrs={'rows':4}), required=False)
     accessroles = forms.MultipleChoiceField(label='Acceso', widget=forms.SelectMultiple(attrs={'size':'8'}), required=False)
-    url = forms.URLField(label='URL', required=False)
+    url = forms.URLField(label='URL', required=False, assume_scheme='https') # Can remove "assume_scheme='https'" in Django 6.0 (default)
     
     def __init__ (self, *args, **kwargs):
         super(FileForm, self).__init__(*args, **kwargs)
@@ -567,7 +569,7 @@ class SchoolRewardForm(forms.Form):
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.template = 'wakemeup/admin/edit_inline_formset.html'
-        self.helper.field_template = 'bootstrap3/field.html'
+        self.helper.field_template = 'bootstrap4/field.html'
 
     # Specify model
     class Meta:
@@ -599,7 +601,7 @@ class SchoolCalendarForm_set(forms.Form):
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.template = 'wakemeup/admin/edit_inline_formset.html'
-        self.helper.field_template = 'bootstrap3/field.html'
+        self.helper.field_template = 'bootstrap4/field.html'
 
         set_dropdown_choices(self,fieldname='itemtype',categoryclass='calendar')
         

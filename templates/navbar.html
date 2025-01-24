@@ -181,7 +181,9 @@
 					</a>	
 					<div class="dropdown-menu dropdown-menu-right">
 						<a class="dropdown-item" href="{% url 'wakemeup:myaccount' %}#profile">Mi cuenta</a>
-						<a class="dropdown-item" href="{% url 'logout' %}">Cerrar sesi&#243;n</a>
+						<!-- Logout -->
+						{% url 'logout' as actionurl %}
+						{% link_post navcontext=navigation formname="logout" actionurl=actionurl displaytype="navbar" urlname=url_name linktext="Cerrar sesi&#243;n" %}
 					</div>
 				</li>
 			{% else %}

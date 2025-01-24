@@ -32,6 +32,7 @@ PROJECT_APPS = [
     'user.apps.UsersConfig',
     'wakemeup.apps.WakemeupConfig',
     'crispy_forms',
+    'crispy_bootstrap4',
     'django_tables2',
     'django.contrib.humanize',
     'widget_tweaks',
@@ -97,9 +98,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization (L18N) / Localization (L10N); Localization enabled by default
 LANGUAGE_CODE = 'es-co'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'UTC' # Timezone (USE_TZ) is enabled by default
 USE_I18N = True
-USE_TZ = True
 
 # Static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
