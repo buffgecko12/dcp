@@ -176,7 +176,8 @@ class MyForm(forms.Form):
                 myfield.initial = fieldinfo.initial
                 
             if fieldinfo.readonly:
-                myfield.widget.attrs.update({'readonly':True})
+                myfield.disabled = True
+                # myfield.widget.attrs.update({'readonly':True})
                 
             if fieldinfo.hidden:
                 myfield.widget = forms.HiddenInput()
@@ -188,7 +189,8 @@ class MyForm(forms.Form):
         # Make all fields read-only
         if(self.readonly):
             for field in self.fields:
-                self.fields[field].widget.attrs.update({'readonly':True})
+                self.fields[field].disabled = True
+                # self.fields[field].widget.attrs.update({'readonly':True})
 
 class FileForm(MyForm):
 
