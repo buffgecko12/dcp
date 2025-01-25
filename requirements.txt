@@ -4,7 +4,7 @@ certifi==2024.12.14
 chardet==5.2.0
 crispy-bootstrap4==2024.10
 dj-database-url==2.3.0
-django==5.0.11
+django==5.1.5
 django-crispy-forms==2.3
 django-debug-toolbar==5.0.1
 django-heroku==0.3.1

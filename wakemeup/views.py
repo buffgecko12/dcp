@@ -381,7 +381,7 @@ def get_calendar(request, currentyearonlyflag=True):
         if (not currentyearonlyflag or schoolyear == DEFAULT_SCHOOL_YEAR):
             
             # Determine grouping and ordering
-            m = re.search('^ronda (\d+)|(\d+).* ronda', event['summary']) # format - "ronda 1" or "1ra ronda"
+            m = re.search('^ronda (\\d+)|(\\d+).* ronda', event['summary']) # format - "ronda 1" or "1ra ronda"
             round = m.groups()[0] or m.groups()[1] if m else None
             grouporder = round or 100 # Default to the end, if no round specified
     
