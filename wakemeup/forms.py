@@ -328,7 +328,7 @@ class LoginForm(AuthenticationForm):
     # Define form fields
     username = forms.CharField(label="Nombre de usuario", required=True)
 #     username = forms.CharField(label="Nombre de usuario (o correo)", required=True)
-    password = forms.CharField(label="Contrase&#241;a", required=True, widget=forms.PasswordInput)
+    password = forms.CharField(label="Contrase" + mychr('n') + "a", required=True, widget=forms.PasswordInput)
 
     # Define constructor
     def __init__ (self, *args, **kwargs):
