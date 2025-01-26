@@ -1,6 +1,6 @@
 from django.urls import reverse
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, AdminUserCreationForm
 from django.contrib.auth import get_user_model
 from django.forms.widgets import HiddenInput, CheckboxSelectMultiple
 
@@ -352,7 +352,9 @@ class LoginForm(AuthenticationForm):
             ),
         )
 
-class SignupForm(UserCreationForm):
+class SignupForm(AdminUserCreationForm):
+
+    usable_password = None
 
     # Define form fields
     username = forms.CharField(label='Nombre de usuario (o correo)', max_length=50)
