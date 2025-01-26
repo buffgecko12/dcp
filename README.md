@@ -8,11 +8,12 @@ These instructions will help you to configure your environment and deploy the we
     - Insall [PyDev](http://www.pydev.org/updates) add-on
     - [Change icons](https://gist.github.com/marlonbernardes/d3d7fd75ee689c2b989b): "C:\Users\<user>\.p2\pool\plugins\<product_folder>" (optional)
 2. [PostgreSQL](https://www.postgresql.org/download/)
-3. [Python](https://www.python.org/downloads/)
-4. [Git](https://git-scm.com/downloads)
-5. [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli#install-the-heroku-cli)
-6. [SQL Data Modeler](https://www.oracle.com/database/sqldeveloper/technologies/sql-data-modeler/download/) (optional) **
-7. [SQL Developer](https://www.oracle.com/database/sqldeveloper/technologies/download/) (optional)  **
+    - add `bin` directory to system `PATH` variable (i.e. `C:\Program Files\PostgreSQL\17\bin`)
+4. [Python](https://www.python.org/downloads/)
+5. [Git](https://git-scm.com/downloads)
+6. [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli#install-the-heroku-cli)
+7. [SQL Data Modeler](https://www.oracle.com/database/sqldeveloper/technologies/sql-data-modeler/download/) (optional) **
+8. [SQL Developer](https://www.oracle.com/database/sqldeveloper/technologies/download/) (optional)  **
     - [Configure Postgres DSN]: Specify hostname: "\<hostname\>/\<database\>?"
     - [Set result set limit]: Specify *ARRAYFETCHSIZE* value in preferences file
 
