@@ -440,6 +440,24 @@ class SignupForm(UserCreationForm):
         
         return username
 
+    # Override default validate_passwords to allow for empty passwords (change in Django 5.1)
+    def validate_passwords(self, password1_field_name = "password1", password2_field_name = "password2"):  
+        
+        # Store password values
+        password1 = self.cleaned_data.get(password1_field_name)  
+        password2 = self.cleaned_data.get(password2_field_name)  
+
+        # Do nothing if passwords are not required and there is no value provided
+        if (
+            (not self.fields[password1_field_name].required and not self.fields[password2_field_name].required) and
+            (not password1.strip() and not password2.strip())
+        ):
+            pass
+
+        # Call normal validate_passwords() if password is required OR a value is provided
+        else:
+            super().validate_passwords(password1_field_name, password2_field_name)
+
 class RewardForm(forms.Form):
 
     # Define form fields
