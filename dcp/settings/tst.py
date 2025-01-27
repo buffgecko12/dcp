@@ -1,5 +1,5 @@
 from .base import *
-import django_heroku
+import django_on_heroku
 
 DEBUG = True
 ALLOWED_HOSTS += [
@@ -10,7 +10,7 @@ ALLOWED_HOSTS += [
 SECURE_SSL_REDIRECT = True
 
 # Configure app for Heroku: DATABASE_URL, ALLOWED_HOSTS, WhiteNoise (static assets), Logging, Heroku CI
-django_heroku.settings(locals())
+django_on_heroku.settings(locals())
 
 LOGGING = {
     'version': 1,

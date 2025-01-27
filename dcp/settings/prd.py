@@ -1,14 +1,13 @@
 from .base import *
-import django_heroku
+import django_on_heroku
 
 DEBUG = False
 
 #https://help.heroku.com/J2R1S4T8/can-heroku-force-an-application-to-use-ssl-tls
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') 
 SECURE_SSL_REDIRECT = True
 
 # Configure app for Heroku: DATABASE_URL, ALLOWED_HOSTS, WhiteNoise (static assets), Logging, Heroku CI
-django_heroku.settings(locals())
+django_on_heroku.settings(locals())
 
 LOGGING = {
     'version': 1,

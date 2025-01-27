@@ -133,12 +133,11 @@ DJANGO_TABLES2_TEMPLATE = 'django_tables2/bootstrap-responsive.html' # Set defau
 # TO-DO: Check into these
 DATETIME_FORMAT = 'j/n/y'
 DATE_FORMAT = 'j/n/y'
+SHORT_DATETIME_FORMAT = 'j/n/y' # Used for django-tables2
 
 # Numeric separator
 USE_THOUSAND_SEPARATOR = True
 THOUSAND_SEPARATOR = '.'
-
-SHORT_DATETIME_FORMAT = 'j/n/y' # Used for django-tables2
 
 # Ignore errors on start-up
 SILENCED_SYSTEM_CHECKS = ['models.E005']
