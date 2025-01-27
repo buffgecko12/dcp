@@ -37,7 +37,7 @@ def get_env_settings():
     elif(myenv == "test"):
         myenvsettings.update(
             {
-                # 'ssl_require':True,
+                'ssl_require':True,
                 'settingsmodule':'dcp.settings.tst'
             }
         )

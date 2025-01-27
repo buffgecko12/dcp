@@ -1,11 +1,11 @@
 from .base import *
-# import django_on_heroku
+import django_on_heroku
 
 DEBUG = True
 ALLOWED_HOSTS += [
     'dcp2-tst.herokuapp.com','tst.duitamacolegioproject.org' # test
     ]
-'''
+
 # https://help.heroku.com/J2R1S4T8/can-heroku-force-an-application-to-use-ssl-tls
 SECURE_SSL_REDIRECT = True
 
@@ -27,4 +27,3 @@ LOGGING = {
         },
     },
 }
-'''
