@@ -1,10 +1,3 @@
-''' 
-Django version: 2.0.1
-Settings: https://docs.djangoproject.com/en/2.0/topics/settings/
-Quick-start: https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
-Internationalization: https://docs.djangoproject.com/en/2.0/topics/i18n/
-'''
-
 import os
 from decouple import config
 from lib.UsefulFunctions.envUtils import get_env_settings
