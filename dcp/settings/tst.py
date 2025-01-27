@@ -1,7 +1,7 @@
 from .base import *
 import django_heroku
 
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS += [
     'dcp2-tst.herokuapp.com','tst.duitamacolegioproject.org' # test
     ]
