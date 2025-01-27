@@ -21,17 +21,29 @@ def get_env_settings():
             {
                 'ssl_require':True,
                 'settingsmodule':'dcp.settings.prd'
-                }
+            }
         )
 
     # Staging    
     elif(myenv == "staging"):
         myenvsettings.update(
-            {'settingsmodule':'dcp.settings.stg'}
+            {
+                'ssl_require':True,
+                'settingsmodule':'dcp.settings.stg'
+            }
         )
     
-    # Test / development
-    elif(myenv in("test","development")):
+    # Test
+    elif(myenv == "test"):
+        myenvsettings.update(
+            {
+                'ssl_require':True,
+                'settingsmodule':'dcp.settings.tst'
+            }
+        )
+    
+    # Development
+    else:
         myenvsettings.update(
             {'settingsmodule':'dcp.settings.dev'}
         )
