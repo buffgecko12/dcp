@@ -11,7 +11,7 @@ DEFAULT_PASSWORD = "somepassword"
 CREATE_CALENDAR_FLAG = False
 
 # Initial data
-YEARS_LIST = [2020, 2021, 2022, 2023, 2024]
+YEARS_LIST = [2018, 2019, 2020, 2021, 2022, 2023, 2024]
 
 # User types: SU - Super user, SA - Site admin, AD - Program Admin, TR - teacher, ST - student, SF - school staff, OT - other
 USER_LIST = [
