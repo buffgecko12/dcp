@@ -517,6 +517,8 @@ class GoogleDrive(GoogleService):
                 'fileclass':myproperties.pop('fileclass', None)
                 
             })
+            
+            break
         
         # Call batch upsert
         result = models.environment.File.objects.save_batch(fileinfo=myfilelist, filesource='GD', deleteoptions=deleteoptions, overridecustomfieldsflag=False)
