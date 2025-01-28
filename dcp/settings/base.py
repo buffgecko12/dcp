@@ -1,10 +1,3 @@
-''' 
-Django version: 2.0.1
-Settings: https://docs.djangoproject.com/en/2.0/topics/settings/
-Quick-start: https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
-Internationalization: https://docs.djangoproject.com/en/2.0/topics/i18n/
-'''
-
 import os
 from decouple import config
 from lib.UsefulFunctions.envUtils import get_env_settings
@@ -140,12 +133,11 @@ DJANGO_TABLES2_TEMPLATE = 'django_tables2/bootstrap-responsive.html' # Set defau
 # TO-DO: Check into these
 DATETIME_FORMAT = 'j/n/y'
 DATE_FORMAT = 'j/n/y'
+SHORT_DATETIME_FORMAT = 'j/n/y' # Used for django-tables2
 
 # Numeric separator
 USE_THOUSAND_SEPARATOR = True
 THOUSAND_SEPARATOR = '.'
-
-SHORT_DATETIME_FORMAT = 'j/n/y' # Used for django-tables2
 
 # Ignore errors on start-up
 SILENCED_SYSTEM_CHECKS = ['models.E005']

@@ -1,9 +1,12 @@
 from .base import *
 import django_on_heroku
 
-DEBUG = False
+DEBUG = True
+ALLOWED_HOSTS += [
+    'dcp2-tst.herokuapp.com','tst.duitamacolegioproject.org' # test
+    ]
 
-#https://help.heroku.com/J2R1S4T8/can-heroku-force-an-application-to-use-ssl-tls
+# https://help.heroku.com/J2R1S4T8/can-heroku-force-an-application-to-use-ssl-tls
 SECURE_SSL_REDIRECT = True
 
 # Configure app for Heroku: DATABASE_URL, ALLOWED_HOSTS, WhiteNoise (static assets), Logging, Heroku CI
@@ -20,7 +23,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'WARN'),
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
     },
 }
