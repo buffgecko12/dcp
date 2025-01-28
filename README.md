@@ -5,7 +5,7 @@ These instructions will help you to configure your environment and deploy the we
 **Install and configure the following applications, in order:**  
 
 1. [Eclipse](https://www.eclipse.org/downloads/) ** (or preferred IDE)
-    - Install [PyDev](http://www.pydev.org/updates) add-on
+    - Install [PyDev](http://www.pydev.org/updates) add-on [install link](https://de-jcup.github.io/update-site-eclipse-sql-editor/update-site)
     - Install [SQL Editor](https://marketplace.eclipse.org/content/sql-editor/help) add-on 
     - [Change icons](https://gist.github.com/marlonbernardes/d3d7fd75ee689c2b989b): "C:\Users\<user>\.p2\pool\plugins\<product_folder>" (optional)
 2. [PostgreSQL](https://www.postgresql.org/download/)
