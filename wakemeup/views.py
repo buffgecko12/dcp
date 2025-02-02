@@ -1333,7 +1333,3 @@ def manage_program(request):
         form = CopyProgramForm(initial={'programname':'incentive'})
          
     return render(request, 'wakemeup/admin/form.html', {'form': form})
-
-def reset_password(email, from_email, template='registration/password_reset_email.html'):
-    form = PasswordResetForm({'email':email})
-    return form.save(from_email=from_email, email_template_name=template)
