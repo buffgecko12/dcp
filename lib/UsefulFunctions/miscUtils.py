@@ -3,7 +3,7 @@ import datetime
 
 # Get settings file key value
 def get_app_setting(setting):
-    return getattr(settings,setting,None)
+    return getattr(settings, setting, None)
 
 def get_school_year():
     try:
