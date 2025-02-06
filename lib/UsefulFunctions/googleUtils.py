@@ -92,6 +92,7 @@ class GoogleService(object):
         self.service = service
         self.version = version
         self.permissions = permissions
+        self.owner = get_app_setting('GOOGLE_ADMIN_USER')
 
         # Connect automatically
         if autoconnect:
@@ -309,13 +310,28 @@ class GoogleDrive(GoogleService):
             return self.connection.files().get_media(fileId=fileid, fields=fields)
 
     @google_api_safe_run
-    def get_files(self, scope="user", driveid=None, fields='files({0})'.format(GD_FILE_FIELDS), spaces="drive", paginateflag=False, ignoredirectoryflag=True, ignoretrashedflag=True, searchquery='', **kwargs):
+    def get_files(
+            self, 
+            scope = "user", 
+            driveid = None, 
+            fields = 'files({0})'.format(GD_FILE_FIELDS), 
+            spaces = "drive", 
+            paginateflag = False, 
+            ignoredirectoryflag = True, 
+            ignoretrashedflag = True, 
+            ownerfilesonlyflag = True,
+            searchquery = '', 
+            **kwargs
+    ):
 
         if ignoredirectoryflag:
             searchquery += (' and ' if searchquery else '') + "(mimeType != 'application/vnd.google-apps.folder')"
 
         if ignoretrashedflag:
             searchquery += (' and ' if searchquery else '') + "trashed=false"
+
+        if ownerfilesonlyflag:
+            searchquery += (' and ' if searchquery else '') + "'" + self.owner + "'" + ' in owners'
 
         # Include nextPageToken
         fields = "nextPageToken" + ("," + fields if fields else '')
