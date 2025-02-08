@@ -1,7 +1,7 @@
 from .base import *
 import django_on_heroku
 
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS += [
     'dcp2-stg.herokuapp.com','stg.duitamacolegioproject.org' # staging
     ]
