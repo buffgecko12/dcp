@@ -167,6 +167,7 @@ class File(MyModel):
     contractid = models.IntegerField()
     schoolid = models.IntegerField()
     schoolyear = models.SmallIntegerField()
+    shortcutdetails = models.JSONField()
 
     # File Manager instance
     objects = FileManager()
