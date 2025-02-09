@@ -497,7 +497,8 @@ class GoogleDrive(GoogleService):
         if not fileid:
             myfiles = self.get_files(ignoredirectoryflag=ignoredirectoryflag, **kwargs)
         else:
-            myfiles = [self.get_file(fileid=fileid)]
+            myfile = self.get_file(fileid=fileid)
+            myfiles = [myfile] if myfile else []
             deleteoptions= {'deleteremovedflag':False}
 
         # Don't delete top-level directory

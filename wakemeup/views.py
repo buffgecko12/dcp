@@ -655,7 +655,8 @@ def get_file(request, fileid):
                 myfile.filedata = gd.download_file(fileid=myfileid, mimetype=mymimetype)
                 myfile.filename = (myfile.filename or '') + (('.' + myfileextension if myfileextension else ''))
 
-                if not myfile.filesize:
+                # Get file size if unknown or variable (i.e. export)
+                if not myfile.filesize or exporttype:
                     myfile.filesize = len(myfile.filedata)
 
 #                 myfileurl = gd.get_file_weblink(fileid=myfile.alternatefileid)
