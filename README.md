@@ -35,17 +35,13 @@ These instructions will help you to configure your environment and deploy the we
       - `echo import sys;sys.path.append('<lib_path_escaped>'); > <virtual_env_name>\Lib\site-packages\<app_name>path.pth`
       - i.e. `echo import sys;sys.path.append('C:\\home\\projects\\dcp\\test\\');sys.path.append('C:\\home\\projects\\dcp\\lib\\'); > c:\home\projects\.venv\dcp2-prd\lib\site-packages\dcp.pth`
 
-3. Within virtual environment, install Python application dependencies:
-    - `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)
-    - `pip install configparser` (used by installer to read config files)
-
 ### Configure Repository
 
   - clone the *[dcprepo]* project
   - update config file: `database.ini`
   - configure initial values: `src/load_intitial_data.sql`
   - configure IDE:
-    - add libraries to project path
+    - add library directories to project path
     - specify *src* folders as such
     - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
   - set environment variables and restart IDE: 
@@ -88,6 +84,11 @@ These instructions will help you to configure your environment and deploy the we
 
 3. Update DNS records  
    - if using Gmail, add "anti-spoof" DNS record so mails don't route to SPAM
+
+### Install dependencies
+Within virtual environment, install Python application dependencies:
+    - `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)
+    - `pip install configparser` (used by installer to read config files)
 
 ### Install
 1. Take a backup of your database (optional)
