@@ -44,8 +44,6 @@ These instructions will help you to configure your environment and deploy the we
     - add library directories to project path
     - specify *src* folders as such
     - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
-  - set environment variables and restart IDE: 
-    - `setx ENV "development"` (valid values: development, test, staging, production)
 
 ### Configure Web Application
 
@@ -93,7 +91,9 @@ Within virtual environment, install Python application dependencies:
 ### Install
 1. Take a backup of your database (optional)
 2. Verify config files have the correct values: `database.ini` (*dcprepo*), `.env` (*dcp*)
-3. Set the "ENV" environment variable and restart your IDE or close your Windows Powershell
+3. Set the "ENV" environment variable in a command prompt
+    - `setx ENV "development"` (valid values: development, test, staging, production)
+    -  restart your IDE or close your Windows Powershell
 4. In your IDE or in a new Windows Powershell, navigate to the *dcprepo* project root and run the desired build command: 
 
     **Clean install:** *build.py -t install_full*  
