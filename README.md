@@ -15,25 +15,13 @@ These instructions will help you to configure your environment and deploy the we
 6. [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli#install-the-heroku-cli)
 7. [SQL Data Modeler](https://www.oracle.com/database/sqldeveloper/technologies/sql-data-modeler/download/) (optional) **
 8. [SQL Developer](https://www.oracle.com/database/sqldeveloper/technologies/download/) (optional)  **
+    - Add [Postgres JDBC driver](https://jdbc.postgresql.org/download/)
     - [Configure Postgres DSN]: Specify hostname: "\<hostname\>/\<database\>?"
     - [Set result set limit]: Specify *ARRAYFETCHSIZE* value in preferences file
 
   *\*\* requires JRE or [JDK](https://www.oracle.com/java/technologies/downloads/#java23)*
 
 
-**Configure environment:**
-1. Install Python environment package dependencies via command prompt:
-    - `pip install Heroku`
-    - `pip install Pylint` (optional)
-      - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
-
-2. Create and activate virtual environment via command prompt:
-    - `cd \<virtual_envs_dir>` (i.e. c:\home\projects\\.venv\\)
-    - `python -m venv <virtual_env_name>`
-    - `<virtual_env_name>\Scripts\activate.bat`
-    - add a path file with source directories to emulate `%PYTHONPATH%`:
-      - `echo import sys;sys.path.append('<lib_path_escaped>'); > <virtual_env_name>\Lib\site-packages\<app_name>path.pth`
-      - i.e. `echo import sys;sys.path.append('C:\\home\\projects\\dcp\\test\\');sys.path.append('C:\\home\\projects\\dcp\\lib\\'); > c:\home\projects\.venv\dcp2-prd\lib\site-packages\dcp.pth`
 
 ### Configure Repository
 
@@ -83,9 +71,22 @@ These instructions will help you to configure your environment and deploy the we
 3. Update DNS records  
    - if using Gmail, add "anti-spoof" DNS record so mails don't route to SPAM
 
-### Install dependencies
-Within virtual environment, install Python application dependencies:
-    - `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)
+### Configure environment
+1. Install Python environment package dependencies via command prompt:  
+    - ~~`pip install Heroku`~~  
+    - `pip install Pylint` (optional)
+      - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
+
+2. Create and activate virtual environment via command prompt:
+    - `cd \<virtual_envs_dir>` (i.e. c:\home\projects\\.venv\\)
+    - `python -m venv <virtual_env_name>`
+    - `<virtual_env_name>\Scripts\activate.bat`
+    - add a path file with source directories to emulate `%PYTHONPATH%`:
+      - `echo import sys;sys.path.append('<lib_path_escaped>'); > <virtual_env_name>\Lib\site-packages\<app_name>dcp.pth`
+      - i.e. `echo import sys;sys.path.append('C:\\home\\projects\\dcp\\test\\');sys.path.append('C:\\home\\projects\\dcp\\lib\\'); > c:\home\projects\.venv\dcp2-prd\lib\site-packages\dcp.pth`
+     
+3. Install dependencies  
+    - `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)  
     - `pip install configparser` (used by installer to read config files)
 
 ### Install
