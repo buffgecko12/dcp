@@ -26,11 +26,12 @@ These instructions will help you to configure your environment and deploy the we
 ### Configure Repository
 
   - clone the *[dcprepo]* project
+      - if your Git password doesn't work, you may need a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
   - update config file: `database.ini`
   - configure initial values: `src/load_intitial_data.sql`
   - configure IDE:
-    - add library directories to project path
-    - specify *src* folders as such
+    - specify source directories (i.e. `lib`) as such
+    - ~~add library directories to project path~~
     - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
 
 ### Configure Web Application
@@ -39,7 +40,7 @@ These instructions will help you to configure your environment and deploy the we
   - update environment variables: `.env`
   - configure initial values: `initialdata.py`
   - configure IDE
-    - specify source directories as such (*lib*, *test*)
+    - specify source directories (i.e. `lib`, `test`) as such
     - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
   - [configure SSL] (optional depending on environment)
 
@@ -72,12 +73,7 @@ These instructions will help you to configure your environment and deploy the we
    - if using Gmail, add "anti-spoof" DNS record so mails don't route to SPAM
 
 ### Configure environment
-1. Install Python environment package dependencies via command prompt:  
-    - ~~`pip install Heroku`~~  
-    - `pip install Pylint` (optional)
-      - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
-
-2. Create and activate virtual environment via command prompt:
+1. Create and activate virtual environment via command prompt:
     - `cd \<virtual_envs_dir>` (i.e. c:\home\projects\\.venv\\)
     - `python -m venv <virtual_env_name>`
     - `<virtual_env_name>\Scripts\activate.bat`
@@ -85,7 +81,7 @@ These instructions will help you to configure your environment and deploy the we
       - `echo import sys;sys.path.append('<lib_path_escaped>'); > <virtual_env_name>\Lib\site-packages\<app_name>dcp.pth`
       - i.e. `echo import sys;sys.path.append('C:\\home\\projects\\dcp\\test\\');sys.path.append('C:\\home\\projects\\dcp\\lib\\'); > c:\home\projects\.venv\dcp2-prd\lib\site-packages\dcp.pth`
      
-3. Install dependencies  
+2. Install dependencies  
     - `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)  
     - `pip install configparser` (used by installer to read config files)
 
@@ -130,8 +126,9 @@ Update the repository and web app with any schema/logic changes.  Existing data 
 ### Notes
  - to overwrite remote: *git push -f heroku master*
  - to access heroku bash (cmd line): *heroku run bash -a <app_name>*
+ - install PyLint (optional): `pip install Pylint`
+      - ignore common warnings:  *disable=C0114,C0115,C0116,bare-except,no-else-return*
  - to cleanup overridden functions:
- 
  
  ```sql
   SELECT 'DROP FUNCTION ' || oid::regprocedure
