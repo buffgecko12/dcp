@@ -473,7 +473,13 @@ def edit_file(request, fileid=None):
     # Set correct template
     if (fileid =="bulk" or not fileid):
         form_template = 'wakemeup/files/edit_file_bulk.html'
-        context.update({'files':request.user.get_files(hierarchyflag=True, objectpermissionsflag=request.user.is_admin(), relativeroot=get_rootdir(request=request, gd_locator=get_gd_locator('program_base')))})
+        context.update({
+                'files':request.user.get_files(
+                            hierarchyflag = True, 
+                            objectpermissionsflag = request.user.is_admin(), 
+                            relativeroot = get_rootdir(request=request, gd_locator=get_gd_locator('program_base'))
+                        )
+                })
     else:
         form_template = 'wakemeup/files/edit_file.html'
 

@@ -287,7 +287,15 @@ class MyUser(AbstractBaseUser):
         return MyUser.objects.send_email(self, email_subject, email_body)
 
     def get_files(self, accesslevel=4, hierarchyflag=False, objectpermissionsflag=False, **kwargs):
-        return File.objects.get_files(hierarchyflag=hierarchyflag, accessinfo={'userid':self.userid, 'requestedaccesslevel':accesslevel, 'objectpermissionsflag':objectpermissionsflag}, **kwargs)
+        return File.objects.get_files(
+            hierarchyflag = hierarchyflag, 
+            accessinfo = {
+                'userid': self.userid, 
+                'requestedaccesslevel': accesslevel, 
+                'objectpermissionsflag': objectpermissionsflag
+            }, 
+            **kwargs
+        )
 
     def is_admin(self):
         if(self.usertype == 'AD' or self.usertype == 'SU'):
