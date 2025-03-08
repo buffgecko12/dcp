@@ -196,7 +196,7 @@ class ProgramManager(models.Manager):
                     'Contratos':{'metadata':{'gd_locator':get_gd_locator('program_files_contracts'), **programinfo}},
                     'Documentos':{'metadata':{'gd_locator':get_gd_locator('program_files_documents'), **programinfo}},
                     'Videos':{'metadata':{'gd_locator':get_gd_locator('program_files_videos'), **programinfo}},
-                    'Entrevistas':{'metadata':{'gd_locator':get_gd_locator('program_files_interviews'), **programinfo}},
+                    # 'Entrevistas':{'metadata':{'gd_locator':get_gd_locator('program_files_interviews'), **programinfo}},
                     'metadata':{'gd_locator':get_gd_locator('program_files_base'), **programinfo},
                 },
                 'Subidas':{'metadata':{'gd_locator':get_gd_locator('program_uploads_base'), **programinfo}},
