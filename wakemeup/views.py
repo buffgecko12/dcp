@@ -55,7 +55,7 @@ def check_authorization(view):
             
             # Parse out view info
             viewname = view.__name__ # i.e. "create_contract"
-            viewname_split = viewname.split("_")
+            viewname_split = viewname.split("_", 1) # Only split once
             
             # Get action & object
             view_action = viewname_split[0]
@@ -675,6 +675,14 @@ def get_file(request, fileid):
         
     # File does not exist or user has no access - return to refering page
     return redirect_referer(request)
+
+@check_authorization
+def list_gallery_projects(request):
+    return HttpResponse()
+
+@check_authorization
+def list_gallery_photos(request):
+    return HttpResponse()
 
 @check_authorization
 def create_contract(request, contractid):

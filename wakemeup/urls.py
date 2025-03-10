@@ -37,6 +37,12 @@ urlpatterns = [
     re_path(r'^files/edit/(?P<fileid>(bulk))?$$', views.edit_file, name="edit_file_bulk"),
     re_path(r'^files/edit/(?P<fileid>(\d+|new))$', views.edit_file, name="edit_file"),
     re_path(r'^files/download/(?P<fileid>\d+)$', views.get_file, name='get_file'), # File download
+
+    # Gallery
+    re_path(r'^gallery/projects$', views.list_gallery_projects, name="list_gallery_projects"),
+    re_path(r'^gallery/photos$', views.list_gallery_photos, name="list_gallery_photos"),
+    # re_path(r'^gallery/projects/edit/(?P<fileid>(bulk))?$$', views.edit_file, name="edit_file_bulk"),
+    # re_path(r'^gallery/projects/edit/(?P<fileid>(\d+|new))$', views.edit_file, name="edit_file"),
     
     # Misc
     re_path(r'^admin/img/(?P<objecttype>(teacher))/(?P<objectid>\d+)/preview$', views.preview_image, name="preview_image"), # Image preview
