@@ -86,17 +86,24 @@
 				<!-- GALLERY -->
 				{% if not auth.navbar.gallery.disable %}
 					{% if auth.objects.gallery_projects.accesslevel >= 1 or auth.objects.gallery_photos.accesslevel >= 1 %}
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Galer&iacute;a</a>
-						<div class="dropdown-menu">
-							{% if not auth.navbar.gallery.projects.disable and auth.objects.gallery_projects.accesslevel >= 1 %}
-								<a class="dropdown-item {% if url_name == 'list_gallery_projects' %} active {% endif %}" href="{% url 'wakemeup:list_gallery_projects' %}">Proyectos</a>
-							{% endif %}
-							{% if not auth.navbar.gallery.photos.disable and auth.objects.gallery_photos.accesslevel >= 1 %}
-								<a class="dropdown-item {% if url_name == 'list_gallery_photos' %} active {% endif %}" href="{% url 'wakemeup:list_gallery_photos' %}">Fotos</a>
-							{% endif %}
-						</div>
-					</li>
+						<li class="nav-item dropdown">
+							<a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">Galer&iacute;a</a>
+							<div class="dropdown-menu">
+								{% if not auth.navbar.gallery.projects.disable and auth.objects.gallery_projects.accesslevel >= 1 %}
+									<a class="dropdown-item {% if url_name == 'list_gallery_projects' %} active {% endif %}" href="{% url 'wakemeup:list_gallery_projects' %}">Proyectos</a>
+								{% endif %}
+								{% if not auth.navbar.gallery.photos.disable and auth.objects.gallery_photos.accesslevel >= 1 %}
+									<a class="dropdown-item {% if url_name == 'list_gallery_photos' %} active {% endif %}" href="{% url 'wakemeup:list_gallery_photos' %}">Fotos</a>
+								{% endif %}
+								{% if auth.objects.gallery_projects.accesslevel >= 10 or auth.objects.gallery_photos.accesslevel >= 10 %}
+									{% if not auth.navbar.gallery.manage.disable %}
+										<div class="dropdown-divider"></div>
+									{% endif %}
+									{% url 'wakemeup:edit_gallery' as actionurl %}
+									{% link_post navcontext=navigation formname="edit_gallery" actionurl=actionurl displaytype="navbar" urlname=url_name linktext="Gestionar" %}
+								{% endif %}					
+							</div>
+						</li>
 					{% endif %}
 				{% endif %}
 				
