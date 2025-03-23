@@ -118,7 +118,11 @@ def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, l
         choices += (Program.objects.get_program_options(idfield=fieldname, **lookupargs))
 
     else:
-        choices += (Category.objects.get_category_options(categoryclass = categoryclass or fieldname))
+        for myfilecategory in (categoryclass or [0]):
+            choices += (Category.objects.get_category_options(categoryclass = myfilecategory or fieldname))
+
+    # else:
+    #     choices += (Category.objects.get_category_options(categoryclass = categoryclass or fieldname))
 
     # Sort
     if sortflag:
@@ -235,7 +239,7 @@ class FileForm(MyForm):
             'schoolyear':   {'dropdown':{'lookupargs':{**dropdownoptions}}, 'default':DEFAULT_SCHOOL_YEAR},
             'programname':  {'dropdown':{'categoryclass':'program', 'lookupargs':{**dropdownoptions}}},
             'userid':       {'dropdown':{'lookupargs':{'programname':programname, 'userflag':True}}, 'default':request.user.userid},
-            'filecategory': {'dropdown':{'categoryclass':'programfile'}},
+            'filecategory': {'dropdown':{'categoryclass':['programfile','contractfile']}},
             'fileclass':    {'dropdown':'default'},
             'accessroles':  {'dropdown':{'lookupargs':{'roleclass':['US']}, 'selectflag':False}, 'default':Role.objects.get(name='Public').roleid if request.user.is_admin() else ''},
         }
