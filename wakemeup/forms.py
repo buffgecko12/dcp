@@ -118,8 +118,8 @@ def set_dropdown_choices(form, fieldname, categoryclass=None, selectflag=True, l
         choices += (Program.objects.get_program_options(idfield=fieldname, **lookupargs))
 
     else:
-        for myfilecategory in (categoryclass or [0]):
-            choices += (Category.objects.get_category_options(categoryclass = myfilecategory or fieldname))
+        for mycategory in (categoryclass or [0]): # handle array of file categories or single file category
+            choices += (Category.objects.get_category_options(categoryclass = mycategory or fieldname))
 
     # else:
     #     choices += (Category.objects.get_category_options(categoryclass = categoryclass or fieldname))
