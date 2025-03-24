@@ -5,3 +5,4 @@
 *.env
 *.gitignore
 google-credentials.json
+staticfiles/cache
