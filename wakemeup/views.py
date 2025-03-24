@@ -426,6 +426,12 @@ def list_file(request):
     elif filetype == "document":
         filecategory = ['LTI','LTT','DTG']
         filetypedisplay = 'Documentos'
+    elif filetype == "photo":
+        filecategory = ['PHT','CTP'] # Photos, Awards
+        filetypedisplay = 'Fotos'
+    elif filetype == "project":
+        filecategory = ['CTE'] # TO-DO: Projects / evidence
+        filetypedisplay = 'Proyectos'
 #     elif filetype == "contract":
 #         filecategory = ['CT','CTC','CTE','CTO','CTP']
 #         filetypedisplay = 'Contratos'
@@ -677,11 +683,19 @@ def get_file(request, fileid):
     return redirect_referer(request)
 
 @check_authorization
-def list_gallery_projects(request):
-    return HttpResponse()
+def list_gallery_photos(request):
+
+    # Set the file type
+    newparams = request.GET.copy()
+    newparams['filetype'] = 'photo'
+    
+    request.GET = newparams
+    
+    # Get files
+    return list_file(request)
 
 @check_authorization
-def list_gallery_photos(request):
+def list_gallery_projects(request):
     return HttpResponse()
 
 @check_authorization
