@@ -402,11 +402,14 @@ def list_file(request):
 
     # Initialize parameters
     filetype = request.GET.get('filetype')
+    displaytype = request.GET.get('displaytype')
+
     schoolyear = None if request.user.is_admin() else DEFAULT_SCHOOL_YEAR
     hierarchyflag = True
     filefilter = {}
     programname = 'incentive'
     allfilesflag = False
+    getthumbnailsflag = True if displaytype == 'cards' else False
     
     # Program filters
     if filetype == "interview":
@@ -430,7 +433,7 @@ def list_file(request):
         filecategory = ['PHT','CTP'] # Photos, Awards
         filetypedisplay = 'Fotos'
     elif filetype == "project":
-        filecategory = ['CTE'] # TO-DO: Projects / evidence
+        filecategory = ['CTE'] # Contract - Evidence
         filetypedisplay = 'Proyectos'
 #     elif filetype == "contract":
 #         filecategory = ['CT','CTC','CTE','CTO','CTP']
@@ -459,7 +462,8 @@ def list_file(request):
     }
 
     context = {
-        'files':request.user.get_files(**fileparams), 
+        'files':request.user.get_files(getthumbnailsflag=getthumbnailsflag, **fileparams), 
+        "displaytype": displaytype, 
         "filetype": filetypedisplay, 
         'schoolyear': str(schoolyear) if schoolyear else None,
         'programname': programname,
@@ -513,6 +517,12 @@ def edit_file(request, fileid=None):
                 myfilecategory = form.cleaned_data.get('filecategory')
                 myaccessroles = form.cleaned_data.get('accessroles')
                 
+                # Project info
+                myproject = form.cleaned_data.get('project') or None
+                mygrade = form.cleaned_data.get('grade') or None
+                mycourse = form.cleaned_data.get('course') or None
+                myplace = form.cleaned_data.get('place') or None
+                
                 filetypes = Category.objects.get_categories(categoryclass='contractfile' if myfileclass == "CT" else "programfile" if myfileclass == "PG" else "")
                 
                 # Get user upload directory or use default (programname, school year); otherwise GD will default to "root"
@@ -528,21 +538,25 @@ def edit_file(request, fileid=None):
                     file_metadata = {
                         'name': myfile.name,
                         'originalFilename': myfile.name,
-                        'description':'Archivo subido por ' + request.user.userdisplayname,
-                        'parents':[uploaddir] if uploaddir else None,
-                        'properties':{
-                            'userid':myuserid,
+                        'description': 'Archivo subido por ' + request.user.userdisplayname,
+                        'parents': [uploaddir] if uploaddir else None,
+                        'properties': {
+                            'userid': myuserid,
                             'uploaduserdisplayname': request.user.userdisplayname,
-                            'uploaduserid':request.user.userid,
-                            'programname':myprogramname
+                            'uploaduserid': request.user.userid,
+                            'programname': myprogramname,
+                            'project-name': myproject, # Google Drive API properties doesn't support nested dictionaries
+                            'project-grade': mygrade,
+                            'project-course': mycourse,
+                            'project-place': myplace
                         }
                     }
     
                     # Build GD file
                     gd_file = {
                         'gd': gd,
-                        'metadata':file_metadata,
-                        'filedata':myfile,
+                        'metadata': file_metadata,
+                        'filedata': myfile,
                     }
     
                     # Create file in repository
@@ -586,7 +600,13 @@ def edit_file(request, fileid=None):
                         # Copy selected attribute to new dictionary
                         if selected:
                             try:
-                                fileinfo[myfield] = formdata[myfield] if formdata[myfield] else None
+                                fileinfo[
+                                    'project-name' if myfield == 'project' else
+                                    'project-grade' if myfield == 'grade' else
+                                    'project-course' if myfield == 'course' else
+                                    'project-place' if myfield == 'place' else
+                                    myfield
+                                ] = formdata[myfield] if formdata[myfield] else None
                             except:
                                 pass
 
@@ -598,6 +618,9 @@ def edit_file(request, fileid=None):
                             "aclinfo": [{"objectid": myfileid, "objectclass":'FL', "accesslevel":4} for myfileid in filelist]
                         } 
                     )
+
+                # Prepare file attributes for storage
+                fileinfo = File.objects.prepare_file_attributes(attributes=fileinfo)
 
                 # Update file info
                 File.objects.update_attributes(fileid=filelist, fileinfo=fileinfo, acllist=acllist)
@@ -688,6 +711,7 @@ def list_gallery_photos(request):
     # Set the file type
     newparams = request.GET.copy()
     newparams['filetype'] = 'photo'
+    newparams['displaytype'] = 'cards'
     
     request.GET = newparams
     
@@ -696,7 +720,16 @@ def list_gallery_photos(request):
 
 @check_authorization
 def list_gallery_projects(request):
-    return HttpResponse()
+
+    # Set the file type
+    newparams = request.GET.copy()
+    newparams['filetype'] = 'project'
+    newparams['displaytype'] = 'cards'
+    
+    request.GET = newparams
+    
+    # Get files
+    return list_file(request)
 
 @check_authorization
 def create_contract(request, contractid):

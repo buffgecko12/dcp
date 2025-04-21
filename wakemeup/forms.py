@@ -213,6 +213,12 @@ class FileForm(MyForm):
     accessroles = forms.MultipleChoiceField(label='Acceso', widget=forms.SelectMultiple(attrs={'size':'8'}), required=False)
     url = forms.URLField(label='URL', required=False, assume_scheme='https') # Can remove "assume_scheme='https'" in Django 6.0 (default)
     
+    # Project results (evidencia)
+    project = forms.CharField(max_length=100, label = 'Proyecto', required=False, empty_value=None)
+    grade = forms.ChoiceField(label='Grado', required=False, choices=[("0","-- Escoger --"), (6,6), (7,7), (8,8), (9,9), (10,10), (11,11)])
+    course = forms.CharField(label='Curso', required=False)
+    place = forms.IntegerField(label='Puesto', required=False, min_value=1, max_value=50)
+    
     def __init__ (self, *args, **kwargs):
         super(FileForm, self).__init__(*args, **kwargs)
 
@@ -250,9 +256,10 @@ class FileForm(MyForm):
         self.helper = FormHelper() 
         setFormHelper(self.helper)
         self.helper.form_tag = False
-        
+
         # Set form layout
         self.helper.layout = Layout(
+            # Admin view
             Fieldset(
                 'Programa',
                 Div(
@@ -265,8 +272,10 @@ class FileForm(MyForm):
                     Div(set_field_size('userid','sm'), css_class='col-sm-6'),
                     css_class='row'
                 ),
-            HTML('<hr class="separator">'),
-            ) if request.user.is_admin() else Div('programname','schoolyear','schoolid','userid'), # Only show for admin
+                HTML('<hr class="separator">'),
+            ) if request.user.is_admin() else 
+            # Non-admin view
+            Div('programname','schoolyear','schoolid','userid'), # Only show for admin
             Fieldset(
                 'General',
                 'fileid',
@@ -277,13 +286,27 @@ class FileForm(MyForm):
                 'accessroles',
 #                 Div(css_class='dropzone', css_id='id_dropzone'),
                 HTML('<hr class="separator">'),
-                Fieldset(
-                    'Archivos',
-                    'url',
-                    HTML('<br>'),
-    #                 getAdminFormActions(),
-                ) if request.user.is_admin() else None
-            )
+            ),
+            Fieldset(
+                'Proyecto',
+                Div(
+                    Div(set_field_size('project','sm'), css_class='col-sm-6'),
+                    Div(set_field_size('grade','sm'), css_class='col-sm-6'),
+                    css_class='row'
+                ),
+                Div(
+                    Div(set_field_size('course','sm'), css_class='col-sm-6'),
+                    Div(set_field_size('place','sm'), css_class='col-sm-6'),
+                    css_class='row'
+                ),
+                HTML('<hr class="separator">')
+            ),
+            Fieldset(
+                'Archivos',
+                'url',
+                HTML('<br>'),
+#                 getAdminFormActions(),
+            ) if request.user.is_admin() else None
         )
 
     # Specify model
@@ -322,6 +345,15 @@ class FileFormBulk(FileForm):
                 get_field_with_checkbox('filecategory'),
                 get_field_with_checkbox('filedescription'),
                 get_field_with_checkbox('accessroles'),
+                HTML('<hr class="separator">'),
+            ),
+            Fieldset(
+                'Proyecto',
+                get_field_with_checkbox('project'),
+#                 get_field_with_checkbox('contractid'),
+                get_field_with_checkbox('grade'),
+                get_field_with_checkbox('course'),
+                get_field_with_checkbox('place'),
             ),
             getAdminFormActions()
         )

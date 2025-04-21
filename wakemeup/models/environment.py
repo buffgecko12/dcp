@@ -109,6 +109,29 @@ class FileManager(models.Manager):
     def lookup_fileid_gd(self, **kwargs):
         return self.lookup_fileid(alternatefileidflag=True, **kwargs)
 
+    def prepare_file_attributes(self, attributes, attributegroups=['project']):
+        
+        attributegroupdict = {}
+
+        # Loop through attribute groups        
+        for attributegroup in attributegroups:
+            
+            attributegroupdict = {}
+            
+            # Find attributes in group
+            attributelist = [key for key, value in attributes.items() if key.startswith(attributegroup + '-')]
+            
+            for myattribute in attributelist:
+                
+                # Parse attribute name and set it in attribute group dict()
+                attribute = myattribute.split('-', 1)[1]
+                attributegroupdict[attribute] = attributes.pop(myattribute)
+            
+        # Add new attribute group to attributes dict
+        attributes[attributegroup] = attributegroupdict
+        
+        return attributes
+
     def save(self, myFile, *args, **kwargs):
 
         # Extract gd_file info if it exists
@@ -121,14 +144,19 @@ class FileManager(models.Manager):
             gd = gd_file.pop('gd')
 
             # Save additional properties
-            gd_file['metadata'].setdefault('properties',{}).update(myFile.get_properties(altproperties=gd_file['metadata'].get('properties')))
+            gd_file['metadata'].setdefault('properties', {}).update(
+                myFile.get_properties(
+                    altproperties=gd_file['metadata'].get('properties')
+                )
+            )
 
             # Save file
             gd_file = gd.create_file(**gd_file)
 
             # Prepare file
-            gd.prepare_gd_file(gd_file)
-
+            gd.prepare_gd_file(gd_file) # Update Google Drive-specific attributes
+            myproperties = self.prepare_file_attributes(attributes=gd_file['properties']) # Convert format for storage in database
+                
             # Update original File attributes
             myFile.filename = gd_file.get('name')
             myFile.fileextension = gd_file.get('fileExtension')
@@ -137,7 +165,7 @@ class FileManager(models.Manager):
             myFile.filedescription = myFile.filedescription or gd_file.get('description') # Give priority to original value
             myFile.filesource = 'GD'
             myFile.alternatefileid = gd_file.get('id')
-            myFile.fileattributes = to_json(gd_file['properties'])
+            myFile.fileattributes = to_json(myproperties)
             myFile.fileURL = myFile.fileURL or gd_file.get('webContentLink')
             myFile.schoolid = myFile.schoolid or gd_file['properties'].get('schoolid') # Give priority to original value
             myFile.schoolyear = myFile.schoolyear or gd_file['properties'].get('schoolyear') # Give priority to original value
@@ -244,7 +272,7 @@ class File(MyModel):
             'schoolyear': self.schoolyear or altproperties.get('schoolyear') 
         }
 
-        for field in ('programname', 'userid', 'gd_locator'):
+        for field in ('programname', 'userid', 'gd_locator', 'project'):
             myvalue = (self.fileattributes or {}).get(field)
             
             if myvalue:

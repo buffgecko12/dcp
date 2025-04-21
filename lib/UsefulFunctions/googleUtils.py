@@ -516,7 +516,8 @@ class GoogleDrive(GoogleService):
             # Prep gd file
             self.prepare_gd_file(myfile)
 
-            myproperties = myfile.get('properties', {})
+            # Format file properties to store in database
+            myproperties = models.environment.File.objects.prepare_file_attributes(attributes=myfile.get('properties', {}))
             
             # Add new file to list
             myfilelist.append({
@@ -527,7 +528,7 @@ class GoogleDrive(GoogleService):
                 'filesize':myfile.get('size'),
                 'fileurl':myfile.get('webContentLink'),
                 'filesource':'GD',
-                'fileattributes':myproperties,
+                'fileattributes': myproperties,
                 # Remove already stored fields from properties
                 'filedescription':myfile.get('description') or myproperties.pop('filedescription', None),
                 'filecategory':myproperties.pop('filecategory', None),
