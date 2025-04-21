@@ -13,7 +13,11 @@
 		<div class="row">
 			<div class="col">
 				<div align="center" style="white-space:nowrap;overflow:auto">
-					{% include "wakemeup/files/file_list.html" with filenamelength=60 showlinks=True iconsize=iconsize icontileflag=icontileflag %}
+				    {% if displaytype == "cards" %}
+    					{% include "wakemeup/files/file_list_cards.html" with filenamelength=60 showlinks=True iconsize=iconsize icontileflag=icontileflag %}
+   					{% else %}
+                        {% include "wakemeup/files/file_list.html" with filenamelength=60 showlinks=True iconsize=iconsize icontileflag=icontileflag %}
+   					{% endif %}
 				</div>
 			</div>
 		</div>
