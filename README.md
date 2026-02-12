@@ -18,6 +18,7 @@ These instructions will help you to configure your environment and deploy the we
     - Add [Postgres JDBC driver](https://jdbc.postgresql.org/download/)
     - [Configure Postgres DSN]: Specify hostname: "\<hostname\>/\<database\>?"
     - [Set result set limit]: Specify *ARRAYFETCHSIZE* value in preferences file
+    - Fix persistent progress bar bug (Tools > Preferences > Environment: toggle "Persist file names and directory paths" option)
 
   *\*\* requires JRE or [JDK](https://www.oracle.com/java/technologies/downloads/#java23)*
 
