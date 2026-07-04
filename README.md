@@ -22,7 +22,14 @@ These instructions will help you to configure your environment and deploy the we
 
   *\*\* requires JRE or [JDK](https://www.oracle.com/java/technologies/downloads/#java23)*
 
-
+### Configure Virtual Environment
+1. Create and activate virtual environment via command prompt:
+    - `cd \<virtual_envs_dir>` (i.e. c:\home\projects\\.venv\\)
+    - `python -m venv <virtual_env_name>`
+    - `<virtual_env_name>\Scripts\activate.bat`
+    - add a path file with source directories to emulate `%PYTHONPATH%`:
+      - `echo import sys;sys.path.append('<lib_path_escaped>'); > <virtual_env_name>\Lib\site-packages\<app_name>.pth`
+      - i.e. `echo import sys;sys.path.append('C:\\home\\projects\\dcp\\test\\');sys.path.append('C:\\home\\projects\\dcp\\lib\\'); > c:\home\projects\.venv\dcp2-prd\lib\site-packages\dcp.pth`
 
 ### Configure Repository
 
@@ -34,6 +41,7 @@ These instructions will help you to configure your environment and deploy the we
     - specify source directories (i.e. `lib`) as such
     - ~~add library directories to project path~~
     - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
+    - install dependencies `pip install configparser` (used by installer to read config files)
 
 ### Configure Web Application
 
@@ -44,6 +52,7 @@ These instructions will help you to configure your environment and deploy the we
     - specify source directories (i.e. `lib`, `test`) as such
     - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
   - [configure SSL] (optional depending on environment)
+  - install dependencies `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)
 
 ### Configure Google API  
 1. Grant Google Project service account user API access to Google Drive user account (GOOGLE_DRIVE_USER) using the following scopes:
@@ -72,19 +81,6 @@ These instructions will help you to configure your environment and deploy the we
 
 3. Update DNS records  
    - if using Gmail, add "anti-spoof" DNS record so mails don't route to SPAM
-
-### Configure environment
-1. Create and activate virtual environment via command prompt:
-    - `cd \<virtual_envs_dir>` (i.e. c:\home\projects\\.venv\\)
-    - `python -m venv <virtual_env_name>`
-    - `<virtual_env_name>\Scripts\activate.bat`
-    - add a path file with source directories to emulate `%PYTHONPATH%`:
-      - `echo import sys;sys.path.append('<lib_path_escaped>'); > <virtual_env_name>\Lib\site-packages\<app_name>.pth`
-      - i.e. `echo import sys;sys.path.append('C:\\home\\projects\\dcp\\test\\');sys.path.append('C:\\home\\projects\\dcp\\lib\\'); > c:\home\projects\.venv\dcp2-prd\lib\site-packages\dcp.pth`
-     
-2. Install dependencies  
-    - `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)  
-    - `pip install configparser` (used by installer to read config files)
 
 ### Install
 1. Take a backup of your database (optional)
