@@ -23,16 +23,17 @@ These instructions will help you to configure your environment and deploy the we
   *\*\* requires JRE or [JDK](https://www.oracle.com/java/technologies/downloads/#java23)*
 
 ### Configure Virtual Environment
-1. Create and activate virtual environment via command prompt:
-    - `cd \<virtual_envs_dir>` (i.e. c:\home\projects\\.venv\\)
-    - `python -m venv <virtual_env_name>`
-    - `<virtual_env_name>\Scripts\activate.bat`
-    - add a path file with source directories to emulate `%PYTHONPATH%`:
-      - `echo import sys;sys.path.append('<lib_path_escaped>'); > <virtual_env_name>\Lib\site-packages\<app_name>.pth`
-      - i.e. `echo import sys;sys.path.append('C:\\home\\projects\\dcp\\test\\');sys.path.append('C:\\home\\projects\\dcp\\lib\\'); PYTHONPATH="C:\\home\\projects\\.venv\\develop\\Lib\\site-packages" > c:\home\projects\.venv\develop\lib\site-packages\dcp.pth`
+
+  - `cd \<virtual_envs_dir>` (i.e. c:\home\projects\\.venv\\)
+  - `python -m venv <virtual_env_name>`
+  - `<virtual_env_name>\Scripts\activate.bat`
+  - add a path file with source directories to emulate `%PYTHONPATH%`:
+    - `echo import sys;sys.path.append('<lib_path_escaped>'); > <virtual_env_name>\Lib\site-packages\<app_name>.pth`
+    - i.e. `echo import sys;sys.path.append('C:\\home\\projects\\dcp\\test\\');sys.path.append('C:\\home\\projects\\dcp\\lib\\'); PYTHONPATH="C:\\home\\projects\\.venv\\develop\\Lib\\site-packages" > c:\home\projects\.venv\develop\lib\site-packages\dcp.pth`
 
 ### Configure Repository
 
+  - install dependencies `pip install configparser` (used by installer to read config files)
   - clone the *[dcprepo]* project
       - if your Git password doesn't work, you may need a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
   - update config file: `database.ini`
@@ -41,10 +42,10 @@ These instructions will help you to configure your environment and deploy the we
     - specify source directories (i.e. `lib`) as such
     - ~~add library directories to project path~~
     - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
-- install dependencies `pip install configparser` (used by installer to read config files)
 
 ### Configure Web Application
 
+  - install dependencies `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)
   - clone the *[dcp]* project
   - update environment variables: `.env`
   - configure initial values: `initialdata.py`
@@ -52,7 +53,6 @@ These instructions will help you to configure your environment and deploy the we
     - specify source directories (i.e. `lib`, `test`) as such
     - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
   - [configure SSL] (optional depending on environment)
-  - install dependencies `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)
 
 ### Configure Google API  
 1. Grant Google Project service account user API access to Google Drive user account (GOOGLE_DRIVE_USER) using the following scopes:
