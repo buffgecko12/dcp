@@ -41,7 +41,7 @@ These instructions will help you to configure your environment and deploy the we
     - specify source directories (i.e. `lib`) as such
     - ~~add library directories to project path~~
     - create new interpreter pointing to correct virtual env (*Scripts/Python.exe*) and set this as the project-specific interpreter
-    - install dependencies `pip install configparser` (used by installer to read config files)
+- install dependencies `pip install configparser` (used by installer to read config files)
 
 ### Configure Web Application
 
