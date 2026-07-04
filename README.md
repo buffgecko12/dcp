@@ -29,7 +29,7 @@ These instructions will help you to configure your environment and deploy the we
     - `<virtual_env_name>\Scripts\activate.bat`
     - add a path file with source directories to emulate `%PYTHONPATH%`:
       - `echo import sys;sys.path.append('<lib_path_escaped>'); > <virtual_env_name>\Lib\site-packages\<app_name>.pth`
-      - i.e. `echo import sys;sys.path.append('C:\\home\\projects\\dcp\\test\\');sys.path.append('C:\\home\\projects\\dcp\\lib\\'); PYTHONPATH="C:\\home\\projects\\.venv\\develop\\Lib\\site-packages" > c:\home\projects\.venv\dcp2-prd\lib\site-packages\dcp.pth`
+      - i.e. `echo import sys;sys.path.append('C:\\home\\projects\\dcp\\test\\');sys.path.append('C:\\home\\projects\\dcp\\lib\\'); PYTHONPATH="C:\\home\\projects\\.venv\\develop\\Lib\\site-packages" > c:\home\projects\.venv\develop\lib\site-packages\dcp.pth`
 
 ### Configure Repository
 
