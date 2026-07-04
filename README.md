@@ -33,9 +33,9 @@ These instructions will help you to configure your environment and deploy the we
 
 ### Configure Repository
 
-  - install dependencies `pip install configparser` (used by installer to read config files)
   - clone the *[dcprepo]* project
       - if your Git password doesn't work, you may need a [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+  - install dependencies `pip install configparser` (used by installer to read config files)
   - update config file: `database.ini`
   - configure initial values: `src/load_intitial_data.sql`
   - configure IDE:
@@ -45,8 +45,8 @@ These instructions will help you to configure your environment and deploy the we
 
 ### Configure Web Application
 
-  - install dependencies `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)
   - clone the *[dcp]* project
+  - install dependencies `pip install -r \<path_to_requirements_file>` (*requirements.txt* file is in main app's base directory)
   - update environment variables: `.env`
   - configure initial values: `initialdata.py`
   - configure IDE
