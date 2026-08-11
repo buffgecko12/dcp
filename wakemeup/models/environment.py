@@ -3,7 +3,7 @@ from django.db import models
 from wakemeup.models.base import MyModel
 from lib.UsefulFunctions.dbUtils import *
 from lib.UsefulFunctions.stringUtils import mychr, split_filename
-from lib.UsefulFunctions.dataUtils import generate_options, to_json, to_array
+from lib.UsefulFunctions.dataUtils import generate_options, to_json, to_array, get_matching_item
 import lib.UsefulFunctions.googleUtils as google
 
 import copy
@@ -15,15 +15,77 @@ class FileManager(models.Manager):
     def get(self, fileid):
         return get_data_pk(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (to_array(fileid), None, None, None, None, None, None, None, None, None))
 
-    def get_files(self, fileid=None, fileclass=None, filecategory=None, alternatefileid=None, contractid=None, schoolid=None, schoolyear=None, fileattributes=None, filesource=None, accessinfo=None, hierarchyflag=False, relativeroot=None, orderbyhierarchyflag=True):
-        
+    def get_files(
+            self, 
+            # File-specific
+            fileid=None, 
+            fileclass=None, 
+            filecategory=None, 
+            alternatefileid=None, 
+            contractid=None, 
+            schoolid=None, 
+            schoolyear=None, 
+            fileattributes=None, 
+            filesource=None, 
+            # General
+            accessinfo = None, 
+            hierarchyflag = False, 
+            relativeroot = None, 
+            orderbyhierarchyflag = True,
+            getthumbnailsflag = False
+        ):
+
         fileid = to_array(fileid)
         filecategory = to_array(filecategory)
         
         if not hierarchyflag:
-            return get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo)))
+            myfiles = get_data(self, 'SP_DCPGetFile(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo)))
         else:
-            return get_data(self, 'SP_DCPGetFileHierarchy(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo), relativeroot, orderbyhierarchyflag))
+            myfiles = get_data(self, 'SP_DCPGetFileHierarchy(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)', (fileid, fileclass, filecategory, alternatefileid, contractid, schoolid, schoolyear, fileattributes, filesource, to_json(accessinfo), relativeroot, orderbyhierarchyflag))
+
+        # Generate / append thumbnails
+        if (getthumbnailsflag):
+
+            # File parameters to search in Google Drive
+            searchparams = {
+                'fileid': fileid, 
+                'fileclass': fileclass, 
+                'filecategory': filecategory, 
+                'alternatefileid': alternatefileid,
+                'contractid': contractid,
+                'schoolid': schoolid,
+                'schoolyear': schoolyear,
+                'fileattributes': fileattributes,
+                'filesource': filesource
+            }
+
+            # Get / add thumbnails
+            myfiles = self.add_thumbnail(files=myfiles, searchparams=searchparams)
+            
+        return myfiles
+
+    def add_thumbnail(self, files, searchparams):
+        
+        # Connect to Google Drive
+        gd = google.GoogleDrive(permissions=['read'])
+
+        # Generate query string
+        mysearchquery = google.generate_file_search_query_string (searchparams)
+
+        # Get thumbnails
+        thumbnailinfo = gd.get_files(searchquery=mysearchquery, fields='id,thumbnailLink,hasThumbnail')
+
+        # Add thumbnail info to files
+        for myfile in files:
+            mythumbnail = get_matching_item(thumbnailinfo,'id', myfile.alternatefileid)
+            
+            # Ignore certain file types
+            if ("audio" not in myfile.filetype):
+                if (mythumbnail):
+                    if (mythumbnail['hasThumbnail']):
+                        myfile.thumbnaillink = mythumbnail['thumbnailLink']
+
+        return files
 
     def get_file_alt(self, fileid, filesource='GD'):
         result = self.get_files(alternatefileid=fileid, filesource=filesource)
@@ -47,6 +109,29 @@ class FileManager(models.Manager):
     def lookup_fileid_gd(self, **kwargs):
         return self.lookup_fileid(alternatefileidflag=True, **kwargs)
 
+    def prepare_file_attributes(self, attributes, attributegroups=['project']):
+        
+        attributegroupdict = {}
+
+        # Loop through attribute groups        
+        for attributegroup in attributegroups:
+            
+            attributegroupdict = {}
+            
+            # Find attributes in group
+            attributelist = [key for key, value in attributes.items() if key.startswith(attributegroup + '-')]
+            
+            for myattribute in attributelist:
+                
+                # Parse attribute name and set it in attribute group dict()
+                attribute = myattribute.split('-', 1)[1]
+                attributegroupdict[attribute] = attributes.pop(myattribute)
+            
+        # Add new attribute group to attributes dict
+        attributes[attributegroup] = attributegroupdict
+        
+        return attributes
+
     def save(self, myFile, *args, **kwargs):
 
         # Extract gd_file info if it exists
@@ -59,14 +144,19 @@ class FileManager(models.Manager):
             gd = gd_file.pop('gd')
 
             # Save additional properties
-            gd_file['metadata'].setdefault('properties',{}).update(myFile.get_properties(altproperties=gd_file['metadata'].get('properties')))
+            gd_file['metadata'].setdefault('properties', {}).update(
+                myFile.get_properties(
+                    altproperties=gd_file['metadata'].get('properties')
+                )
+            )
 
             # Save file
             gd_file = gd.create_file(**gd_file)
 
             # Prepare file
-            gd.prepare_gd_file(gd_file)
-
+            gd.prepare_gd_file(gd_file) # Update Google Drive-specific attributes
+            myproperties = self.prepare_file_attributes(attributes=gd_file['properties']) # Convert format for storage in database
+                
             # Update original File attributes
             myFile.filename = gd_file.get('name')
             myFile.fileextension = gd_file.get('fileExtension')
@@ -75,7 +165,7 @@ class FileManager(models.Manager):
             myFile.filedescription = myFile.filedescription or gd_file.get('description') # Give priority to original value
             myFile.filesource = 'GD'
             myFile.alternatefileid = gd_file.get('id')
-            myFile.fileattributes = to_json(gd_file['properties'])
+            myFile.fileattributes = to_json(myproperties)
             myFile.fileURL = myFile.fileURL or gd_file.get('webContentLink')
             myFile.schoolid = myFile.schoolid or gd_file['properties'].get('schoolid') # Give priority to original value
             myFile.schoolyear = myFile.schoolyear or gd_file['properties'].get('schoolyear') # Give priority to original value
@@ -182,7 +272,7 @@ class File(MyModel):
             'schoolyear': self.schoolyear or altproperties.get('schoolyear') 
         }
 
-        for field in ('programname', 'userid', 'gd_locator'):
+        for field in ('programname', 'userid', 'gd_locator', 'project'):
             myvalue = (self.fileattributes or {}).get(field)
             
             if myvalue:

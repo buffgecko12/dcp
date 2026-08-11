@@ -62,7 +62,7 @@ def convert_form_binary_to_db(formfieldname):
 
 def to_array(value):
     if value:
-        return value if (isinstance(value, collections.abc.Sequence) and (not isinstance(value, str))) else [value]
+        return value if is_array(value) else [value]
     else:
         return None
 
@@ -131,3 +131,7 @@ def get_distinct_items(items, distinctfield):
     
     
     return mylist
+
+def is_array(value):
+    return (isinstance(value, collections.abc.Sequence) and (not isinstance(value, str)))
+    

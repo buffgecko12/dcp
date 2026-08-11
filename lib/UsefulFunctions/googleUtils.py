@@ -11,7 +11,7 @@ from googleapiclient.http import MediaFileUpload, MediaIoBaseUpload, MediaIoBase
 from googleapiclient.errors import HttpError
 
 # Import - Useful functions
-from lib.UsefulFunctions.dataUtils import get_matching_item, to_json, convert_json_to_dict
+from lib.UsefulFunctions.dataUtils import get_matching_item, to_json, convert_json_to_dict, is_array
 from lib.UsefulFunctions.miscUtils import get_app_setting
 from lib.UsefulFunctions.stringUtils import split_filename
 from lib.UsefulFunctions.envUtils import check_env
@@ -314,7 +314,7 @@ class GoogleDrive(GoogleService):
             self, 
             scope = "user", 
             driveid = None, 
-            fields = 'files({0})'.format(GD_FILE_FIELDS), 
+            fields = GD_FILE_FIELDS, 
             spaces = "drive", 
             paginateflag = False, 
             ignoredirectoryflag = True, 
@@ -323,6 +323,9 @@ class GoogleDrive(GoogleService):
             searchquery = '', 
             **kwargs
     ):
+
+        # Format fields
+        filefields = 'files({0})'.format(fields)
 
         if ignoredirectoryflag:
             searchquery += (' and ' if searchquery else '') + "(mimeType != 'application/vnd.google-apps.folder')"
@@ -334,10 +337,10 @@ class GoogleDrive(GoogleService):
             searchquery += (' and ' if searchquery else '') + "'" + self.owner + "'" + ' in owners'
 
         # Include nextPageToken
-        fields = "nextPageToken" + ("," + fields if fields else '')
+        filefields = "nextPageToken" + ("," + filefields if filefields else '')
 
         # Map parameters to Google API
-        params = {'driveId':driveid, 'corpora':scope, 'fields':fields, 'spaces':spaces, 'q':searchquery, **kwargs}
+        params = {'driveId':driveid, 'corpora':scope, 'fields':filefields, 'spaces':spaces, 'q':searchquery, **kwargs}
 
         # Return all results at once
         if not paginateflag:
@@ -513,7 +516,8 @@ class GoogleDrive(GoogleService):
             # Prep gd file
             self.prepare_gd_file(myfile)
 
-            myproperties = myfile.get('properties', {})
+            # Format file properties to store in database
+            myproperties = models.environment.File.objects.prepare_file_attributes(attributes=myfile.get('properties', {}))
             
             # Add new file to list
             myfilelist.append({
@@ -524,7 +528,7 @@ class GoogleDrive(GoogleService):
                 'filesize':myfile.get('size'),
                 'fileurl':myfile.get('webContentLink'),
                 'filesource':'GD',
-                'fileattributes':myproperties,
+                'fileattributes': myproperties,
                 # Remove already stored fields from properties
                 'filedescription':myfile.get('description') or myproperties.pop('filedescription', None),
                 'filecategory':myproperties.pop('filecategory', None),
@@ -605,3 +609,30 @@ def get_gd_media_file(file, mimetype, filepath=None, chunksize = (5*1024*1024), 
     else:
         return MediaIoBaseUpload(file, mimetype, chunksize, resumable)
     
+def generate_file_search_query_string(properties):
+
+    querystring = ""
+
+    if (properties):
+        
+        # Loop through properties
+        for key, value in properties.items():
+            paramstring = ""
+            
+            if (value is not None):
+                
+                #Property value is an array
+                if (is_array(value)):
+                    if (len(value) > 0):
+                    
+                        for item in value:
+                            paramstring += (" or " if paramstring else "") + "properties has { key='" + str(key) + "' and value='" + str(item) +"'}"
+                            
+                        paramstring = '(' + paramstring + ')'
+                            
+                else:
+                    paramstring = "properties has { key='" + str(key) + "' and value='" + str(value) +"'}"
+                    
+                querystring += (" and " if querystring else "") + paramstring
+
+    return querystring

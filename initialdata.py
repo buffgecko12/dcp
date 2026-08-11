@@ -87,6 +87,8 @@ OBJECT_LIST = {
     'permissions':{'objectclass':'BO','objectname':'permissions'},
     'admintools':{'objectclass':'VW','objectname':'admintools'},
     'program':{'objectclass':'BO','objectname':'program'}, # 2.0.1
+    'gallery_projects':{'objectclass':'BO','objectname':'gallery_projects'}, #2.0.2
+    'gallery_photos':{'objectclass':'BO','objectname':'gallery_photos'} #2.0.2
 }
 
 ROLE_LIST = {
@@ -127,9 +129,22 @@ ROLE_LIST = {
     'role_edit_program':{'roleclass':'PG','name':'Program - Edit','description':'Edit access on program info'},
     'role_create_program':{'roleclass':'PG','name':'Program - Create','description':'Create access on program info','usertypelist':['SA']},
     'role_delete_program':{'roleclass':'PG','name':'Program - Delete','description':'Delete access on program info','usertypelist':['SU']},
+    
+    # Gallery Projects (2.0.2)
+    'role_get_gallery_projects':{'roleclass':'OT','name':'Gallery Projects - View','description':'Read/download access on gallery projects','publicflag':True}, 
+    'role_edit_gallery_projects':{'roleclass':'OT','name':'Gallery Projects - Edit','description':'Edit access on gallery projects'},
+    'role_create_gallery_projects':{'roleclass':'OT','name':'Gallery Projects - Create','description':'Create access on gallery projects','usertypelist':['SA']},
+    'role_delete_gallery_projects':{'roleclass':'OT','name':'Gallery Projects - Delete','description':'Delete access on gallery projects','usertypelist':['SU']},
+
+    # Gallery Photos (2.0.2)
+    'role_get_gallery_photos':{'roleclass':'OT','name':'Gallery Photos - View','description':'Read/download access on gallery photos','publicflag':True}, 
+    'role_edit_gallery_photos':{'roleclass':'OT','name':'Gallery Photos - Edit','description':'Edit access on gallery photos'},
+    'role_create_gallery_photos':{'roleclass':'OT','name':'Gallery Photos - Create','description':'Create access on gallery photos','usertypelist':['SA']},
+    'role_delete_gallery_photos':{'roleclass':'OT','name':'Gallery Photos - Delete','description':'Delete access on gallery photos','usertypelist':['SU']},
+    
 }
 
-GENERAL_OBJECTS = ['school','class','contract','reward','teacher']
+GENERAL_OBJECTS = ['school', 'class', 'contract', 'reward', 'teacher']
 
 # Default ACLs
 ACL_LIST = {
@@ -158,6 +173,18 @@ ACL_LIST = {
     'role_create_program':[{'object':'program','accesslevel':10}],
     'role_delete_program':[{'object':'program','accesslevel':12}],
     
+    # Gallery Projects (2.0.2)
+    'role_get_gallery_projects':[{'object':'gallery_projects','accesslevel':4}],
+    'role_edit_gallery_projects':[{'object':'gallery_projects','accesslevel':8}],
+    'role_create_gallery_projects':[{'object':'gallery_projects','accesslevel':10}],
+    'role_delete_gallery_projects':[{'object':'gallery_projects','accesslevel':12}],
+    
+    # Gallery Photos (2.0.2)
+    'role_get_gallery_photos':[{'object':'gallery_photos','accesslevel':4}],
+    'role_edit_gallery_photos':[{'object':'gallery_photos','accesslevel':8}],
+    'role_create_gallery_photos':[{'object':'gallery_photos','accesslevel':10}],
+    'role_delete_gallery_photos':[{'object':'gallery_photos','accesslevel':12}],
+    
     # CUSTOM PERMISSIONS
     # Public
     'role_public': [
@@ -165,7 +192,7 @@ ACL_LIST = {
         {'object':'reward',"accesslevel":1},
     ],
 
-    # Buyer
+    # Buyer (2.0.1)
     'role_buyer':[
         {'object':'file','accesslevel':10}, # Buyer (upload files)
     ],

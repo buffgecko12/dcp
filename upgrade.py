@@ -76,7 +76,51 @@ def upgrade(upgradeinfo):
                     role.save()
 
         elif myversion == '2.0.2':
-            pass
+
+            # New Objects
+            objectlist = {
+                'gallery_projects':{'objectclass':'BO','objectname':'gallery_projects'},
+                'gallery_photos':{'objectclass':'BO','objectname':'gallery_photos'}
+            }
+            
+            # New roles
+            rolelist = {
+
+                # Gallery Projects
+                'role_get_gallery_projects':{'roleclass':'OT','name':'Gallery Projects - View','description':'Read/download access on gallery projects','publicflag':True}, 
+                'role_edit_gallery_projects':{'roleclass':'OT','name':'Gallery Projects - Edit','description':'Edit access on gallery projects'},
+                'role_create_gallery_projects':{'roleclass':'OT','name':'Gallery Projects - Create','description':'Create access on gallery projects','usertypelist':['SA']},
+                'role_delete_gallery_projects':{'roleclass':'OT','name':'Gallery Projects - Delete','description':'Delete access on gallery projects','usertypelist':['SU']},
+
+                # Gallery Photos
+                'role_get_gallery_photos':{'roleclass':'OT','name':'Gallery Photos - View','description':'Read/download access on gallery photos','publicflag':True}, 
+                'role_edit_gallery_photos':{'roleclass':'OT','name':'Gallery Photos - Edit','description':'Edit access on gallery photos'},
+                'role_create_gallery_photos':{'roleclass':'OT','name':'Gallery Photos - Create','description':'Create access on gallery photos','usertypelist':['SA']},
+                'role_delete_gallery_photos':{'roleclass':'OT','name':'Gallery Photos - Delete','description':'Delete access on gallery photos','usertypelist':['SU']},
+
+            }
+
+            # New ACLs
+            acllist = {
+                
+                # Gallery Projects
+                'role_get_gallery_projects':[{'object':'gallery_projects','accesslevel':4}],
+                'role_edit_gallery_projects':[{'object':'gallery_projects','accesslevel':8}],
+                'role_create_gallery_projects':[{'object':'gallery_projects','accesslevel':10}],
+                'role_delete_gallery_projects':[{'object':'gallery_projects','accesslevel':12}],
+                
+                # Gallery Photos
+                'role_get_gallery_photos':[{'object':'gallery_photos','accesslevel':4}],
+                'role_edit_gallery_photos':[{'object':'gallery_photos','accesslevel':8}],
+                'role_create_gallery_photos':[{'object':'gallery_photos','accesslevel':10}],
+                'role_delete_gallery_photos':[{'object':'gallery_photos','accesslevel':12}],
+                
+            }
+            
+            # Add to setup list
+            setup_list.append(
+                setup.setup_config('authorization', objectlist=objectlist, rolelist=rolelist, acllist=acllist)
+            )
 
     # Apply updates
     print("\n### Applying v{0} updates".format(upgradeinfo['targetversion'].get('version')))

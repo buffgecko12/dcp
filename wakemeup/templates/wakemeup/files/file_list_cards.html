@@ -1,0 +1,35 @@
+<div style="display: flex; flex-direction: row; flex-wrap: wrap" class="justify-content-center">
+  {% for file in files %}
+    <div class="card" style="width: 18rem; margin: 10px">
+      <div class="card-body">
+        <div style="display: flex; flex-direction: row" class="justify-content-center">
+          <h6 class="card-title text-wrap">
+            {% if file.fileattributes.project.name %}
+                {{ file.fileattributes.project.name }}
+            {% else %}
+                {{file.filename|truncatechars:filenamelength|default:30}}
+            {% endif %}
+           </h6>
+        </div>
+		<a href="{% url 'wakemeup:get_file' fileid=file.fileid %}?forcedownload=False">
+		  {% if file.thumbnaillink %}
+		    <img src="{{file.thumbnaillink}}" class="img-fluid" > <!-- -card-img-top -->
+		  {% else %}
+		    <img src="{{file.fileattributes.gd.iconLink}}" class="img-fluid" >
+		  {% endif %}
+		</a><br><br>
+        {% if file.fileattributes.project.course %}
+            Curso: {{ file.fileattributes.project.course }}<br>
+        {% endif %}
+        {% if file.fileattributes.project.place %}
+            Puesto: {{ file.fileattributes.project.place }}<br>
+        {% endif %}
+		{% if file.filedescription %}
+            <p class="card-text text-wrap">{{file.filedescription}}</p>
+        {% endif %}
+      </div>
+    </div>
+  {% empty %}
+    No hay registros.
+  {% endfor %}
+</div>
